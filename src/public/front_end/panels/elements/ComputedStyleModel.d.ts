@@ -11,9 +11,9 @@ export declare class ComputedStyleModel extends Common.ObjectWrapper.ObjectWrapp
     cssModel(): SDK.CSSModel.CSSModel | null;
     _onNodeChanged(event: Common.EventTarget.EventTargetEvent): void;
     _updateModel(cssModel: SDK.CSSModel.CSSModel | null): void;
-    _onComputedStyleChanged(event: Common.EventTarget.EventTargetEvent | null): void;
-    _onDOMModelChanged(event: Common.EventTarget.EventTargetEvent): void;
-    _onFrameResized(_event: Common.EventTarget.EventTargetEvent): void;
+    _onComputedStyleChanged(event: Common.EventTarget.EventTargetEvent<unknown> | null): void;
+    _onDOMModelChanged(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMNode>): void;
+    _onFrameResized(): void;
     _elementNode(): SDK.DOMModel.DOMNode | null;
     fetchComputedStyle(): Promise<ComputedStyle | null>;
 }

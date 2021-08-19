@@ -9,7 +9,8 @@ export declare abstract class ContentProvider {
 export declare class SearchMatch {
     lineNumber: number;
     lineContent: string;
-    constructor(lineNumber: number, lineContent: string);
+    columnNumber?: number | undefined;
+    constructor(lineNumber: number, lineContent: string, columnNumber?: number | undefined);
 }
 export declare const contentAsDataURL: (content: string | null, mimeType: string, contentEncoded: boolean, charset?: string | null | undefined, limitSize?: boolean) => string | null;
 export declare type DeferredContent = {

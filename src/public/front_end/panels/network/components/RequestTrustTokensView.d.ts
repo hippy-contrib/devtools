@@ -14,9 +14,11 @@ export interface RequestTrustTokensReportData {
     result?: Readonly<Protocol.Network.TrustTokenOperationDoneEvent>;
 }
 export declare class RequestTrustTokensReport extends HTMLElement {
+    static readonly litTagName: import("../../../ui/lit-html/static.js").Static;
     private readonly shadow;
     private trustTokenData?;
     set data(data: RequestTrustTokensReportData);
+    connectedCallback(): void;
     private render;
     private renderParameterSection;
     private renderRefreshPolicy;

@@ -31,7 +31,7 @@ export declare class PerformanceModel extends Common.ObjectWrapper.ObjectWrapper
     filmStripModel(): SDK.FilmStripModel.FilmStripModel;
     frames(): TimelineModel.TimelineFrameModel.TimelineFrame[];
     frameModel(): TimelineModel.TimelineFrameModel.TimelineFrameModel;
-    interactionRecords(): Common.SegmentedRange.Segment[];
+    interactionRecords(): Common.SegmentedRange.Segment<TimelineModel.TimelineIRModel.Phases>[];
     extensionInfo(): {
         title: string;
         model: SDK.TracingModel.TracingModel;

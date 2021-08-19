@@ -53,4 +53,3 @@ export declare class ParallelConnection implements ProtocolClient.InspectorBacke
     disconnect(): Promise<void>;
 }
 export declare function initMainConnection(createMainTarget: () => Promise<void>, websocketConnectionLost: () => void): Promise<void>;
-export declare function _createMainConnection(websocketConnectionLost: () => void): ProtocolClient.InspectorBackend.Connection;

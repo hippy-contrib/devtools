@@ -45,8 +45,8 @@ export class XWidget extends XElement {
     isShowing() {
         return this._visible;
     }
-    registerRequiredCSS(cssFile, options) {
-        appendStyle(this._shadowRoot || this, cssFile, options);
+    registerRequiredCSS(cssFile) {
+        appendStyle(this._shadowRoot || this, cssFile);
     }
     setOnShown(callback) {
         this._onShownCallback = callback;

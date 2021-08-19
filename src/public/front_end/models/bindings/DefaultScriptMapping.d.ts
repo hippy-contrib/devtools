@@ -13,8 +13,8 @@ export declare class DefaultScriptMapping implements DebuggerSourceMapping {
     static scriptForUISourceCode(uiSourceCode: Workspace.UISourceCode.UISourceCode): SDK.Script.Script | null;
     rawLocationToUILocation(rawLocation: SDK.DebuggerModel.Location): Workspace.UISourceCode.UILocation | null;
     uiLocationToRawLocations(uiSourceCode: Workspace.UISourceCode.UISourceCode, lineNumber: number, columnNumber: number): SDK.DebuggerModel.Location[];
-    _parsedScriptSource(event: Common.EventTarget.EventTargetEvent): void;
-    _discardedScriptSource(event: Common.EventTarget.EventTargetEvent): void;
+    _parsedScriptSource(event: Common.EventTarget.EventTargetEvent<SDK.Script.Script>): void;
+    _discardedScriptSource(event: Common.EventTarget.EventTargetEvent<SDK.Script.Script>): void;
     _debuggerReset(): void;
     dispose(): void;
 }

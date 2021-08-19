@@ -1,9 +1,9 @@
 import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as TextUtils from '../../models/text_utils/text_utils.js';
+import * as Adorners from '../../ui/components/adorners/adorners.js';
 import * as TextEditor from '../../ui/legacy/components/text_editor/text_editor.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import * as ElementsComponents from './components/components.js';
 import type { ElementsTreeOutline, UpdateRecord } from './ElementsTreeOutline.js';
 export declare class ElementsTreeElement extends UI.TreeOutline.TreeElement {
     _node: SDK.DOMModel.DOMNode;
@@ -20,8 +20,8 @@ export declare class ElementsTreeElement extends UI.TreeOutline.TreeElement {
     _editing: EditorHandles | null;
     _highlightResult: UI.UIUtils.HighlightChange[];
     _adornerContainer: HTMLElement | undefined;
-    _adorners: ElementsComponents.Adorner.Adorner[];
-    _styleAdorners: ElementsComponents.Adorner.Adorner[];
+    _adorners: Adorners.Adorner.Adorner[];
+    _styleAdorners: Adorners.Adorner.Adorner[];
     _adornersThrottler: Common.Throttler.Throttler;
     _htmlEditElement: HTMLElement | undefined;
     expandAllButtonElement: UI.TreeOutline.TreeElement | null;
@@ -101,19 +101,22 @@ export declare class ElementsTreeElement extends UI.TreeOutline.TreeElement {
     _copyStyles(): Promise<void>;
     _highlightSearchResults(): void;
     _editAsHTML(): void;
-    adorn({ name, category }: ElementsComponents.Adorner.AdornerDefinition): ElementsComponents.Adorner.Adorner;
-    removeAdorner(adornerToRemove: ElementsComponents.Adorner.Adorner): void;
+    adorn({ name }: {
+        name: string;
+    }): Adorners.Adorner.Adorner;
+    removeAdorner(adornerToRemove: Adorners.Adorner.Adorner): void;
     removeAllAdorners(): void;
     _updateAdorners(): void;
     _updateAdornersInternal(): Promise<void>;
     updateStyleAdorners(): Promise<void>;
-    createGridAdorner(): ElementsComponents.Adorner.Adorner | null;
-    createScrollSnapAdorner(): ElementsComponents.Adorner.Adorner | null;
-    createFlexAdorner(): ElementsComponents.Adorner.Adorner | null;
+    createGridAdorner(): Adorners.Adorner.Adorner | null;
+    createScrollSnapAdorner(): Adorners.Adorner.Adorner | null;
+    createFlexAdorner(): Adorners.Adorner.Adorner | null;
 }
 export declare const InitialChildrenLimit = 500;
 export declare const ForbiddenClosingTagElements: Set<string>;
 export declare const EditTagBlocklist: Set<string>;
+export declare function adornerComparator(adornerA: Adorners.Adorner.Adorner, adornerB: Adorners.Adorner.Adorner): number;
 export interface EditorHandles {
     commit: () => void;
     cancel: () => void;

@@ -1,6 +1,6 @@
 export declare class WorkerWrapper {
-    _workerPromise: Promise<Worker>;
-    _disposed?: boolean;
+    private readonly workerPromise;
+    private disposed?;
     private constructor();
     static fromURL(url: URL): WorkerWrapper;
     postMessage(message: unknown): void;

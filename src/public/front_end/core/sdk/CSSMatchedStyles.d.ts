@@ -22,9 +22,9 @@ export declare class CSSMatchedStyles {
     node(): DOMNode;
     cssModel(): CSSModel;
     hasMatchingSelectors(rule: CSSStyleRule): boolean;
-    matchingSelectors(rule: CSSStyleRule): number[];
-    recomputeMatchingSelectors(rule: CSSStyleRule): Promise<any>;
-    addNewRule(rule: CSSStyleRule, node: DOMNode): Promise<any>;
+    getMatchingSelectors(rule: CSSStyleRule): number[];
+    recomputeMatchingSelectors(rule: CSSStyleRule): Promise<void>;
+    addNewRule(rule: CSSStyleRule, node: DOMNode): Promise<void>;
     _setSelectorMatches(node: DOMNode, selectorText: string, value: boolean): void;
     mediaMatches(style: CSSStyleDeclaration): boolean;
     nodeStyles(): CSSStyleDeclaration[];
@@ -59,12 +59,12 @@ declare class NodeCascade {
 declare class DOMInheritanceCascade {
     _nodeCascades: NodeCascade[];
     _propertiesState: Map<CSSProperty, PropertyState>;
-    _availableCSSVariables: Map<NodeCascade, Map<string, string>>;
+    _availableCSSVariables: Map<NodeCascade, Map<string, string | null>>;
     _computedCSSVariables: Map<NodeCascade, Map<string, string | null>>;
     _initialized: boolean;
     _styleToNodeCascade: Map<CSSStyleDeclaration, NodeCascade>;
     constructor(nodeCascades: NodeCascade[]);
-    availableCSSVariables(style: CSSStyleDeclaration): string[];
+    findAvailableCSSVariables(style: CSSStyleDeclaration): string[];
     computeCSSVariable(style: CSSStyleDeclaration, variableName: string): string | null;
     computeValue(style: CSSStyleDeclaration, value: string): string | null;
     computeSingleVariableValue(style: CSSStyleDeclaration, cssVariableValue: string): {
@@ -75,8 +75,8 @@ declare class DOMInheritanceCascade {
         variableName: string | null;
         fallback: string | null;
     };
-    _innerComputeCSSVariable(availableCSSVariables: Map<string, string>, computedCSSVariables: Map<string, string | null>, variableName: string): string | null;
-    _innerComputeValue(availableCSSVariables: Map<string, string>, computedCSSVariables: Map<string, string | null>, value: string): string | null;
+    _innerComputeCSSVariable(availableCSSVariables: Map<string, string | null>, computedCSSVariables: Map<string, string | null>, variableName: string): string | null;
+    _innerComputeValue(availableCSSVariables: Map<string, string | null>, computedCSSVariables: Map<string, string | null>, value: string): string | null;
     styles(): CSSStyleDeclaration[];
     propertyState(property: CSSProperty): PropertyState | null;
     reset(): void;

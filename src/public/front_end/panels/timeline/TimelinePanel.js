@@ -44,9 +44,9 @@ import * as TimelineModel from '../../models/timeline_model/timeline_model.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as MobileThrottling from '../mobile_throttling/mobile_throttling.js';
-import { Events, PerformanceModel } from './PerformanceModel.js'; // eslint-disable-line no-unused-vars
-import { TimelineController } from './TimelineController.js'; // eslint-disable-line no-unused-vars
-import { TimelineEventOverviewCoverage, TimelineEventOverviewCPUActivity, TimelineEventOverviewFrames, TimelineEventOverviewInput, TimelineEventOverviewMemory, TimelineEventOverviewNetwork, TimelineEventOverviewResponsiveness, TimelineFilmStripOverview } from './TimelineEventOverview.js'; // eslint-disable-line no-unused-vars
+import { Events, PerformanceModel } from './PerformanceModel.js';
+import { TimelineController } from './TimelineController.js';
+import { TimelineEventOverviewCoverage, TimelineEventOverviewCPUActivity, TimelineEventOverviewFrames, TimelineEventOverviewInput, TimelineEventOverviewMemory, TimelineEventOverviewNetwork, TimelineEventOverviewResponsiveness, TimelineFilmStripOverview } from './TimelineEventOverview.js';
 import { TimelineFlameChartView } from './TimelineFlameChartView.js';
 import { TimelineHistoryManager } from './TimelineHistoryManager.js';
 import { TimelineLoader } from './TimelineLoader.js';
@@ -304,7 +304,7 @@ export class TimelinePanel extends UI.Panel.Panel {
     _selection;
     constructor() {
         super('timeline');
-        this.registerRequiredCSS('panels/timeline/timelinePanel.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/timeline/timelinePanel.css');
         this.element.addEventListener('contextmenu', this._contextMenu.bind(this), false);
         this._dropTarget = new UI.DropTarget.DropTarget(this.element, [UI.DropTarget.Type.File, UI.DropTarget.Type.URI], i18nString(UIStrings.dropTimelineFileOrUrlHere), this._handleDrop.bind(this));
         this._recordingOptionUIControls = [];
@@ -473,7 +473,7 @@ export class TimelinePanel extends UI.Panel.Panel {
             Common.Settings.Settings.instance().createSetting('timelineShowSettingsToolbar', false);
         this._showSettingsPaneButton = new UI.Toolbar.ToolbarSettingToggle(this._showSettingsPaneSetting, 'largeicon-settings-gear', i18nString(UIStrings.captureSettings));
         SDK.NetworkManager.MultitargetNetworkManager.instance().addEventListener(SDK.NetworkManager.MultitargetNetworkManager.Events.ConditionsChanged, this._updateShowSettingsToolbarButton, this);
-        MobileThrottling.ThrottlingManager.throttlingManager().addEventListener(MobileThrottling.ThrottlingManager.Events.RateChanged, this._updateShowSettingsToolbarButton, this);
+        SDK.CPUThrottlingManager.CPUThrottlingManager.instance().addEventListener(SDK.CPUThrottlingManager.Events.RateChanged, this._updateShowSettingsToolbarButton, this);
         this._disableCaptureJSProfileSetting.addChangeListener(this._updateShowSettingsToolbarButton, this);
         this._captureLayersAndPicturesSetting.addChangeListener(this._updateShowSettingsToolbarButton, this);
         this._settingsPane = new UI.Widget.HBox();
@@ -636,7 +636,7 @@ export class TimelinePanel extends UI.Panel.Panel {
     }
     _updateShowSettingsToolbarButton() {
         const messages = [];
-        if (MobileThrottling.ThrottlingManager.throttlingManager().cpuThrottlingRate() !== 1) {
+        if (SDK.CPUThrottlingManager.CPUThrottlingManager.instance().cpuThrottlingRate() !== 1) {
             messages.push(i18nString(UIStrings.CpuThrottlingIsEnabled));
         }
         if (SDK.NetworkManager.MultitargetNetworkManager.instance().isThrottling()) {
@@ -1000,7 +1000,7 @@ export class TimelinePanel extends UI.Panel.Panel {
                 if (!this._performanceModel) {
                     return null;
                 }
-                return this._performanceModel.frameModel().frames(selection._endTime, selection._endTime)[0];
+                return this._performanceModel.frameModel().getFramesWithinWindow(selection._endTime, selection._endTime)[0];
             default:
                 console.assert(false, 'Should never be reached');
                 return null;
@@ -1162,7 +1162,7 @@ export class StatusPane extends UI.Widget.VBox {
     _timeUpdateTimer;
     constructor(options, buttonCallback) {
         super(true);
-        this.registerRequiredCSS('panels/timeline/timelineStatusDialog.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/timeline/timelineStatusDialog.css');
         this.contentElement.classList.add('timeline-status-dialog');
         const statusLine = this.contentElement.createChild('div', 'status-dialog-line status');
         statusLine.createChild('div', 'label').textContent = i18nString(UIStrings.status);
@@ -1197,9 +1197,11 @@ export class StatusPane extends UI.Widget.VBox {
     }
     hide() {
         this.element.parentNode.classList.remove('tinted');
+        this._arrangeDialog(this.element.parentNode);
         this.element.remove();
     }
     showPane(parent) {
+        this._arrangeDialog(parent);
         this.show(parent);
         parent.classList.add('tinted');
     }
@@ -1230,11 +1232,17 @@ export class StatusPane extends UI.Widget.VBox {
         delete this._timeUpdateTimer;
     }
     _updateTimer(precise) {
+        this._arrangeDialog(this.element.parentNode);
         if (!this._timeUpdateTimer) {
             return;
         }
         const elapsed = (Date.now() - this._startTime) / 1000;
         this._time.textContent = i18nString(UIStrings.ssec, { PH1: elapsed.toFixed(precise ? 1 : 0) });
+    }
+    _arrangeDialog(parent) {
+        const isSmallDialog = parent.clientWidth < 325;
+        this.element.classList.toggle('small-dialog', isSmallDialog);
+        this.contentElement.classList.toggle('small-dialog', isSmallDialog);
     }
 }
 let loadTimelineHandlerInstance;

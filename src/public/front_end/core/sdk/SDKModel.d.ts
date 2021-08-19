@@ -6,7 +6,7 @@ export interface RegistrationInfo {
     early?: boolean;
 }
 declare const registeredModels: Map<new (arg1: Target) => SDKModel, RegistrationInfo>;
-export declare class SDKModel extends Common.ObjectWrapper.ObjectWrapper {
+export declare class SDKModel<Events = any> extends Common.ObjectWrapper.ObjectWrapper<Events> {
     _target: Target;
     constructor(target: Target);
     target(): Target;

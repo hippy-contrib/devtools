@@ -203,7 +203,7 @@ export class LayerTreeOutline extends Common.ObjectWrapper.ObjectWrapper {
         if (layer) {
             this._layerSnapshotMap = this._layerViewHost.getLayerSnapshotMap();
             if (this._layerSnapshotMap.has(layer)) {
-                contextMenu.defaultSection().appendItem(i18nString(UIStrings.showPaintProfiler), this.dispatchEventToListeners.bind(this, Events.PaintProfilerRequested, selection), false);
+                contextMenu.defaultSection().appendItem(i18nString(UIStrings.showPaintProfiler), () => this.dispatchEventToListeners(Events.PaintProfilerRequested, selection), false);
             }
         }
         this._layerViewHost.showContextMenu(contextMenu, selection);

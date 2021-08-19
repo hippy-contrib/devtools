@@ -14,7 +14,7 @@ export declare class IsolateSelector extends UI.Widget.VBox implements UI.ListCo
     isolateAdded(isolate: SDK.IsolateManager.Isolate): void;
     isolateChanged(isolate: SDK.IsolateManager.Isolate): void;
     isolateRemoved(isolate: SDK.IsolateManager.Isolate): void;
-    _targetChanged(event: Common.EventTarget.EventTargetEvent): void;
+    _targetChanged(event: Common.EventTarget.EventTargetEvent<SDK.Target.Target>): void;
     _heapStatsChanged(event: Common.EventTarget.EventTargetEvent): void;
     _updateTotal(): void;
     static _formatTrendElement(trendValueMs: number, element: Element): void;

@@ -35,8 +35,8 @@ import * as Platform from '../../../../core/platform/platform.js';
 import * as Root from '../../../../core/root/root.js';
 import * as UI from '../../legacy.js';
 import * as ThemeSupport from '../../theme_support/theme_support.js';
-import { ChartViewport } from './ChartViewport.js'; // eslint-disable-line no-unused-vars
-import { TimelineGrid } from './TimelineGrid.js'; // eslint-disable-line no-unused-vars
+import { ChartViewport } from './ChartViewport.js';
+import { TimelineGrid } from './TimelineGrid.js';
 const UIStrings = {
     /**
     *@description Aria accessible name in Flame Chart of the Performance panel
@@ -138,7 +138,7 @@ export class FlameChart extends UI.Widget.VBox {
     _totalTime;
     constructor(dataProvider, flameChartDelegate, groupExpansionSetting) {
         super(true);
-        this.registerRequiredCSS('ui/legacy/components/perf_ui/flameChart.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/components/perf_ui/flameChart.css');
         this.contentElement.classList.add('flame-chart-main-pane');
         this._groupExpansionSetting = groupExpansionSetting;
         this._groupExpansionState = groupExpansionSetting && groupExpansionSetting.get() || {};

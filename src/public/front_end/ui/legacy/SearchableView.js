@@ -119,7 +119,7 @@ export class SearchableView extends VBox {
     _valueChangedTimeoutId;
     constructor(searchable, replaceable, settingName) {
         super(true);
-        this.registerRequiredCSS('ui/legacy/searchableView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/searchableView.css');
         searchableViewsByElement.set(this.element, this);
         this._searchProvider = searchable;
         this._replaceProvider = replaceable;

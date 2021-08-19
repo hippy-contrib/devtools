@@ -32,7 +32,7 @@
 import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as Common from '../common/common.js';
 import * as Platfrom from '../platform/platform.js';
-import { Events } from './NetworkRequest.js'; // eslint-disable-line no-unused-vars
+import { Events } from './NetworkRequest.js';
 export class Resource {
     _resourceTreeModel;
     _request;

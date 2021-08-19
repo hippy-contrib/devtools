@@ -12,7 +12,7 @@ export class CSPViolationsListView extends UI.Widget.VBox {
     issueRows = new Map();
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/issues/cspViolationsListView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/issues/cspViolationsListView.css');
         this.table.data = {
             columns: [
                 { id: 'sourceCode', title: 'Source Code', sortable: false, widthWeighting: 1, visible: true, hideable: false },

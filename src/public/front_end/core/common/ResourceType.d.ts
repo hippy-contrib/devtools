@@ -1,9 +1,9 @@
 import type * as Platform from '../platform/platform.js';
 export declare class ResourceType {
-    _name: string;
-    _title: () => Platform.UIString.LocalizedString;
-    _category: ResourceCategory;
-    _isTextType: boolean;
+    private readonly nameInternal;
+    private readonly titleInternal;
+    private readonly categoryInternal;
+    private readonly isTextTypeInternal;
     constructor(name: string, title: () => Platform.UIString.LocalizedString, category: ResourceCategory, isTextType: boolean);
     static fromMimeType(mimeType: string | null): ResourceType;
     static fromMimeTypeOverride(mimeType: string | null): ResourceType | null;
@@ -73,6 +73,5 @@ export declare const resourceTypes: {
     SourceMapStyleSheet: ResourceType;
     WebBundle: ResourceType;
 };
-export declare const _mimeTypeByName: Map<string, string>;
-export declare const _resourceTypeByExtension: Map<string, ResourceType>;
-export declare const _mimeTypeByExtension: Map<string, string>;
+export declare const resourceTypeByExtension: Map<string, ResourceType>;
+export declare const mimeTypeByExtension: Map<string, string>;

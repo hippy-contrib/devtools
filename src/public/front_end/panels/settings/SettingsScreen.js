@@ -32,8 +32,10 @@ import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as Root from '../../core/root/root.js';
+import * as IconButton from '../../ui/components/icon_button/icon_button.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import settingsScreenStyles from './settingsScreen.css.js';
 const UIStrings = {
     /**
     *@description Name of the Settings view
@@ -80,6 +82,10 @@ const UIStrings = {
     * list of experiments, but no experiments match the filter.
     */
     noResults: 'No experiments match the filter',
+    /**
+    *@description Text that is usually a hyperlink to more documentation
+    */
+    learnMore: 'Learn more',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/settings/SettingsScreen.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -90,12 +96,11 @@ export class SettingsScreen extends UI.Widget.VBox {
     _reportTabOnReveal;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/settings/settingsScreen.css', { enableLegacyPatching: false });
         this.contentElement.classList.add('settings-window-main');
         this.contentElement.classList.add('vbox');
         const settingsLabelElement = document.createElement('div');
         const settingsTitleElement = UI.Utils
-            .createShadowRootWithCoreStyles(settingsLabelElement, { cssFile: 'panels/settings/settingsScreen.css', enableLegacyPatching: false, delegatesFocus: undefined })
+            .createShadowRootWithCoreStyles(settingsLabelElement, { cssFile: [settingsScreenStyles], delegatesFocus: undefined })
             .createChild('div', 'settings-window-title');
         UI.ARIAUtils.markAsHeading(settingsTitleElement, 1);
         settingsTitleElement.textContent = i18nString(UIStrings.settings);
@@ -136,6 +141,7 @@ export class SettingsScreen extends UI.Widget.VBox {
         dialog.setOutsideTabIndexBehavior(UI.Dialog.OutsideTabIndexBehavior.PreserveMainViewTabIndex);
         settingsScreen.show(dialog.contentElement);
         dialog.setEscapeKeyCallback(settingsScreen._onEscapeKeyPressed.bind(settingsScreen));
+        dialog.setMarginBehavior(UI.GlassPane.MarginBehavior.NoMargin);
         // UI.Dialog extends GlassPane and overrides the `show` method with a wider
         // accepted type. However, TypeScript uses the supertype declaration to
         // determine the full type, which requires a `!Document`.
@@ -186,6 +192,10 @@ export class SettingsScreen extends UI.Widget.VBox {
         if (this._tabbedLocation.tabbedPane().selectedTabId === 'keybinds' && this._keybindsTab) {
             this._keybindsTab.onEscapeKeyPressed(event);
         }
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([settingsScreenStyles]);
     }
 }
 class SettingsTab extends UI.Widget.VBox {
@@ -382,7 +392,7 @@ export class ExperimentsSettingsTab extends SettingsTab {
         return subsection;
     }
     _createExperimentCheckbox(experiment) {
-        const label = UI.UIUtils.CheckboxLabel.create(i18nString(experiment.title), experiment.isEnabled());
+        const label = UI.UIUtils.CheckboxLabel.create(experiment.title, experiment.isEnabled());
         const input = label.checkboxElement;
         input.name = experiment.name;
         function listener() {
@@ -396,8 +406,21 @@ export class ExperimentsSettingsTab extends SettingsTab {
         }
         input.addEventListener('click', listener, false);
         const p = document.createElement('p');
-        p.className = experiment.unstable && !experiment.isEnabled() ? 'settings-experiment-unstable' : '';
+        p.classList.add('settings-experiment');
+        if (experiment.unstable && !experiment.isEnabled()) {
+            p.classList.add('settings-experiment-unstable');
+        }
         p.appendChild(label);
+        if (experiment.docLink) {
+            const link = UI.XLink.XLink.create(experiment.docLink);
+            link.textContent = '';
+            link.setAttribute('aria-label', i18nString(UIStrings.learnMore));
+            const linkIcon = new IconButton.Icon.Icon();
+            linkIcon.data = { iconName: 'ic_help_16x16', color: 'var(--color-text-secondary)', width: '16px', height: '16px' };
+            linkIcon.classList.add('link-icon');
+            link.prepend(linkIcon);
+            p.appendChild(link);
+        }
         return p;
     }
 }

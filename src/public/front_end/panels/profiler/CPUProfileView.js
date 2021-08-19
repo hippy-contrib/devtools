@@ -167,9 +167,8 @@ export class CPUProfileType extends ProfileType {
     }
     _consoleProfileFinished(event) {
         const data = event.data;
-        const cpuProfile = data.cpuProfile;
         const profile = new CPUProfileHeader(data.cpuProfilerModel, this, data.title);
-        profile.setProtocolProfile(cpuProfile);
+        profile.setProtocolProfile(data.cpuProfile);
         this.addProfile(profile);
     }
     _startRecordingProfile() {
@@ -342,7 +341,7 @@ export class CPUFlameChartDataProvider extends ProfileFlameChartDataProvider {
             if (ms < 1000) {
                 return i18nString(UIStrings.fms, { PH1: ms.toFixed(1) });
             }
-            return i18n.i18n.secondsToString(ms / 1000, true);
+            return i18n.TimeUtilities.secondsToString(ms / 1000, true);
         }
         const name = UI.UIUtils.beautifyFunctionName(node.functionName);
         pushEntryInfoRow(i18nString(UIStrings.name), name);
@@ -356,8 +355,8 @@ export class CPUFlameChartDataProvider extends ProfileFlameChartDataProvider {
             pushEntryInfoRow(i18nString(UIStrings.url), link.textContent || '');
         }
         linkifier.dispose();
-        pushEntryInfoRow(i18nString(UIStrings.aggregatedSelfTime), i18n.i18n.secondsToString(node.self / 1000, true));
-        pushEntryInfoRow(i18nString(UIStrings.aggregatedTotalTime), i18n.i18n.secondsToString(node.total / 1000, true));
+        pushEntryInfoRow(i18nString(UIStrings.aggregatedSelfTime), i18n.TimeUtilities.secondsToString(node.self / 1000, true));
+        pushEntryInfoRow(i18nString(UIStrings.aggregatedTotalTime), i18n.TimeUtilities.secondsToString(node.total / 1000, true));
         const deoptReason = node.deoptReason;
         if (deoptReason) {
             pushEntryInfoRow(i18nString(UIStrings.notOptimized), deoptReason);

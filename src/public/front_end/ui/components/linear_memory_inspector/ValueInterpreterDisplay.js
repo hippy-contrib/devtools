@@ -5,6 +5,7 @@ import * as i18n from '../../../core/i18n/i18n.js';
 import * as LitHtml from '../../lit-html/lit-html.js';
 import * as ComponentHelpers from '../helpers/helpers.js';
 import * as IconButton from '../icon_button/icon_button.js';
+import valueInterpreterDisplayStyles from './valueInterpreterDisplay.css.js';
 import { format, getDefaultValueTypeMapping, getPointerAddress, isNumber, isPointer, isValidMode, VALUE_TYPE_MODE_LIST } from './ValueInterpreterDisplayUtils.js';
 const UIStrings = {
     /**
@@ -63,8 +64,11 @@ export class ValueInterpreterDisplay extends HTMLElement {
     constructor() {
         super();
         this.shadow.adoptedStyleSheets = [
-            ...getStyleSheets('ui/legacy/inspectorCommon.css', { enableLegacyPatching: false }),
+            ...getStyleSheets('ui/legacy/inspectorCommon.css'),
         ];
+    }
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [valueInterpreterDisplayStyles];
     }
     set data(data) {
         this.buffer = data.buffer;
@@ -84,67 +88,6 @@ export class ValueInterpreterDisplay extends HTMLElement {
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
         render(html `
-      <style>
-        :host {
-          flex: auto;
-          display: flex;
-        }
-
-        .mode-type {
-          color: var(--text-highlight-color); /* stylelint-disable-line plugin/use_theme_colors */
-          /* See: crbug.com/1152736 for color variable migration. */
-        }
-
-        .value-types {
-          width: 100%;
-          display: grid;
-          grid-template-columns: auto auto 1fr;
-          grid-column-gap: 24px;
-          grid-row-gap: 4px;
-          min-height: 24px;
-          overflow: hidden;
-          padding: 2px 12px;
-          align-items: baseline;
-          justify-content: start;
-        }
-
-        .value-type-cell {
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          min-height: 24px;
-        }
-
-        .value-type-value-with-link {
-          display: flex;
-          align-items: center;
-        }
-
-        .value-type-cell-no-mode {
-          grid-column: 1 / 3;
-        }
-
-        .jump-to-button {
-          display: flex;
-          width: 20px;
-          height: 20px;
-          border: none;
-          padding: 0;
-          outline: none;
-          justify-content: center;
-          align-items: center;
-          cursor: pointer;
-        }
-
-        .signed-divider {
-          width: 1px;
-          height: 15px;
-          background-color: var(--color-details-hairline);
-          margin: 0 4px;
-        }
-      </style>
       <div class="value-types">
         ${SORTED_VALUE_TYPES.map(type => this.valueTypes.has(type) ? this.showValue(type) : '')}
       </div>

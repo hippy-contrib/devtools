@@ -152,7 +152,7 @@ export class ResourceWebSocketFrameView extends UI.Widget.VBox {
     messageFilterSetting = Common.Settings.Settings.instance().createSetting('networkWebSocketMessageFilter', '');
     constructor(request) {
         super();
-        this.registerRequiredCSS('panels/network/webSocketFrameView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/network/webSocketFrameView.css');
         this.element.classList.add('websocket-frame-view');
         this._request = request;
         this._splitWidget = new UI.SplitWidget.SplitWidget(false, true, 'resourceWebSocketFrameSplitViewState');
@@ -203,11 +203,12 @@ export class ResourceWebSocketFrameView extends UI.Widget.VBox {
         const placeholder = i18nString(UIStrings.enterRegex);
         this._filterTextInput = new UI.Toolbar.ToolbarInput(placeholder, '', 0.4);
         this._filterTextInput.addEventListener(UI.Toolbar.ToolbarInput.Event.TextChanged, this._updateFilterSetting, this);
-        if (this.messageFilterSetting.get()) {
-            this._filterTextInput.setValue(this.messageFilterSetting.get());
+        const filter = this.messageFilterSetting.get();
+        if (filter) {
+            this._filterTextInput.setValue(filter);
         }
-        this._mainToolbar.appendToolbarItem(this._filterTextInput);
         this._filterRegex = null;
+        this._mainToolbar.appendToolbarItem(this._filterTextInput);
         const mainContainer = new UI.Widget.VBox();
         mainContainer.element.appendChild(this._mainToolbar.element);
         this._dataGrid.asWidget().show(mainContainer.element);
@@ -216,6 +217,9 @@ export class ResourceWebSocketFrameView extends UI.Widget.VBox {
         this._frameEmptyWidget = new UI.EmptyWidget.EmptyWidget(i18nString(UIStrings.selectMessageToBrowseItsContent));
         this._splitWidget.setSidebarWidget(this._frameEmptyWidget);
         this._selectedNode = null;
+        if (filter) {
+            this._applyFilter(filter);
+        }
         function onRowContextMenu(contextMenu, genericNode) {
             const node = genericNode;
             const binaryView = node.binaryView();
@@ -229,11 +233,11 @@ export class ResourceWebSocketFrameView extends UI.Widget.VBox {
         }
     }
     static opCodeDescription(opCode, mask) {
-        const localizedDescription = opCodeDescriptions[opCode] || '';
+        const localizedDescription = opCodeDescriptions[opCode] || (() => '');
         if (mask) {
-            return i18nString(UIStrings.sOpcodeSMask, { PH1: localizedDescription, PH2: opCode });
+            return i18nString(UIStrings.sOpcodeSMask, { PH1: localizedDescription(), PH2: opCode });
         }
-        return i18nString(UIStrings.sOpcodeS, { PH1: localizedDescription, PH2: opCode });
+        return i18nString(UIStrings.sOpcodeS, { PH1: localizedDescription(), PH2: opCode });
     }
     wasShown() {
         this.refresh();
@@ -263,6 +267,9 @@ export class ResourceWebSocketFrameView extends UI.Widget.VBox {
     _updateFilterSetting() {
         const text = this._filterTextInput.value();
         this.messageFilterSetting.set(text);
+        this._applyFilter(text);
+    }
+    _applyFilter(text) {
         const type = this._filterTypeCombobox.selectedOption().value;
         this._filterRegex = text ? new RegExp(text, 'i') : null;
         this._filterType = type === 'all' ? null : type;

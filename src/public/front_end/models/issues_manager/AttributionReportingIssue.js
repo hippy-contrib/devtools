@@ -37,7 +37,7 @@ export class AttributionReportingIssue extends Issue {
                 };
             case "AttributionReportingIssue::InvalidAttributionSourceEventId" /* InvalidAttributionSourceEventId */:
                 return {
-                    file: 'arInvalidAttrubtionSourceEventId.md',
+                    file: 'arInvalidAttributionSourceEventId.md',
                     links: [],
                 };
             case "AttributionReportingIssue::InvalidAttributionData" /* InvalidAttributionData */:
@@ -78,8 +78,8 @@ export class AttributionReportingIssue extends Issue {
     getKind() {
         return IssueKind.PageError;
     }
-    static fromInspectorIssue(issuesModel, inspectorDetails) {
-        const { attributionReportingIssueDetails } = inspectorDetails;
+    static fromInspectorIssue(issuesModel, inspectorIssue) {
+        const { attributionReportingIssueDetails } = inspectorIssue.details;
         if (!attributionReportingIssueDetails) {
             console.warn('Attribution Reporting issue without details received.');
             return [];

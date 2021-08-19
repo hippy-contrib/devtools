@@ -89,7 +89,7 @@ export class Writer {
             return false;
         }
         function contentLoaded(entry, contentData) {
-            progress.worked();
+            progress.incrementWorked();
             let encoded = contentData.encoded;
             if (contentData.content !== null) {
                 let content = contentData.content;
@@ -111,7 +111,7 @@ export class Writer {
         for (let i = 0; i < fileContent.length && !progress.isCanceled(); i += _chunkSize) {
             const chunk = fileContent.substr(i, _chunkSize);
             await stream.write(chunk);
-            progress.worked(chunk.length);
+            progress.incrementWorked(chunk.length);
         }
         progress.done();
     }

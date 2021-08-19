@@ -42,7 +42,7 @@ export class SocketServer extends DomainRegister {
 
   public close() {
     this.wss.close(() => {
-      debug('close wss!!!');
+      debug('close wss.');
     });
   }
 
@@ -130,9 +130,12 @@ export class SocketServer extends DomainRegister {
       });
 
       ws.on('close', () => {
+        debug('devtools ws disconnect.');
         conn.appClientList.forEach((appClient) => {
           appClient.resumeApp();
         });
+        const i = conn.devtoolsWsList.findIndex((v) => v === ws);
+        if (i !== -1) conn.devtoolsWsList.splice(i, 1);
       });
     }
 
@@ -178,8 +181,8 @@ export class SocketServer extends DomainRegister {
           appWs: ws,
         });
       }
-      ws.removeAllListeners('close');
       ws.on('close', () => {
+        debug('ws app client disconnect.');
         for (const [clientId, { appWs }] of this.connectionMap.entries()) {
           if (appWs === ws) {
             this.connectionMap.delete(clientId);

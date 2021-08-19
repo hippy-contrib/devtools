@@ -34,9 +34,9 @@ export declare class TracingModel {
     maximumRecordTime(): number;
     navStartTimes(): Map<string, Event>;
     sortedProcesses(): Process[];
-    processByName(name: string): Process | null;
-    processById(pid: number): Process | null;
-    threadByName(processName: string, threadName: string): Thread | null;
+    getProcessByName(name: string): Process | null;
+    getProcessById(pid: number): Process | null;
+    getThreadByName(processName: string, threadName: string): Thread | null;
     extractEventsFromThreadByName(processName: string, threadName: string, eventName: string): Event[];
     _processPendingAsyncEvents(): void;
     _closeOpenAsyncEvents(): void;

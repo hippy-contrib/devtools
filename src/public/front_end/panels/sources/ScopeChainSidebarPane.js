@@ -86,9 +86,9 @@ export class ScopeChainSidebarPane extends UI.Widget.VBox {
     _infoElement;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/sources/scopeChainSidebarPane.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/sources/scopeChainSidebarPane.css');
         this._treeOutline = new ObjectUI.ObjectPropertiesSection.ObjectPropertiesSectionsTreeOutline();
-        this._treeOutline.registerRequiredCSS('panels/sources/scopeChainSidebarPane.css', { enableLegacyPatching: false });
+        this._treeOutline.registerRequiredCSS('panels/sources/scopeChainSidebarPane.css');
         this._treeOutline.setShowSelectionOnKeyboardFocus(/* show */ true);
         this._expandController =
             new ObjectUI.ObjectPropertiesSection.ObjectPropertiesSectionsTreeExpandController(this._treeOutline);
@@ -189,8 +189,7 @@ export class ScopeChainSidebarPane extends UI.Widget.VBox {
         }
         titleElement.createChild('div', 'scope-chain-sidebar-pane-section-subtitle').textContent = subtitle;
         titleElement.createChild('div', 'scope-chain-sidebar-pane-section-title').textContent = title;
-        const section = new ObjectUI.ObjectPropertiesSection.RootElement(resolveScopeInObject(scope), this._linkifier, emptyPlaceholder, 
-        /* ignoreHasOwnProperty */ true, extraProperties);
+        const section = new ObjectUI.ObjectPropertiesSection.RootElement(resolveScopeInObject(scope), this._linkifier, emptyPlaceholder, 0 /* All */, extraProperties);
         section.title = titleElement;
         section.listItemElement.classList.add('scope-chain-sidebar-pane-section');
         section.listItemElement.setAttribute('aria-label', title);
@@ -203,7 +202,7 @@ export class ScopeChainSidebarPane extends UI.Widget.VBox {
         }
         const extraProperties = [];
         if (thisObject) {
-            extraProperties.push(new SDK.RemoteObject.RemoteObjectProperty('this', thisObject));
+            extraProperties.push(new SDK.RemoteObject.RemoteObjectProperty('this', thisObject, undefined, undefined, undefined, undefined, undefined, /* synthetic */ true));
         }
         if (isFirstScope) {
             const exception = details.exception();

@@ -440,7 +440,7 @@ export class DOMNode {
         });
     }
     removeNode(callback) {
-        this._agent.invoke_removeNode({ nodeId: this.id }).then(response => {
+        return this._agent.invoke_removeNode({ nodeId: this.id }).then(response => {
             if (!response.getError()) {
                 this._domModel.markUndoableState();
             }
@@ -1265,6 +1265,13 @@ export class DOMModel extends SDKModel {
             return null;
         }
         return this.nodeForId(response.nodeId);
+    }
+    async getContainerForNode(nodeId, containerName) {
+        const { nodeId: containerNodeId } = await this._agent.invoke_getContainerForNode({ nodeId, containerName });
+        if (!containerNodeId) {
+            return null;
+        }
+        return this.nodeForId(containerNodeId);
     }
     pushObjectAsNodeToFrontend(object) {
         return object.isNode() ? this.pushNodeToFrontend(object.objectId) : Promise.resolve(null);

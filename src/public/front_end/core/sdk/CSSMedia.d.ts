@@ -1,8 +1,7 @@
 import * as TextUtils from '../../models/text_utils/text_utils.js';
 import type * as Protocol from '../../generated/protocol.js';
-import type { CSSModel, Edit } from './CSSModel.js';
-import { CSSLocation } from './CSSModel.js';
-import type { CSSStyleSheetHeader } from './CSSStyleSheetHeader.js';
+import type { CSSModel } from './CSSModel.js';
+import { CSSQuery } from './CSSQuery.js';
 export declare class CSSMediaQuery {
     _active: boolean;
     _expressions: CSSMediaQueryExpression[] | null;
@@ -25,25 +24,14 @@ export declare class CSSMediaQueryExpression {
     valueRange(): TextUtils.TextRange.TextRange | null;
     computedLength(): number | null;
 }
-export declare class CSSMedia {
-    _cssModel: CSSModel;
-    text?: string;
+export declare class CSSMedia extends CSSQuery {
     source?: Protocol.CSS.CSSMediaSource;
     sourceURL?: string;
-    range?: TextUtils.TextRange.TextRange | null;
-    styleSheetId?: string;
     mediaList?: CSSMediaQuery[] | null;
-    constructor(cssModel: CSSModel, payload: Protocol.CSS.CSSMedia);
-    static parsePayload(cssModel: CSSModel, payload: Protocol.CSS.CSSMedia): CSSMedia;
     static parseMediaArrayPayload(cssModel: CSSModel, payload: Protocol.CSS.CSSMedia[]): CSSMedia[];
-    _reinitialize(payload: Protocol.CSS.CSSMedia): void;
-    rebase(edit: Edit): void;
-    equal(other: CSSMedia): boolean;
+    constructor(cssModel: CSSModel, payload: Protocol.CSS.CSSMedia);
+    reinitialize(payload: Protocol.CSS.CSSMedia): void;
     active(): boolean;
-    lineNumberInSource(): number | undefined;
-    columnNumberInSource(): number | undefined;
-    header(): CSSStyleSheetHeader | null;
-    rawLocation(): CSSLocation | null;
 }
 export declare const Source: {
     LINKED_SHEET: string;

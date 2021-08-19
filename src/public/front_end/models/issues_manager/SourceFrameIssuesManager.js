@@ -6,23 +6,20 @@ import * as SDK from '../../core/sdk/sdk.js';
 import * as Bindings from '../../models/bindings/bindings.js';
 import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as Workspace from '../../models/workspace/workspace.js';
-import * as Marked from '../../third_party/marked/marked.js';
 import { ContentSecurityPolicyIssue, trustedTypesPolicyViolationCode, trustedTypesSinkViolationCode } from './ContentSecurityPolicyIssue.js';
 import { toZeroBasedLocation } from './Issue.js';
-import * as IssuesManager from './IssuesManager.js';
-import { findTitleFromMarkdownAst, getMarkdownFileContent } from './MarkdownIssueDescription.js';
+import { getIssueTitleFromMarkdownDescription } from './MarkdownIssueDescription.js';
 export class SourceFrameIssuesManager {
     issuesManager;
     locationPool = new Bindings.LiveLocation.LiveLocationPool();
     issueMessages = new Array();
     constructor(issuesManager) {
         this.issuesManager = issuesManager;
-        this.issuesManager.addEventListener(IssuesManager.Events.IssueAdded, this.onIssueAdded, this);
-        this.issuesManager.addEventListener(IssuesManager.Events.FullUpdateRequired, this.onFullUpdateRequired, this);
+        this.issuesManager.addEventListener("IssueAdded" /* IssueAdded */, this.onIssueAdded, this);
+        this.issuesManager.addEventListener("FullUpdateRequired" /* FullUpdateRequired */, this.onFullUpdateRequired, this);
     }
     onIssueAdded(event) {
-        const { issue } = 
-        /** @type {!{issue: !Issue}} */ (event.data);
+        const { issue } = event.data;
         this.addIssue(issue);
     }
     addIssue(issue) {
@@ -49,15 +46,10 @@ export class SourceFrameIssuesManager {
             this.addIssue(issue);
         }
     }
-    async getIssueTitleFromMarkdownDescription(description) {
-        const rawMarkdown = await getMarkdownFileContent(description.file);
-        const markdownAst = Marked.Marked.lexer(rawMarkdown);
-        return findTitleFromMarkdownAst(markdownAst);
-    }
     async addIssueMessageToScript(issue, rawLocation) {
         const description = issue.getDescription();
         if (description) {
-            const title = await this.getIssueTitleFromMarkdownDescription(description);
+            const title = await getIssueTitleFromMarkdownDescription(description);
             if (title) {
                 const clickHandler = () => {
                     Common.Revealer.reveal(issue);

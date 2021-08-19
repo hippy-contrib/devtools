@@ -6,7 +6,9 @@ import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import * as ConsoleComponents from './components/components.js';
 import { ConsoleFilter, FilterType } from './ConsoleFilter.js';
+import consoleSidebarStyles from './consoleSidebar.css.js';
 const UIStrings = {
     /**
     * @description Filter name in Console Sidebar of the Console panel. This is shown when we fail to
@@ -50,8 +52,9 @@ export class ConsoleSidebar extends UI.Widget.VBox {
         super(true);
         this.setMinimumSize(125, 0);
         this._tree = new UI.TreeOutline.TreeOutlineInShadow();
-        this._tree.registerRequiredCSS('panels/console/consoleSidebar.css', { enableLegacyPatching: false });
         this._tree.addEventListener(UI.TreeOutline.Events.ElementSelected, this._selectionChanged.bind(this));
+        const deprecationWarning = new ConsoleComponents.SidebarDeprecation.SidebarDeprecation();
+        this.contentElement.appendChild(deprecationWarning);
         this.contentElement.appendChild(this._tree.element);
         this._selectedTreeElement = null;
         this._treeElements = [];
@@ -100,6 +103,10 @@ export class ConsoleSidebar extends UI.Widget.VBox {
     _selectionChanged(event) {
         this._selectedTreeElement = event.data;
         this.dispatchEventToListeners("FilterSelected" /* FilterSelected */);
+    }
+    wasShown() {
+        super.wasShown();
+        this._tree.registerCSSFiles([consoleSidebarStyles]);
     }
 }
 class ConsoleSidebarTreeElement extends UI.TreeOutline.TreeElement {
@@ -173,6 +180,7 @@ export class FilterTreeElement extends ConsoleSidebarTreeElement {
     }
     _updateGroupTitle(messageCount) {
         if (this.uiStringForFilterCount) {
+            // eslint-disable-next-line rulesdir/l10n_i18nString_call_only_with_uistrings
             return i18nString(this.uiStringForFilterCount, { n: messageCount });
         }
         return '';

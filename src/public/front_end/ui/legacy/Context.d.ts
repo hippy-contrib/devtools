@@ -19,7 +19,7 @@ export declare class Context {
 }
 export declare function registerListener(registration: ContextFlavorListenerRegistration): void;
 export interface ContextFlavorListenerRegistration {
-    contextTypes: () => Array<unknown>;
+    contextTypes: () => Array<Function>;
     loadListener: () => Promise<ContextFlavorListener>;
 }
 export {};

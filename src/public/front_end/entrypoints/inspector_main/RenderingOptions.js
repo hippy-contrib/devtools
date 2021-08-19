@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /* eslint-disable rulesdir/no_underscored_properties */
-import * as Common from '../../core/common/common.js'; // eslint-disable-line no-unused-vars
+import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
@@ -182,7 +182,7 @@ const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 // `front_end/sdk/module.json` to make this feature available in the
 // Command Menu.
 const supportsPrefersReducedData = () => {
-    const query = '(prefers-reduced-data: reduce)';
+    const query = '(prefers-reduced-data)';
     // Note: `media` serializes to `'not all'` for unsupported queries.
     return window.matchMedia(query).media === query;
 };
@@ -200,7 +200,7 @@ let renderingOptionsViewInstance;
 export class RenderingOptionsView extends UI.Widget.VBox {
     constructor() {
         super(true);
-        this.registerRequiredCSS('entrypoints/inspector_main/renderingOptions.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('entrypoints/inspector_main/renderingOptions.css');
         this._appendCheckbox(i18nString(UIStrings.paintFlashing), i18nString(UIStrings.highlightsAreasOfThePageGreen), Common.Settings.Settings.instance().moduleSetting('showPaintRects'));
         this._appendCheckbox(i18nString(UIStrings.layoutShiftRegions), i18nString(UIStrings.highlightsAreasOfThePageBlueThat), Common.Settings.Settings.instance().moduleSetting('showLayoutShiftRegions'));
         this._appendCheckbox(i18nString(UIStrings.layerBorders), i18nString(UIStrings.showsLayerBordersOrangeoliveAnd), Common.Settings.Settings.instance().moduleSetting('showDebugBorders'));

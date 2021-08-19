@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 // @ts-nocheck
+import * as EmulationModelModule from '../../models/emulation/emulation.js';
 import * as EmulationModule from './emulation.js';
 self.Emulation = self.Emulation || {};
 Emulation = Emulation || {};
@@ -16,9 +17,9 @@ Emulation.AdvancedAppProvider = EmulationModule.AdvancedApp.AdvancedAppProvider;
 /**
  * @constructor
  */
-Emulation.DeviceModeModel = EmulationModule.DeviceModeModel.DeviceModeModel;
+Emulation.DeviceModeModel = EmulationModelModule.DeviceModeModel.DeviceModeModel;
 /** @enum {string} */
-Emulation.DeviceModeModel.Type = EmulationModule.DeviceModeModel.Type;
+Emulation.DeviceModeModel.Type = EmulationModelModule.DeviceModeModel.Type;
 /**
  * @constructor
  */
@@ -38,15 +39,11 @@ Emulation.DevicesSettingsTab = EmulationModule.DevicesSettingsTab.DevicesSetting
 /**
  * @constructor
  */
-Emulation.EmulatedDevice = EmulationModule.EmulatedDevices.EmulatedDevice;
+Emulation.EmulatedDevice = EmulationModelModule.EmulatedDevices.EmulatedDevice;
 /**
  * @constructor
  */
-Emulation.EmulatedDevicesList = EmulationModule.EmulatedDevices.EmulatedDevicesList;
-/**
- * @constructor
- */
-Emulation.LocationsSettingsTab = EmulationModule.LocationsSettingsTab.LocationsSettingsTab;
+Emulation.EmulatedDevicesList = EmulationModelModule.EmulatedDevices.EmulatedDevicesList;
 /**
  * @constructor
  */
@@ -57,12 +54,4 @@ Emulation.InspectedPagePlaceholder.instance =
  * @constructor
  */
 Emulation.MediaQueryInspector = EmulationModule.MediaQueryInspector.MediaQueryInspector;
-/**
- * @constructor
- */
-Emulation.SensorsView = EmulationModule.SensorsView.SensorsView;
-/**
- * @constructor
- */
-Emulation.SensorsView.ShowActionDelegate = EmulationModule.SensorsView.ShowActionDelegate;
 //# sourceMappingURL=emulation-legacy.js.map

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../common/common.js';
-import { Events as ResourceTreeModelEvents, ResourceTreeModel } from './ResourceTreeModel.js'; // eslint-disable-line no-unused-vars
+import { Events as ResourceTreeModelEvents, ResourceTreeModel } from './ResourceTreeModel.js';
 import { TargetManager } from './TargetManager.js';
 let frameManagerInstance = null;
 /**
@@ -48,7 +48,7 @@ export class FrameManager extends Common.ObjectWrapper.ObjectWrapper {
     modelRemoved(resourceTreeModel) {
         const listeners = this._eventListeners.get(resourceTreeModel);
         if (listeners) {
-            Common.EventTarget.EventTarget.removeEventListeners(listeners);
+            Common.EventTarget.removeEventListeners(listeners);
         }
         // Iterate over this model's frames and decrease their count or remove them.
         // (The ResourceTreeModel does not send FrameDetached events when a model
@@ -88,15 +88,10 @@ export class FrameManager extends Common.ObjectWrapper.ObjectWrapper {
             frameSet.add(frame.id);
         }
         this.dispatchEventToListeners(Events.FrameAddedToTarget, { frame });
-        const wasAwaited = this.awaitedFrames.get(frame.id);
-        if (wasAwaited && (!wasAwaited.notInTarget || wasAwaited.notInTarget !== frame.resourceTreeModel().target())) {
-            this.awaitedFrames.delete(frame.id);
-            wasAwaited.resolve(frame);
-        }
+        this.resolveAwaitedFrame(frame);
     }
     _frameDetached(event) {
-        const frame = event.data.frame;
-        const isSwap = event.data.isSwap;
+        const { frame, isSwap } = event.data;
         // Decrease the frame's count or remove it entirely from the map.
         this._decreaseOrRemoveFrame(frame.id);
         // If the transferring frame's detached event is received before its frame
@@ -122,8 +117,7 @@ export class FrameManager extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
     _resourceAdded(event) {
-        const resource = event.data;
-        this.dispatchEventToListeners(Events.ResourceAdded, { resource });
+        this.dispatchEventToListeners(Events.ResourceAdded, { resource: event.data });
     }
     _decreaseOrRemoveFrame(frameId) {
         const frameData = this._frames.get(frameId);
@@ -173,8 +167,33 @@ export class FrameManager extends Common.ObjectWrapper.ObjectWrapper {
             return frame;
         }
         return new Promise(resolve => {
-            this.awaitedFrames.set(frameId, { notInTarget, resolve });
+            const waiting = this.awaitedFrames.get(frameId);
+            if (waiting) {
+                waiting.push({ notInTarget, resolve });
+            }
+            else {
+                this.awaitedFrames.set(frameId, [{ notInTarget, resolve }]);
+            }
         });
+    }
+    resolveAwaitedFrame(frame) {
+        const waiting = this.awaitedFrames.get(frame.id);
+        if (!waiting) {
+            return;
+        }
+        const newWaiting = waiting.filter(({ notInTarget, resolve }) => {
+            if (!notInTarget || notInTarget !== frame.resourceTreeModel().target()) {
+                resolve(frame);
+                return false;
+            }
+            return true;
+        });
+        if (newWaiting.length > 0) {
+            this.awaitedFrames.set(frame.id, newWaiting);
+        }
+        else {
+            this.awaitedFrames.delete(frame.id);
+        }
     }
 }
 // TODO(crbug.com/1167717): Make this a const enum again

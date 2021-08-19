@@ -1,4 +1,4 @@
-import { ContextMenuColumnSortClickEvent } from './DataGridUtils.js';
+import { ContextMenuColumnSortClickEvent } from './DataGridEvents.js';
 function toggleColumnVisibility(dataGrid, column) {
     const newVisibility = !column.visible;
     const newColumns = dataGrid.data.columns.map(col => {

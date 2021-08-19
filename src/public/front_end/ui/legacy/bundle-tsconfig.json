@@ -1,1 +1,1 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/ui/legacy"},"files":["../../../../../../front_end/ui/legacy/legacy.ts"],"references":[{"path":"./ui-tsconfig.json"}]}
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/ui/legacy"},"files":["../../../../../../chrome-devtools/front_end/ui/legacy/legacy.ts"],"references":[{"path":"./ui-tsconfig.json"}]}

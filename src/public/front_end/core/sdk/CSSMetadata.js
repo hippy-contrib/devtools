@@ -88,11 +88,10 @@ export class CSSMetadata {
             propertyValueSets.set(propertyName, new Set(basisValueObj.values));
         }
         // and add manually maintained map of extra prop-value pairs
-        for (const [propertyName, extraValueObj] of Object.entries(_extraPropertyValues)) {
-            if (propertyValueSets.has(propertyName)) {
-                // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-                // @ts-expect-error
-                Platform.SetUtilities.addAll(propertyValueSets.get(propertyName), extraValueObj.values);
+        for (const [propertyName, extraValueObj] of Object.entries(extraPropertyValues)) {
+            const propertyValueSet = propertyValueSets.get(propertyName);
+            if (propertyValueSet) {
+                Platform.SetUtilities.addAll(propertyValueSet, extraValueObj.values);
             }
             else {
                 propertyValueSets.set(propertyName, new Set(extraValueObj.values));
@@ -142,14 +141,14 @@ export class CSSMetadata {
         name = name.toLowerCase();
         return this._svgProperties.has(name);
     }
-    longhands(shorthand) {
+    getLonghands(shorthand) {
         return this._longhands.get(shorthand) || null;
     }
-    shorthands(longhand) {
+    getShorthands(longhand) {
         return this._shorthands.get(longhand) || null;
     }
     isColorAwareProperty(propertyName) {
-        return _colorAwareProperties.has(propertyName.toLowerCase()) || this.isCustomProperty(propertyName.toLowerCase());
+        return colorAwareProperties.has(propertyName.toLowerCase()) || this.isCustomProperty(propertyName.toLowerCase());
     }
     isFontFamilyProperty(propertyName) {
         return propertyName.toLowerCase() === 'font-family';
@@ -158,7 +157,7 @@ export class CSSMetadata {
         const lowerCasedName = propertyName.toLowerCase();
         // TODO: @Yisi, parse hsl(), hsla(), hwb() and lch()
         // See also https://drafts.csswg.org/css-color/#hue-syntax
-        return _colorAwareProperties.has(lowerCasedName) || _angleAwareProperties.has(lowerCasedName);
+        return colorAwareProperties.has(lowerCasedName) || angleAwareProperties.has(lowerCasedName);
     }
     isGridAreaDefiningProperty(propertyName) {
         propertyName = propertyName.toLowerCase();
@@ -169,17 +168,17 @@ export class CSSMetadata {
         if (propertyName === 'line-height') {
             return false;
         }
-        return _distanceProperties.has(propertyName) || propertyName.startsWith('margin') ||
+        return distanceProperties.has(propertyName) || propertyName.startsWith('margin') ||
             propertyName.startsWith('padding') || propertyName.indexOf('width') !== -1 ||
             propertyName.indexOf('height') !== -1;
     }
     isBezierAwareProperty(propertyName) {
         propertyName = propertyName.toLowerCase();
-        return _bezierAwareProperties.has(propertyName) || this.isCustomProperty(propertyName);
+        return bezierAwareProperties.has(propertyName) || this.isCustomProperty(propertyName);
     }
     isFontAwareProperty(propertyName) {
         propertyName = propertyName.toLowerCase();
-        return _fontAwareProperties.has(propertyName) || this.isCustomProperty(propertyName);
+        return fontAwareProperties.has(propertyName) || this.isCustomProperty(propertyName);
     }
     isCustomProperty(propertyName) {
         return propertyName.startsWith('--');
@@ -241,13 +240,13 @@ export class CSSMetadata {
         }
         return keywords;
     }
-    propertyValues(propertyName) {
+    getPropertyValues(propertyName) {
         const acceptedKeywords = ['inherit', 'initial', 'revert', 'unset'];
         propertyName = propertyName.toLowerCase();
         acceptedKeywords.push(...this._specificPropertyValues(propertyName));
         if (this.isColorAwareProperty(propertyName)) {
             acceptedKeywords.push('currentColor');
-            for (const color in Common.Color.Nicknames) {
+            for (const color of Common.Color.Nicknames.keys()) {
                 acceptedKeywords.push(color);
             }
         }
@@ -257,7 +256,7 @@ export class CSSMetadata {
         return Weight.get(property) || Weight.get(this.canonicalPropertyName(property)) || 0;
     }
     getValuePreset(key, value) {
-        const values = _valuePresets.get(key);
+        const values = valuePresets.get(key);
         let text = values ? values.get(value) : null;
         if (!text) {
             return null;
@@ -285,31 +284,25 @@ export const URLRegex = /url\(\s*('.+?'|".+?"|[^)]+)\s*\)/g;
  *    [track-name] "a a ." minmax(50px, auto) [track-name]
  */
 export const GridAreaRowRegex = /((?:\[[\w\- ]+\]\s*)*(?:"[^"]+"|'[^']+'))[^'"\[]*\[?[^'"\[]*/;
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-let _instance = null;
+let cssMetadataInstance = null;
 export function cssMetadata() {
-    if (!_instance) {
+    if (!cssMetadataInstance) {
         const supportedProperties = SupportedCSSProperties.generatedProperties;
-        _instance = new CSSMetadata(supportedProperties, SupportedCSSProperties.generatedAliasesFor);
+        cssMetadataInstance = new CSSMetadata(supportedProperties, SupportedCSSProperties.generatedAliasesFor);
     }
-    return _instance;
+    return cssMetadataInstance;
 }
 /**
  * The pipe character '|' indicates where text selection should be set.
  */
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _imageValuePresetMap = new Map([
+const imageValuePresetMap = new Map([
     ['linear-gradient', 'linear-gradient(|45deg, black, transparent|)'],
     ['radial-gradient', 'radial-gradient(|black, transparent|)'],
     ['repeating-linear-gradient', 'repeating-linear-gradient(|45deg, black, transparent 100px|)'],
     ['repeating-radial-gradient', 'repeating-radial-gradient(|black, transparent 100px|)'],
     ['url', 'url(||)'],
 ]);
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _filterValuePresetMap = new Map([
+const filterValuePresetMap = new Map([
     ['blur', 'blur(|1px|)'],
     ['brightness', 'brightness(|0.5|)'],
     ['contrast', 'contrast(|0.5|)'],
@@ -322,14 +315,12 @@ const _filterValuePresetMap = new Map([
     ['sepia', 'sepia(|1|)'],
     ['url', 'url(||)'],
 ]);
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _valuePresets = new Map([
-    ['filter', _filterValuePresetMap],
-    ['backdrop-filter', _filterValuePresetMap],
-    ['background', _imageValuePresetMap],
-    ['background-image', _imageValuePresetMap],
-    ['-webkit-mask-image', _imageValuePresetMap],
+const valuePresets = new Map([
+    ['filter', filterValuePresetMap],
+    ['backdrop-filter', filterValuePresetMap],
+    ['background', imageValuePresetMap],
+    ['background-image', imageValuePresetMap],
+    ['-webkit-mask-image', imageValuePresetMap],
     [
         'transform',
         new Map([
@@ -356,9 +347,7 @@ const _valuePresets = new Map([
         ]),
     ],
 ]);
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _distanceProperties = new Set([
+const distanceProperties = new Set([
     'background-position',
     'border-spacing',
     'bottom',
@@ -379,9 +368,7 @@ const _distanceProperties = new Set([
     'grid-column-gap',
     'row-gap',
 ]);
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _bezierAwareProperties = new Set([
+const bezierAwareProperties = new Set([
     'animation',
     'animation-timing-function',
     'transition',
@@ -391,12 +378,8 @@ const _bezierAwareProperties = new Set([
     '-webkit-transition',
     '-webkit-transition-timing-function',
 ]);
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _fontAwareProperties = new Set(['font-size', 'line-height', 'font-weight', 'font-family', 'letter-spacing']);
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _colorAwareProperties = new Set([
+const fontAwareProperties = new Set(['font-size', 'line-height', 'font-weight', 'font-family', 'letter-spacing']);
+const colorAwareProperties = new Set([
     'accent-color',
     'background',
     'background-color',
@@ -450,9 +433,7 @@ const _colorAwareProperties = new Set([
     '-webkit-text-stroke-color',
 ]);
 // In addition to `_colorAwareProperties`, the following properties contain CSS <angle> units.
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _angleAwareProperties = new Set([
+const angleAwareProperties = new Set([
     '-webkit-border-image',
     'transform',
     '-webkit-transform',
@@ -465,9 +446,7 @@ const _angleAwareProperties = new Set([
     'font-style',
 ]);
 // manually maintained list of property values to add into autocomplete list
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _extraPropertyValues = {
+const extraPropertyValues = {
     'background-repeat': { values: ['repeat', 'repeat-x', 'repeat-y', 'no-repeat', 'space', 'round'] },
     'content': { values: ['normal', 'close-quote', 'no-close-quote', 'no-open-quote', 'open-quote'] },
     'baseline-shift': { values: ['baseline'] },

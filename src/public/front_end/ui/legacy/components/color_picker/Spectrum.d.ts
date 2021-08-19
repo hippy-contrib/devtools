@@ -132,9 +132,6 @@ export declare class PaletteGenerator {
     _finish(): void;
     _processStylesheet(stylesheet: SDK.CSSStyleSheetHeader.CSSStyleSheetHeader): Promise<void>;
 }
-export declare const MaterialPaletteShades: {
-    [x: string]: string[];
-};
 export declare const MaterialPalette: {
     title: string;
     mutable: boolean;

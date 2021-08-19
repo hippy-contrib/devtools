@@ -1,13 +1,13 @@
 import * as Common from '../../core/common/common.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import type * as Protocol from '../../generated/protocol.js';
-import { DeviceModeModel } from './DeviceModeModel.js';
+import * as EmulationModel from '../../models/emulation/emulation.js';
 import { DeviceModeToolbar } from './DeviceModeToolbar.js';
 import { MediaQueryInspector } from './MediaQueryInspector.js';
 export declare class DeviceModeView extends UI.Widget.VBox {
     wrapperInstance: UI.Widget.VBox | null;
     blockElementToWidth: WeakMap<HTMLElement, number>;
-    _model: DeviceModeModel;
+    _model: EmulationModel.DeviceModeModel.DeviceModeModel;
     _mediaInspector: MediaQueryInspector;
     _showMediaInspectorSetting: Common.Settings.Setting<boolean>;
     _showRulersSetting: Common.Settings.Setting<boolean>;
@@ -34,9 +34,9 @@ export declare class DeviceModeView extends UI.Widget.VBox {
         y: number;
     } | null;
     _resizeStart?: UI.Geometry.Size;
-    _cachedCssScreenRect?: UI.Geometry.Rect;
-    _cachedCssVisiblePageRect?: UI.Geometry.Rect;
-    _cachedOutlineRect?: UI.Geometry.Rect;
+    _cachedCssScreenRect?: EmulationModel.DeviceModeModel.Rect;
+    _cachedCssVisiblePageRect?: EmulationModel.DeviceModeModel.Rect;
+    _cachedOutlineRect?: EmulationModel.DeviceModeModel.Rect;
     _cachedMediaInspectorVisible?: boolean;
     _cachedShowRulers?: boolean;
     _cachedScale?: number;
@@ -72,7 +72,7 @@ export declare class DeviceModeView extends UI.Widget.VBox {
     captureFullSizeScreenshot(): Promise<void>;
     captureAreaScreenshot(clip?: Protocol.Page.Viewport): Promise<void>;
     _saveScreenshotBase64(screenshot: string): void;
-    _paintImage(ctx: CanvasRenderingContext2D, src: string, rect: UI.Geometry.Rect): Promise<void>;
+    _paintImage(ctx: CanvasRenderingContext2D, src: string, rect: EmulationModel.DeviceModeModel.Rect): Promise<void>;
     _saveScreenshot(canvas: HTMLCanvasElement): void;
 }
 export declare class Ruler extends UI.Widget.VBox {

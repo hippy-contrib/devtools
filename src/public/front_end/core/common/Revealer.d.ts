@@ -7,7 +7,7 @@ export declare function setRevealForTest(newReveal: (arg0: Object | null, arg1?:
 export declare const revealDestination: (revealable: Object | null) => string | null;
 export declare function registerRevealer(registration: RevealerRegistration): void;
 export interface RevealerRegistration {
-    contextTypes: () => Array<unknown>;
+    contextTypes: () => Array<Function>;
     loadRevealer: () => Promise<Revealer>;
     destination?: RevealerDestination;
 }

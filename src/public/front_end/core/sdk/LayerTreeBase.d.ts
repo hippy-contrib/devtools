@@ -55,7 +55,7 @@ export declare class LayerTreeBase {
     layersById: Map<string | number, Layer>;
     _root: Layer | null;
     _contentRoot: Layer | null;
-    _backendNodeIdToNode: Map<number, DOMNode | null>;
+    _backendNodeIdToNode: Map<Protocol.DOM.BackendNodeId, DOMNode | null>;
     _viewportSize?: {
         width: number;
         height: number;
@@ -68,8 +68,8 @@ export declare class LayerTreeBase {
     setContentRoot(contentRoot: Layer | null): void;
     forEachLayer(callback: (arg0: Layer) => any, root?: Layer | null): any;
     layerById(id: string): Layer | null;
-    resolveBackendNodeIds(requestedNodeIds: Set<number>): Promise<void>;
-    backendNodeIdToNode(): Map<number, DOMNode | null>;
+    resolveBackendNodeIds(requestedNodeIds: Set<Protocol.DOM.BackendNodeId>): Promise<void>;
+    backendNodeIdToNode(): Map<Protocol.DOM.BackendNodeId, DOMNode | null>;
     setViewportSize(viewportSize: {
         width: number;
         height: number;

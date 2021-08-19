@@ -25,4 +25,3 @@ export declare const DispatchFilterBy: {
     Blocking: string;
     Passive: string;
 };
-export declare const _objectGroupName = "event-listeners-panel";

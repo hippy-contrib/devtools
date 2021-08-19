@@ -277,7 +277,7 @@ export class OverviewCalculator {
         return (time - this._minimumBoundaries) * this._xScaleFactor;
     }
     formatValue(value, precision) {
-        return i18n.i18n.secondsToString(value / 1000, Boolean(precision));
+        return i18n.TimeUtilities.secondsToString(value / 1000, Boolean(precision));
     }
     maximumBoundary() {
         return this._maximumBoundaries;

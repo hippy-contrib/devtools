@@ -1,3 +1,4 @@
+import * as Platform from '../../core/platform/platform.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import type * as Protocol from '../../generated/protocol.js';
 declare type TabData = {
@@ -31,27 +32,27 @@ export declare const enum PlayerPropertyKeys {
     VideoPlaybackFreezing = "kVideoPlaybackFreezing"
 }
 export declare class PropertyRenderer extends UI.Widget.VBox {
-    _title: string;
+    _title: Platform.UIString.LocalizedString;
     _contents: HTMLElement;
     _value: string | null;
     _pseudoColorProtectionElement: HTMLDivElement | null;
-    constructor(title: string);
+    constructor(title: Platform.UIString.LocalizedString);
     updateData(propname: string, propvalue: string): void;
     _updateData(propname: string, propvalue: string | null): void;
     changeContents(value: string | null): void;
 }
 export declare class FormattedPropertyRenderer extends PropertyRenderer {
     _formatfunction: (arg0: string) => string;
-    constructor(title: string, formatfunction: (arg0: string) => string);
+    constructor(title: Platform.UIString.LocalizedString, formatfunction: (arg0: string) => string);
     _updateData(propname: string, propvalue: string | null): void;
 }
 export declare class DefaultPropertyRenderer extends PropertyRenderer {
-    constructor(title: string, defaultText: string);
+    constructor(title: Platform.UIString.LocalizedString, defaultText: string);
 }
 export declare class DimensionPropertyRenderer extends PropertyRenderer {
     _width: number;
     _height: number;
-    constructor(title: string);
+    constructor(title: Platform.UIString.LocalizedString);
     _updateData(propname: string, propvalue: string | null): void;
 }
 export declare class AttributesView extends UI.Widget.VBox {
@@ -110,5 +111,6 @@ export declare class PlayerPropertiesView extends UI.Widget.VBox {
     formatTime(seconds: string | number): string;
     formatFileSize(bytes: string): string;
     populateAttributesAndElements(): void;
+    wasShown(): void;
 }
 export {};

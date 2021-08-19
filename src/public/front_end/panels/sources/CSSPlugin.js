@@ -187,7 +187,7 @@ export class CSSPlugin extends Plugin {
         const value = swatch.createChild('span');
         value.textContent = text;
         value.setAttribute('hidden', 'true');
-        swatch.addEventListener('swatch-click', this._swatchIconClicked.bind(this, swatch), false);
+        swatch.addEventListener(InlineEditor.ColorSwatch.ClickEvent.eventName, this._swatchIconClicked.bind(this, swatch), false);
         return swatch;
     }
     _createBezierSwatch(text) {
@@ -300,7 +300,7 @@ export class CSSPlugin extends Plugin {
         }
         const line = this._textEditor.line(prefixRange.startLine);
         const tokenContent = line.substring(propertyToken.startColumn, propertyToken.endColumn);
-        const propertyValues = SDK.CSSMetadata.cssMetadata().propertyValues(tokenContent);
+        const propertyValues = SDK.CSSMetadata.cssMetadata().getPropertyValues(tokenContent);
         return Promise.resolve(propertyValues.filter(value => value.startsWith(prefix)).map(value => {
             return {
                 text: value,

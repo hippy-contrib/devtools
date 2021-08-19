@@ -4,4 +4,5 @@ export declare class CSSOverviewStartView extends UI.Widget.Widget {
     _controller: OverviewController;
     constructor(controller: OverviewController);
     _render(): void;
+    wasShown(): void;
 }

@@ -32,6 +32,7 @@ export declare class ItemMouseOutEvent<TreeNodeDataType> extends Event {
     constructor(node: TreeNode<TreeNodeDataType>);
 }
 export declare class TreeOutline<TreeNodeDataType> extends HTMLElement {
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     private treeData;
     private nodeExpandedMap;

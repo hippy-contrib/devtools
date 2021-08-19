@@ -43,7 +43,7 @@ export { DCHECK } from './dcheck.js';
  * (e.g. `Platform.TypeScriptUtilities.assertNotNull` causes a
  * compiler error)
  */
-export { assertNotNull, assertUnhandled } from './typescript-utilities.js';
+export { assertNotNullOrUndefined, assertUnhandled } from './typescript-utilities.js';
 export { assertNever, runOnWindowLoad } from './utilities.js';
 export { ArrayUtilities, DateUtilities, KeyboardUtilities, MapUtilities, NumberUtilities, SetUtilities, StringUtilities, TypeScriptUtilities, UIString, };
 //# sourceMappingURL=platform.js.map

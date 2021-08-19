@@ -17,6 +17,7 @@ export declare class SettingsScreen extends UI.Widget.VBox implements UI.View.Vi
     _tabInvoked(event: Common.EventTarget.EventTargetEvent): void;
     _reportSettingsPanelShown(tabId: string): void;
     _onEscapeKeyPressed(event: Event): void;
+    wasShown(): void;
 }
 declare class SettingsTab extends UI.Widget.VBox {
     containerElement: HTMLElement;

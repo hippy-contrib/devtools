@@ -31,7 +31,7 @@
 import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as ARIAUtils from './ARIAUtils.js';
-import { AnchorBehavior, GlassPane, MarginBehavior, PointerEventsBehavior, SizeBehavior } from './GlassPane.js'; // eslint-disable-line no-unused-vars
+import { AnchorBehavior, GlassPane, MarginBehavior, PointerEventsBehavior, SizeBehavior } from './GlassPane.js';
 import { Icon } from './Icon.js';
 import * as ThemeSupport from './theme_support/theme_support.js'; // eslint-disable-line rulesdir/es_modules_import
 import { createTextChild, ElementFocusRestorer } from './UIUtils.js';
@@ -87,7 +87,7 @@ export class SoftContextMenu {
         this._document = document;
         this._glassPane = new GlassPane();
         this._glassPane.setPointerEventsBehavior(this._parentMenu ? PointerEventsBehavior.PierceGlassPane : PointerEventsBehavior.BlockedByGlassPane);
-        this._glassPane.registerRequiredCSS('ui/legacy/softContextMenu.css', { enableLegacyPatching: false });
+        this._glassPane.registerRequiredCSS('ui/legacy/softContextMenu.css');
         this._glassPane.setContentAnchorBox(anchorBox);
         this._glassPane.setSizeBehavior(SizeBehavior.MeasureContent);
         this._glassPane.setMarginBehavior(MarginBehavior.NoMargin);
@@ -194,14 +194,14 @@ export class SoftContextMenu {
         if (item.type === 'checkbox') {
             const checkedState = item.checked ? i18nString(UIStrings.checked) : i18nString(UIStrings.unchecked);
             if (item.shortcut) {
-                accessibleName = i18nString(UIStrings.sSS, { PH1: item.label, PH2: item.shortcut, PH3: checkedState });
+                accessibleName = i18nString(UIStrings.sSS, { PH1: String(item.label), PH2: item.shortcut, PH3: checkedState });
             }
             else {
-                accessibleName = i18nString(UIStrings.sS, { PH1: item.label, PH2: checkedState });
+                accessibleName = i18nString(UIStrings.sS, { PH1: String(item.label), PH2: checkedState });
             }
         }
         else if (item.shortcut) {
-            accessibleName = i18nString(UIStrings.sS, { PH1: item.label, PH2: item.shortcut });
+            accessibleName = i18nString(UIStrings.sS, { PH1: String(item.label), PH2: item.shortcut });
         }
         ARIAUtils.setAccessibleName(menuItemElement, accessibleName);
         this.detailsForElementMap.set(menuItemElement, detailsForElement);

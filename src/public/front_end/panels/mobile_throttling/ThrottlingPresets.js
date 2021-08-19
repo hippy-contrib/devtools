@@ -40,14 +40,6 @@ const UIStrings = {
 };
 const str_ = i18n.i18n.registerUIStrings('panels/mobile_throttling/ThrottlingPresets.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
-// TODO(crbug.com/1167717): Make this a const enum again
-// eslint-disable-next-line rulesdir/const_enum
-export var CPUThrottlingRates;
-(function (CPUThrottlingRates) {
-    CPUThrottlingRates[CPUThrottlingRates["NoThrottling"] = 1] = "NoThrottling";
-    CPUThrottlingRates[CPUThrottlingRates["MidTierMobile"] = 4] = "MidTierMobile";
-    CPUThrottlingRates[CPUThrottlingRates["LowEndMobile"] = 6] = "LowEndMobile";
-})(CPUThrottlingRates || (CPUThrottlingRates = {}));
 export class ThrottlingPresets {
     static getNoThrottlingConditions() {
         const title = typeof SDK.NetworkManager.NoThrottlingConditions.title === 'function' ?
@@ -57,7 +49,7 @@ export class ThrottlingPresets {
             title,
             description: i18nString(UIStrings.noThrottling),
             network: SDK.NetworkManager.NoThrottlingConditions,
-            cpuThrottlingRate: CPUThrottlingRates.NoThrottling,
+            cpuThrottlingRate: SDK.CPUThrottlingManager.CPUThrottlingRates.NoThrottling,
         };
     }
     static getOfflineConditions() {
@@ -68,7 +60,7 @@ export class ThrottlingPresets {
             title,
             description: i18nString(UIStrings.noInternetConnectivity),
             network: SDK.NetworkManager.OfflineConditions,
-            cpuThrottlingRate: CPUThrottlingRates.NoThrottling,
+            cpuThrottlingRate: SDK.CPUThrottlingManager.CPUThrottlingRates.NoThrottling,
         };
     }
     static getLowEndMobileConditions() {
@@ -76,7 +68,7 @@ export class ThrottlingPresets {
             title: i18nString(UIStrings.lowendMobile),
             description: i18nString(UIStrings.slowGXCpuSlowdown),
             network: SDK.NetworkManager.Slow3GConditions,
-            cpuThrottlingRate: CPUThrottlingRates.LowEndMobile,
+            cpuThrottlingRate: SDK.CPUThrottlingManager.CPUThrottlingRates.LowEndMobile,
         };
     }
     static getMidTierMobileConditions() {
@@ -84,7 +76,7 @@ export class ThrottlingPresets {
             title: i18nString(UIStrings.midtierMobile),
             description: i18nString(UIStrings.fastGXCpuSlowdown),
             network: SDK.NetworkManager.Fast3GConditions,
-            cpuThrottlingRate: CPUThrottlingRates.MidTierMobile,
+            cpuThrottlingRate: SDK.CPUThrottlingManager.CPUThrottlingRates.MidTierMobile,
         };
     }
     static getCustomConditions() {
@@ -111,9 +103,9 @@ export class ThrottlingPresets {
         SDK.NetworkManager.OfflineConditions,
     ];
     static cpuThrottlingPresets = [
-        CPUThrottlingRates.NoThrottling,
-        CPUThrottlingRates.MidTierMobile,
-        CPUThrottlingRates.LowEndMobile,
+        SDK.CPUThrottlingManager.CPUThrottlingRates.NoThrottling,
+        SDK.CPUThrottlingManager.CPUThrottlingRates.MidTierMobile,
+        SDK.CPUThrottlingManager.CPUThrottlingRates.LowEndMobile,
     ];
 }
 // @ts-ignore exported for Tests.js

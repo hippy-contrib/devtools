@@ -5,6 +5,7 @@
 import * as i18n from '../../core/i18n/i18n.js';
 import * as Platform from '../../core/platform/platform.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import playerPropertiesViewStyles from './playerPropertiesView.css.js';
 const UIStrings = {
     /**
     *@description The type of media, for example - video, audio, or text. Capitalized.
@@ -192,7 +193,7 @@ export class PropertyRenderer extends UI.Widget.VBox {
 export class FormattedPropertyRenderer extends PropertyRenderer {
     _formatfunction;
     constructor(title, formatfunction) {
-        super(i18nString(title));
+        super(title);
         this._formatfunction = formatfunction;
     }
     _updateData(propname, propvalue) {
@@ -206,7 +207,7 @@ export class FormattedPropertyRenderer extends PropertyRenderer {
 }
 export class DefaultPropertyRenderer extends PropertyRenderer {
     constructor(title, defaultText) {
-        super(i18nString(title));
+        super(title);
         this.changeContents(defaultText);
     }
 }
@@ -214,7 +215,7 @@ export class DimensionPropertyRenderer extends PropertyRenderer {
     _width;
     _height;
     constructor(title) {
-        super(i18nString(title));
+        super(title);
         this._width = 0;
         this._height = 0;
     }
@@ -278,7 +279,7 @@ export class TrackManager {
     addNewTab(tabs, tabData, tabNumber) {
         const tabElements = [];
         for (const [name, data] of Object.entries(tabData)) {
-            tabElements.push(new DefaultPropertyRenderer(name, data));
+            tabElements.push(new DefaultPropertyRenderer(i18n.i18n.lockedString(name), data));
         }
         const newTab = new AttributesView(tabElements);
         tabs.addNewTab(tabNumber, newTab);
@@ -371,7 +372,6 @@ export class PlayerPropertiesView extends UI.Widget.VBox {
     constructor() {
         super();
         this.contentElement.classList.add('media-properties-frame');
-        this.registerRequiredCSS('panels/media/playerPropertiesView.css', { enableLegacyPatching: false });
         this._mediaElements = [];
         this._videoDecoderElements = [];
         this._audioDecoderElements = [];
@@ -519,6 +519,10 @@ export class PlayerPropertiesView extends UI.Widget.VBox {
         this._attributeMap.set("kAudioTracks" /* AudioTracks */, audioTrackManager);
         const textTrackManager = new TextTrackManager(this);
         this._attributeMap.set("kTextTracks" /* TextTracks */, textTrackManager);
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([playerPropertiesViewStyles]);
     }
 }
 //# sourceMappingURL=PlayerPropertiesView.js.map

@@ -9,7 +9,6 @@ export declare enum Events {
     RequestActivated = "RequestActivated"
 }
 export declare abstract class NetworkLogViewInterface {
-    static HTTPRequestsFilter(request: SDK.NetworkRequest.NetworkRequest): boolean;
     onLoadFromFile(file: File): Promise<void>;
     abstract nodeForRequest(request: SDK.NetworkRequest.NetworkRequest): NetworkRequestNode | null;
     abstract headerHeight(): number;
@@ -37,8 +36,6 @@ export declare abstract class NetworkLogViewInterface {
     revealAndHighlightRequest(request: SDK.NetworkRequest.NetworkRequest): void;
     selectRequest(request: SDK.NetworkRequest.NetworkRequest): void;
     removeAllNodeHighlights(): void;
-    static getDCLEventColor(): string;
-    static getLoadEventColor(): string;
     modelAdded(model: SDK.NetworkManager.NetworkManager): void;
     modelRemoved(model: SDK.NetworkManager.NetworkManager): void;
     linkifier(): Components.Linkifier.Linkifier;

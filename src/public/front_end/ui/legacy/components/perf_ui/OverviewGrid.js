@@ -32,7 +32,7 @@ import * as Common from '../../../../core/common/common.js';
 import * as i18n from '../../../../core/i18n/i18n.js';
 import * as Platform from '../../../../core/platform/platform.js';
 import * as UI from '../../legacy.js';
-import { TimelineGrid } from './TimelineGrid.js'; // eslint-disable-line no-unused-vars
+import { TimelineGrid } from './TimelineGrid.js';
 const UIStrings = {
     /**
     *@description Label for the window for Overview grids
@@ -132,7 +132,7 @@ export class Window extends Common.ObjectWrapper.ObjectWrapper {
         }
         this._parentElement.addEventListener('wheel', this._onMouseWheel.bind(this), true);
         this._parentElement.addEventListener('dblclick', this._resizeWindowMaximum.bind(this), true);
-        UI.Utils.appendStyle(this._parentElement, 'ui/legacy/components/perf_ui/overviewGrid.css', { enableLegacyPatching: false });
+        UI.Utils.appendStyle(this._parentElement, 'ui/legacy/components/perf_ui/overviewGrid.css');
         this._leftResizeElement = parentElement.createChild('div', 'overview-grid-window-resizer');
         UI.UIUtils.installDragHandle(this._leftResizeElement, this._resizerElementStartDragging.bind(this), this._leftResizeElementDragging.bind(this), null, 'ew-resize');
         this._rightResizeElement = parentElement.createChild('div', 'overview-grid-window-resizer');

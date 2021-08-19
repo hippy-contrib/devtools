@@ -14,7 +14,7 @@ import { ResourceTreeModel } from './ResourceTreeModel.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
 import { SourceMapManager } from './SourceMapManager.js';
-export declare class CSSModel extends SDKModel {
+export declare class CSSModel extends SDKModel<EventTypes> {
     _isEnabled: boolean;
     _cachedMatchedCascadeNode: DOMNode | null;
     _cachedMatchedCascadePromise: Promise<CSSMatchedStyles | null> | null;
@@ -51,17 +51,18 @@ export declare class CSSModel extends SDKModel {
     stopCoverage(): Promise<void>;
     mediaQueriesPromise(): Promise<CSSMedia[]>;
     isEnabled(): boolean;
-    _enable(): Promise<any>;
-    matchedStylesPromise(nodeId: number): Promise<CSSMatchedStyles | null>;
+    _enable(): Promise<void>;
+    matchedStylesPromise(nodeId: Protocol.DOM.NodeId): Promise<CSSMatchedStyles | null>;
     classNamesPromise(styleSheetId: string): Promise<string[]>;
-    computedStylePromise(nodeId: number): Promise<Map<string, string> | null>;
-    backgroundColorsPromise(nodeId: number): Promise<ContrastInfo | null>;
-    platformFontsPromise(nodeId: number): Promise<Protocol.CSS.PlatformFontUsage[] | null>;
+    computedStylePromise(nodeId: Protocol.DOM.NodeId): Promise<Map<string, string> | null>;
+    backgroundColorsPromise(nodeId: Protocol.DOM.NodeId): Promise<ContrastInfo | null>;
+    platformFontsPromise(nodeId: Protocol.DOM.NodeId): Promise<Protocol.CSS.PlatformFontUsage[] | null>;
     allStyleSheets(): CSSStyleSheetHeader[];
-    inlineStylesPromise(nodeId: number): Promise<InlineStyleResult | null>;
+    inlineStylesPromise(nodeId: Protocol.DOM.NodeId): Promise<InlineStyleResult | null>;
     forcePseudoState(node: DOMNode, pseudoClass: string, enable: boolean): boolean;
     pseudoState(node: DOMNode): string[] | null;
     setMediaText(styleSheetId: string, range: TextUtils.TextRange.TextRange, newMediaText: string): Promise<boolean>;
+    setContainerQueryText(styleSheetId: string, range: TextUtils.TextRange.TextRange, newContainerQueryText: string): Promise<boolean>;
     addRule(styleSheetId: string, ruleText: string, ruleLocation: TextUtils.TextRange.TextRange): Promise<CSSStyleRule | null>;
     requestViaInspectorStylesheet(node: DOMNode): Promise<CSSStyleSheetHeader | null>;
     mediaQueryResultChanged(): void;
@@ -76,14 +77,14 @@ export declare class CSSModel extends SDKModel {
     getAllStyleSheetHeaders(): Iterable<CSSStyleSheetHeader>;
     _styleSheetAdded(header: Protocol.CSS.CSSStyleSheetHeader): void;
     _styleSheetRemoved(id: string): void;
-    styleSheetIdsForURL(url: string): string[];
+    getStyleSheetIdsForURL(url: string): string[];
     setStyleSheetText(styleSheetId: string, newText: string, majorChange: boolean): Promise<string | null>;
     getStyleSheetText(styleSheetId: string): Promise<string | null>;
     _resetStyleSheets(): void;
     _resetFontFaces(): void;
-    suspendModel(): Promise<any>;
-    resumeModel(): Promise<any>;
-    setEffectivePropertyValueForNode(nodeId: number, propertyName: string, value: string): void;
+    suspendModel(): Promise<void>;
+    resumeModel(): Promise<void>;
+    setEffectivePropertyValueForNode(nodeId: Protocol.DOM.NodeId, propertyName: string, value: string): void;
     cachedMatchedCascadeForNode(node: DOMNode): Promise<CSSMatchedStyles | null>;
     discardCachedMatchedCascade(): void;
     createCSSPropertyTracker(propertiesToTrack: Protocol.CSS.CSSComputedStyleProperty[]): CSSPropertyTracker;
@@ -101,6 +102,22 @@ export declare enum Events {
     StyleSheetChanged = "StyleSheetChanged",
     StyleSheetRemoved = "StyleSheetRemoved"
 }
+export declare type EventTypes = {
+    [Events.FontsUpdated]: void;
+    [Events.MediaQueryResultChanged]: void;
+    [Events.ModelWasEnabled]: void;
+    [Events.PseudoStateForced]: {
+        node: DOMNode;
+        pseudoClass: string;
+        enable: boolean;
+    };
+    [Events.StyleSheetAdded]: CSSStyleSheetHeader;
+    [Events.StyleSheetChanged]: {
+        styleSheetId: string;
+        edit?: Edit;
+    };
+    [Events.StyleSheetRemoved]: CSSStyleSheetHeader;
+};
 export declare class Edit {
     styleSheetId: string;
     oldRange: TextUtils.TextRange.TextRange;
@@ -123,7 +140,7 @@ declare class ComputedStyleLoader {
     _cssModel: CSSModel;
     _nodeIdToPromise: Map<number, Promise<Map<string, string> | null>>;
     constructor(cssModel: CSSModel);
-    computedStylePromise(nodeId: number): Promise<Map<string, string> | null>;
+    computedStylePromise(nodeId: Protocol.DOM.NodeId): Promise<Map<string, string> | null>;
 }
 export declare class InlineStyleResult {
     inlineStyle: CSSStyleDeclaration | null;

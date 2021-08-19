@@ -30,12 +30,11 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../common/common.js';
 import * as Host from '../host/host.js';
-import { DebuggerModel } from './DebuggerModel.js'; // eslint-disable-line no-unused-vars
+import { DebuggerModel } from './DebuggerModel.js';
 import { HeapProfilerModel } from './HeapProfilerModel.js';
-import { RemoteFunction, RemoteObject, RemoteObjectImpl, // eslint-disable-line no-unused-vars
-RemoteObjectProperty, ScopeRemoteObject } from './RemoteObject.js'; // eslint-disable-line no-unused-vars
+import { RemoteFunction, RemoteObject, RemoteObjectImpl, RemoteObjectProperty, ScopeRemoteObject } from './RemoteObject.js';
 import { Capability, Type } from './Target.js';
-import { SDKModel } from './SDKModel.js'; // eslint-disable-line no-unused-vars
+import { SDKModel } from './SDKModel.js';
 export class RuntimeModel extends SDKModel {
     _agent;
     _executionContextById;
@@ -216,14 +215,14 @@ export class RuntimeModel extends SDKModel {
     }
     // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _inspectRequested(payload, hints) {
+    _inspectRequested(payload, hints, executionContextId) {
         const object = this.createRemoteObject(payload);
         if (hints && 'copyToClipboard' in hints && Boolean(hints.copyToClipboard)) {
             this._copyRequested(object);
             return;
         }
         if (hints && 'queryObjects' in hints && hints.queryObjects) {
-            this._queryObjectsRequested(object);
+            this._queryObjectsRequested(object, executionContextId);
             return;
         }
         if (object.isNode()) {
@@ -282,14 +281,14 @@ export class RuntimeModel extends SDKModel {
             }
         }
     }
-    async _queryObjectsRequested(object) {
+    async _queryObjectsRequested(object, executionContextId) {
         const result = await this.queryObjects(object);
         object.release();
         if ('error' in result) {
             Common.Console.Console.instance().error(result.error);
             return;
         }
-        this.dispatchEventToListeners(Events.QueryObjectRequested, { objects: result.objects });
+        this.dispatchEventToListeners(Events.QueryObjectRequested, { objects: result.objects, executionContextId });
     }
     static simpleTextFromException(exceptionDetails) {
         let text = exceptionDetails.text;
@@ -405,8 +404,8 @@ class RuntimeDispatcher {
     consoleAPICalled({ type, args, executionContextId, timestamp, stackTrace, context }) {
         this._runtimeModel._consoleAPICalled(type, args, executionContextId, timestamp, stackTrace, context);
     }
-    inspectRequested({ object, hints }) {
-        this._runtimeModel._inspectRequested(object, hints);
+    inspectRequested({ object, hints, executionContextId }) {
+        this._runtimeModel._inspectRequested(object, hints, executionContextId);
     }
     bindingCalled(event) {
         this._runtimeModel._bindingCalled(event);

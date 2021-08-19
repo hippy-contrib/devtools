@@ -14,7 +14,9 @@ let devToolsLocaleInstance = null;
  */
 export class DevToolsLocale {
     locale;
+    lookupClosestDevToolsLocale;
     constructor(data) {
+        this.lookupClosestDevToolsLocale = data.lookupClosestDevToolsLocale;
         // TODO(crbug.com/1163928): Use constant once setting actually exists.
         if (data.settingLanguage === 'browserLanguage') {
             this.locale = data.navigatorLanguage || 'en-US';
@@ -22,7 +24,7 @@ export class DevToolsLocale {
         else {
             this.locale = data.settingLanguage;
         }
-        this.locale = data.lookupClosestDevToolsLocale(this.locale);
+        this.locale = this.lookupClosestDevToolsLocale(this.locale);
     }
     static instance(opts = { create: false }) {
         if (!devToolsLocaleInstance && !opts.create) {
@@ -38,5 +40,25 @@ export class DevToolsLocale {
         // overwrite the locale.
         this.locale = 'en-US';
     }
+    /**
+     * Returns true iff DevTools supports the language of the passed locale.
+     * Note that it doesn't have to be a one-to-one match, e.g. if DevTools supports
+     * 'de', then passing 'de-AT' will return true.
+     */
+    languageIsSupportedByDevTools(localeString) {
+        return localeLanguagesMatch(localeString, this.lookupClosestDevToolsLocale(localeString));
+    }
+}
+/**
+ * Returns true iff the two locales have matching languages. This means the
+ * passing 'de-AT' and 'de-DE' will return true, while 'de-DE' and 'en' will
+ * return false.
+ */
+export function localeLanguagesMatch(localeString1, localeString2) {
+    // @ts-ignore TODO(crbug.com/1163928) Wait for Intl support.
+    const locale1 = new Intl.Locale(localeString1);
+    // @ts-ignore TODO(crbug.com/1163928) Wait for Intl support.
+    const locale2 = new Intl.Locale(localeString2);
+    return locale1.language === locale2.language;
 }
 //# sourceMappingURL=DevToolsLocale.js.map

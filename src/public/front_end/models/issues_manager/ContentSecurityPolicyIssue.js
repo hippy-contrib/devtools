@@ -30,12 +30,12 @@ const str_ = i18n.i18n.registerUIStrings('models/issues_manager/ContentSecurityP
 const i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(undefined, str_);
 export class ContentSecurityPolicyIssue extends Issue {
     issueDetails;
-    constructor(issueDetails, issuesModel) {
+    constructor(issueDetails, issuesModel, issueId) {
         const issueCode = [
             "ContentSecurityPolicyIssue" /* ContentSecurityPolicyIssue */,
             issueDetails.contentSecurityPolicyViolationType,
         ].join('::');
-        super(issueCode, issuesModel);
+        super(issueCode, issuesModel, issueId);
         this.issueDetails = issueDetails;
     }
     getCategory() {
@@ -76,7 +76,7 @@ export class ContentSecurityPolicyIssue extends Issue {
             console.warn('Content security policy issue without details received.');
             return [];
         }
-        return [new ContentSecurityPolicyIssue(cspDetails, issuesModel)];
+        return [new ContentSecurityPolicyIssue(cspDetails, issuesModel, inspectorIssue.issueId)];
     }
 }
 const cspURLViolation = {

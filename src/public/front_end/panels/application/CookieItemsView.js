@@ -157,7 +157,7 @@ export class CookieItemsView extends StorageItemsView {
     _selectedCookie;
     constructor(model, cookieDomain) {
         super(i18nString(UIStrings.cookies), 'cookiesPanel');
-        this.registerRequiredCSS('panels/application/cookieItemsView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/application/cookieItemsView.css');
         this.element.classList.add('storage-view');
         this._model = model;
         this._cookieDomain = cookieDomain;
@@ -191,7 +191,7 @@ export class CookieItemsView extends StorageItemsView {
         this._model = model;
         this._cookieDomain = domain;
         this.refreshItems();
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventDescriptors);
+        Common.EventTarget.removeEventListeners(this._eventDescriptors);
         const networkManager = model.target().model(SDK.NetworkManager.NetworkManager);
         if (networkManager) {
             this._eventDescriptors = [

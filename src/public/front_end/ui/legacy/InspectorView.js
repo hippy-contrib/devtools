@@ -41,7 +41,7 @@ import { SplitWidget } from './SplitWidget.js';
 import { Events as TabbedPaneEvents } from './TabbedPane.js';
 import { ToolbarButton } from './Toolbar.js';
 import { ViewManager } from './ViewManager.js';
-import { VBox, WidgetFocusRestorer } from './Widget.js'; // eslint-disable-line no-unused-vars
+import { VBox, WidgetFocusRestorer } from './Widget.js';
 const UIStrings = {
     /**
     *@description Title of more tabs button in inspector view
@@ -67,6 +67,26 @@ const UIStrings = {
     *@description Text for context menu action to move a tab to the drawer
     */
     moveToBottom: 'Move to bottom',
+    /**
+     * @description Text shown in a prompt to the user when DevTools is started and the
+     * currently selected DevTools locale does not match Chrome's locale.
+     * The placeholder is the current Chrome language.
+     * @example {German} PH1
+     */
+    devToolsLanguageMissmatch: 'DevTools is now available in {PH1}!',
+    /**
+     * @description An option the user can select when we notice that DevTools
+     * is configured with a different locale than Chrome. This option means DevTools will
+     * always try and display the DevTools UI in the same language as Chrome.
+     */
+    setToBrowserLanguage: 'Always match Chrome\'s language',
+    /**
+     * @description An option the user can select when DevTools notices that DevTools
+     * is configured with a different locale than Chrome. This option means DevTools UI
+     * will be switched to the language specified in the placeholder.
+     * @example {German} PH1
+     */
+    setToSpecificLanguage: 'Switch DevTools to {PH1}',
 };
 const str_ = i18n.i18n.registerUIStrings('ui/legacy/InspectorView.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -87,7 +107,7 @@ export class InspectorView extends VBox {
     constructor() {
         super();
         GlassPane.setContainer(this.element);
-        this.setMinimumSize(240, 72);
+        this.setMinimumSize(250, 72);
         // DevTools sidebar is a vertical split of panels tabbed pane and a drawer.
         this._drawerSplitWidget = new SplitWidget(false, true, 'Inspector.drawerSplitViewState', 200, 200);
         this._drawerSplitWidget.hideSidebar();
@@ -113,7 +133,7 @@ export class InspectorView extends VBox {
         this._tabbedLocation = ViewManager.instance().createTabbedLocation(Host.InspectorFrontendHost.InspectorFrontendHostInstance.bringToFront.bind(Host.InspectorFrontendHost.InspectorFrontendHostInstance), 'panel', true, true, Root.Runtime.Runtime.queryParam('panel'));
         this._tabbedPane = this._tabbedLocation.tabbedPane();
         this._tabbedPane.element.classList.add('main-tabbed-pane');
-        this._tabbedPane.registerRequiredCSS('ui/legacy/inspectorViewTabbedPane.css', { enableLegacyPatching: false });
+        this._tabbedPane.registerRequiredCSS('ui/legacy/inspectorViewTabbedPane.css');
         this._tabbedPane.addEventListener(TabbedPaneEvents.TabSelected, this._tabSelected, this);
         this._tabbedPane.setAccessibleName(i18nString(UIStrings.panels));
         this._tabbedPane.setTabDelegate(this._tabDelegate);
@@ -128,6 +148,11 @@ export class InspectorView extends VBox {
         function showPanel(event) {
             const panelName = event.data;
             this.showPanel(panelName);
+        }
+        if (shouldShowLocaleInfobar()) {
+            const infobar = createLocaleInfobar();
+            infobar.setParentView(this);
+            this._attachInfobar(infobar);
         }
     }
     static instance(opts = { forceNew: null }) {
@@ -246,7 +271,7 @@ export class InspectorView extends VBox {
     }
     _keyDown(event) {
         const keyboardEvent = event;
-        if (!KeyboardShortcut.eventHasCtrlOrMeta(keyboardEvent) || keyboardEvent.altKey || keyboardEvent.shiftKey) {
+        if (!KeyboardShortcut.eventHasCtrlEquivalentKey(keyboardEvent) || keyboardEvent.altKey || keyboardEvent.shiftKey) {
             return;
         }
         // Ctrl/Cmd + 1-9 should show corresponding panel.
@@ -306,31 +331,86 @@ export class InspectorView extends VBox {
                 {
                     text: i18nString(UIStrings.reloadDevtools),
                     highlight: true,
-                    delegate: () => {
-                        if (DockController.instance().canDock() && DockController.instance().dockSide() === State.Undocked) {
-                            Host.InspectorFrontendHost.InspectorFrontendHostInstance.setIsDocked(true, function () { });
-                        }
-                        Host.InspectorFrontendHost.InspectorFrontendHostInstance.reattach(() => window.location.reload());
-                    },
+                    delegate: () => reloadDevTools(),
                     dismiss: false,
                 },
             ]);
             infobar.setParentView(this);
-            this._attachReloadRequiredInfobar(infobar);
+            this._attachInfobar(infobar);
             this._reloadRequiredInfobar = infobar;
             infobar.setCloseCallback(() => {
                 delete this._reloadRequiredInfobar;
             });
         }
     }
-    _attachReloadRequiredInfobar(infobar) {
+    _createInfoBarDiv() {
         if (!this._infoBarDiv) {
             this._infoBarDiv = document.createElement('div');
             this._infoBarDiv.classList.add('flex-none');
             this.contentElement.insertBefore(this._infoBarDiv, this.contentElement.firstChild);
         }
-        this._infoBarDiv.appendChild(infobar.element);
     }
+    _attachInfobar(infobar) {
+        this._createInfoBarDiv();
+        this._infoBarDiv?.appendChild(infobar.element);
+    }
+}
+function getDisableLocaleInfoBarSetting() {
+    return Common.Settings.Settings.instance().createSetting('disableLocaleInfoBar', false);
+}
+function shouldShowLocaleInfobar() {
+    if (!Root.Runtime.experiments.isEnabled(Root.Runtime.ExperimentName.LOCALIZED_DEVTOOLS)) {
+        return false;
+    }
+    if (getDisableLocaleInfoBarSetting().get()) {
+        return false;
+    }
+    // If the language setting is different than 'en-US', the user already
+    // used the setting before, so don't show the toolbar.
+    const languageSettingValue = Common.Settings.Settings.instance().moduleSetting('language').get();
+    if (languageSettingValue !== 'en-US') {
+        return false;
+    }
+    // When the selected DevTools locale differs from the locale of the browser UI, we want to notify
+    // users only once, that they have the opportunity to adjust DevTools locale to match Chrome's locale.
+    return !i18n.DevToolsLocale.localeLanguagesMatch(navigator.language, languageSettingValue) &&
+        i18n.DevToolsLocale.DevToolsLocale.instance().languageIsSupportedByDevTools(navigator.language);
+}
+function createLocaleInfobar() {
+    const devtoolsLocale = i18n.DevToolsLocale.DevToolsLocale.instance();
+    const closestSupportedLocale = devtoolsLocale.lookupClosestDevToolsLocale(navigator.language);
+    // @ts-ignore TODO(crbug.com/1163928) Wait for Intl support.
+    const locale = new Intl.Locale(closestSupportedLocale);
+    const closestSupportedLanguageInCurrentLocale = new Intl.DisplayNames([devtoolsLocale.locale], { type: 'language' }).of(locale.language);
+    const languageSetting = Common.Settings.Settings.instance().moduleSetting('language');
+    return new Infobar(InfobarType.Info, i18nString(UIStrings.devToolsLanguageMissmatch, { PH1: closestSupportedLanguageInCurrentLocale }), [
+        {
+            text: i18nString(UIStrings.setToBrowserLanguage),
+            highlight: true,
+            delegate: () => {
+                languageSetting.set('browserLanguage');
+                getDisableLocaleInfoBarSetting().set(true);
+                reloadDevTools();
+            },
+            dismiss: true,
+        },
+        {
+            text: i18nString(UIStrings.setToSpecificLanguage, { PH1: closestSupportedLanguageInCurrentLocale }),
+            highlight: true,
+            delegate: () => {
+                languageSetting.set(closestSupportedLocale);
+                getDisableLocaleInfoBarSetting().set(true);
+                reloadDevTools();
+            },
+            dismiss: true,
+        },
+    ], getDisableLocaleInfoBarSetting());
+}
+function reloadDevTools() {
+    if (DockController.instance().canDock() && DockController.instance().dockSide() === State.Undocked) {
+        Host.InspectorFrontendHost.InspectorFrontendHostInstance.setIsDocked(true, function () { });
+    }
+    Host.InspectorFrontendHost.InspectorFrontendHostInstance.reattach(() => window.location.reload());
 }
 let actionDelegateInstance;
 export class ActionDelegate {

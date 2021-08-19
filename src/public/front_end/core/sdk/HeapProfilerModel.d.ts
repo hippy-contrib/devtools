@@ -5,7 +5,7 @@ import type { RemoteObject } from './RemoteObject.js';
 import { RuntimeModel } from './RuntimeModel.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
-export declare class HeapProfilerModel extends SDKModel {
+export declare class HeapProfilerModel extends SDKModel<EventTypes> {
     _enabled: boolean;
     _heapProfilerAgent: ProtocolProxyApi.HeapProfilerApi;
     _memoryAgent: ProtocolProxyApi.MemoryApi;
@@ -38,6 +38,28 @@ export declare enum Events {
     ReportHeapSnapshotProgress = "ReportHeapSnapshotProgress",
     ResetProfiles = "ResetProfiles"
 }
+/**
+ * An array of triplets. Each triplet describes a fragment. The first number is the fragment
+ * index, the second number is a total count of objects for the fragment, the third number is
+ * a total size of the objects for the fragment.
+ */
+export declare type HeapStatsUpdateSamples = number[];
+export interface LastSeenObjectId {
+    lastSeenObjectId: number;
+    timestamp: number;
+}
+export interface HeapSnapshotProgress {
+    done: number;
+    total: number;
+    finished?: boolean;
+}
+export declare type EventTypes = {
+    [Events.HeapStatsUpdate]: HeapStatsUpdateSamples;
+    [Events.LastSeenObjectId]: LastSeenObjectId;
+    [Events.AddHeapSnapshotChunk]: string;
+    [Events.ReportHeapSnapshotProgress]: HeapSnapshotProgress;
+    [Events.ResetProfiles]: HeapProfilerModel;
+};
 export interface NativeProfilerCallFrame {
     functionName: string;
     url: string;

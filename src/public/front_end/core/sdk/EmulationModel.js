@@ -14,8 +14,6 @@ export class EmulationModel extends SDKModel {
     _deviceOrientationAgent;
     _cssModel;
     _overlayModel;
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _mediaConfiguration;
     _touchEnabled;
     _touchMobile;
@@ -136,8 +134,6 @@ export class EmulationModel extends SDKModel {
     async resetPageScaleFactor() {
         await this._emulationAgent.invoke_resetPageScaleFactor();
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async emulateDevice(metrics) {
         if (metrics) {
             await this._emulationAgent.invoke_setDeviceMetricsOverride(metrics);
@@ -159,8 +155,6 @@ export class EmulationModel extends SDKModel {
             ]);
         }
         else {
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             function processEmulationResult(errorType, result) {
                 const errorMessage = result.getError();
                 if (errorMessage) {
@@ -176,7 +170,7 @@ export class EmulationModel extends SDKModel {
                     .invoke_setGeolocationOverride({
                     latitude: location.latitude,
                     longitude: location.longitude,
-                    accuracy: Location.DefaultGeoMockAccuracy,
+                    accuracy: Location.defaultGeoMockAccuracy,
                 })
                     .then(result => processEmulationResult('emulation-set-location', result)),
                 this._emulationAgent
@@ -273,23 +267,23 @@ export class EmulationModel extends SDKModel {
     }
     _updateCssMedia() {
         // See the note above, where this._mediaConfiguration is defined.
-        const type = this._mediaConfiguration.get('type');
+        const type = this._mediaConfiguration.get('type') ?? '';
         const features = [
             {
                 name: 'prefers-color-scheme',
-                value: this._mediaConfiguration.get('prefers-color-scheme'),
+                value: this._mediaConfiguration.get('prefers-color-scheme') ?? '',
             },
             {
                 name: 'prefers-reduced-motion',
-                value: this._mediaConfiguration.get('prefers-reduced-motion'),
+                value: this._mediaConfiguration.get('prefers-reduced-motion') ?? '',
             },
             {
                 name: 'prefers-reduced-data',
-                value: this._mediaConfiguration.get('prefers-reduced-data'),
+                value: this._mediaConfiguration.get('prefers-reduced-data') ?? '',
             },
             {
                 name: 'color-gamut',
-                value: this._mediaConfiguration.get('color-gamut'),
+                value: this._mediaConfiguration.get('color-gamut') ?? '',
             },
         ];
         this._emulateCSSMedia(type, features);
@@ -362,9 +356,7 @@ export class Location {
     toSetting() {
         return `${this.latitude}@${this.longitude}:${this.timezoneId}:${this.locale}:${this.error || ''}`;
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    static DefaultGeoMockAccuracy = 150;
+    static defaultGeoMockAccuracy = 150;
 }
 export class DeviceOrientation {
     alpha;

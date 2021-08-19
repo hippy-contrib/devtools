@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
 import * as Logs from '../../models/logs/logs.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 const UIStrings = {
     /**
     *@description Text for web URLs
@@ -50,22 +51,22 @@ export class NetworkSearchScope {
         }
         const locations = [];
         if (stringMatchesQuery(request.url())) {
-            locations.push(UIRequestLocation.urlMatch(request));
+            locations.push(NetworkForward.UIRequestLocation.UIRequestLocation.urlMatch(request));
         }
         for (const header of request.requestHeaders()) {
             if (headerMatchesQuery(header)) {
-                locations.push(UIRequestLocation.requestHeaderMatch(request, header));
+                locations.push(NetworkForward.UIRequestLocation.UIRequestLocation.requestHeaderMatch(request, header));
             }
         }
         for (const header of request.responseHeaders) {
             if (headerMatchesQuery(header)) {
-                locations.push(UIRequestLocation.responseHeaderMatch(request, header));
+                locations.push(NetworkForward.UIRequestLocation.UIRequestLocation.responseHeaderMatch(request, header));
             }
         }
         for (const match of bodyMatches) {
-            locations.push(UIRequestLocation.bodyMatch(request, match));
+            locations.push(NetworkForward.UIRequestLocation.UIRequestLocation.bodyMatch(request, match));
         }
-        progress.worked();
+        progress.incrementWorked();
         return new NetworkSearchResult(request, locations);
         function headerMatchesQuery(header) {
             return stringMatchesQuery(`${header.name}: ${header.value}`);
@@ -85,41 +86,6 @@ export class NetworkSearchScope {
         }
     }
     stopSearch() {
-    }
-}
-// TODO(crbug.com/1167717): Make this a const enum again
-// eslint-disable-next-line rulesdir/const_enum
-export var UIHeaderSection;
-(function (UIHeaderSection) {
-    UIHeaderSection["General"] = "General";
-    UIHeaderSection["Request"] = "Request";
-    UIHeaderSection["Response"] = "Response";
-})(UIHeaderSection || (UIHeaderSection = {}));
-export class UIRequestLocation {
-    request;
-    header;
-    searchMatch;
-    isUrlMatch;
-    constructor(request, header, searchMatch, urlMatch) {
-        this.request = request;
-        this.header = header;
-        this.searchMatch = searchMatch;
-        this.isUrlMatch = urlMatch;
-    }
-    static requestHeaderMatch(request, header) {
-        return new UIRequestLocation(request, { section: UIHeaderSection.Request, header }, null, false);
-    }
-    static responseHeaderMatch(request, header) {
-        return new UIRequestLocation(request, { section: UIHeaderSection.Response, header }, null, false);
-    }
-    static bodyMatch(request, searchMatch) {
-        return new UIRequestLocation(request, null, searchMatch, false);
-    }
-    static urlMatch(request) {
-        return new UIRequestLocation(request, null, null, true);
-    }
-    static header(request, section, name) {
-        return new UIRequestLocation(request, { section, header: { name, value: '' } }, null, true);
     }
 }
 export class NetworkSearchResult {

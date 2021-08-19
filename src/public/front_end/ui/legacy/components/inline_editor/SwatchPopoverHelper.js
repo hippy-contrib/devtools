@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../../../../core/common/common.js';
+import * as Platform from '../../../../core/platform/platform.js';
 import * as UI from '../../legacy.js';
 import { ColorSwatch } from './ColorSwatch.js';
 export class SwatchPopoverHelper extends Common.ObjectWrapper.ObjectWrapper {
@@ -13,14 +14,12 @@ export class SwatchPopoverHelper extends Common.ObjectWrapper.ObjectWrapper {
     _isHidden;
     _anchorElement;
     _view;
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _hiddenCallback;
     _focusRestorer;
     constructor() {
         super();
         this._popover = new UI.GlassPane.GlassPane();
-        this._popover.registerRequiredCSS('ui/legacy/components/inline_editor/swatchPopover.css', { enableLegacyPatching: false });
+        this._popover.registerRequiredCSS('ui/legacy/components/inline_editor/swatchPopover.css');
         this._popover.setSizeBehavior(UI.GlassPane.SizeBehavior.MeasureContent);
         this._popover.setMarginBehavior(UI.GlassPane.MarginBehavior.Arrow);
         this._popover.element.addEventListener('mousedown', e => e.consume(), false);
@@ -41,8 +40,6 @@ export class SwatchPopoverHelper extends Common.ObjectWrapper.ObjectWrapper {
     isShowing() {
         return this._popover.isShowing();
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     show(view, anchorElement, hiddenCallback) {
         if (this._popover.isShowing()) {
             if (this._anchorElement === anchorElement) {
@@ -121,7 +118,7 @@ export class SwatchPopoverHelper extends Common.ObjectWrapper.ObjectWrapper {
             event.consume(true);
             return;
         }
-        if (event.key === 'Escape') {
+        if (event.key === Platform.KeyboardUtilities.ESCAPE_KEY) {
             this.hide(false);
             event.consume(true);
         }

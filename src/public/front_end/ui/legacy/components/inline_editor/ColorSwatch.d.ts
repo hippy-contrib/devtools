@@ -4,9 +4,15 @@ export declare class FormatChangedEvent extends Event {
         format: string;
         text: string | null;
     };
+    static readonly eventName = "formatchanged";
     constructor(format: string, text: string | null);
 }
+export declare class ClickEvent extends Event {
+    static readonly eventName = "swatchclick";
+    constructor();
+}
 export declare class ColorSwatch extends HTMLElement {
+    static readonly litTagName: import("../../../lit-html/static.js").Static;
     private readonly shadow;
     private tooltip;
     private text;
@@ -33,5 +39,9 @@ export declare class ColorSwatch extends HTMLElement {
 declare global {
     interface HTMLElementTagNameMap {
         'devtools-color-swatch': ColorSwatch;
+    }
+    interface HTMLElementEventMap {
+        [FormatChangedEvent.eventName]: FormatChangedEvent;
+        [ClickEvent.eventName]: Event;
     }
 }

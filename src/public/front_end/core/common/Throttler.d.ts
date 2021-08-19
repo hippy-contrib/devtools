@@ -1,13 +1,13 @@
 export declare type FinishCallback = (err: Error) => void;
 export declare class Throttler {
-    _timeout: number;
-    _isRunningProcess: boolean;
-    _asSoonAsPossible: boolean;
-    _process: (() => (Promise<unknown>)) | null;
-    _lastCompleteTime: number;
-    _schedulePromise: Promise<unknown>;
-    _scheduleResolve: (value: unknown) => void;
-    _processTimeout?: number;
+    private readonly timeout;
+    private isRunningProcess;
+    private asSoonAsPossible;
+    private process;
+    private lastCompleteTime;
+    private schedulePromise;
+    private scheduleResolve;
+    private processTimeout?;
     constructor(timeout: number);
     _processCompleted(): void;
     _processCompletedForTests(): void;

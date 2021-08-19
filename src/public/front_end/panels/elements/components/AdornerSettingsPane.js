@@ -4,6 +4,7 @@
 import * as i18n from '../../../core/i18n/i18n.js';
 import * as ComponentHelpers from '../../../ui/components/helpers/helpers.js';
 import * as LitHtml from '../../../ui/lit-html/lit-html.js';
+import adornerSettingsPaneStyles from './adornerSettingsPane.css.js';
 const UIStrings = {
     /**
       * @description Title of a list of settings to toggle badges.
@@ -25,8 +26,12 @@ export class AdornerSettingUpdatedEvent extends Event {
     }
 }
 export class AdornerSettingsPane extends HTMLElement {
+    static litTagName = LitHtml.literal `devtools-adorner-settings-pane`;
     shadow = this.attachShadow({ mode: 'open' });
     settings = new Map();
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [adornerSettingsPaneStyles];
+    }
     set data(data) {
         this.settings = new Map(data.settings.entries());
         this.render();
@@ -72,70 +77,6 @@ export class AdornerSettingsPane extends HTMLElement {
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
         render(html `
-      <style>
-        .adorner-settings-pane {
-          display: flex;
-          height: 2.67em;
-          padding: 0 12px;
-          color: var(--color-text-primary);
-          font-size: 12px;
-          align-items: center;
-        }
-
-        .settings-title {
-          font-weight: 500;
-        }
-
-        .setting {
-          margin-left: 1em;
-        }
-
-        .adorner-status {
-          margin: auto 0.4em auto 0;
-        }
-
-        .adorner-status,
-        .adorner-name {
-          vertical-align: middle;
-        }
-
-        .close {
-          position: relative;
-          margin-left: auto;
-          font-size: 1em;
-          width: 1.5em;
-          height: 1.5em;
-          border: none;
-          border-radius: 50%;
-          background-color: var(--color-background-elevation-1);
-          cursor: pointer;
-        }
-
-        .close::before,
-        .close::after {
-          content: '';
-          display: inline-block;
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          margin: auto;
-          width: 1em;
-          height: 0.2em;
-          background-color: var(--color-text-secondary);
-          border-radius: 2px;
-        }
-
-        .close::before {
-          transform: rotate(45deg);
-        }
-
-        .close::after {
-          transform: rotate(-45deg);
-        }
-      </style>
-
       <div class="adorner-settings-pane" tabindex="-1">
         <div class="settings-title">${i18nString(UIStrings.settingsTitle)}</div>
         <div class="setting-list" @change=${this.onChange}>

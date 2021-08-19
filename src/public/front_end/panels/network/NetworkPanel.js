@@ -34,10 +34,12 @@
 import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
+import * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Bindings from '../../models/bindings/bindings.js';
 import * as Logs from '../../models/logs/logs.js';
 import * as Workspace from '../../models/workspace/workspace.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 import * as IconButton from '../../ui/components/icon_button/icon_button.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
@@ -45,11 +47,11 @@ import * as MobileThrottling from '../mobile_throttling/mobile_throttling.js';
 import * as Search from '../search/search.js';
 import { BlockedURLsPane } from './BlockedURLsPane.js';
 import { Events } from './NetworkDataGridNode.js';
-import { NetworkItemView } from './NetworkItemView.js'; // eslint-disable-line no-unused-vars
-import { NetworkLogView } from './NetworkLogView.js'; // eslint-disable-line no-unused-vars
+import { NetworkItemView } from './NetworkItemView.js';
+import { NetworkLogView } from './NetworkLogView.js';
 import { NetworkOverview } from './NetworkOverview.js';
-import { NetworkSearchScope } from './NetworkSearchScope.js'; // eslint-disable-line no-unused-vars
-import { NetworkTransferTimeCalculator } from './NetworkTimeCalculator.js'; // eslint-disable-line no-unused-vars
+import { NetworkSearchScope } from './NetworkSearchScope.js';
+import { NetworkTransferTimeCalculator } from './NetworkTimeCalculator.js';
 const UIStrings = {
     /**
     *@description Text to close something
@@ -187,7 +189,7 @@ export class NetworkPanel extends UI.Panel.Panel {
     _throttlingSelect;
     constructor() {
         super('network');
-        this.registerRequiredCSS('panels/network/networkPanel.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/network/networkPanel.css');
         this._networkLogShowOverviewSetting =
             Common.Settings.Settings.instance().createSetting('networkLogShowOverview', true);
         this._networkLogLargeRowsSetting = Common.Settings.Settings.instance().createSetting('networkLogLargeRows', false);
@@ -206,7 +208,7 @@ export class NetworkPanel extends UI.Panel.Panel {
         this._rightToolbar = new UI.Toolbar.Toolbar('', networkToolbarContainer);
         this._filterBar = new UI.FilterBar.FilterBar('networkPanel', true);
         this._filterBar.show(panel.contentElement);
-        this._filterBar.addEventListener(UI.FilterBar.FilterBar.Events.Changed, this._handleFilterChanged.bind(this));
+        this._filterBar.addEventListener("Changed" /* Changed */, this._handleFilterChanged.bind(this));
         this._settingsPane = new UI.Widget.HBox();
         this._settingsPane.element.classList.add('network-settings-pane');
         this._settingsPane.show(panel.contentElement);
@@ -240,7 +242,7 @@ export class NetworkPanel extends UI.Panel.Panel {
         tabbedPane.setMinimumSize(100, 25);
         tabbedPane.element.classList.add('network-tabbed-pane');
         tabbedPane.element.addEventListener('keydown', event => {
-            if (event.key !== 'Escape') {
+            if (event.key !== Platform.KeyboardUtilities.ESCAPE_KEY) {
                 return;
             }
             splitWidget.hideSidebar();
@@ -311,7 +313,7 @@ export class NetworkPanel extends UI.Panel.Panel {
             }
         }
         panel._networkLogView.setTextFilterValue(filterString);
-        UI.ViewManager.ViewManager.instance().showView('network');
+        return UI.ViewManager.ViewManager.instance().showView('network');
     }
     static async selectAndShowRequest(request, tab, options) {
         const panel = NetworkPanel._instance();
@@ -439,7 +441,7 @@ export class NetworkPanel extends UI.Panel.Panel {
             this._resetFilmStripView();
         }
     }
-    _willReloadPage(_event) {
+    _willReloadPage() {
         if (this._pendingStopTimer) {
             clearTimeout(this._pendingStopTimer);
             delete this._pendingStopTimer;
@@ -448,7 +450,7 @@ export class NetworkPanel extends UI.Panel.Panel {
             this._filmStripRecorder.startRecording();
         }
     }
-    _load(_event) {
+    _load() {
         if (this._filmStripRecorder && this._filmStripRecorder.isRecording()) {
             this._pendingStopTimer = window.setTimeout(this._stopFilmStripRecording.bind(this), displayScreenshotDelay);
         }
@@ -517,6 +519,12 @@ export class NetworkPanel extends UI.Panel.Panel {
         this._hideRequestPanel();
         if (request) {
             this._networkLogView.revealAndHighlightRequest(request);
+        }
+    }
+    revealAndHighlightRequestWithId(request) {
+        this._hideRequestPanel();
+        if (request) {
+            this._networkLogView.revealAndHighlightRequestWithId(request);
         }
     }
     async selectAndActivateRequest(request, shownTab, options) {
@@ -693,6 +701,39 @@ export class RequestRevealer {
         return UI.ViewManager.ViewManager.instance().showView('network').then(panel.revealAndHighlightRequest.bind(panel, request));
     }
 }
+let requestIdRevealerInstance;
+export class RequestIdRevealer {
+    static instance(opts = { forceNew: null }) {
+        const { forceNew } = opts;
+        if (!requestIdRevealerInstance || forceNew) {
+            requestIdRevealerInstance = new RequestIdRevealer();
+        }
+        return requestIdRevealerInstance;
+    }
+    reveal(requestId) {
+        if (!(requestId instanceof NetworkForward.NetworkRequestId.NetworkRequestId)) {
+            return Promise.reject(new Error('Internal error: not a network request ID'));
+        }
+        const panel = NetworkPanel._instance();
+        return UI.ViewManager.ViewManager.instance().showView('network').then(panel.revealAndHighlightRequestWithId.bind(panel, requestId));
+    }
+}
+let networkLogWithFilterRevealerInstance;
+export class NetworkLogWithFilterRevealer {
+    static instance(opts = { forceNew: null }) {
+        const { forceNew } = opts;
+        if (!networkLogWithFilterRevealerInstance || forceNew) {
+            networkLogWithFilterRevealerInstance = new NetworkLogWithFilterRevealer();
+        }
+        return networkLogWithFilterRevealerInstance;
+    }
+    reveal(request) {
+        if (!(request instanceof NetworkForward.UIFilter.UIRequestFilter)) {
+            return Promise.reject(new Error('Internal error: not a UIRequestFilter'));
+        }
+        return NetworkPanel.revealAndFilter(request.filters);
+    }
+}
 export class FilmStripRecorder {
     _tracingManager;
     _resourceTreeModel;
@@ -820,7 +861,7 @@ export class RequestLocationRevealer {
     }
     async reveal(match) {
         const location = match;
-        const view = await NetworkPanel._instance().selectAndActivateRequest(location.request);
+        const view = await NetworkPanel._instance().selectAndActivateRequest(location.request, location.tab, location.filterOptions);
         if (!view) {
             return;
         }

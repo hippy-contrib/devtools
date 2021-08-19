@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Platform from '../platform/platform.js';
-import { TracingModel } from './TracingModel.js'; // eslint-disable-line no-unused-vars
+import { TracingModel } from './TracingModel.js';
 export class FilmStripModel {
     _frames;
     _zeroTime;

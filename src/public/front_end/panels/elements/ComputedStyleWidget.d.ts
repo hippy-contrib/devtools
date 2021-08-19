@@ -29,6 +29,7 @@ export declare class ComputedStyleWidget extends UI.ThrottledWidget.ThrottledWid
     onResize(): void;
     _showInheritedComputedStyleChanged(): void;
     update(): void;
+    wasShown(): void;
     doUpdate(): Promise<void>;
     _fetchMatchedCascade(): Promise<SDK.CSSMatchedStyles.CSSMatchedStyles | null>;
     _rebuildAlphabeticalList(nodeStyle: ComputedStyle | null, matchedStyles: SDK.CSSMatchedStyles.CSSMatchedStyles | null): Promise<void>;

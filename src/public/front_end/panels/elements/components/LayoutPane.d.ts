@@ -14,6 +14,7 @@ export interface LayoutPaneData {
     flexContainerElements?: LayoutElement[];
 }
 export declare class LayoutPane extends HTMLElement {
+    static readonly litTagName: import("../../../ui/lit-html/static.js").Static;
     private readonly shadow;
     private settings;
     private gridElements;

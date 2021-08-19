@@ -89,12 +89,3 @@ export declare const calculateFirstFocusableCell: (options: {
     columns: readonly Column[];
     rows: readonly Row[];
 }) => [colIndex: number, rowIndex: number];
-export declare class ContextMenuColumnSortClickEvent extends Event {
-    data: {
-        column: Column;
-    };
-    constructor(column: Column);
-}
-export declare class ContextMenuHeaderResetClickEvent extends Event {
-    constructor();
-}

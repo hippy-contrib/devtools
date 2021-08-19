@@ -220,7 +220,7 @@ export class TimelineHistoryManager {
         nameSpan.textContent = title;
         UI.ARIAUtils.setAccessibleName(nameSpan, title);
         const tracingModel = performanceModel.tracingModel();
-        const duration = i18n.i18n.millisToString(tracingModel.maximumRecordTime() - tracingModel.minimumRecordTime(), false);
+        const duration = i18n.TimeUtilities.millisToString(tracingModel.maximumRecordTime() - tracingModel.minimumRecordTime(), false);
         const timeContainer = container.createChild('span', 'time');
         timeContainer.appendChild(document.createTextNode(duration));
         timeContainer.appendChild(timeElement);
@@ -289,7 +289,6 @@ export class DropDown {
         this._glassPane.element.addEventListener('blur', () => this._close(null));
         const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(this._glassPane.contentElement, {
             cssFile: 'panels/timeline/timelineHistoryManager.css',
-            enableLegacyPatching: false,
             delegatesFocus: undefined,
         });
         const contentElement = shadowRoot.createChild('div', 'drop-down');
@@ -399,7 +398,7 @@ export class ToolbarButton extends UI.Toolbar.ToolbarItem {
         const element = document.createElement('button');
         element.classList.add('history-dropdown-button');
         super(element);
-        UI.Utils.appendStyle(this.element, 'panels/timeline/historyToolbarButton.css', { enableLegacyPatching: false });
+        UI.Utils.appendStyle(this.element, 'panels/timeline/historyToolbarButton.css');
         this._contentElement = this.element.createChild('span', 'content');
         const dropdownArrowIcon = UI.Icon.Icon.create('smallicon-triangle-down');
         this.element.appendChild(dropdownArrowIcon);

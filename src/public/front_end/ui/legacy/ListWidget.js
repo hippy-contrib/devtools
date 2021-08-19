@@ -46,7 +46,7 @@ export class ListWidget extends VBox {
     _emptyPlaceholder;
     constructor(delegate, delegatesFocus = true) {
         super(true, delegatesFocus);
-        this.registerRequiredCSS('ui/legacy/listWidget.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/listWidget.css');
         this._delegate = delegate;
         this._list = this.contentElement.createChild('div', 'list');
         this._lastSeparator = false;
@@ -277,8 +277,19 @@ export class Editor {
         this._validators.push(validator);
         return select;
     }
+    createCustomControl(name, ctor, validator) {
+        const control = new ctor();
+        this._controlByName.set(name, control);
+        this._controls.push(control);
+        this._validators.push(validator);
+        return control;
+    }
     control(name) {
-        return /** @type {!HTMLInputElement|!HTMLSelectElement} */ this._controlByName.get(name);
+        const control = this._controlByName.get(name);
+        if (!control) {
+            throw new Error(`Control with name ${name} does not exist, please verify.`);
+        }
+        return control;
     }
     _validateControls(forceValid) {
         let allValid = true;
@@ -299,6 +310,9 @@ export class Editor {
             allValid = allValid && valid;
         }
         this._commitButton.disabled = !allValid;
+    }
+    requestValidation() {
+        this._validateControls(false);
     }
     beginEdit(item, index, commitButtonTitle, commit, cancel) {
         this._commit = commit;

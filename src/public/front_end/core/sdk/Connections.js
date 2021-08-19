@@ -55,7 +55,7 @@ export class MainConnection {
     }
     async disconnect() {
         const onDisconnect = this._onDisconnect;
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         this._onDisconnect = null;
         this._onMessage = null;
         if (onDisconnect) {
@@ -74,8 +74,6 @@ export class WebSocketConnection {
         this._socket = new WebSocket(url);
         this._socket.onerror = this._onError.bind(this);
         this._socket.onopen = this._onOpen.bind(this);
-        // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this._socket.onmessage = (messageEvent) => {
             if (this._onMessage) {
                 this._onMessage.call(null, messageEvent.data);
@@ -222,7 +220,7 @@ export class ParallelConnection {
     }
 }
 export async function initMainConnection(createMainTarget, websocketConnectionLost) {
-    ProtocolClient.InspectorBackend.Connection.setFactory(_createMainConnection.bind(null, websocketConnectionLost));
+    ProtocolClient.InspectorBackend.Connection.setFactory(createMainConnection.bind(null, websocketConnectionLost));
     await createMainTarget();
     Host.InspectorFrontendHost.InspectorFrontendHostInstance.connectionReady();
     Host.InspectorFrontendHost.InspectorFrontendHostInstance.events.addEventListener(Host.InspectorFrontendHostAPI.Events.ReattachMainTarget, () => {
@@ -236,9 +234,7 @@ export async function initMainConnection(createMainTarget, websocketConnectionLo
         createMainTarget();
     });
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export function _createMainConnection(websocketConnectionLost) {
+function createMainConnection(websocketConnectionLost) {
     const wsParam = Root.Runtime.Runtime.queryParam('ws');
     const wssParam = Root.Runtime.Runtime.queryParam('wss');
     if (wsParam || wssParam) {

@@ -30,7 +30,7 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as i18n from '../i18n/i18n.js';
-import { PageResourceLoader } from './PageResourceLoader.js'; // eslint-disable-line no-unused-vars
+import { PageResourceLoader } from './PageResourceLoader.js';
 const UIStrings = {
     /**
     *@description Error message when failing to fetch a resource referenced in a source map

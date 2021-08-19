@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 import * as i18n from '../../../core/i18n/i18n.js';
 import * as UI from '../../legacy/legacy.js';
-import { LinearMemoryInspector } from './LinearMemoryInspector.js'; // eslint-disable-line no-unused-vars
-import { LinearMemoryInspectorController } from './LinearMemoryInspectorController.js'; // eslint-disable-line no-unused-vars
+import { LinearMemoryInspector } from './LinearMemoryInspector.js';
+import { LinearMemoryInspectorController } from './LinearMemoryInspectorController.js';
 const UIStrings = {
     /**
     *@description Label in the Linear Memory Inspector tool that serves as a placeholder if no inspections are open (i.e. nothing to see here).
@@ -102,20 +102,14 @@ class LinearMemoryInspectorView extends UI.Widget.VBox {
         this._address = address;
         this._inspector = new LinearMemoryInspector();
         this._inspector.addEventListener('memoryrequest', (event) => {
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this._memoryRequested(event);
         });
         this._inspector.addEventListener('addresschanged', (event) => {
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.updateAddress(event.data);
         });
         this._inspector.addEventListener('settingschanged', (event) => {
             // Stop event from bubbling up, since no element further up needs the event.
             event.stopPropagation();
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.saveSettings(event.data);
         });
         this.contentElement.appendChild(this._inspector);

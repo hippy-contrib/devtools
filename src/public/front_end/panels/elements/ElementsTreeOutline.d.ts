@@ -22,7 +22,7 @@ export declare class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
     _visibleWidth?: number;
     _clipboardNodeData?: ClipboardData;
     _isXMLMimeType?: boolean | null;
-    _suppressRevealAndSelect?: boolean;
+    suppressRevealAndSelect: boolean;
     _previousHoveredElement?: UI.TreeOutline.TreeElement;
     _treeElementBeingDragged?: ElementsTreeElement;
     _dragOverTreeElement?: ElementsTreeElement;
@@ -58,7 +58,6 @@ export declare class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
     findTreeElement(node: SDK.DOMModel.DOMNode): ElementsTreeElement | null;
     _lookUpTreeElement(node: SDK.DOMModel.DOMNode | null): UI.TreeOutline.TreeElement | null;
     createTreeElementFor(node: SDK.DOMModel.DOMNode): ElementsTreeElement | null;
-    set suppressRevealAndSelect(x: boolean);
     _revealAndSelectNode(node: SDK.DOMModel.DOMNode | null, omitFocus: boolean): void;
     _treeElementFromEvent(event: MouseEvent): UI.TreeOutline.TreeElement | null;
     _onfocusout(_event: Event): void;
@@ -95,14 +94,23 @@ export declare class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
     unwireFromDOMModel(domModel: SDK.DOMModel.DOMModel): void;
     _addUpdateRecord(node: SDK.DOMModel.DOMNode): UpdateRecord;
     _updateRecordForHighlight(node: SDK.DOMModel.DOMNode): UpdateRecord | null;
-    _documentUpdated(event: Common.EventTarget.EventTargetEvent): void;
-    _attributeModified(event: Common.EventTarget.EventTargetEvent): void;
-    _attributeRemoved(event: Common.EventTarget.EventTargetEvent): void;
-    _characterDataModified(event: Common.EventTarget.EventTargetEvent): void;
-    _nodeInserted(event: Common.EventTarget.EventTargetEvent): void;
-    _nodeRemoved(event: Common.EventTarget.EventTargetEvent): void;
-    _childNodeCountUpdated(event: Common.EventTarget.EventTargetEvent): void;
-    _distributedNodesChanged(event: Common.EventTarget.EventTargetEvent): void;
+    _documentUpdated(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMModel>): void;
+    _attributeModified(event: Common.EventTarget.EventTargetEvent<{
+        node: SDK.DOMModel.DOMNode;
+        name: string;
+    }>): void;
+    _attributeRemoved(event: Common.EventTarget.EventTargetEvent<{
+        node: SDK.DOMModel.DOMNode;
+        name: string;
+    }>): void;
+    _characterDataModified(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMNode>): void;
+    _nodeInserted(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMNode>): void;
+    _nodeRemoved(event: Common.EventTarget.EventTargetEvent<{
+        node: SDK.DOMModel.DOMNode;
+        parent: SDK.DOMModel.DOMNode;
+    }>): void;
+    _childNodeCountUpdated(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMNode>): void;
+    _distributedNodesChanged(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMNode>): void;
     _updateModifiedNodesSoon(): void;
     _updateModifiedNodes(): void;
     _updateModifiedNode(node: SDK.DOMModel.DOMNode): void;
@@ -118,7 +126,7 @@ export declare class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
     insertChildElement(treeElement: ElementsTreeElement, child: SDK.DOMModel.DOMNode, index: number, isClosingTag?: boolean): ElementsTreeElement;
     _moveChild(treeElement: ElementsTreeElement, child: ElementsTreeElement, targetIndex: number): void;
     _innerUpdateChildren(treeElement: ElementsTreeElement): void;
-    _markersChanged(event: Common.EventTarget.EventTargetEvent): void;
+    _markersChanged(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMNode>): void;
     static _treeOutlineSymbol: symbol;
 }
 export declare namespace ElementsTreeOutline {

@@ -95,7 +95,9 @@ const UIStrings = {
     */
     hitTest: 'Hit Test',
     /**
-    *@description Text in Timeline UIUtils of the Performance panel
+    *@description Noun for an event in the Performance panel. The browser has decided
+    *that the styles for some elements need to be recalculated and scheduled that
+    *recalculation process at some time in the future.
     */
     scheduleStyleRecalculation: 'Schedule Style Recalculation',
     /**
@@ -187,6 +189,14 @@ const UIStrings = {
     *@description Text in Timeline UIUtils of the Performance panel
     */
     compileScript: 'Compile Script',
+    /**
+    *@description Text in Timeline UIUtils of the Performance panel
+    */
+    compileCode: 'Compile Code',
+    /**
+    *@description Text in Timeline UIUtils of the Performance panel
+    */
+    optimizeCode: 'Optimize Code',
     /**
     *@description Text in Timeline UIUtils of the Performance panel
     */
@@ -401,8 +411,9 @@ const UIStrings = {
     */
     decryptReply: 'Decrypt Reply',
     /**
-    *@description Text in Timeline UIUtils of the Performance panel
-    */
+     * @description Noun phrase meaning 'the browser was preparing the digest'.
+     * Digest: https://developer.mozilla.org/en-US/docs/Glossary/Digest
+     */
     digest: 'Digest',
     /**
     *@description Noun phrase meaning 'the browser was preparing the digest
@@ -491,7 +502,7 @@ const UIStrings = {
     */
     flingHalt: 'Fling Halt',
     /**
-    *@description Text in Timeline UIUtils of the Performance panel
+    *@description Noun for a tap event (tap on a touch screen device) in the Performance panel.
     */
     tap: 'Tap',
     /**
@@ -802,10 +813,15 @@ const UIStrings = {
     */
     cumulativeLayoutShifts: 'Cumulative Layout Shifts',
     /**
-    *@description Warning in Timeline that CLS can cause a poor user experience
-    *@example {Link to web.dev/metrics} PH1
+    *@description Text for the link to the evolved CLS website
     */
-    sCanResultInPoorUserExperiences: '{PH1} can result in poor user experiences.',
+    evolvedClsLink: 'evolved',
+    /**
+    *@description Warning in Timeline that CLS can cause a poor user experience. It contains a link to inform developers about the recent changes to how CLS is measured. The new CLS metric is said to have evolved from the previous version.
+    *@example {Link to web.dev/metrics} PH1
+    *@example {Link to web.dev/evolving-cls which will always have the text 'evolved'} PH2
+    */
+    sCLSInformation: '{PH1} can result in poor user experiences. It has recently {PH2}.',
     /**
     *@description Text to indicate an item is a warning
     */
@@ -818,6 +834,14 @@ const UIStrings = {
     *@description Text in Timeline for the cumulative CLS score
     */
     cumulativeScore: 'Cumulative Score',
+    /**
+    *@description Text in Timeline for the current CLS score
+    */
+    currentClusterScore: 'Current Cluster Score',
+    /**
+    *@description Text in Timeline for the current CLS cluster
+    */
+    currentClusterId: 'Current Cluster ID',
     /**
     *@description Text in Timeline for whether input happened recently
     */
@@ -1239,6 +1263,8 @@ export class TimelineUIUtils {
             new TimelineRecordStyle(i18nString(UIStrings.xhrReadyStateChange), scripting);
         eventStyles[type.XHRLoad] = new TimelineRecordStyle(i18nString(UIStrings.xhrLoad), scripting);
         eventStyles[type.CompileScript] = new TimelineRecordStyle(i18nString(UIStrings.compileScript), scripting);
+        eventStyles[type.CompileCode] = new TimelineRecordStyle(i18nString(UIStrings.compileCode), scripting);
+        eventStyles[type.OptimizeCode] = new TimelineRecordStyle(i18nString(UIStrings.optimizeCode), scripting);
         eventStyles[type.EvaluateScript] = new TimelineRecordStyle(i18nString(UIStrings.evaluateScript), scripting);
         eventStyles[type.CompileModule] = new TimelineRecordStyle(i18nString(UIStrings.compileModule), scripting);
         eventStyles[type.EvaluateModule] = new TimelineRecordStyle(i18nString(UIStrings.evaluateModule), scripting);
@@ -1923,8 +1949,8 @@ export class TimelineUIUtils {
             contentHelper.appendWarningRow(event, TimelineModel.TimelineModel.TimelineModelImpl.WarningType.V8Deopt);
         }
         if (detailed && !Number.isNaN(event.duration || 0)) {
-            contentHelper.appendTextRow(i18nString(UIStrings.totalTime), i18n.i18n.millisToString(event.duration || 0, true));
-            contentHelper.appendTextRow(i18nString(UIStrings.selfTime), i18n.i18n.millisToString(event.selfTime, true));
+            contentHelper.appendTextRow(i18nString(UIStrings.totalTime), i18n.TimeUtilities.millisToString(event.duration || 0, true));
+            contentHelper.appendTextRow(i18nString(UIStrings.selfTime), i18n.TimeUtilities.millisToString(event.selfTime, true));
         }
         if (model.isGenericTrace()) {
             for (const key in event.args) {
@@ -1958,7 +1984,7 @@ export class TimelineUIUtils {
             case recordTypes.TimerRemove: {
                 contentHelper.appendTextRow(i18nString(UIStrings.timerId), eventData['timerId']);
                 if (event.name === recordTypes.TimerInstall) {
-                    contentHelper.appendTextRow(i18nString(UIStrings.timeout), i18n.i18n.millisToString(eventData['timeout']));
+                    contentHelper.appendTextRow(i18nString(UIStrings.timeout), i18n.TimeUtilities.millisToString(eventData['timeout']));
                     contentHelper.appendTextRow(i18nString(UIStrings.repeats), !eventData['singleShot']);
                 }
                 break;
@@ -2158,7 +2184,7 @@ export class TimelineUIUtils {
             }
             // @ts-ignore Fall-through intended.
             case recordTypes.FireIdleCallback: {
-                contentHelper.appendTextRow(i18nString(UIStrings.allottedTime), i18n.i18n.millisToString(eventData['allottedMilliseconds']));
+                contentHelper.appendTextRow(i18nString(UIStrings.allottedTime), i18n.TimeUtilities.millisToString(eventData['allottedMilliseconds']));
                 contentHelper.appendTextRow(i18nString(UIStrings.invokedByTimeout), eventData['timedOut']);
             }
             case recordTypes.RequestIdleCallback:
@@ -2188,17 +2214,20 @@ export class TimelineUIUtils {
                         eventTime = event.startTime - navStartTime.startTime;
                     }
                 }
-                contentHelper.appendTextRow(i18nString(UIStrings.timestamp), i18n.i18n.preciseMillisToString(eventTime, 1));
+                contentHelper.appendTextRow(i18nString(UIStrings.timestamp), i18n.TimeUtilities.preciseMillisToString(eventTime, 1));
                 contentHelper.appendElementRow(i18nString(UIStrings.details), TimelineUIUtils.buildDetailsNodeForPerformanceEvent(event));
                 break;
             }
             case recordTypes.LayoutShift: {
                 const warning = document.createElement('span');
                 const clsLink = UI.XLink.XLink.create('https://web.dev/cls/', i18nString(UIStrings.cumulativeLayoutShifts));
-                warning.appendChild(i18n.i18n.getFormatLocalizedString(str_, UIStrings.sCanResultInPoorUserExperiences, { PH1: clsLink }));
+                const evolvedClsLink = UI.XLink.XLink.create('https://web.dev/evolving-cls/', i18nString(UIStrings.evolvedClsLink));
+                warning.appendChild(i18n.i18n.getFormatLocalizedString(str_, UIStrings.sCLSInformation, { PH1: clsLink, PH2: evolvedClsLink }));
                 contentHelper.appendElementRow(i18nString(UIStrings.warning), warning, true);
                 contentHelper.appendTextRow(i18nString(UIStrings.score), eventData['score'].toPrecision(4));
                 contentHelper.appendTextRow(i18nString(UIStrings.cumulativeScore), eventData['cumulative_score'].toPrecision(4));
+                contentHelper.appendTextRow(i18nString(UIStrings.currentClusterId), eventData['_current_cluster_id']);
+                contentHelper.appendTextRow(i18nString(UIStrings.currentClusterScore), eventData['_current_cluster_score'].toPrecision(4));
                 contentHelper.appendTextRow(i18nString(UIStrings.hadRecentInput), eventData['had_recent_input'] ? i18nString(UIStrings.yes) : i18nString(UIStrings.no));
                 for (const impactedNode of eventData['impacted_nodes']) {
                     const oldRect = new CLSRect(impactedNode['old_rect']);
@@ -2219,7 +2248,7 @@ export class TimelineUIUtils {
             }
         }
         if (timelineData.timeWaitingForMainThread) {
-            contentHelper.appendTextRow(i18nString(UIStrings.timeWaitingForMainThread), i18n.i18n.millisToString(timelineData.timeWaitingForMainThread, true));
+            contentHelper.appendTextRow(i18nString(UIStrings.timeWaitingForMainThread), i18n.TimeUtilities.millisToString(timelineData.timeWaitingForMainThread, true));
         }
         for (let i = 0; i < timelineData.backendNodeIds.length; ++i) {
             const relatedNode = relatedNodesMap && relatedNodesMap.get(timelineData.backendNodeIds[i]);
@@ -2368,15 +2397,15 @@ export class TimelineUIUtils {
         // The time from queueing the request until resource processing is finished.
         const fullDuration = request.endTime - (request.getStartTime() || -Infinity);
         if (isFinite(fullDuration)) {
-            let textRow = i18n.i18n.millisToString(fullDuration, true);
+            let textRow = i18n.TimeUtilities.millisToString(fullDuration, true);
             // The time from queueing the request until the download is finished. This
             // corresponds to the total time reported for the request in the network tab.
             const networkDuration = (request.finishTime || request.getStartTime()) - request.getStartTime();
             // The time it takes to make the resource available to the renderer process.
             const processingDuration = request.endTime - (request.finishTime || 0);
             if (isFinite(networkDuration) && isFinite(processingDuration)) {
-                const networkDurationStr = i18n.i18n.millisToString(networkDuration, true);
-                const processingDurationStr = i18n.i18n.millisToString(processingDuration, true);
+                const networkDurationStr = i18n.TimeUtilities.millisToString(networkDuration, true);
+                const processingDurationStr = i18n.TimeUtilities.millisToString(processingDuration, true);
                 const cacheOrNetworkLabel = request.cached() ? i18nString(UIStrings.loadFromCache) : i18nString(UIStrings.networkTransfer);
                 textRow += i18nString(UIStrings.SSSResourceLoading, { PH1: networkDurationStr, PH2: cacheOrNetworkLabel, PH3: processingDurationStr });
             }
@@ -2487,7 +2516,7 @@ export class TimelineUIUtils {
         }
         else if (initiator) { // Partial invalidation tracking.
             const delay = event.startTime - initiator.startTime;
-            contentHelper.appendTextRow(i18nString(UIStrings.pendingFor), i18n.i18n.preciseMillisToString(delay, 1));
+            contentHelper.appendTextRow(i18nString(UIStrings.pendingFor), i18n.TimeUtilities.preciseMillisToString(delay, 1));
             const link = document.createElement('span');
             link.classList.add('devtools-link');
             UI.ARIAUtils.markAsLink(link);
@@ -2539,7 +2568,7 @@ export class TimelineUIUtils {
                 break;
         }
         const invalidationsTreeOutline = new UI.TreeOutline.TreeOutlineInShadow();
-        invalidationsTreeOutline.registerRequiredCSS('panels/timeline/invalidationsTree.css', { enableLegacyPatching: false });
+        invalidationsTreeOutline.registerRequiredCSS('panels/timeline/invalidationsTree.css');
         invalidationsTreeOutline.element.classList.add('invalidations-tree');
         const invalidationGroups = groupInvalidationsByCause(invalidations);
         invalidationGroups.forEach(function (group) {
@@ -2633,7 +2662,7 @@ export class TimelineUIUtils {
             return null;
         }
         const container = document.createElement('div');
-        UI.Utils.appendStyle(container, 'ui/legacy/components/utils/imagePreview.css', { enableLegacyPatching: false });
+        UI.Utils.appendStyle(container, 'ui/legacy/components/utils/imagePreview.css');
         container.classList.add('image-preview-container', 'vbox', 'link');
         const img = container.createChild('img');
         img.src = imageURL;
@@ -2654,7 +2683,7 @@ export class TimelineUIUtils {
     static createEventDivider(event, zeroTime) {
         const eventDivider = document.createElement('div');
         eventDivider.classList.add('resources-event-divider');
-        const startTime = i18n.i18n.millisToString(event.startTime - zeroTime);
+        const startTime = i18n.TimeUtilities.millisToString(event.startTime - zeroTime);
         UI.Tooltip.Tooltip.install(eventDivider, i18nString(UIStrings.sAtS, { PH1: TimelineUIUtils.eventTitle(event), PH2: startTime }));
         const style = TimelineUIUtils.markerStyleForEvent(event);
         if (style.tall) {
@@ -2744,7 +2773,7 @@ export class TimelineUIUtils {
         pieChart.data = {
             chartName: i18nString(UIStrings.timeSpentInRendering),
             size: 110,
-            formatter: (value) => i18n.i18n.preciseMillisToString(value),
+            formatter: (value) => i18n.TimeUtilities.preciseMillisToString(value),
             showLegend: true,
             total,
             slices,
@@ -2760,7 +2789,7 @@ export class TimelineUIUtils {
         contentHelper.appendElementRow(i18nString(UIStrings.duration), duration, frame.hasWarnings());
         const durationInMillis = frame.endTime - frame.startTime;
         contentHelper.appendTextRow(i18nString(UIStrings.fps), Math.floor(1000 / durationInMillis));
-        contentHelper.appendTextRow(i18nString(UIStrings.cpuTime), i18n.i18n.millisToString(frame.cpuTime, true));
+        contentHelper.appendTextRow(i18nString(UIStrings.cpuTime), i18n.TimeUtilities.millisToString(frame.cpuTime, true));
         if (filmStripFrame) {
             const filmStripPreview = document.createElement('div');
             filmStripPreview.classList.add('timeline-filmstrip-preview');
@@ -2780,8 +2809,8 @@ export class TimelineUIUtils {
     }
     static frameDuration(frame) {
         const durationText = i18nString(UIStrings.sAtSParentheses, {
-            PH1: i18n.i18n.millisToString(frame.endTime - frame.startTime, true),
-            PH2: i18n.i18n.millisToString(frame.startTimeOffset, true),
+            PH1: i18n.TimeUtilities.millisToString(frame.endTime - frame.startTime, true),
+            PH2: i18n.TimeUtilities.millisToString(frame.startTimeOffset, true),
         });
         if (!frame.hasWarnings()) {
             return i18n.i18n.getFormatLocalizedString(str_, UIStrings.emptyPlaceholder, { PH1: durationText });
@@ -2934,23 +2963,22 @@ export class TimelineUIUtils {
                 break;
             }
             case warnings.IdleDeadlineExceeded: {
-                const exceededMs = i18n.i18n.millisToString((event.duration || 0) - eventData['allottedMilliseconds'], true);
+                const exceededMs = i18n.TimeUtilities.millisToString((event.duration || 0) - eventData['allottedMilliseconds'], true);
                 span.textContent = i18nString(UIStrings.idleCallbackExecutionExtended, { PH1: exceededMs });
                 break;
             }
             case warnings.LongHandler: {
                 span.textContent =
-                    i18nString(UIStrings.handlerTookS, { PH1: i18n.i18n.millisToString((event.duration || 0), true) });
+                    i18nString(UIStrings.handlerTookS, { PH1: i18n.TimeUtilities.millisToString((event.duration || 0), true) });
                 break;
             }
             case warnings.LongRecurringHandler: {
-                span.textContent =
-                    i18nString(UIStrings.recurringHandlerTookS, { PH1: i18n.i18n.millisToString((event.duration || 0), true) });
+                span.textContent = i18nString(UIStrings.recurringHandlerTookS, { PH1: i18n.TimeUtilities.millisToString((event.duration || 0), true) });
                 break;
             }
             case warnings.LongTask: {
                 const longTaskLink = UI.XLink.XLink.create('https://web.dev/rail/#goals-and-guidelines', i18nString(UIStrings.longTask));
-                span.appendChild(i18n.i18n.getFormatLocalizedString(str_, UIStrings.sTookS, { PH1: longTaskLink, PH2: i18n.i18n.millisToString((event.duration || 0), true) }));
+                span.appendChild(i18n.i18n.getFormatLocalizedString(str_, UIStrings.sTookS, { PH1: longTaskLink, PH2: i18n.TimeUtilities.millisToString((event.duration || 0), true) }));
                 break;
             }
             case warnings.V8Deopt: {

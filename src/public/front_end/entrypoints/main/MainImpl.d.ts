@@ -1,4 +1,6 @@
 import * as Common from '../../core/common/common.js';
+import * as ProtocolClient from '../../core/protocol_client/protocol_client.js';
+import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 export declare class MainImpl {
     _lateInitDonePromise: Promise<void>;
@@ -56,9 +58,9 @@ export declare class SettingsButtonProvider implements UI.Toolbar.Provider {
 }
 export declare class PauseListener {
     constructor();
-    _debuggerPaused(event: Common.EventTarget.EventTargetEvent): void;
+    _debuggerPaused(event: Common.EventTarget.EventTargetEvent<SDK.DebuggerModel.DebuggerModel>): void;
 }
-export declare function sendOverProtocol(method: string, params: Object | null): Promise<any[] | null>;
+export declare function sendOverProtocol(method: ProtocolClient.InspectorBackend.QualifiedName, params: Object | null): Promise<unknown[] | null>;
 export declare class ReloadActionDelegate implements UI.ActionRegistration.ActionDelegate {
     static instance(opts?: {
         forceNew: boolean | null;

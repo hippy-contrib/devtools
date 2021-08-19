@@ -6,6 +6,7 @@ import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import domLinkifierStyles from './domLinkifier.css.js';
 const UIStrings = {
     /**
     * @description Text displayed when trying to create a link to a node in the UI, but the node
@@ -68,7 +69,7 @@ export const linkifyNodeReference = function (node, options = {
     }
     const root = document.createElement('span');
     root.classList.add('monospace');
-    const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(root, { cssFile: 'panels/elements/domLinkifier.css', enableLegacyPatching: false, delegatesFocus: undefined });
+    const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(root, { cssFile: [domLinkifierStyles], delegatesFocus: undefined });
     const link = shadowRoot.createChild('div', 'node-link');
     decorateNodeLabel(node, link, options.tooltip);
     link.addEventListener('click', () => {
@@ -89,7 +90,7 @@ export const linkifyDeferredNodeReference = function (deferredNode, options = {
     preventKeyboardFocus: undefined,
 }) {
     const root = document.createElement('div');
-    const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(root, { cssFile: 'panels/elements/domLinkifier.css', enableLegacyPatching: false, delegatesFocus: undefined });
+    const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(root, { cssFile: 'panels/elements/domLinkifier.css', delegatesFocus: undefined });
     const link = shadowRoot.createChild('div', 'node-link');
     link.createChild('slot');
     link.addEventListener('click', deferredNode.resolve.bind(deferredNode, onDeferredNodeResolved), false);

@@ -27,7 +27,7 @@ export class ElementStatePaneWidget extends UI.Widget.Widget {
     _cssModel;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/elements/elementStatePaneWidget.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/elements/elementStatePaneWidget.css');
         this.contentElement.className = 'styles-element-state-pane';
         UI.UIUtils.createTextChild(this.contentElement.createChild('div'), i18nString(UIStrings.forceElementState));
         const table = document.createElement('table');
@@ -84,6 +84,7 @@ export class ElementStatePaneWidget extends UI.Widget.Widget {
         }
     }
     wasShown() {
+        super.wasShown();
         this._update();
     }
     _update() {

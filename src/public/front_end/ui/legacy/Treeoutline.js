@@ -34,7 +34,7 @@
 import * as Common from '../../core/common/common.js';
 import * as Platform from '../../core/platform/platform.js';
 import * as ARIAUtils from './ARIAUtils.js';
-import { InplaceEditor } from './InplaceEditor.js'; // eslint-disable-line no-unused-vars
+import { InplaceEditor } from './InplaceEditor.js';
 import { Keys } from './KeyboardShortcut.js';
 import { Tooltip } from './Tooltip.js';
 import { deepElementFromPoint, enclosingNodeOrSelfWithNodeNameInArray, isEditing } from './UIUtils.js';
@@ -295,7 +295,7 @@ export class TreeOutline extends Common.ObjectWrapper.ObjectWrapper {
             }
             const viewRect = scrollParentElement.getBoundingClientRect();
             const currentScrollX = viewRect.left - treeRect.left;
-            const currentScrollY = viewRect.top - treeRect.top;
+            const currentScrollY = viewRect.top - treeRect.top + this.contentElement.offsetTop;
             // Only scroll into view on each axis if the item is not visible at all
             // but if we do scroll and _centerUponScrollIntoView is true
             // then we center the top left corner of the item in view.
@@ -344,13 +344,17 @@ export class TreeOutlineInShadow extends TreeOutline {
         super();
         this.contentElement.classList.add('tree-outline');
         this.element = document.createElement('div');
-        this._shadowRoot = createShadowRootWithCoreStyles(this.element, { cssFile: 'ui/legacy/treeoutline.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        this._shadowRoot =
+            createShadowRootWithCoreStyles(this.element, { cssFile: 'ui/legacy/treeoutline.css', delegatesFocus: undefined });
         this._disclosureElement = this._shadowRoot.createChild('div', 'tree-outline-disclosure');
         this._disclosureElement.appendChild(this.contentElement);
         this._renderSelection = true;
     }
-    registerRequiredCSS(cssFile, options) {
-        appendStyle(this._shadowRoot, cssFile, options);
+    registerRequiredCSS(cssFile) {
+        appendStyle(this._shadowRoot, cssFile);
+    }
+    registerCSSFiles(cssFiles) {
+        this._shadowRoot.adoptedStyleSheets = this._shadowRoot.adoptedStyleSheets.concat(cssFiles);
     }
     hideOverflow() {
         this._disclosureElement.classList.add('tree-outline-disclosure-hide-overflow');
@@ -986,7 +990,8 @@ export class TreeElement {
             event.consume(true);
         }
         if (this._listItemNode.draggable && this._selectionElement && this.treeOutline) {
-            const marginLeft = this.treeOutline.element.getBoundingClientRect().left - this._listItemNode.getBoundingClientRect().left;
+            const marginLeft = this.treeOutline.element.getBoundingClientRect().left -
+                this._listItemNode.getBoundingClientRect().left - this.treeOutline.element.scrollLeft;
             // By default the left margin extends far off screen. This is not a problem except when dragging an element.
             // Setting the margin once here should be fine, because we believe the left margin should never change.
             this._selectionElement.style.setProperty('margin-left', marginLeft + 'px');

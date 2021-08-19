@@ -1,7 +1,7 @@
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import { TimelineLoader } from './TimelineLoader.js'; // eslint-disable-line no-unused-vars
+import { TimelineLoader } from './TimelineLoader.js';
 export class ExtensionTracingSession {
     _provider;
     _performanceModel;

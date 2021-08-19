@@ -147,6 +147,8 @@ export declare enum RecordType {
     XHRReadyStateChange = "XHRReadyStateChange",
     XHRLoad = "XHRLoad",
     CompileScript = "v8.compile",
+    CompileCode = "V8.CompileCode",
+    OptimizeCode = "V8.OptimizeCode",
     EvaluateScript = "EvaluateScript",
     CompileModule = "v8.compileModule",
     EvaluateModule = "v8.evaluateModule",
@@ -397,7 +399,7 @@ export declare class InvalidationTrackingEvent {
 export declare class InvalidationTracker {
     _lastRecalcStyle: SDK.TracingModel.Event | null;
     _lastPaintWithLayer: SDK.TracingModel.Event | null;
-    _didPaint: boolean;
+    didPaint: boolean;
     _invalidations: {
         [x: string]: InvalidationTrackingEvent[];
     };
@@ -412,7 +414,6 @@ export declare class InvalidationTracker {
     _addSyntheticStyleRecalcInvalidations(event: SDK.TracingModel.Event, frameId: number, styleInvalidatorInvalidation: InvalidationTrackingEvent): void;
     _addSyntheticStyleRecalcInvalidation(baseEvent: SDK.TracingModel.Event, styleInvalidatorInvalidation: InvalidationTrackingEvent): void;
     didLayout(layoutEvent: SDK.TracingModel.Event): void;
-    didPaint(_paintEvent: SDK.TracingModel.Event): void;
     _addInvalidationToEvent(event: SDK.TracingModel.Event, eventFrameId: number, invalidation: InvalidationTrackingEvent): void;
     _invalidationsOfTypes(types?: string[]): Generator<InvalidationTrackingEvent, any, any>;
     _startNewFrameIfNeeded(): void;
@@ -433,7 +434,7 @@ export declare class TimelineData {
     warning: string | null;
     previewElement: Element | null;
     url: string | null;
-    backendNodeIds: number[];
+    backendNodeIds: Protocol.DOM.BackendNodeId[];
     stackTrace: Protocol.Runtime.CallFrame[] | null;
     picture: SDK.TracingModel.ObjectSnapshot | null;
     _initiator: SDK.TracingModel.Event | null;

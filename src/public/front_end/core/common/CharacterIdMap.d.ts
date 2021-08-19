@@ -1,7 +1,7 @@
 export declare class CharacterIdMap<T> {
-    _elementToCharacter: Map<T, string>;
-    _characterToElement: Map<string, T>;
-    _charCode: number;
+    private readonly elementToCharacter;
+    private readonly characterToElement;
+    private charCode;
     constructor();
     toChar(object: T): string;
     fromChar(character: string): T | null;

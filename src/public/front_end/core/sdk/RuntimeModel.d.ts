@@ -4,11 +4,10 @@ import type * as Protocol from '../../generated/protocol.js';
 import { DebuggerModel } from './DebuggerModel.js';
 import { HeapProfilerModel } from './HeapProfilerModel.js';
 import type { ScopeRef } from './RemoteObject.js';
-import { RemoteObject, // eslint-disable-line no-unused-vars
-RemoteObjectProperty } from './RemoteObject.js';
+import { RemoteObject, RemoteObjectProperty } from './RemoteObject.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
-export declare class RuntimeModel extends SDKModel {
+export declare class RuntimeModel extends SDKModel<EventTypes> {
     _agent: ProtocolProxyApi.RuntimeApi;
     _executionContextById: Map<number, ExecutionContext>;
     _executionContextComparator: (arg0: ExecutionContext, arg1: ExecutionContext) => number;
@@ -45,15 +44,15 @@ export declare class RuntimeModel extends SDKModel {
         usedSize: number;
         totalSize: number;
     } | null>;
-    _inspectRequested(payload: Protocol.Runtime.RemoteObject, hints?: any): void;
+    _inspectRequested(payload: Protocol.Runtime.RemoteObject, hints?: any, executionContextId?: number): void;
     addBinding(event: Protocol.Runtime.AddBindingRequest): Promise<Protocol.ProtocolResponseWithError>;
     _bindingCalled(event: Protocol.Runtime.BindingCalledEvent): void;
     _copyRequested(object: RemoteObject): void;
-    _queryObjectsRequested(object: RemoteObject): Promise<void>;
+    _queryObjectsRequested(object: RemoteObject, executionContextId?: number): Promise<void>;
     static simpleTextFromException(exceptionDetails: Protocol.Runtime.ExceptionDetails): string;
     exceptionThrown(timestamp: number, exceptionDetails: Protocol.Runtime.ExceptionDetails): void;
     _exceptionRevoked(exceptionId: number): void;
-    _consoleAPICalled(type: string, args: Protocol.Runtime.RemoteObject[], executionContextId: number, timestamp: number, stackTrace?: Protocol.Runtime.StackTrace, context?: string): void;
+    _consoleAPICalled(type: Protocol.Runtime.ConsoleAPICalledEventType, args: Protocol.Runtime.RemoteObject[], executionContextId: number, timestamp: number, stackTrace?: Protocol.Runtime.StackTrace, context?: string): void;
     executionContextIdForScriptId(scriptId: string): number;
     executionContextForStackTrace(stackTrace: Protocol.Runtime.StackTrace): number;
     hasSideEffectSupport(): boolean | null;
@@ -71,6 +70,33 @@ export declare enum Events {
     ConsoleAPICalled = "ConsoleAPICalled",
     QueryObjectRequested = "QueryObjectRequested"
 }
+export interface ConsoleAPICall {
+    type: Protocol.Runtime.ConsoleAPICalledEventType;
+    args: Protocol.Runtime.RemoteObject[];
+    executionContextId: number;
+    timestamp: number;
+    stackTrace?: Protocol.Runtime.StackTrace;
+    context?: string;
+}
+export interface ExceptionWithTimestamp {
+    timestamp: number;
+    details: Protocol.Runtime.ExceptionDetails;
+}
+export interface QueryObjectRequestedEvent {
+    objects: RemoteObject;
+    executionContextId?: number;
+}
+export declare type EventTypes = {
+    [Events.BindingCalled]: Protocol.Runtime.BindingCalledEvent;
+    [Events.ExecutionContextCreated]: Protocol.Runtime.ExecutionContextDescription;
+    [Events.ExecutionContextDestroyed]: ExecutionContext;
+    [Events.ExecutionContextChanged]: ExecutionContext;
+    [Events.ExecutionContextOrderChanged]: RuntimeModel;
+    [Events.ExceptionThrown]: ExceptionWithTimestamp;
+    [Events.ExceptionRevoked]: number;
+    [Events.ConsoleAPICalled]: ConsoleAPICall;
+    [Events.QueryObjectRequested]: QueryObjectRequestedEvent;
+};
 export declare class ExecutionContext {
     id: number;
     uniqueId: string;

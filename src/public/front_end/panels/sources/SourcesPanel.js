@@ -30,18 +30,17 @@
 import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
-import * as Root from '../../core/root/root.js';
+import * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Bindings from '../../models/bindings/bindings.js';
 import * as Extensions from '../../models/extensions/extensions.js';
-import * as Recorder from '../../models/recorder/recorder.js';
 import * as Workspace from '../../models/workspace/workspace.js';
 import * as ObjectUI from '../../ui/legacy/components/object_ui/object_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as Snippets from '../snippets/snippets.js';
 import { CallStackSidebarPane } from './CallStackSidebarPane.js';
 import { DebuggerPausedMessage } from './DebuggerPausedMessage.js';
-import { ContentScriptsNavigatorView, FilesNavigatorView, NetworkNavigatorView, OverridesNavigatorView, RecordingsNavigatorView, SnippetsNavigatorView } from './SourcesNavigator.js';
+import { ContentScriptsNavigatorView, FilesNavigatorView, NetworkNavigatorView, OverridesNavigatorView, SnippetsNavigatorView } from './SourcesNavigator.js';
 import { Events, SourcesView } from './SourcesView.js';
 import { ThreadsSidebarPane } from './ThreadsSidebarPane.js';
 import { UISourceCodeFrame } from './UISourceCodeFrame.js';
@@ -119,6 +118,21 @@ const UIStrings = {
     */
     copyS: 'Copy {PH1}',
     /**
+    *@description A context menu item for strings in the Console, Sources, and Network panel.
+    * When clicked, the raw contents of the string is copied to the clipboard.
+    */
+    copyStringContents: 'Copy string contents',
+    /**
+    *@description A context menu item for strings in the Console, Sources, and Network panel.
+    * When clicked, the string is copied to the clipboard as a valid JavaScript literal.
+    */
+    copyStringAsJSLiteral: 'Copy string as JavaScript literal',
+    /**
+    *@description A context menu item for strings in the Console, Sources, and Network panel.
+    * When clicked, the string is copied to the clipboard as a valid JSON literal.
+    */
+    copyStringAsJSONLiteral: 'Copy string as JSON literal',
+    /**
     *@description A context menu item in the Sources Panel of the Sources panel
     */
     showFunctionDefinition: 'Show function definition',
@@ -129,6 +143,7 @@ const UIStrings = {
 };
 const str_ = i18n.i18n.registerUIStrings('panels/sources/SourcesPanel.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
+const primitiveRemoteObjectTypes = new Set(['number', 'boolean', 'bigint', 'undefined']);
 let sourcesPanelInstance;
 let wrapperViewInstance;
 export class SourcesPanel extends UI.Panel.Panel {
@@ -164,7 +179,7 @@ export class SourcesPanel extends UI.Panel.Panel {
     sidebarPaneView;
     constructor() {
         super('sources');
-        this.registerRequiredCSS('panels/sources/sourcesPanel.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/sources/sourcesPanel.css');
         new UI.DropTarget.DropTarget(this.element, [UI.DropTarget.Type.Folder], i18nString(UIStrings.dropWorkspaceFolderHere), this._handleDrop.bind(this));
         this._workspace = Workspace.Workspace.WorkspaceImpl.instance();
         this._togglePauseAction =
@@ -545,65 +560,6 @@ export class SourcesPanel extends UI.Panel.Panel {
             Snippets.ScriptSnippetFileSystem.evaluateScriptSnippet(uiSourceCode);
         }
     }
-    async _updateUserFlow(uiSourceCode, userFlow) {
-        const indent = Common.Settings.Settings.instance().moduleSetting('textEditorIndent').get();
-        const content = JSON.stringify(userFlow, null, indent);
-        uiSourceCode.setContent(content, false);
-        await Common.Revealer.reveal(uiSourceCode.uiLocation(content.length), true);
-    }
-    async _toggleRecording() {
-        const uiSourceCode = this._sourcesView.currentUISourceCode();
-        if (!uiSourceCode) {
-            return;
-        }
-        const target = UI.Context.Context.instance().flavor(SDK.Target.Target);
-        if (!target) {
-            return;
-        }
-        const recorderModel = target.model(Recorder.RecorderModel.RecorderModel);
-        if (!recorderModel) {
-            return;
-        }
-        const currentSession = await recorderModel.toggleRecording();
-        if (currentSession) {
-            currentSession.addEventListener('recording-updated', async ({ data }) => {
-                this._updateUserFlow(uiSourceCode, data);
-            });
-            // Render the initial user flow
-            this._updateUserFlow(uiSourceCode, currentSession.getUserFlow());
-        }
-    }
-    _replayRecording() {
-        const uiSourceCode = this._sourcesView.currentUISourceCode();
-        if (!uiSourceCode) {
-            return;
-        }
-        const target = UI.Context.Context.instance().flavor(SDK.Target.Target);
-        if (!target) {
-            return;
-        }
-        const recorderModel = target.model(Recorder.RecorderModel.RecorderModel);
-        if (!recorderModel) {
-            return;
-        }
-        const userFlow = recorderModel.parseUserFlow(uiSourceCode.content());
-        recorderModel.replayRecording(userFlow);
-    }
-    _exportRecording() {
-        const uiSourceCode = this._sourcesView.currentUISourceCode();
-        if (!uiSourceCode) {
-            return;
-        }
-        const target = UI.Context.Context.instance().flavor(SDK.Target.Target);
-        if (!target) {
-            return;
-        }
-        const recorderModel = target.model(Recorder.RecorderModel.RecorderModel);
-        if (!recorderModel) {
-            return;
-        }
-        recorderModel.exportRecording(uiSourceCode);
-    }
     _editorSelected(event) {
         const uiSourceCode = event.data;
         if (this.editorView.mainWidget() &&
@@ -800,9 +756,28 @@ export class SourcesPanel extends UI.Panel.Panel {
             return remoteObject.type;
         }
         const copyContextMenuTitle = getObjectTitle();
-        contextMenu.debugSection().appendItem(i18nString(UIStrings.storeSAsGlobalVariable, { PH1: copyContextMenuTitle }), () => SDK.ConsoleModel.ConsoleModel.instance().saveToTempVariable(executionContext, remoteObject));
-        // Copy object context menu.
-        if (remoteObject.type !== 'function') {
+        contextMenu.debugSection().appendItem(i18nString(UIStrings.storeSAsGlobalVariable, { PH1: String(copyContextMenuTitle) }), () => SDK.ConsoleModel.ConsoleModel.instance().saveToTempVariable(executionContext, remoteObject));
+        const ctxMenuClipboardSection = contextMenu.clipboardSection();
+        const inspectorFrontendHost = Host.InspectorFrontendHost.InspectorFrontendHostInstance;
+        if (remoteObject.type === 'string') {
+            ctxMenuClipboardSection.appendItem(i18nString(UIStrings.copyStringContents), () => {
+                inspectorFrontendHost.copyText(remoteObject.value);
+            });
+            ctxMenuClipboardSection.appendItem(i18nString(UIStrings.copyStringAsJSLiteral), () => {
+                inspectorFrontendHost.copyText(Platform.StringUtilities.formatAsJSLiteral(remoteObject.value));
+            });
+            ctxMenuClipboardSection.appendItem(i18nString(UIStrings.copyStringAsJSONLiteral), () => {
+                inspectorFrontendHost.copyText(JSON.stringify(remoteObject.value));
+            });
+        }
+        // We are trying to copy a primitive value.
+        else if (primitiveRemoteObjectTypes.has(remoteObject.type)) {
+            ctxMenuClipboardSection.appendItem(i18nString(UIStrings.copyS, { PH1: String(copyContextMenuTitle) }), () => {
+                inspectorFrontendHost.copyText(remoteObject.description);
+            });
+        }
+        // We are trying to copy a remote object.
+        else if (remoteObject.type === 'object') {
             const copyDecodedValueHandler = async () => {
                 const result = await remoteObject.callFunctionJSON(toStringForClipboard, [{
                         value: {
@@ -810,11 +785,11 @@ export class SourcesPanel extends UI.Panel.Panel {
                             indent: indent,
                         },
                     }]);
-                Host.InspectorFrontendHost.InspectorFrontendHostInstance.copyText(result);
+                inspectorFrontendHost.copyText(result);
             };
-            contextMenu.clipboardSection().appendItem(i18nString(UIStrings.copyS, { PH1: copyContextMenuTitle }), copyDecodedValueHandler);
+            ctxMenuClipboardSection.appendItem(i18nString(UIStrings.copyS, { PH1: String(copyContextMenuTitle) }), copyDecodedValueHandler);
         }
-        if (remoteObject.type === 'function') {
+        else if (remoteObject.type === 'function') {
             contextMenu.debugSection().appendItem(i18nString(UIStrings.showFunctionDefinition), this._showFunctionDefinition.bind(this, remoteObject));
         }
         // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
@@ -950,7 +925,10 @@ export class SourcesPanel extends UI.Panel.Panel {
         this._splitWidget.setSidebarWidget(this.sidebarPaneView);
     }
     _setAsCurrentPanel() {
-        return UI.ViewManager.ViewManager.instance().showView('sources');
+        if (Common.Settings.Settings.instance().moduleSetting('autoFocusOnDebuggerPausedEnabled').get()) {
+            return UI.ViewManager.ViewManager.instance().showView('sources');
+        }
+        return Promise.resolve();
     }
     _extensionSidebarPaneAdded(event) {
         const pane = event.data;
@@ -1098,19 +1076,6 @@ export class DebuggingActionDelegate {
                 panel._runSnippet();
                 return true;
             }
-            case 'recorder.toggle-recording': {
-                // TODO: Handle dangling promise
-                panel._toggleRecording();
-                return true;
-            }
-            case 'recorder.replay-recording': {
-                panel._replayRecording();
-                return true;
-            }
-            case 'recorder.export-recording': {
-                panel._exportRecording();
-                return true;
-            }
             case 'debugger.toggle-breakpoints-active': {
                 panel._toggleBreakpointsActive();
                 return true;
@@ -1182,11 +1147,6 @@ const registeredNavigatorViews = [
         viewId: 'navigator-snippets',
         navigatorView: SnippetsNavigatorView.instance,
         experiment: undefined,
-    },
-    {
-        viewId: 'navigator-recordings',
-        navigatorView: RecordingsNavigatorView.instance,
-        experiment: Root.Runtime.ExperimentName.RECORDER,
     },
     {
         viewId: 'navigator-overrides',

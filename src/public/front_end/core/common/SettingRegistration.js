@@ -55,7 +55,7 @@ const UIStrings = {
     /**
     *@description Text for the memory of the page
     */
-    memory: 'Memory',
+    memory: 'JS Memory',
     /**
     *@description Text for the extension of the page
     */

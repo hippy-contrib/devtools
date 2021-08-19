@@ -4,7 +4,7 @@ export declare class Cookie {
     _value: string;
     _type: Type | null | undefined;
     _attributes: {
-        [x: string]: any;
+        [x: string]: string | number | boolean | undefined;
     };
     _size: number;
     _priority: Protocol.Network.CookiePriority;

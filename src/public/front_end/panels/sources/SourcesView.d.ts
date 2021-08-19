@@ -81,7 +81,7 @@ export declare enum Events {
  * @interface
  */
 export interface EditorAction {
-    button(sourcesView: SourcesView): UI.Toolbar.ToolbarButton;
+    getOrCreateButton(sourcesView: SourcesView): UI.Toolbar.ToolbarButton;
 }
 export declare function registerEditorAction(editorAction: () => EditorAction): void;
 export declare function getRegisteredEditorActions(): EditorAction[];

@@ -45,6 +45,7 @@ export declare class ConsoleView extends UI.Widget.VBox implements UI.Searchable
     _pinPane: ConsolePinPane;
     _viewport: ConsoleViewport;
     _messagesElement: HTMLElement;
+    _messagesCountElement: HTMLElement;
     _viewportThrottler: Common.Throttler.Throttler;
     _pendingBatchResize: boolean;
     _onMessageResizedBound: (e: Common.EventTarget.EventTargetEvent) => void;
@@ -70,6 +71,8 @@ export declare class ConsoleView extends UI.Widget.VBox implements UI.Searchable
     private pendingSidebarMessages;
     private userHasOpenedSidebarAtLeastOnce;
     private issueToolbarThrottle;
+    private requestResolver;
+    private issueResolver;
     constructor();
     static instance(): ConsoleView;
     static clearConsole(): void;

@@ -996,6 +996,12 @@ export namespace ProtocolMapping {
     'CSS.setMediaText':
         {paramsType: [Protocol.CSS.SetMediaTextRequest]; returnType: Protocol.CSS.SetMediaTextResponse;};
     /**
+     * Modifies the expression of a container query.
+     */
+    'CSS.setContainerQueryText': {
+      paramsType: [Protocol.CSS.SetContainerQueryTextRequest]; returnType: Protocol.CSS.SetContainerQueryTextResponse;
+    };
+    /**
      * Modifies the rule selector.
      */
     'CSS.setRuleSelector':
@@ -1310,6 +1316,13 @@ export namespace ProtocolMapping {
      */
     'DOM.getFrameOwner':
         {paramsType: [Protocol.DOM.GetFrameOwnerRequest]; returnType: Protocol.DOM.GetFrameOwnerResponse;};
+    /**
+     * Returns the container of the given node based on container query conditions.
+     * If containerName is given, it will find the nearest container with a matching name;
+     * otherwise it will find the nearest container regardless of its container name.
+     */
+    'DOM.getContainerForNode':
+        {paramsType: [Protocol.DOM.GetContainerForNodeRequest]; returnType: Protocol.DOM.GetContainerForNodeResponse;};
     /**
      * Returns event listeners of the given object.
      */
@@ -1908,11 +1921,6 @@ export namespace ProtocolMapping {
      */
     'Network.setCookies': {paramsType: [Protocol.Network.SetCookiesRequest]; returnType: void;};
     /**
-     * For testing.
-     */
-    'Network.setDataSizeLimitsForTest':
-        {paramsType: [Protocol.Network.SetDataSizeLimitsForTestRequest]; returnType: void;};
-    /**
      * Specifies whether to always send extra HTTP headers with the requests from this page.
      */
     'Network.setExtraHTTPHeaders': {paramsType: [Protocol.Network.SetExtraHTTPHeadersRequest]; returnType: void;};
@@ -1978,6 +1986,9 @@ export namespace ProtocolMapping {
     'Overlay.hideHighlight': {paramsType: []; returnType: void;};
     /**
      * Highlights owner element of the frame with given id.
+     * Deprecated: Doesn't work reliablity and cannot be fixed due to process
+     * separatation (the owner node might be in a different process). Determine
+     * the owner node in the client and use highlightNode.
      */
     'Overlay.highlightFrame': {paramsType: [Protocol.Overlay.HighlightFrameRequest]; returnType: void;};
     /**
@@ -2024,6 +2035,8 @@ export namespace ProtocolMapping {
     'Overlay.setShowFlexOverlays': {paramsType: [Protocol.Overlay.SetShowFlexOverlaysRequest]; returnType: void;};
     'Overlay.setShowScrollSnapOverlays':
         {paramsType: [Protocol.Overlay.SetShowScrollSnapOverlaysRequest]; returnType: void;};
+    'Overlay.setShowContainerQueryOverlays':
+        {paramsType: [Protocol.Overlay.SetShowContainerQueryOverlaysRequest]; returnType: void;};
     /**
      * Requests that backend shows paint rectangles
      */

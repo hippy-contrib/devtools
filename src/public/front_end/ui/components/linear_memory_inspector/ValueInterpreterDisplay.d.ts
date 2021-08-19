@@ -18,7 +18,7 @@ export declare class JumpToPointerAddressEvent extends Event {
     constructor(address: number);
 }
 export declare class ValueInterpreterDisplay extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     private endianness;
     private buffer;
@@ -26,6 +26,7 @@ export declare class ValueInterpreterDisplay extends HTMLElement {
     private valueTypeModeConfig;
     private memoryLength;
     constructor();
+    connectedCallback(): void;
     set data(data: ValueDisplayData);
     private render;
     private showValue;

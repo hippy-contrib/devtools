@@ -25,6 +25,9 @@ export declare class AccessibilitySidebarView extends UI.ThrottledWidget.Throttl
     wasShown(): void;
     willHide(): void;
     _pullNode(): void;
-    _onAttrChange(event: Common.EventTarget.EventTargetEvent): void;
-    _onNodeChange(event: Common.EventTarget.EventTargetEvent): void;
+    _onAttrChange(event: Common.EventTarget.EventTargetEvent<{
+        node: SDK.DOMModel.DOMNode;
+        name: string;
+    }>): void;
+    _onNodeChange(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMNode>): void;
 }

@@ -1,11 +1,13 @@
 import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Protocol from '../../generated/protocol.js';
-import * as Bindings from '../../models/bindings/bindings.js';
+import type * as IssuesManager from '../../models/issues_manager/issues_manager.js';
+import * as Logs from '../../models/logs/logs.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as ObjectUI from '../../ui/legacy/components/object_ui/object_ui.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import type { Chrome } from '../../../extension-api/ExtensionAPI.js';
 import type { ConsoleViewportElement } from './ConsoleViewport.js';
 export declare const getMessageForElement: (element: Element) => ConsoleViewMessage | undefined;
 export declare class ConsoleViewMessage implements ConsoleViewportElement {
@@ -39,7 +41,9 @@ export declare class ConsoleViewMessage implements ConsoleViewportElement {
     _lastInSimilarGroup: boolean;
     _groupKey: string;
     _repeatCountElement: UI.UIUtils.DevToolsSmallBubble | null;
-    constructor(consoleMessage: SDK.ConsoleModel.ConsoleMessage, linkifier: Components.Linkifier.Linkifier, nestingLevel: number, onResize: (arg0: Common.EventTarget.EventTargetEvent) => void);
+    private requestResolver;
+    private issueResolver;
+    constructor(consoleMessage: SDK.ConsoleModel.ConsoleMessage, linkifier: Components.Linkifier.Linkifier, requestResolver: Logs.RequestResolver.RequestResolver, issueResolver: IssuesManager.IssueResolver.IssueResolver, nestingLevel: number, onResize: (arg0: Common.EventTarget.EventTargetEvent) => void);
     element(): HTMLElement;
     wasShown(): void;
     onResize(): void;
@@ -50,6 +54,7 @@ export declare class ConsoleViewMessage implements ConsoleViewportElement {
     consoleMessage(): SDK.ConsoleModel.ConsoleMessage;
     _buildMessage(): HTMLElement;
     _formatAsNetworkRequest(): HTMLElement | null;
+    private createAffectedResourceLinks;
     _buildMessageAnchor(): HTMLElement | null;
     _buildMessageWithStackTrace(runtimeModel: SDK.RuntimeModel.RuntimeModel): HTMLElement;
     _linkifyLocation(url: string, lineNumber: number, columnNumber: number): HTMLElement | null;
@@ -114,7 +119,7 @@ export declare class ConsoleViewMessage implements ConsoleViewportElement {
     searchCount(): number;
     searchHighlightNode(index: number): Element;
     _getInlineFrames(debuggerModel: SDK.DebuggerModel.DebuggerModel, url: string, lineNumber: number | undefined, columnNumber: number | undefined): Promise<{
-        frames: Bindings.DebuggerLanguagePlugins.FunctionInfo[];
+        frames: Chrome.DevTools.FunctionInfo[];
     }>;
     _expandInlineStackFrames(debuggerModel: SDK.DebuggerModel.DebuggerModel, prefix: string, suffix: string, url: string, lineNumber: number | undefined, columnNumber: number | undefined, stackTrace: HTMLElement, insertBefore: HTMLElement): Promise<boolean>;
     _tryFormatAsError(string: string): HTMLElement | null;
@@ -131,7 +136,7 @@ export declare class ConsoleGroupViewMessage extends ConsoleViewMessage {
     _collapsed: boolean;
     _expandGroupIcon: UI.Icon.Icon | null;
     _onToggle: () => void;
-    constructor(consoleMessage: SDK.ConsoleModel.ConsoleMessage, linkifier: Components.Linkifier.Linkifier, nestingLevel: number, onToggle: () => void, onResize: (arg0: Common.EventTarget.EventTargetEvent) => void);
+    constructor(consoleMessage: SDK.ConsoleModel.ConsoleMessage, linkifier: Components.Linkifier.Linkifier, requestResolver: Logs.RequestResolver.RequestResolver, issueResolver: IssuesManager.IssueResolver.IssueResolver, nestingLevel: number, onToggle: () => void, onResize: (arg0: Common.EventTarget.EventTargetEvent) => void);
     _setCollapsed(collapsed: boolean): void;
     collapsed(): boolean;
     maybeHandleOnKeyDown(event: KeyboardEvent): boolean;
@@ -140,7 +145,7 @@ export declare class ConsoleGroupViewMessage extends ConsoleViewMessage {
 }
 export declare class ConsoleCommand extends ConsoleViewMessage {
     _formattedCommand: HTMLElement | null;
-    constructor(consoleMessage: SDK.ConsoleModel.ConsoleMessage, linkifier: Components.Linkifier.Linkifier, nestingLevel: number, onResize: (arg0: Common.EventTarget.EventTargetEvent) => void);
+    constructor(consoleMessage: SDK.ConsoleModel.ConsoleMessage, linkifier: Components.Linkifier.Linkifier, requestResolver: Logs.RequestResolver.RequestResolver, issueResolver: IssuesManager.IssueResolver.IssueResolver, nestingLevel: number, onResize: (arg0: Common.EventTarget.EventTargetEvent) => void);
     contentElement(): HTMLElement;
     _updateSearch(): void;
 }
@@ -149,7 +154,7 @@ export declare class ConsoleCommandResult extends ConsoleViewMessage {
 }
 export declare class ConsoleTableMessageView extends ConsoleViewMessage {
     _dataGrid: DataGrid.SortableDataGrid.SortableDataGrid<unknown> | null;
-    constructor(consoleMessage: SDK.ConsoleModel.ConsoleMessage, linkifier: Components.Linkifier.Linkifier, nestingLevel: number, onResize: (arg0: Common.EventTarget.EventTargetEvent) => void);
+    constructor(consoleMessage: SDK.ConsoleModel.ConsoleMessage, linkifier: Components.Linkifier.Linkifier, requestResolver: Logs.RequestResolver.RequestResolver, issueResolver: IssuesManager.IssueResolver.IssueResolver, nestingLevel: number, onResize: (arg0: Common.EventTarget.EventTargetEvent) => void);
     wasShown(): void;
     onResize(): void;
     contentElement(): HTMLElement;

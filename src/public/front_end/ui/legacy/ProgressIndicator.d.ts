@@ -17,5 +17,5 @@ export declare class ProgressIndicator implements Common.Progress.Progress {
     setTitle(title: string): void;
     setTotalWork(totalWork: number): void;
     setWorked(worked: number, title?: string): void;
-    worked(worked?: number): void;
+    incrementWorked(worked?: number): void;
 }

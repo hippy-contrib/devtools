@@ -32,9 +32,11 @@ export class ContentProvider {
 export class SearchMatch {
     lineNumber;
     lineContent;
-    constructor(lineNumber, lineContent) {
+    columnNumber;
+    constructor(lineNumber, lineContent, columnNumber) {
         this.lineNumber = lineNumber;
         this.lineContent = lineContent;
+        this.columnNumber = columnNumber;
     }
 }
 export const contentAsDataURL = function (content, mimeType, contentEncoded, charset, limitSize = true) {

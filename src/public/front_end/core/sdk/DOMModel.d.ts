@@ -1,4 +1,3 @@
-import type * as ProtocolClient from '../protocol_client/protocol_client.js';
 import type * as ProtocolProxyApi from '../../generated/protocol-proxy-api.js';
 import * as Protocol from '../../generated/protocol.js';
 import { CSSModel } from './CSSModel.js';
@@ -12,9 +11,9 @@ export declare class DOMNode {
     _agent: ProtocolProxyApi.DOMApi;
     ownerDocument: DOMDocument | null;
     _isInShadowTree: boolean;
-    id: number;
+    id: Protocol.DOM.NodeId;
     index: number | undefined;
-    _backendNodeId: number;
+    _backendNodeId: Protocol.DOM.BackendNodeId;
     _nodeType: number;
     _nodeName: string;
     _localName: string;
@@ -55,7 +54,7 @@ export declare class DOMNode {
     isSVGNode(): boolean;
     creationStackTrace(): Promise<Protocol.Runtime.StackTrace | null>;
     domModel(): DOMModel;
-    backendNodeId(): number;
+    backendNodeId(): Protocol.DOM.BackendNodeId;
     children(): DOMNode[] | null;
     hasAttributes(): boolean;
     childNodeCount(): number;
@@ -83,21 +82,21 @@ export declare class DOMNode {
     isShadowRoot(): boolean;
     shadowRootType(): string | null;
     nodeNameInCorrectCase(): string;
-    setNodeName(name: string, callback?: ((arg0: ProtocolClient.InspectorBackend.ProtocolError | null, arg1: DOMNode | null) => any)): void;
+    setNodeName(name: string, callback?: ((arg0: string | null, arg1: DOMNode | null) => any)): void;
     localName(): string;
     nodeValue(): string;
-    setNodeValue(value: string, callback?: ((arg0: ProtocolClient.InspectorBackend.ProtocolError | null) => any)): void;
+    setNodeValue(value: string, callback?: ((arg0: string | null) => any)): void;
     getAttribute(name: string): string | undefined;
-    setAttribute(name: string, text: string, callback?: ((arg0: ProtocolClient.InspectorBackend.ProtocolError | null) => any)): void;
-    setAttributeValue(name: string, value: string, callback?: ((arg0: ProtocolClient.InspectorBackend.ProtocolError | null) => any)): void;
+    setAttribute(name: string, text: string, callback?: ((arg0: string | null) => any)): void;
+    setAttributeValue(name: string, value: string, callback?: ((arg0: string | null) => any)): void;
     setAttributeValuePromise(name: string, value: string): Promise<string | null>;
     attributes(): Attribute[];
     removeAttribute(name: string): Promise<void>;
     getChildNodes(callback: (arg0: Array<DOMNode> | null) => void): void;
     getSubtree(depth: number, pierce: boolean): Promise<DOMNode[] | null>;
     getOuterHTML(): Promise<string | null>;
-    setOuterHTML(html: string, callback?: ((arg0: ProtocolClient.InspectorBackend.ProtocolError | null) => any)): void;
-    removeNode(callback?: ((arg0: ProtocolClient.InspectorBackend.ProtocolError | null, arg1?: Protocol.DOM.NodeId | undefined) => any)): void;
+    setOuterHTML(html: string, callback?: ((arg0: string | null) => any)): void;
+    removeNode(callback?: ((arg0: string | null, arg1?: Protocol.DOM.NodeId | undefined) => any)): Promise<void>;
     copyNode(): Promise<string | null>;
     path(): string;
     isAncestor(node: DOMNode): boolean;
@@ -114,8 +113,8 @@ export declare class DOMNode {
     _addAttribute(name: string, value: string): void;
     _setAttribute(name: string, value: string): void;
     _removeAttribute(name: string): void;
-    copyTo(targetNode: DOMNode, anchorNode: DOMNode | null, callback?: ((arg0: ProtocolClient.InspectorBackend.ProtocolError | null, arg1: DOMNode | null) => any)): void;
-    moveTo(targetNode: DOMNode, anchorNode: DOMNode | null, callback?: ((arg0: ProtocolClient.InspectorBackend.ProtocolError | null, arg1: DOMNode | null) => any)): void;
+    copyTo(targetNode: DOMNode, anchorNode: DOMNode | null, callback?: ((arg0: string | null, arg1: DOMNode | null) => any)): void;
+    moveTo(targetNode: DOMNode, anchorNode: DOMNode | null, callback?: ((arg0: string | null, arg1: DOMNode | null) => any)): void;
     isXMLNode(): boolean;
     setMarker(name: string, value: any): void;
     marker<T>(name: string): T | null;
@@ -145,11 +144,11 @@ export declare namespace DOMNode {
 }
 export declare class DeferredDOMNode {
     _domModel: DOMModel;
-    _backendNodeId: number;
-    constructor(target: Target, backendNodeId: number);
+    _backendNodeId: Protocol.DOM.BackendNodeId;
+    constructor(target: Target, backendNodeId: Protocol.DOM.BackendNodeId);
     resolve(callback: (arg0: DOMNode | null) => void): void;
     resolvePromise(): Promise<DOMNode | null>;
-    backendNodeId(): number;
+    backendNodeId(): Protocol.DOM.BackendNodeId;
     domModel(): DOMModel;
     highlight(): void;
 }
@@ -157,7 +156,7 @@ export declare class DOMNodeShortcut {
     nodeType: number;
     nodeName: string;
     deferredNode: DeferredDOMNode;
-    constructor(target: Target, backendNodeId: number, nodeType: number, nodeName: string);
+    constructor(target: Target, backendNodeId: Protocol.DOM.BackendNodeId, nodeType: number, nodeName: string);
 }
 export declare class DOMDocument extends DOMNode {
     body: DOMNode | null;
@@ -166,13 +165,13 @@ export declare class DOMDocument extends DOMNode {
     baseURL: string;
     constructor(domModel: DOMModel, payload: Protocol.DOM.Node);
 }
-export declare class DOMModel extends SDKModel {
+export declare class DOMModel extends SDKModel<EventTypes> {
     _agent: ProtocolProxyApi.DOMApi;
     _idToDOMNode: {
         [x: number]: DOMNode;
     };
     _document: DOMDocument | null;
-    _attributeLoadNodeIds: Set<number>;
+    _attributeLoadNodeIds: Set<Protocol.DOM.NodeId>;
     _runtimeModel: RuntimeModel;
     _lastMutationId: number;
     _pendingDocumentRequestPromise: Promise<DOMDocument | null> | null;
@@ -191,7 +190,7 @@ export declare class DOMModel extends SDKModel {
     existingDocument(): DOMDocument | null;
     pushNodeToFrontend(objectId: string): Promise<DOMNode | null>;
     pushNodeByPathToFrontend(path: string): Promise<number | null>;
-    pushNodesByBackendIdsToFrontend(backendNodeIds: Set<number>): Promise<Map<number, DOMNode | null> | null>;
+    pushNodesByBackendIdsToFrontend(backendNodeIds: Set<Protocol.DOM.BackendNodeId>): Promise<Map<Protocol.DOM.BackendNodeId, DOMNode | null> | null>;
     _attributeModified(nodeId: number, name: string, value: string): void;
     _attributeRemoved(nodeId: number, name: string): void;
     _inlineStyleInvalidated(nodeIds: number[]): void;
@@ -218,11 +217,12 @@ export declare class DOMModel extends SDKModel {
     performSearch(query: string, includeUserAgentShadowDOM: boolean): Promise<number>;
     searchResult(index: number): Promise<DOMNode | null>;
     _cancelSearch(): void;
-    classNamesPromise(nodeId: number): Promise<string[]>;
-    querySelector(nodeId: number, selector: string): Promise<number | null>;
-    querySelectorAll(nodeId: number, selector: string): Promise<number[] | null>;
+    classNamesPromise(nodeId: Protocol.DOM.NodeId): Promise<string[]>;
+    querySelector(nodeId: Protocol.DOM.NodeId, selector: string): Promise<number | null>;
+    querySelectorAll(nodeId: Protocol.DOM.NodeId, selector: string): Promise<number[] | null>;
     markUndoableState(minorChange?: boolean): void;
     nodeForLocation(x: number, y: number, includeUserAgentShadowDOM: boolean): Promise<DOMNode | null>;
+    getContainerForNode(nodeId: Protocol.DOM.NodeId, containerName?: string): Promise<DOMNode | null>;
     pushObjectAsNodeToFrontend(object: RemoteObject): Promise<DOMNode | null>;
     suspendModel(): Promise<void>;
     resumeModel(): Promise<void>;
@@ -241,6 +241,27 @@ export declare enum Events {
     DistributedNodesChanged = "DistributedNodesChanged",
     MarkersChanged = "MarkersChanged"
 }
+export declare type EventTypes = {
+    [Events.AttrModified]: {
+        node: DOMNode;
+        name: string;
+    };
+    [Events.AttrRemoved]: {
+        node: DOMNode;
+        name: string;
+    };
+    [Events.CharacterDataModified]: DOMNode;
+    [Events.DOMMutated]: DOMNode;
+    [Events.NodeInserted]: DOMNode;
+    [Events.NodeRemoved]: {
+        node: DOMNode;
+        parent: DOMNode;
+    };
+    [Events.DocumentUpdated]: DOMModel;
+    [Events.ChildNodeCountUpdated]: DOMNode;
+    [Events.DistributedNodesChanged]: DOMNode;
+    [Events.MarkersChanged]: DOMNode;
+};
 export declare class DOMModelUndoStack {
     _stack: DOMModel[];
     _index: number;

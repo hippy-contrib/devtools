@@ -33,7 +33,7 @@ export declare class CSSOverviewModel extends SDK.SDKModel.SDKModel {
     _domSnapshotAgent: ProtocolProxyApi.DOMSnapshotApi;
     _overlayAgent: ProtocolProxyApi.OverlayApi;
     constructor(target: SDK.Target.Target);
-    highlightNode(node: number): void;
+    highlightNode(node: Protocol.DOM.BackendNodeId): void;
     getNodeStyleStats(): Promise<NodeStyleStats>;
     getComputedStyleForNode(nodeId: Protocol.DOM.NodeId): Promise<Protocol.CSS.GetComputedStyleForNodeResponse>;
     getMediaQueries(): Promise<Map<string, Protocol.CSS.CSSMedia[]>>;

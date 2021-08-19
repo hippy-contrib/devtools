@@ -28,7 +28,7 @@ export declare class Event {
     _updateMaxTime: (arg0: number) => void;
     _selfIndex: number;
     _live: boolean;
-    _title: string;
+    title: string;
     _color: string;
     _fontColor: string;
     _hoverData: Object;
@@ -45,8 +45,6 @@ export declare class Event {
     set endTime(time: number);
     get id(): number;
     set level(level: number);
-    set title(text: string);
-    get title(): string;
     set color(color: string);
     get color(): string;
     get fontColor(): string;

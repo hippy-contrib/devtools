@@ -1,5 +1,4 @@
 import * as Common from '../common/common.js';
-import type * as ProtocolClient from '../protocol_client/protocol_client.js';
 import type * as ProtocolProxyApi from '../../generated/protocol-proxy-api.js';
 import * as Protocol from '../../generated/protocol.js';
 import type { RemoteObject } from './RemoteObject.js';
@@ -15,7 +14,7 @@ export declare enum StepMode {
     StepOut = "StepOut",
     StepOver = "StepOver"
 }
-export declare class DebuggerModel extends SDKModel {
+export declare class DebuggerModel extends SDKModel<EventTypes> {
     _agent: ProtocolProxyApi.DebuggerApi;
     _runtimeModel: RuntimeModel;
     _sourceMapManager: SourceMapManager<Script>;
@@ -36,7 +35,6 @@ export declare class DebuggerModel extends SDKModel {
     }>>) | null;
     _expandCallFramesCallback: ((arg0: Array<CallFrame>) => Promise<Array<CallFrame>>) | null;
     _evaluateOnCallFrameCallback: ((arg0: CallFrame, arg1: EvaluationOptions) => Promise<EvaluationResult | null>) | null;
-    _ignoreDebuggerPausedEvents: boolean;
     _breakpointResolvedEventTarget: Common.ObjectWrapper.ObjectWrapper;
     _autoStepOver: boolean;
     _isPausing: boolean;
@@ -45,7 +43,6 @@ export declare class DebuggerModel extends SDKModel {
     sourceMapManager(): SourceMapManager<Script>;
     runtimeModel(): RuntimeModel;
     debuggerEnabled(): boolean;
-    ignoreDebuggerPausedEvents(ignore: boolean): void;
     _enableDebugger(): Promise<void>;
     syncDebuggerId(): Promise<Protocol.Debugger.EnableResponse>;
     _onFrameNavigated(): void;
@@ -84,8 +81,8 @@ export declare class DebuggerModel extends SDKModel {
     scriptForId(scriptId: string): Script | null;
     scriptsForSourceURL(sourceURL: string | null): Script[];
     scriptsForExecutionContext(executionContext: ExecutionContext): Script[];
-    setScriptSource(scriptId: string, newSource: string, callback: (arg0: ProtocolClient.InspectorBackend.ProtocolError | null, arg1?: Protocol.Runtime.ExceptionDetails | undefined) => void): void;
-    _didEditScriptSource(scriptId: string, newSource: string, callback: (arg0: ProtocolClient.InspectorBackend.ProtocolError | null, arg1?: Protocol.Runtime.ExceptionDetails | undefined) => void, error: string | null, exceptionDetails?: Protocol.Runtime.ExceptionDetails, callFrames?: Protocol.Debugger.CallFrame[], asyncStackTrace?: Protocol.Runtime.StackTrace, asyncStackTraceId?: Protocol.Runtime.StackTraceId, needsStepIn?: boolean): void;
+    setScriptSource(scriptId: string, newSource: string, callback: (error: string | null, arg1?: Protocol.Runtime.ExceptionDetails | undefined) => void): void;
+    _didEditScriptSource(scriptId: string, newSource: string, callback: (error: string | null, arg1?: Protocol.Runtime.ExceptionDetails | undefined) => void, error: string | null, exceptionDetails?: Protocol.Runtime.ExceptionDetails, callFrames?: Protocol.Debugger.CallFrame[], asyncStackTrace?: Protocol.Runtime.StackTrace, asyncStackTraceId?: Protocol.Runtime.StackTraceId, needsStepIn?: boolean): void;
     get callFrames(): CallFrame[] | null;
     debuggerPausedDetails(): DebuggerPausedDetails | null;
     _setDebuggerPausedDetails(debuggerPausedDetails: DebuggerPausedDetails | null): boolean;
@@ -135,13 +132,22 @@ export declare enum Events {
     DebuggerPaused = "DebuggerPaused",
     DebuggerResumed = "DebuggerResumed",
     ParsedScriptSource = "ParsedScriptSource",
-    FailedToParseScriptSource = "FailedToParseScriptSource",
     DiscardedAnonymousScriptSource = "DiscardedAnonymousScriptSource",
     GlobalObjectCleared = "GlobalObjectCleared",
     CallFrameSelected = "CallFrameSelected",
-    ConsoleCommandEvaluatedInSelectedCallFrame = "ConsoleCommandEvaluatedInSelectedCallFrame",
     DebuggerIsReadyToPause = "DebuggerIsReadyToPause"
 }
+export declare type EventTypes = {
+    [Events.DebuggerWasEnabled]: DebuggerModel;
+    [Events.DebuggerWasDisabled]: void;
+    [Events.DebuggerPaused]: DebuggerModel;
+    [Events.DebuggerResumed]: DebuggerModel;
+    [Events.ParsedScriptSource]: Script;
+    [Events.DiscardedAnonymousScriptSource]: Script;
+    [Events.GlobalObjectCleared]: DebuggerModel;
+    [Events.CallFrameSelected]: DebuggerModel;
+    [Events.DebuggerIsReadyToPause]: DebuggerModel;
+};
 export declare class Location {
     debuggerModel: DebuggerModel;
     scriptId: string;
@@ -189,9 +195,11 @@ export declare class CallFrame {
     _functionName: string;
     _functionLocation: Location | undefined;
     _returnValue: RemoteObject | null;
+    readonly warnings: string[];
     constructor(debuggerModel: DebuggerModel, script: Script, payload: Protocol.Debugger.CallFrame, inlineFrameIndex?: number, functionName?: string);
     static fromPayloadArray(debuggerModel: DebuggerModel, callFrames: Protocol.Debugger.CallFrame[]): CallFrame[];
-    createVirtualCallFrame(inlineFrameIndex?: number, functionName?: string): CallFrame;
+    createVirtualCallFrame(inlineFrameIndex: number, name: string): CallFrame;
+    addWarning(warning: string): void;
     get script(): Script;
     get id(): string;
     get inlineFrameIndex(): number;

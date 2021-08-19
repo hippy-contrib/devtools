@@ -15,7 +15,7 @@ export declare const StyleValueDelimiters = " \u00A0\t\n\"':;,/()";
 export declare function getValueModificationDirection(event: Event): string | null;
 export declare function createReplacementString(wordString: string, event: Event, customNumberHandler?: ((arg0: string, arg1: number, arg2: string) => string)): string | null;
 export declare function handleElementValueModifications(event: Event, element: Element, finishHandler?: ((arg0: string, arg1: string) => void), suggestionHandler?: ((arg0: string) => boolean), customNumberHandler?: ((arg0: string, arg1: number, arg2: string) => string)): boolean;
-export declare function formatLocalized(format: string, substitutions: ArrayLike<any> | null): Element;
+export declare function formatLocalized<U>(format: string, substitutions: ArrayLike<U> | null): Element;
 export declare function openLinkExternallyLabel(): string;
 export declare function copyLinkAddressLabel(): string;
 export declare function copyFileNameLabel(): string;
@@ -28,12 +28,12 @@ export declare class ElementFocusRestorer {
     constructor(element: Element);
     restore(): void;
 }
-export declare function highlightSearchResult(element: Element, offset: number, length: number, domChanges?: any[]): Element | null;
+export declare function highlightSearchResult(element: Element, offset: number, length: number, domChanges?: HighlightChange[]): Element | null;
 export declare function highlightSearchResults(element: Element, resultRanges: TextUtils.TextRange.SourceRange[], changes?: HighlightChange[]): Element[];
 export declare function runCSSAnimationOnce(element: Element, className: string): void;
 export declare function highlightRangesWithStyleClass(element: Element, resultRanges: TextUtils.TextRange.SourceRange[], styleClass: string, changes?: HighlightChange[]): Element[];
-export declare function applyDomChanges(domChanges: any[]): void;
-export declare function revertDomChanges(domChanges: any[]): void;
+export declare function applyDomChanges(domChanges: HighlightChange[]): void;
+export declare function revertDomChanges(domChanges: HighlightChange[]): void;
 export declare function measurePreferredSize(element: Element, containerElement?: Element | null): Size;
 export declare function startBatchUpdate(): void;
 export declare function endBatchUpdate(): void;
@@ -41,7 +41,7 @@ export declare function invokeOnceAfterBatchUpdate(object: Object, method: () =>
 export declare function animateFunction(window: Window, func: Function, params: {
     from: number;
     to: number;
-}[], duration: number, animationComplete?: (() => any)): () => void;
+}[], duration: number, animationComplete?: (() => void)): () => void;
 export declare class LongClickController extends Common.ObjectWrapper.ObjectWrapper {
     _element: Element;
     _callback: (arg0: Event) => void;
@@ -56,13 +56,13 @@ export declare class LongClickController extends Common.ObjectWrapper.ObjectWrap
     reset(): void;
     _enable(): void;
     dispose(): void;
-    static TIME_MS: number;
+    static readonly TIME_MS = 200;
 }
 export declare function initializeUIUtils(document: Document, themeSetting: Common.Settings.Setting<string>): void;
 export declare function beautifyFunctionName(name: string): string;
 export declare const createTextChild: (element: Element | DocumentFragment, text: string) => Text;
 export declare const createTextChildren: (element: Element | DocumentFragment, ...childrenText: string[]) => void;
-export declare function createTextButton(text: string, eventHandler?: ((arg0: Event) => any), className?: string, primary?: boolean, alternativeEvent?: string): HTMLButtonElement;
+export declare function createTextButton(text: string, eventHandler?: ((arg0: Event) => void), className?: string, primary?: boolean, alternativeEvent?: string): HTMLButtonElement;
 export declare function createInput(className?: string, type?: string): HTMLInputElement;
 export declare function createSelect(name: string, options: string[] | Map<string, string[]>[] | Set<string>): HTMLSelectElement;
 export declare function createLabel(title: string, className?: string, associatedControl?: Element): Element;
@@ -73,7 +73,7 @@ export declare function setTitle(element: HTMLElement, title: string, actionId?:
 export declare class CheckboxLabel extends HTMLSpanElement {
     _shadowRoot: DocumentFragment;
     checkboxElement: HTMLInputElement;
-    textElement: Element;
+    textElement: HTMLElement;
     constructor();
     static create(title?: string, checked?: boolean, subtitle?: string): CheckboxLabel;
     set backgroundColor(color: string);
@@ -132,7 +132,7 @@ export declare function addReferrerToURL(url: string): string;
 export declare function addReferrerToURLIfNecessary(url: string): string;
 export declare function loadImage(url: string): Promise<HTMLImageElement | null>;
 export declare function loadImageFromData(data: string | null): Promise<HTMLImageElement | null>;
-export declare function createFileSelectorElement(callback: (arg0: File) => any): HTMLInputElement;
+export declare function createFileSelectorElement(callback: (arg0: File) => void): HTMLInputElement;
 export declare const MaxLengthForDisplayedURLs = 150;
 export declare class MessageDialog {
     static show(message: string, where?: Element | Document): Promise<void>;
@@ -157,7 +157,7 @@ export interface Options {
     editable?: boolean;
 }
 export interface HighlightChange {
-    node: Element;
+    node: Element | Text;
     type: string;
     oldText?: string;
     newText?: string;
@@ -174,5 +174,5 @@ export declare function registerRenderer(registration: RendererRegistration): vo
 export declare function getApplicableRegisteredRenderers(object: Object): RendererRegistration[];
 export interface RendererRegistration {
     loadRenderer: () => Promise<Renderer>;
-    contextTypes: () => Array<unknown>;
+    contextTypes: () => Array<Function>;
 }

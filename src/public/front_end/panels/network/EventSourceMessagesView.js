@@ -39,7 +39,7 @@ export class EventSourceMessagesView extends UI.Widget.VBox {
     _dataGrid;
     constructor(request) {
         super();
-        this.registerRequiredCSS('panels/network/eventSourceMessagesView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/network/eventSourceMessagesView.css');
         this.element.classList.add('event-source-messages-view');
         this._request = request;
         const columns = [

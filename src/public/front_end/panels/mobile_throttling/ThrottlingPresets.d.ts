@@ -1,9 +1,4 @@
 import * as SDK from '../../core/sdk/sdk.js';
-export declare enum CPUThrottlingRates {
-    NoThrottling = 1,
-    MidTierMobile = 4,
-    LowEndMobile = 6
-}
 export declare class ThrottlingPresets {
     static getNoThrottlingConditions(): Conditions;
     static getOfflineConditions(): Conditions;
@@ -13,7 +8,7 @@ export declare class ThrottlingPresets {
     static getMobilePresets(): (Conditions | PlaceholderConditions)[];
     static getAdvancedMobilePresets(): Conditions[];
     static networkPresets: SDK.NetworkManager.Conditions[];
-    static cpuThrottlingPresets: CPUThrottlingRates[];
+    static cpuThrottlingPresets: SDK.CPUThrottlingManager.CPUThrottlingRates[];
 }
 export interface Conditions {
     title: string;

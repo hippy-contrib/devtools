@@ -41,7 +41,7 @@ export class ProgressIndicator {
     constructor() {
         this.element = document.createElement('div');
         this.element.classList.add('progress-indicator');
-        this._shadowRoot = createShadowRootWithCoreStyles(this.element, { cssFile: 'ui/legacy/progressIndicator.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        this._shadowRoot = createShadowRootWithCoreStyles(this.element, { cssFile: 'ui/legacy/progressIndicator.css', delegatesFocus: undefined });
         this._contentElement = this._shadowRoot.createChild('div', 'progress-indicator-shadow-container');
         this._labelElement = this._contentElement.createChild('div', 'title');
         this._progressElement = this._contentElement.createChild('progress');
@@ -80,7 +80,7 @@ export class ProgressIndicator {
             this.setTitle(title);
         }
     }
-    worked(worked) {
+    incrementWorked(worked) {
         this.setWorked(this._worked + (worked || 1));
     }
 }

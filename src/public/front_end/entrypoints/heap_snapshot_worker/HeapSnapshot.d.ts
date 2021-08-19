@@ -274,7 +274,7 @@ export declare abstract class HeapSnapshot {
     };
     _createNodeIdFilter(minNodeId: number, maxNodeId: number): (arg0: HeapSnapshotNode) => boolean;
     _createAllocationStackFilter(bottomUpAllocationNodeId: number): ((arg0: HeapSnapshotNode) => boolean) | undefined;
-    aggregates(sortedIndexes: boolean, key?: string, filter?: ((arg0: HeapSnapshotNode) => boolean)): {
+    getAggregatesByClassName(sortedIndexes: boolean, key?: string, filter?: ((arg0: HeapSnapshotNode) => boolean)): {
         [x: string]: HeapSnapshotModel.HeapSnapshotModel.Aggregate;
     };
     allocationTracesTops(): HeapSnapshotModel.HeapSnapshotModel.SerializedAllocationNode[];

@@ -2,28 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 export class Throttler {
-    _timeout;
-    _isRunningProcess;
-    _asSoonAsPossible;
-    _process;
-    _lastCompleteTime;
-    _schedulePromise;
-    _scheduleResolve;
-    _processTimeout;
+    timeout;
+    isRunningProcess;
+    asSoonAsPossible;
+    process;
+    lastCompleteTime;
+    schedulePromise;
+    scheduleResolve;
+    processTimeout;
     constructor(timeout) {
-        this._timeout = timeout;
-        this._isRunningProcess = false;
-        this._asSoonAsPossible = false;
-        this._process = null;
-        this._lastCompleteTime = 0;
-        this._schedulePromise = new Promise(fulfill => {
-            this._scheduleResolve = fulfill;
+        this.timeout = timeout;
+        this.isRunningProcess = false;
+        this.asSoonAsPossible = false;
+        this.process = null;
+        this.lastCompleteTime = 0;
+        this.schedulePromise = new Promise(fulfill => {
+            this.scheduleResolve = fulfill;
         });
     }
     _processCompleted() {
-        this._lastCompleteTime = this._getTime();
-        this._isRunningProcess = false;
-        if (this._process) {
+        this.lastCompleteTime = this._getTime();
+        this.isRunningProcess = false;
+        if (this.process) {
             this._innerSchedule(false);
         }
         this._processCompletedForTests();
@@ -32,43 +32,43 @@ export class Throttler {
         // For sniffing in tests.
     }
     _onTimeout() {
-        delete this._processTimeout;
-        this._asSoonAsPossible = false;
-        this._isRunningProcess = true;
+        delete this.processTimeout;
+        this.asSoonAsPossible = false;
+        this.isRunningProcess = true;
         Promise.resolve()
-            .then(this._process)
+            .then(this.process)
             .catch(console.error.bind(console))
             .then(this._processCompleted.bind(this))
-            .then(this._scheduleResolve);
-        this._schedulePromise = new Promise(fulfill => {
-            this._scheduleResolve = fulfill;
+            .then(this.scheduleResolve);
+        this.schedulePromise = new Promise(fulfill => {
+            this.scheduleResolve = fulfill;
         });
-        this._process = null;
+        this.process = null;
     }
     schedule(process, asSoonAsPossible) {
         // Deliberately skip previous process.
-        this._process = process;
+        this.process = process;
         // Run the first scheduled task instantly.
-        const hasScheduledTasks = Boolean(this._processTimeout) || this._isRunningProcess;
-        const okToFire = this._getTime() - this._lastCompleteTime > this._timeout;
+        const hasScheduledTasks = Boolean(this.processTimeout) || this.isRunningProcess;
+        const okToFire = this._getTime() - this.lastCompleteTime > this.timeout;
         asSoonAsPossible = Boolean(asSoonAsPossible) || (!hasScheduledTasks && okToFire);
-        const forceTimerUpdate = asSoonAsPossible && !this._asSoonAsPossible;
-        this._asSoonAsPossible = this._asSoonAsPossible || asSoonAsPossible;
+        const forceTimerUpdate = asSoonAsPossible && !this.asSoonAsPossible;
+        this.asSoonAsPossible = this.asSoonAsPossible || asSoonAsPossible;
         this._innerSchedule(forceTimerUpdate);
-        return this._schedulePromise;
+        return this.schedulePromise;
     }
     _innerSchedule(forceTimerUpdate) {
-        if (this._isRunningProcess) {
+        if (this.isRunningProcess) {
             return;
         }
-        if (this._processTimeout && !forceTimerUpdate) {
+        if (this.processTimeout && !forceTimerUpdate) {
             return;
         }
-        if (this._processTimeout) {
-            this._clearTimeout(this._processTimeout);
+        if (this.processTimeout) {
+            this._clearTimeout(this.processTimeout);
         }
-        const timeout = this._asSoonAsPossible ? 0 : this._timeout;
-        this._processTimeout = this._setTimeout(this._onTimeout.bind(this), timeout);
+        const timeout = this.asSoonAsPossible ? 0 : this.timeout;
+        this.processTimeout = this._setTimeout(this._onTimeout.bind(this), timeout);
     }
     _clearTimeout(timeoutId) {
         clearTimeout(timeoutId);

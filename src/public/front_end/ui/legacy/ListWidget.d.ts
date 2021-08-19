@@ -32,25 +32,34 @@ export interface Delegate<T> {
     beginEdit(item: T): Editor<T>;
     commitEdit(item: T, editor: Editor<T>, isNew: boolean): void;
 }
+export interface CustomEditorControl<T> extends HTMLElement {
+    value: T;
+    validate: () => ValidatorResult;
+}
+export declare type EditorControl<T = string> = (HTMLInputElement | HTMLSelectElement | CustomEditorControl<T>);
 export declare class Editor<T> {
     element: HTMLDivElement;
     _contentElement: HTMLElement;
     _commitButton: HTMLButtonElement;
     _cancelButton: HTMLButtonElement;
     _errorMessageContainer: HTMLElement;
-    _controls: (HTMLInputElement | HTMLSelectElement)[];
-    _controlByName: Map<string, HTMLInputElement | HTMLSelectElement>;
-    _validators: ((arg0: T, arg1: number, arg2: (HTMLInputElement | HTMLSelectElement)) => ValidatorResult)[];
+    _controls: EditorControl[];
+    _controlByName: Map<string, EditorControl>;
+    _validators: ((arg0: T, arg1: number, arg2: EditorControl) => ValidatorResult)[];
     _commit: (() => void) | null;
     _cancel: (() => void) | null;
     _item: T | null;
     _index: number;
     constructor();
     contentElement(): Element;
-    createInput(name: string, type: string, title: string, validator: (arg0: T, arg1: number, arg2: (HTMLInputElement | HTMLSelectElement)) => ValidatorResult): HTMLInputElement;
-    createSelect(name: string, options: string[], validator: (arg0: T, arg1: number, arg2: (HTMLInputElement | HTMLSelectElement)) => ValidatorResult, title?: string): HTMLSelectElement;
-    control(name: string): HTMLInputElement | HTMLSelectElement;
+    createInput(name: string, type: string, title: string, validator: (arg0: T, arg1: number, arg2: EditorControl) => ValidatorResult): HTMLInputElement;
+    createSelect(name: string, options: string[], validator: (arg0: T, arg1: number, arg2: EditorControl) => ValidatorResult, title?: string): HTMLSelectElement;
+    createCustomControl<S, U extends CustomEditorControl<S>>(name: string, ctor: {
+        new (): U;
+    }, validator: (arg0: T, arg1: number, arg2: EditorControl) => ValidatorResult): CustomEditorControl<S>;
+    control(name: string): EditorControl;
     _validateControls(forceValid: boolean): void;
+    requestValidation(): void;
     beginEdit(item: T, index: number, commitButtonTitle: string, commit: () => void, cancel: () => void): void;
     _commitClicked(): void;
     _cancelClicked(): void;

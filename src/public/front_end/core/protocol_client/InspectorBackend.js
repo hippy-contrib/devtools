@@ -29,24 +29,35 @@
  */
 /* eslint-disable rulesdir/no_underscored_properties */
 import { NodeURL } from './NodeURL.js';
-export const ProtocolError = Symbol('Protocol.Error');
 export const DevToolsStubErrorCode = -32015;
 // TODO(dgozman): we are not reporting generic errors in tests, but we should
 // instead report them and just have some expected errors in test expectations.
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _GenericError = -32000;
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _ConnectionClosedErrorCode = -32001;
+const GenericError = -32000;
+const ConnectionClosedErrorCode = -32001;
+export const splitQualifiedName = (string) => {
+    const [domain, eventName] = string.split('.');
+    return [domain, eventName];
+};
+export const qualifyName = (domain, name) => {
+    return `${domain}.${name}`;
+};
 export class InspectorBackend {
-    _agentPrototypes;
-    _dispatcherPrototypes;
-    _initialized;
-    constructor() {
-        this._agentPrototypes = new Map();
-        this._dispatcherPrototypes = new Map();
-        this._initialized = false;
+    _agentPrototypes = new Map();
+    initialized = false;
+    eventParameterNamesForDomain = new Map();
+    getOrCreateEventParameterNamesForDomain(domain) {
+        let map = this.eventParameterNamesForDomain.get(domain);
+        if (!map) {
+            map = new Map();
+            this.eventParameterNamesForDomain.set(domain, map);
+        }
+        return map;
+    }
+    getOrCreateEventParameterNamesForDomainForTesting(domain) {
+        return this.getOrCreateEventParameterNamesForDomain(domain);
+    }
+    getEventParamterNames() {
+        return this.eventParameterNamesForDomain;
     }
     static reportProtocolError(error, messageObject) {
         console.error(error + ': ' + JSON.stringify(messageObject));
@@ -55,90 +66,40 @@ export class InspectorBackend {
         console.warn(error + ': ' + JSON.stringify(messageObject));
     }
     isInitialized() {
-        return this._initialized;
-    }
-    _addAgentGetterMethodToProtocolTargetPrototype(domain) {
-        let upperCaseLength = 0;
-        while (upperCaseLength < domain.length && domain[upperCaseLength].toLowerCase() !== domain[upperCaseLength]) {
-            ++upperCaseLength;
-        }
-        const methodName = domain.substr(0, upperCaseLength).toLowerCase() + domain.slice(upperCaseLength) + 'Agent';
-        function agentGetter() {
-            return this._agents[domain];
-        }
-        // @ts-ignore Method code generation
-        TargetBase.prototype[methodName] = agentGetter;
-        function registerDispatcher(dispatcher) {
-            this.registerDispatcher(domain, dispatcher);
-        }
-        // @ts-ignore Method code generation
-        TargetBase.prototype['register' + domain + 'Dispatcher'] = registerDispatcher;
-        function unregisterDispatcher(dispatcher) {
-            this.unregisterDispatcher(domain, dispatcher);
-        }
-        // @ts-ignore Method code generation
-        TargetBase.prototype['unregister' + domain + 'Dispatcher'] = unregisterDispatcher;
+        return this.initialized;
     }
     _agentPrototype(domain) {
-        if (!this._agentPrototypes.has(domain)) {
-            this._agentPrototypes.set(domain, new _AgentPrototype(domain));
-            this._addAgentGetterMethodToProtocolTargetPrototype(domain);
+        let prototype = this._agentPrototypes.get(domain);
+        if (!prototype) {
+            prototype = new _AgentPrototype(domain);
+            this._agentPrototypes.set(domain, prototype);
         }
-        return /** @type {!_AgentPrototype} */ this._agentPrototypes.get(domain);
+        return prototype;
     }
-    _dispatcherPrototype(domain) {
-        if (!this._dispatcherPrototypes.has(domain)) {
-            this._dispatcherPrototypes.set(domain, new _DispatcherPrototype());
-        }
-        return /** @type {!_DispatcherPrototype} */ this._dispatcherPrototypes.get(domain);
-    }
-    registerCommand(method, signature, replyArgs) {
-        const domainAndMethod = method.split('.');
-        this._agentPrototype(domainAndMethod[0]).registerCommand(domainAndMethod[1], signature, replyArgs);
-        this._initialized = true;
+    registerCommand(method, parameters, replyArgs) {
+        const [domain, command] = splitQualifiedName(method);
+        this._agentPrototype(domain).registerCommand(command, parameters, replyArgs);
+        this.initialized = true;
     }
     registerEnum(type, values) {
-        const domainAndName = type.split('.');
-        const domain = domainAndName[0];
+        const [domain, name] = splitQualifiedName(type);
         // @ts-ignore Protocol global namespace pollution
         if (!Protocol[domain]) {
             // @ts-ignore Protocol global namespace pollution
             Protocol[domain] = {};
         }
         // @ts-ignore Protocol global namespace pollution
-        Protocol[domain][domainAndName[1]] = values;
-        this._initialized = true;
+        Protocol[domain][name] = values;
+        this.initialized = true;
     }
     registerEvent(eventName, params) {
         const domain = eventName.split('.')[0];
-        this._dispatcherPrototype(domain).registerEvent(eventName, params);
-        this._initialized = true;
-    }
-    wrapClientCallback(clientCallback, errorPrefix, constructor, defaultValue) {
-        /**
-         * @template S
-         */
-        function callbackWrapper(error, value) {
-            if (error) {
-                console.error(errorPrefix + error);
-                clientCallback(defaultValue);
-                return;
-            }
-            if (constructor) {
-                // @ts-ignore Special casting
-                clientCallback(new constructor(value));
-            }
-            else {
-                // @ts-ignore Special casting
-                clientCallback(value);
-            }
-        }
-        return callbackWrapper;
+        const eventParameterNames = this.getOrCreateEventParameterNamesForDomain(domain);
+        eventParameterNames.set(eventName, params);
+        this.initialized = true;
     }
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-let _factory;
+let connectionFactory;
 export class Connection {
     _onMessage;
     constructor() {
@@ -153,10 +114,10 @@ export class Connection {
         throw new Error('not implemented');
     }
     static setFactory(factory) {
-        _factory = factory;
+        connectionFactory = factory;
     }
     static getFactory() {
-        return _factory;
+        return connectionFactory;
     }
 }
 export const test = {
@@ -194,11 +155,6 @@ export class SessionRouter {
     _lastMessageId;
     _pendingResponsesCount;
     _pendingLongPollingMessageIds;
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _domainToLogger;
     _sessions;
     _pendingScripts;
     constructor(connection) {
@@ -206,7 +162,6 @@ export class SessionRouter {
         this._lastMessageId = 1;
         this._pendingResponsesCount = 0;
         this._pendingLongPollingMessageIds = new Set();
-        this._domainToLogger = new Map();
         this._sessions = new Map();
         this._pendingScripts = [];
         test.deprecatedRunAfterPendingDispatches = this._deprecatedRunAfterPendingDispatches.bind(this);
@@ -262,8 +217,6 @@ export class SessionRouter {
             method: method,
         };
         if (params) {
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // @ts-expect-error
             messageObject.params = params;
         }
         if (sessionId) {
@@ -287,8 +240,6 @@ export class SessionRouter {
         session.callbacks.set(messageId, { callback, method });
         this._connection.sendRawMessage(JSON.stringify(messageObject));
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _sendRawMessageForTesting(method, params, callback) {
         const domain = method.split('.')[0];
         this.sendMessage('', domain, method, params, callback || (() => { }));
@@ -330,7 +281,7 @@ export class SessionRouter {
         if (session.target._needsNodeJSPatching) {
             NodeURL.patch(messageObject);
         }
-        if ('id' in messageObject) { // just a response for some request
+        if (messageObject.id !== undefined) { // just a response for some request
             const callback = session.callbacks.get(messageObject.id);
             session.callbacks.delete(messageObject.id);
             if (!callback) {
@@ -339,7 +290,7 @@ export class SessionRouter {
                 }
                 return;
             }
-            callback.callback(messageObject.error, messageObject.result);
+            callback.callback(messageObject.error || null, messageObject.result || null);
             --this._pendingResponsesCount;
             this._pendingLongPollingMessageIds.delete(messageObject.id);
             if (this._pendingScripts.length && !this._hasOutstandingNonLongPollingRequests()) {
@@ -347,17 +298,13 @@ export class SessionRouter {
             }
         }
         else {
-            if (!('method' in messageObject)) {
+            if (messageObject.method === undefined) {
                 InspectorBackend.reportProtocolError('Protocol Error: the message without method', messageObject);
                 return;
             }
-            const method = messageObject.method.split('.');
-            const domainName = method[0];
-            if (!(domainName in session.target._dispatchers)) {
-                InspectorBackend.reportProtocolError(`Protocol Error: the message ${messageObject.method} is for non-existing domain '${domainName}'`, messageObject);
-                return;
-            }
-            session.target._dispatchers[domainName].dispatch(method[1], messageObject);
+            // This cast is justified as we just checked for the presence of messageObject.method.
+            const eventMessage = messageObject;
+            session.target.dispatch(eventMessage);
         }
     }
     _hasOutstandingNonLongPollingRequests() {
@@ -389,7 +336,7 @@ export class SessionRouter {
     static dispatchConnectionError(callback, method) {
         const error = {
             message: `Connection is closed, can\'t dispatch pending call to ${method}`,
-            code: _ConnectionClosedErrorCode,
+            code: ConnectionClosedErrorCode,
             data: null,
         };
         setTimeout(() => callback(error, null), 0);
@@ -397,7 +344,7 @@ export class SessionRouter {
     static dispatchUnregisterSessionError({ callback, method }) {
         const error = {
             message: `Session is unregistering, can\'t dispatch pending call to ${method}`,
-            code: _ConnectionClosedErrorCode,
+            code: ConnectionClosedErrorCode,
             data: null,
         };
         setTimeout(() => callback(error, null), 0);
@@ -407,8 +354,8 @@ export class TargetBase {
     _needsNodeJSPatching;
     _sessionId;
     _router;
-    _agents;
-    _dispatchers;
+    agents = new Map();
+    dispatchers = new Map();
     constructor(needsNodeJSPatching, parentTarget, sessionId, connection) {
         this._needsNodeJSPatching = needsNodeJSPatching;
         this._sessionId = sessionId;
@@ -423,32 +370,27 @@ export class TargetBase {
             router = new SessionRouter(connection);
         }
         else {
-            router = new SessionRouter(_factory());
+            router = new SessionRouter(connectionFactory());
         }
         this._router = router;
         router.registerSession(this, this._sessionId);
-        this._agents = {};
         for (const [domain, agentPrototype] of inspectorBackend._agentPrototypes) {
-            this._agents[domain] = Object.create(agentPrototype);
-            this._agents[domain]._target = this;
+            const agent = Object.create(agentPrototype);
+            agent._target = this;
+            this.agents.set(domain, agent);
         }
-        this._dispatchers = {};
-        for (const [domain, dispatcherPrototype] of inspectorBackend._dispatcherPrototypes) {
-            this._dispatchers[domain] = Object.create(dispatcherPrototype);
-            this._dispatchers[domain]._dispatchers = [];
+        for (const [domain, eventParameterNames] of inspectorBackend.getEventParamterNames().entries()) {
+            this.dispatchers.set(domain, new DispatcherManager(eventParameterNames));
         }
     }
-    registerDispatcher(domain, dispatcher) {
-        if (!this._dispatchers[domain]) {
+    dispatch(eventMessage) {
+        const [domainName, method] = splitQualifiedName(eventMessage.method);
+        const dispatcher = this.dispatchers.get(domainName);
+        if (!dispatcher) {
+            InspectorBackend.reportProtocolError(`Protocol Error: the message ${eventMessage.method} is for non-existing domain '${domainName}'`, eventMessage);
             return;
         }
-        this._dispatchers[domain].addDomainDispatcher(dispatcher);
-    }
-    unregisterDispatcher(domain, dispatcher) {
-        if (!this._dispatchers[domain]) {
-            return;
-        }
-        this._dispatchers[domain].removeDomainDispatcher(dispatcher);
+        dispatcher.dispatch(method, eventMessage);
     }
     dispose(_reason) {
         if (!this._router) {
@@ -467,197 +409,242 @@ export class TargetBase {
         return this._router;
     }
     // Agent accessors, keep alphabetically sorted.
+    /**
+     * Make sure that `Domain` is only ever instantiated with one protocol domain
+     * name, because if `Domain` allows multiple domains, the type is unsound.
+     */
+    getAgent(domain) {
+        const agent = this.agents.get(domain);
+        if (!agent) {
+            throw new Error('Accessing undefined agent');
+        }
+        return agent;
+    }
     accessibilityAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Accessibility');
     }
     animationAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Animation');
     }
     applicationCacheAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('ApplicationCache');
     }
     auditsAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Audits');
+    }
+    browserAgent() {
+        return this.getAgent('Browser');
     }
     backgroundServiceAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('BackgroundService');
     }
     cacheStorageAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('CacheStorage');
     }
     cssAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('CSS');
     }
     databaseAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Database');
     }
     debuggerAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Debugger');
     }
     deviceOrientationAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('DeviceOrientation');
     }
     domAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('DOM');
     }
     domdebuggerAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('DOMDebugger');
     }
     domsnapshotAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('DOMSnapshot');
     }
     domstorageAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('DOMStorage');
     }
     emulationAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Emulation');
     }
     heapProfilerAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('HeapProfiler');
     }
     indexedDBAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('IndexedDB');
     }
     inputAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Input');
     }
     ioAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('IO');
     }
     inspectorAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Inspector');
     }
     layerTreeAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('LayerTree');
     }
     logAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Log');
     }
     mediaAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Media');
     }
     memoryAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Memory');
     }
     networkAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Network');
     }
     overlayAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Overlay');
     }
     pageAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Page');
     }
     profilerAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Profiler');
     }
     performanceAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Performance');
     }
     runtimeAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Runtime');
     }
     securityAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Security');
     }
     serviceWorkerAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('ServiceWorker');
     }
     storageAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Storage');
     }
     targetAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Target');
     }
     tracingAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('Tracing');
     }
     webAudioAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('WebAudio');
     }
     webAuthnAgent() {
-        throw new Error('Implemented in InspectorBackend.js');
+        return this.getAgent('WebAuthn');
     }
-    // Dispatcher registration, keep alphabetically sorted.
-    registerAnimationDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    // Dispatcher registration and de-registration, keep alphabetically sorted.
+    /**
+     * Make sure that `Domain` is only ever instantiated with one protocol domain
+     * name, because if `Domain` allows multiple domains, the type is unsound.
+     */
+    registerDispatcher(domain, dispatcher) {
+        const manager = this.dispatchers.get(domain);
+        if (!manager) {
+            return;
+        }
+        manager.addDomainDispatcher(dispatcher);
     }
-    registerApplicationCacheDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    /**
+     * Make sure that `Domain` is only ever instantiated with one protocol domain
+     * name, because if `Domain` allows multiple domains, the type is unsound.
+     */
+    unregisterDispatcher(domain, dispatcher) {
+        const manager = this.dispatchers.get(domain);
+        if (!manager) {
+            return;
+        }
+        manager.removeDomainDispatcher(dispatcher);
     }
-    registerAuditsDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerAnimationDispatcher(dispatcher) {
+        this.registerDispatcher('Animation', dispatcher);
     }
-    registerCSSDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerApplicationCacheDispatcher(dispatcher) {
+        this.registerDispatcher('ApplicationCache', dispatcher);
     }
-    registerDatabaseDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerAuditsDispatcher(dispatcher) {
+        this.registerDispatcher('Audits', dispatcher);
     }
-    registerBackgroundServiceDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerCSSDispatcher(dispatcher) {
+        this.registerDispatcher('CSS', dispatcher);
     }
-    registerDebuggerDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerDatabaseDispatcher(dispatcher) {
+        this.registerDispatcher('Database', dispatcher);
     }
-    unregisterDebuggerDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerBackgroundServiceDispatcher(dispatcher) {
+        this.registerDispatcher('BackgroundService', dispatcher);
     }
-    registerDOMDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerDebuggerDispatcher(dispatcher) {
+        this.registerDispatcher('Debugger', dispatcher);
     }
-    registerDOMStorageDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    unregisterDebuggerDispatcher(dispatcher) {
+        this.unregisterDispatcher('Debugger', dispatcher);
     }
-    registerHeapProfilerDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerDOMDispatcher(dispatcher) {
+        this.registerDispatcher('DOM', dispatcher);
     }
-    registerInspectorDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerDOMStorageDispatcher(dispatcher) {
+        this.registerDispatcher('DOMStorage', dispatcher);
     }
-    registerLayerTreeDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerHeapProfilerDispatcher(dispatcher) {
+        this.registerDispatcher('HeapProfiler', dispatcher);
     }
-    registerLogDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerInspectorDispatcher(dispatcher) {
+        this.registerDispatcher('Inspector', dispatcher);
     }
-    registerMediaDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerLayerTreeDispatcher(dispatcher) {
+        this.registerDispatcher('LayerTree', dispatcher);
     }
-    registerNetworkDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerLogDispatcher(dispatcher) {
+        this.registerDispatcher('Log', dispatcher);
     }
-    registerOverlayDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerMediaDispatcher(dispatcher) {
+        this.registerDispatcher('Media', dispatcher);
     }
-    registerPageDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerNetworkDispatcher(dispatcher) {
+        this.registerDispatcher('Network', dispatcher);
     }
-    registerProfilerDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerOverlayDispatcher(dispatcher) {
+        this.registerDispatcher('Overlay', dispatcher);
     }
-    registerRuntimeDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerPageDispatcher(dispatcher) {
+        this.registerDispatcher('Page', dispatcher);
     }
-    registerSecurityDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerProfilerDispatcher(dispatcher) {
+        this.registerDispatcher('Profiler', dispatcher);
     }
-    registerServiceWorkerDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerRuntimeDispatcher(dispatcher) {
+        this.registerDispatcher('Runtime', dispatcher);
     }
-    registerStorageDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerSecurityDispatcher(dispatcher) {
+        this.registerDispatcher('Security', dispatcher);
     }
-    registerTargetDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerServiceWorkerDispatcher(dispatcher) {
+        this.registerDispatcher('ServiceWorker', dispatcher);
     }
-    registerTracingDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerStorageDispatcher(dispatcher) {
+        this.registerDispatcher('Storage', dispatcher);
     }
-    registerWebAudioDispatcher(_dispatcher) {
-        throw new Error('Implemented in InspectorBackend.js');
+    registerTargetDispatcher(dispatcher) {
+        this.registerDispatcher('Target', dispatcher);
+    }
+    registerTracingDispatcher(dispatcher) {
+        this.registerDispatcher('Tracing', dispatcher);
+    }
+    registerWebAudioDispatcher(dispatcher) {
+        this.registerDispatcher('WebAudio', dispatcher);
     }
 }
+/**
+ * This is a class that serves as the prototype for a domains agents (every target
+ * has it's own set of agents). The InspectorBackend keeps an instance of this class
+ * per domain, and each TargetBase creates its agents (via Object.create) and installs
+ * this instance as prototype.
+ *
+ * The reasons this is done is so that on the prototypes we can install the implementations
+ * of the invoke_enable, etc. methods that the front-end uses.
+ */
 // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
 // eslint-disable-next-line @typescript-eslint/naming-convention
 class _AgentPrototype {
@@ -668,15 +655,10 @@ class _AgentPrototype {
         this._replyArgs = {};
         this._domain = domain;
     }
-    registerCommand(methodName, signature, replyArgs) {
-        const domainAndMethod = this._domain + '.' + methodName;
-        // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        function sendMessagePromise(_vararg) {
-            const params = Array.prototype.slice.call(arguments);
-            return _AgentPrototype.prototype._sendMessageToBackendPromise.call(this, domainAndMethod, signature, params);
+    registerCommand(methodName, parameters, replyArgs) {
+        const domainAndMethod = qualifyName(this._domain, methodName);
+        function sendMessagePromise(...args) {
+            return _AgentPrototype.prototype._sendMessageToBackendPromise.call(this, domainAndMethod, parameters, args);
         }
         // @ts-ignore Method code generation
         this[methodName] = sendMessagePromise;
@@ -687,19 +669,16 @@ class _AgentPrototype {
         this['invoke_' + methodName] = invoke;
         this._replyArgs[domainAndMethod] = replyArgs;
     }
-    _prepareParameters(method, signature, 
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    args, errorCallback) {
+    _prepareParameters(method, parameters, args, errorCallback) {
         const params = {};
         let hasParams = false;
-        for (const param of signature) {
-            const paramName = param['name'];
-            const typeName = param['type'];
-            const optionalFlag = param['optional'];
+        for (const param of parameters) {
+            const paramName = param.name;
+            const typeName = param.type;
+            const optionalFlag = param.optional;
             if (!args.length && !optionalFlag) {
                 errorCallback(`Protocol Error: Invalid number of arguments for method '${method}' call. ` +
-                    `It must have the following arguments ${JSON.stringify(signature)}'.`);
+                    `It must have the following arguments ${JSON.stringify(parameters)}'.`);
                 return null;
             }
             const value = args.shift();
@@ -720,30 +699,23 @@ class _AgentPrototype {
         }
         return hasParams ? params : null;
     }
-    _sendMessageToBackendPromise(method, signature, 
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    args) {
+    _sendMessageToBackendPromise(method, parameters, args) {
         let errorMessage;
         function onError(message) {
             console.error(message);
             errorMessage = message;
         }
-        const params = this._prepareParameters(method, signature, args, onError);
+        const params = this._prepareParameters(method, parameters, args, onError);
         if (errorMessage) {
             return Promise.resolve(null);
         }
         return new Promise(resolve => {
             // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const callback = (error, result) => {
                 if (error) {
-                    if (!test.suppressRequestErrors && error.code !== DevToolsStubErrorCode && error.code !== _GenericError &&
-                        error.code !== _ConnectionClosedErrorCode) {
+                    if (!test.suppressRequestErrors && error.code !== DevToolsStubErrorCode && error.code !== GenericError &&
+                        error.code !== ConnectionClosedErrorCode) {
                         console.error('Request ' + method + ' failed. ' + JSON.stringify(error));
                     }
                     resolve(null);
@@ -762,33 +734,13 @@ class _AgentPrototype {
     }
     _invoke(method, request) {
         return new Promise(fulfill => {
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const callback = (error, result) => {
                 if (error && !test.suppressRequestErrors && error.code !== DevToolsStubErrorCode &&
-                    error.code !== _GenericError && error.code !== _ConnectionClosedErrorCode) {
+                    error.code !== GenericError && error.code !== ConnectionClosedErrorCode) {
                     console.error('Request ' + method + ' failed. ' + JSON.stringify(error));
                 }
-                if (!result) {
-                    result = {};
-                }
-                if (error) {
-                    // TODO(crbug.com/1011811): Remove Old lookup of ProtocolError
-                    result[ProtocolError] = error.message;
-                    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    result.getError = () => {
-                        return error.message;
-                    };
-                }
-                else {
-                    result.getError = () => {
-                        return undefined;
-                    };
-                }
-                fulfill(result);
+                const errorMessage = error?.message;
+                fulfill({ ...result, getError: () => errorMessage });
             };
             if (!this._target._router) {
                 SessionRouter.dispatchConnectionError(callback, method);
@@ -799,42 +751,44 @@ class _AgentPrototype {
         });
     }
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-class _DispatcherPrototype {
-    _eventArgs;
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _dispatchers;
-    constructor() {
-        this._eventArgs = {};
-    }
-    registerEvent(eventName, params) {
-        this._eventArgs[eventName] = params;
+/**
+ * A `DispatcherManager` has a collection of dispatchers that implement one of the
+ * `ProtocolProxyApi.{Foo}Dispatcher` interfaces. Each target uses one of these per
+ * domain to manage the registered dispatchers. The class knows the parameter names
+ * of the events via `eventArgs`, which is a map managed by the inspector back-end
+ * so that there is only one map per domain that is shared among all DispatcherManagers.
+ */
+class DispatcherManager {
+    eventArgs;
+    dispatchers = [];
+    constructor(eventArgs) {
+        this.eventArgs = eventArgs;
     }
     addDomainDispatcher(dispatcher) {
-        this._dispatchers.push(dispatcher);
+        this.dispatchers.push(dispatcher);
     }
     removeDomainDispatcher(dispatcher) {
-        const index = this._dispatchers.indexOf(dispatcher);
+        const index = this.dispatchers.indexOf(dispatcher);
         if (index === -1) {
             return;
         }
-        this._dispatchers.splice(index, 1);
+        this.dispatchers.splice(index, 1);
     }
-    dispatch(functionName, messageObject) {
-        if (!this._dispatchers.length) {
+    dispatch(event, messageObject) {
+        if (!this.dispatchers.length) {
             return;
         }
-        if (!this._eventArgs[messageObject.method]) {
-            InspectorBackend.reportProtocolWarning(`Protocol Warning: Attempted to dispatch an unspecified method '${messageObject.method}'`, messageObject);
+        if (!this.eventArgs.has(messageObject.method)) {
+            InspectorBackend.reportProtocolWarning(`Protocol Warning: Attempted to dispatch an unspecified event '${messageObject.method}'`, messageObject);
             return;
         }
-        const messageArgument = { ...messageObject.params };
-        for (let index = 0; index < this._dispatchers.length; ++index) {
-            const dispatcher = this._dispatchers[index];
-            if (functionName in dispatcher) {
-                dispatcher[functionName].call(dispatcher, messageArgument);
+        const messageParams = { ...messageObject.params };
+        for (let index = 0; index < this.dispatchers.length; ++index) {
+            const dispatcher = this.dispatchers[index];
+            if (event in dispatcher) {
+                const f = dispatcher[event];
+                // @ts-ignore Can't type check the dispatch.
+                f.call(dispatcher, messageParams);
             }
         }
     }

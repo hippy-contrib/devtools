@@ -1,1 +1,1 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/panels/layers"},"files":["../../../../../../front_end/panels/layers/layers.ts"],"references":[{"path":"./layers-tsconfig.json"}]}
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/layers"},"files":["../../../../../../chrome-devtools/front_end/panels/layers/layers.ts"],"references":[{"path":"./layers-tsconfig.json"}]}

@@ -107,7 +107,7 @@ export class PerformanceModel extends Common.ObjectWrapper.ObjectWrapper {
         return this._filmStripModel;
     }
     frames() {
-        return this._frameModel.frames();
+        return this._frameModel.getFrames();
     }
     frameModel() {
         return this._frameModel;

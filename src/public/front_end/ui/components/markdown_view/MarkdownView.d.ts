@@ -4,8 +4,10 @@ export interface MarkdownViewData {
     tokens: Marked.Marked.Token[];
 }
 export declare class MarkdownView extends HTMLElement {
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     private tokenData;
+    connectedCallback(): void;
     set data(data: MarkdownViewData);
     private update;
     private render;

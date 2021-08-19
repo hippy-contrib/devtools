@@ -56,10 +56,10 @@ export class TimelineFrameModel {
         this._categoryMapper = categoryMapper;
         this.reset();
     }
-    frames(startTime, endTime) {
-        if (!startTime && !endTime) {
-            return this._frames;
-        }
+    getFrames() {
+        return this._frames;
+    }
+    getFramesWithinWindow(startTime, endTime) {
         const firstFrame = Platform.ArrayUtilities.lowerBound(this._frames, startTime || 0, (time, frame) => time - frame.endTime);
         const lastFrame = Platform.ArrayUtilities.lowerBound(this._frames, endTime || Infinity, (time, frame) => time - frame.startTime);
         return this._frames.slice(firstFrame, lastFrame);

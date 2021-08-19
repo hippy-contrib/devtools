@@ -50,15 +50,4 @@ import * as RequestTimingView from './RequestTimingView.js';
 import * as ResourceWebSocketFrameView from './ResourceWebSocketFrameView.js';
 import * as SignedExchangeInfoView from './SignedExchangeInfoView.js';
 export { BinaryResourceView, BlockedURLsPane, EventSourceMessagesView, NetworkConfigView, NetworkDataGridNode, NetworkFrameGrouper, NetworkItemView, NetworkLogView, NetworkLogViewColumns, NetworkManageCustomHeadersView, NetworkOverview, NetworkPanel, NetworkSearchScope, NetworkTimeCalculator, NetworkWaterfallColumn, RequestCookiesView, RequestHeadersView, RequestHTMLView, RequestInitiatorView, RequestPreviewView, RequestResponseView, RequestTimingView, ResourceWebSocketFrameView, SignedExchangeInfoView, };
-/**
- * This function exists to break a circular dependency from Cookie Table. In order to reveal
- * requests from the Cookie Table in the Network Panel, the Cookie Table dispatches an event
- * which is picked up here and used to load the Network Panel instance.
- */
-const onRevealAndFilter = (evt) => {
-    NetworkPanel.NetworkPanel.revealAndFilter(evt.detail);
-};
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-// @ts-expect-error
-document.body.addEventListener('networkrevealandfilter', onRevealAndFilter);
 //# sourceMappingURL=network.js.map

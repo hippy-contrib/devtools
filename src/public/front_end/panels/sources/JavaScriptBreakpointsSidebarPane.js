@@ -87,7 +87,7 @@ export class JavaScriptBreakpointsSidebarPane extends UI.ThrottledWidget.Throttl
     _emptyElement;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/sources/javaScriptBreakpointsSidebarPane.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/sources/javaScriptBreakpointsSidebarPane.css');
         this._breakpointManager = Bindings.BreakpointManager.BreakpointManager.instance();
         this._breakpointManager.addEventListener(Bindings.BreakpointManager.Events.BreakpointAdded, this.update, this);
         this._breakpointManager.addEventListener(Bindings.BreakpointManager.Events.BreakpointRemoved, this.update, this);

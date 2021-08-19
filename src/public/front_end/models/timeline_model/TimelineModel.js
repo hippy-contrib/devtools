@@ -458,7 +458,7 @@ export class TimelineModelImpl {
         }
     }
     _buildGPUEvents(tracingModel) {
-        const thread = tracingModel.threadByName('GPU Process', 'CrGpuMain');
+        const thread = tracingModel.getThreadByName('GPU Process', 'CrGpuMain');
         if (!thread) {
             return;
         }
@@ -468,7 +468,7 @@ export class TimelineModelImpl {
         track.events = thread.events().filter(event => event.name === gpuEventName);
     }
     _buildLoadingEvents(tracingModel, events) {
-        const thread = tracingModel.threadByName('Renderer', 'CrRendererMain');
+        const thread = tracingModel.getThreadByName('Renderer', 'CrRendererMain');
         if (!thread) {
             return;
         }
@@ -950,7 +950,7 @@ export class TimelineModelImpl {
                 break;
             }
             case RecordType.Paint: {
-                this._invalidationTracker.didPaint(event);
+                this._invalidationTracker.didPaint = true;
                 timelineData.backendNodeIds.push(eventData['nodeId']);
                 // Only keep layer paint events, skip paints for subframes that get painted to the same layer as parent.
                 if (!eventData['layerId']) {
@@ -1078,7 +1078,7 @@ export class TimelineModelImpl {
             return;
         }
         if (event.name === RecordType.ResourceWillSendRequest) {
-            const requestId = event.args['data']['requestId'];
+            const requestId = event.args?.data?.requestId;
             if (typeof requestId === 'string') {
                 this._requestsFromBrowser.set(requestId, event);
             }
@@ -1251,8 +1251,8 @@ export class TimelineModelImpl {
                 continue;
             }
             const id = TimelineModelImpl.globalEventId(e, 'requestId');
-            if (e.name === RecordType.ResourceSendRequest && this._requestsFromBrowser.has(e.args.data.requestId)) {
-                const requestId = e.args.data.requestId;
+            const requestId = e.args?.data?.requestId;
+            if (e.name === RecordType.ResourceSendRequest && requestId && this._requestsFromBrowser.has(requestId)) {
                 const event = this._requestsFromBrowser.get(requestId);
                 if (event) {
                     addRequest(event, id);
@@ -1325,6 +1325,8 @@ export var RecordType;
     RecordType["XHRReadyStateChange"] = "XHRReadyStateChange";
     RecordType["XHRLoad"] = "XHRLoad";
     RecordType["CompileScript"] = "v8.compile";
+    RecordType["CompileCode"] = "V8.CompileCode";
+    RecordType["OptimizeCode"] = "V8.OptimizeCode";
     RecordType["EvaluateScript"] = "EvaluateScript";
     RecordType["CompileModule"] = "v8.compileModule";
     RecordType["EvaluateModule"] = "v8.evaluateModule";
@@ -1773,13 +1775,13 @@ export class InvalidationTrackingEvent {
 export class InvalidationTracker {
     _lastRecalcStyle;
     _lastPaintWithLayer;
-    _didPaint;
+    didPaint;
     _invalidations;
     _invalidationsByNodeId;
     constructor() {
         this._lastRecalcStyle = null;
         this._lastPaintWithLayer = null;
-        this._didPaint = false;
+        this.didPaint = false;
         this._initializePerFrameState();
         this._invalidations = {};
         this._invalidationsByNodeId = {};
@@ -1918,9 +1920,6 @@ export class InvalidationTracker {
             invalidation.linkedLayoutEvent = true;
         }
     }
-    didPaint(_paintEvent) {
-        this._didPaint = true;
-    }
     _addInvalidationToEvent(event, eventFrameId, invalidation) {
         if (eventFrameId !== invalidation.frame) {
             return;
@@ -1952,7 +1951,7 @@ export class InvalidationTracker {
         return generator();
     }
     _startNewFrameIfNeeded() {
-        if (!this._didPaint) {
+        if (!this.didPaint) {
             return;
         }
         this._initializePerFrameState();
@@ -1962,7 +1961,7 @@ export class InvalidationTracker {
         this._invalidationsByNodeId = {};
         this._lastRecalcStyle = null;
         this._lastPaintWithLayer = null;
-        this._didPaint = false;
+        this.didPaint = false;
     }
 }
 export class TimelineAsyncEventTracker {

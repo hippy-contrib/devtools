@@ -3,5 +3,6 @@
 // found in the LICENSE file.
 import * as DevToolsLocale from './DevToolsLocale.js';
 import * as i18n from './i18nImpl.js';
-export { DevToolsLocale, i18n, };
+import * as TimeUtilities from './time-utilities.js';
+export { DevToolsLocale, i18n, TimeUtilities, };
 //# sourceMappingURL=i18n.js.map

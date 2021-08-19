@@ -93,15 +93,13 @@ export declare class ModelBreakpoint {
     constructor(debuggerModel: SDK.DebuggerModel.DebuggerModel, breakpoint: Breakpoint, debuggerWorkspaceBinding: DebuggerWorkspaceBinding);
     _resetLocations(): void;
     _scheduleUpdateInDebugger(): void;
-    _didUpdateInDebugger(): void;
     _scriptDiverged(): boolean;
-    _updateInDebugger(callback: () => void): Promise<void>;
+    _updateInDebugger(): Promise<void>;
     _refreshBreakpoint(): Promise<void>;
-    _didSetBreakpointInDebugger(callback: () => void, breakpointIds: string[], locations: SDK.DebuggerModel.Location[]): Promise<void>;
     _didRemoveFromDebugger(): void;
     _breakpointResolved(event: Common.EventTarget.EventTargetEvent): Promise<void>;
     _locationUpdated(liveLocation: LiveLocation): Promise<void>;
-    _addResolvedLocation(location: SDK.DebuggerModel.Location): Promise<boolean>;
+    _addResolvedLocation(location: SDK.DebuggerModel.Location): Promise<void>;
     _cleanUpAfterDebuggerIsGone(): void;
     _removeEventListeners(): void;
 }

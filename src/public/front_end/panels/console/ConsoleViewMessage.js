@@ -39,6 +39,8 @@ import * as Bindings from '../../models/bindings/bindings.js';
 import * as Logs from '../../models/logs/logs.js';
 import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as Workspace from '../../models/workspace/workspace.js';
+import * as IssueCounter from '../../ui/components/issue_counter/issue_counter.js';
+import * as RequestLinkIcon from '../../ui/components/request_link_icon/request_link_icon.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as ObjectUI from '../../ui/legacy/components/object_ui/object_ui.js';
 import * as TextEditor from '../../ui/legacy/components/text_editor/text_editor.js';
@@ -203,9 +205,13 @@ export class ConsoleViewMessage {
     _lastInSimilarGroup;
     _groupKey;
     _repeatCountElement;
-    constructor(consoleMessage, linkifier, nestingLevel, onResize) {
+    requestResolver;
+    issueResolver;
+    constructor(consoleMessage, linkifier, requestResolver, issueResolver, nestingLevel, onResize) {
         this._message = consoleMessage;
         this._linkifier = linkifier;
+        this.requestResolver = requestResolver;
+        this.issueResolver = issueResolver;
         this._repeatCount = 1;
         this._closeGroupDecorationCount = 0;
         this._nestingLevel = nestingLevel;
@@ -277,7 +283,7 @@ export class ConsoleViewMessage {
                         messageElement.textContent = i18nString(UIStrings.consoleWasCleared);
                     }
                     UI.Tooltip.Tooltip.install(messageElement, i18nString(UIStrings.clearAllMessagesWithS, {
-                        PH1: UI.ShortcutRegistry.ShortcutRegistry.instance().shortcutTitleForAction('console.clear'),
+                        PH1: String(UI.ShortcutRegistry.ShortcutRegistry.instance().shortcutTitleForAction('console.clear')),
                     }));
                     break;
                 case "dir" /* Dir */: {
@@ -375,6 +381,28 @@ export class ConsoleViewMessage {
         }
         return messageElement;
     }
+    createAffectedResourceLinks() {
+        const elements = [];
+        const requestId = this._message.getAffectedResources()?.requestId;
+        if (requestId) {
+            const icon = new RequestLinkIcon.RequestLinkIcon.RequestLinkIcon();
+            icon.classList.add('resource-links');
+            icon.data = {
+                affectedRequest: { requestId },
+                requestResolver: this.requestResolver,
+                displayURL: false,
+            };
+            elements.push(icon);
+        }
+        const issueId = this._message.getAffectedResources()?.issueId;
+        if (issueId) {
+            const icon = new IssueCounter.IssueLinkIcon.IssueLinkIcon();
+            icon.classList.add('resource-links');
+            icon.data = { issueId, issueResolver: this.issueResolver };
+            elements.push(icon);
+        }
+        return elements;
+    }
     _buildMessageAnchor() {
         const linkify = (message) => {
             if (message.scriptId) {
@@ -399,6 +427,10 @@ export class ConsoleViewMessage {
             const anchorWrapperElement = document.createElement('span');
             anchorWrapperElement.classList.add('console-message-anchor');
             anchorWrapperElement.appendChild(anchorElement);
+            for (const element of this.createAffectedResourceLinks()) {
+                UI.UIUtils.createTextChild(anchorWrapperElement, ' ');
+                anchorWrapperElement.append(element);
+            }
             UI.UIUtils.createTextChild(anchorWrapperElement, ' ');
             return anchorWrapperElement;
         }
@@ -576,9 +608,7 @@ export class ConsoleViewMessage {
         else {
             UI.UIUtils.createTextChild(result, description);
         }
-        if (obj.objectId) {
-            result.addEventListener('contextmenu', this._contextMenuEventFired.bind(this, obj), false);
-        }
+        result.addEventListener('contextmenu', this._contextMenuEventFired.bind(this, obj), false);
         return result;
     }
     _formatParameterAsTrustedType(obj) {
@@ -688,11 +718,10 @@ export class ConsoleViewMessage {
     _formattedParameterAsNodeForTest() {
     }
     _formatParameterAsString(output) {
-        // Properly escape double quotes here, so users don't get surprised
-        // when they copy strings from the console (https://crbug.com/1178530).
         const description = output.description ?? '';
-        const text = JSON.stringify(description);
+        const text = Platform.StringUtilities.formatAsJSLiteral(description);
         const result = document.createElement('span');
+        result.addEventListener('contextmenu', this._contextMenuEventFired.bind(this, output), false);
         result.appendChild(this._linkifyStringAsFragment(text));
         return result;
     }
@@ -1292,7 +1321,7 @@ export class ConsoleViewMessage {
             const scripts = uiSourceCodes.map(uiSourceCode => debuggerWorkspaceBinding.scriptsForUISourceCode(uiSourceCode)).flat();
             if (scripts.length) {
                 const location = new SDK.DebuggerModel.Location(debuggerModel, scripts[0].scriptId, lineNumber || 0, columnNumber);
-                return debuggerWorkspaceBinding.pluginManager.getFunctionInfo(scripts[0], location);
+                return await debuggerWorkspaceBinding.pluginManager.getFunctionInfo(scripts[0], location) ?? { frames: [] };
             }
         }
         return { frames: [] };
@@ -1449,6 +1478,11 @@ export class ConsoleViewMessage {
             if (debuggerModel.scriptsForSourceURL(url).length) {
                 return url;
             }
+            // nodejs stack traces contain (absolute) file paths, but v8 reports them as file: urls.
+            const fileUrl = new URL(url, 'file://');
+            if (debuggerModel.scriptsForSourceURL(fileUrl.href).length) {
+                return fileUrl.href;
+            }
             return null;
         }
     }
@@ -1461,9 +1495,18 @@ export class ConsoleViewMessage {
         }
         const container = document.createDocumentFragment();
         const tokens = ConsoleViewMessage._tokenizeMessageText(string);
+        let isBlob = false;
         for (const token of tokens) {
             if (!token.text) {
                 continue;
+            }
+            if (isBlob) {
+                token.text = `blob:${token.text}`;
+                isBlob = !isBlob;
+            }
+            if (token.text === '\'blob:' && token === tokens[0]) {
+                isBlob = true;
+                token.text = '\'';
             }
             switch (token.type) {
                 case 'url': {
@@ -1563,9 +1606,9 @@ export class ConsoleGroupViewMessage extends ConsoleViewMessage {
     _collapsed;
     _expandGroupIcon;
     _onToggle;
-    constructor(consoleMessage, linkifier, nestingLevel, onToggle, onResize) {
+    constructor(consoleMessage, linkifier, requestResolver, issueResolver, nestingLevel, onToggle, onResize) {
         console.assert(consoleMessage.isGroupStartMessage());
-        super(consoleMessage, linkifier, nestingLevel, onResize);
+        super(consoleMessage, linkifier, requestResolver, issueResolver, nestingLevel, onResize);
         this._collapsed = consoleMessage.type === "startGroupCollapsed" /* StartGroupCollapsed */;
         this._expandGroupIcon = null;
         this._onToggle = onToggle;
@@ -1617,8 +1660,8 @@ export class ConsoleGroupViewMessage extends ConsoleViewMessage {
 }
 export class ConsoleCommand extends ConsoleViewMessage {
     _formattedCommand;
-    constructor(consoleMessage, linkifier, nestingLevel, onResize) {
-        super(consoleMessage, linkifier, nestingLevel, onResize);
+    constructor(consoleMessage, linkifier, requestResolver, issueResolver, nestingLevel, onResize) {
+        super(consoleMessage, linkifier, requestResolver, issueResolver, nestingLevel, onResize);
         this._formattedCommand = null;
     }
     contentElement() {
@@ -1665,8 +1708,8 @@ export class ConsoleCommandResult extends ConsoleViewMessage {
 }
 export class ConsoleTableMessageView extends ConsoleViewMessage {
     _dataGrid;
-    constructor(consoleMessage, linkifier, nestingLevel, onResize) {
-        super(consoleMessage, linkifier, nestingLevel, onResize);
+    constructor(consoleMessage, linkifier, requestResolver, issueResolver, nestingLevel, onResize) {
+        super(consoleMessage, linkifier, requestResolver, issueResolver, nestingLevel, onResize);
         console.assert(consoleMessage.type === "table" /* Table */);
         this._dataGrid = null;
     }

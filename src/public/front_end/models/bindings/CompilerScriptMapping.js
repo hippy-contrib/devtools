@@ -244,7 +244,7 @@ export class CompilerScriptMapping {
         return false;
     }
     dispose() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         this._regularProject.dispose();
         this._contentScriptsProject.dispose();
         this._stubProject.dispose();

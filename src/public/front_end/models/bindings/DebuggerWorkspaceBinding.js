@@ -8,9 +8,9 @@ import { CompilerScriptMapping } from './CompilerScriptMapping.js';
 import { DebuggerLanguagePluginManager } from './DebuggerLanguagePlugins.js';
 import { DefaultScriptMapping } from './DefaultScriptMapping.js';
 import { IgnoreListManager } from './IgnoreListManager.js';
-import { LiveLocationWithPool } from './LiveLocation.js'; // eslint-disable-line no-unused-vars
+import { LiveLocationWithPool } from './LiveLocation.js';
 import { ResourceMapping } from './ResourceMapping.js';
-import { ResourceScriptMapping } from './ResourceScriptMapping.js'; // eslint-disable-line no-unused-vars
+import { ResourceScriptMapping } from './ResourceScriptMapping.js';
 let debuggerWorkspaceBindingInstance;
 export class DebuggerWorkspaceBinding {
     _workspace;
@@ -39,6 +39,9 @@ export class DebuggerWorkspaceBinding {
             debuggerWorkspaceBindingInstance = new DebuggerWorkspaceBinding(targetManager, workspace);
         }
         return debuggerWorkspaceBindingInstance;
+    }
+    static removeInstance() {
+        debuggerWorkspaceBindingInstance = undefined;
     }
     addSourceMapping(sourceMapping) {
         this._sourceMappings.push(sourceMapping);
@@ -253,8 +256,7 @@ export class DebuggerWorkspaceBinding {
         return modelData._compilerMapping.sourceMapForScript(script);
     }
     _globalObjectCleared(event) {
-        const debuggerModel = event.data;
-        this._reset(debuggerModel);
+        this._reset(event.data);
     }
     _reset(debuggerModel) {
         const modelData = this._debuggerModelToData.get(debuggerModel);
@@ -287,8 +289,7 @@ export class DebuggerWorkspaceBinding {
         }
     }
     _debuggerResumed(event) {
-        const debuggerModel = event.data;
-        this._reset(debuggerModel);
+        this._reset(event.data);
     }
 }
 class ModelData {

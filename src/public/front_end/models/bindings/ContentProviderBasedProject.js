@@ -148,7 +148,7 @@ export class ContentProviderBasedProject extends Workspace.Workspace.ProjectStor
             if (allMatchesFound) {
                 result.push(path);
             }
-            progress.worked(1);
+            progress.incrementWorked(1);
         }
     }
     indexContent(progress) {

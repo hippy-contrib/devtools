@@ -145,7 +145,6 @@ export function javaScriptIdentifiers(content) {
 export function format(mimeType, text, indentString) {
     // Default to a 4-space indent.
     indentString = indentString || '    ';
-    mimeType === 'application/json' ? indentString = '  ' : null;
     let result;
     const builder = new FormattedContentBuilder(indentString);
     const lineEndings = Platform.StringUtilities.findLineEndingIndexes(text);
@@ -156,6 +155,7 @@ export function format(mimeType, text, indentString) {
                 formatter.format(text, lineEndings);
                 break;
             }
+            case 'text/x-scss':
             case 'text/css': {
                 const formatter = new CSSFormatter(builder);
                 formatter.format(text, lineEndings, 0, text.length);

@@ -37,6 +37,7 @@ import * as Platform from '../../../../core/platform/platform.js';
 import * as Root from '../../../../core/root/root.js';
 import * as SDK from '../../../../core/sdk/sdk.js';
 import * as IssuesManager from '../../../../models/issues_manager/issues_manager.js';
+import * as NetworkForward from '../../../../panels/network/forward/forward.js';
 import * as UI from '../../legacy.js';
 import * as DataGrid from '../data_grid/data_grid.js';
 const UIStrings = {
@@ -100,7 +101,7 @@ export class CookiesTable extends UI.Widget.VBox {
     _cookieToBlockedReasons;
     constructor(renderInline, saveCallback, refreshCallback, selectedCallback, deleteCallback) {
         super();
-        this.registerRequiredCSS('ui/legacy/components/cookie_table/cookiesTable.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/components/cookie_table/cookiesTable.css');
         this.element.classList.add('cookies-table');
         this._saveCallback = saveCallback;
         this._refreshCallback = refreshCallback;
@@ -462,7 +463,7 @@ export class CookiesTable extends UI.Widget.VBox {
             data[SDK.Cookie.Attributes.Path] = cookie.path() || '';
         }
         if (cookie.maxAge()) {
-            data[SDK.Cookie.Attributes.Expires] = i18n.i18n.secondsToString(Math.floor(cookie.maxAge()));
+            data[SDK.Cookie.Attributes.Expires] = i18n.TimeUtilities.secondsToString(Math.floor(cookie.maxAge()));
         }
         else if (cookie.expires()) {
             if (cookie.expires() < 0) {
@@ -484,7 +485,7 @@ export class CookiesTable extends UI.Widget.VBox {
         data[SDK.Cookie.Attributes.SourcePort] = cookie.sourcePort();
         data[SDK.Cookie.Attributes.SourceScheme] = cookie.sourceScheme();
         data[SDK.Cookie.Attributes.Priority] = cookie.priority() || '';
-        const blockedReasons = this._cookieToBlockedReasons ? this._cookieToBlockedReasons.get(cookie) : null;
+        const blockedReasons = this._cookieToBlockedReasons?.get(cookie);
         const node = new DataGridNode(data, cookie, blockedReasons || null);
         node.selectable = true;
         return node;
@@ -595,21 +596,17 @@ export class CookiesTable extends UI.Widget.VBox {
         }
         const cookie = maybeCookie;
         contextMenu.revealSection().appendItem(i18nString(UIStrings.showRequestsWithThisCookie), () => {
-            const evt = new CustomEvent('networkrevealandfilter', {
-                bubbles: true,
-                composed: true,
-                detail: [
-                    {
-                        filterType: 'cookie-domain',
-                        filterValue: cookie.domain(),
-                    },
-                    {
-                        filterType: 'cookie-name',
-                        filterValue: cookie.name(),
-                    },
-                ],
-            });
-            this.element.dispatchEvent(evt);
+            const requestFilter = NetworkForward.UIFilter.UIRequestFilter.filters([
+                {
+                    filterType: NetworkForward.UIFilter.FilterType.CookieDomain,
+                    filterValue: cookie.domain(),
+                },
+                {
+                    filterType: NetworkForward.UIFilter.FilterType.CookieName,
+                    filterValue: cookie.name(),
+                },
+            ]);
+            Common.Revealer.reveal(requestFilter);
         });
         if (IssuesManager.RelatedIssue.hasIssues(cookie)) {
             contextMenu.revealSection().appendItem(i18nString(UIStrings.showIssueAssociatedWithThis), () => {

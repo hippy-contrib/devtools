@@ -1,7 +1,6 @@
 interface Options {
-    cssFile?: string;
+    cssFile?: string | CSSStyleSheet[];
     delegatesFocus?: boolean;
-    enableLegacyPatching: false;
 }
 export declare function createShadowRootWithCoreStyles(element: Element, options?: Options): ShadowRoot;
 export {};

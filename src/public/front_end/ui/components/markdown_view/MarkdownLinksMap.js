@@ -24,6 +24,7 @@ export const markdownLinks = new Map([
         'https://web.dev/cross-origin-resource-sharing/#preflight-requests-for-complex-http-calls',
     ],
     ['issueQuirksModeDoctype', 'https://web.dev/doctype/'],
+    ['sameSiteAndSameOrigin', 'https://web.dev/same-site-same-origin/'],
 ]);
 export const getMarkdownLink = (key) => {
     const link = markdownLinks.get(key);

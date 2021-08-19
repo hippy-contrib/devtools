@@ -1,6 +1,7 @@
 import * as Common from '../common/common.js';
 import * as Host from '../host/host.js';
 import type * as Protocol from '../../generated/protocol.js';
+import type { ResourceTreeFrame } from './ResourceTreeModel.js';
 import type { Target } from './Target.js';
 export declare type PageResourceLoadInitiator = {
     target: null;
@@ -18,19 +19,20 @@ export interface PageResource {
     url: string;
     size: number | null;
 }
+interface LoadQueueEntry {
+    resolve: () => void;
+    reject: (arg0: Error) => void;
+}
 /**
  * The page resource loader is a bottleneck for all DevTools-initiated resource loads. For each such load, it keeps a
  * `PageResource` object around that holds meta information. This can be as the basis for reporting to the user which
  * resources were loaded, and whether there was a load error.
  */
-export declare class PageResourceLoader extends Common.ObjectWrapper.ObjectWrapper {
+export declare class PageResourceLoader extends Common.ObjectWrapper.ObjectWrapper<EventTypes> {
     _currentlyLoading: number;
     _maxConcurrentLoads: number;
     _pageResources: Map<string, PageResource>;
-    _queuedLoads: {
-        resolve: (arg0: any) => void;
-        reject: (arg0: any) => void;
-    }[];
+    _queuedLoads: LoadQueueEntry[];
     _loadOverride: ((arg0: string) => Promise<{
         success: boolean;
         content: string;
@@ -52,7 +54,7 @@ export declare class PageResourceLoader extends Common.ObjectWrapper.ObjectWrapp
         maxConcurrentLoads: number;
         loadTimeout: number;
     }): PageResourceLoader;
-    _onMainFrameNavigated(event: any): void;
+    _onMainFrameNavigated(event: Common.EventTarget.EventTargetEvent<ResourceTreeFrame>): void;
     getResourcesLoaded(): Map<string, PageResource>;
     /**
      * Loading is the number of currently loading and queued items. Resources is the total number of resources,
@@ -93,3 +95,7 @@ export declare function getLoadThroughTargetSetting(): Common.Settings.Setting<b
 export declare enum Events {
     Update = "Update"
 }
+export declare type EventTypes = {
+    [Events.Update]: void;
+};
+export {};

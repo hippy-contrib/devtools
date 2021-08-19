@@ -47,7 +47,7 @@ export class ConsoleFilter {
         const message = viewMessage.consoleMessage();
         if (this.executionContext &&
             (this.executionContext.runtimeModel !== message.runtimeModel() ||
-                this.executionContext.id !== message.executionContextId)) {
+                this.executionContext.id !== message.getExecutionContextId())) {
             return false;
         }
         if (message.type === SDK.ConsoleModel.FrontendMessageType.Command ||

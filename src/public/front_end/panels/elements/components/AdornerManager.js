@@ -1,31 +1,56 @@
 // Copyright 2021 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// TODO(crbug.com/1167717): Make this a const enum again
+// eslint-disable-next-line rulesdir/const_enum
+export var RegisteredAdorners;
+(function (RegisteredAdorners) {
+    RegisteredAdorners["GRID"] = "grid";
+    RegisteredAdorners["FLEX"] = "flex";
+    RegisteredAdorners["AD"] = "ad";
+    RegisteredAdorners["SCROLL_SNAP"] = "scroll-snap";
+})(RegisteredAdorners || (RegisteredAdorners = {}));
 // This enum-like const object serves as the authoritative registry for all the
 // adorners available.
-export const AdornerRegistry = {
-    GRID: {
-        name: 'grid',
-        category: "Layout" /* LAYOUT */,
-        enabledByDefault: true,
-    },
-    FLEX: {
-        name: 'flex',
-        category: "Layout" /* LAYOUT */,
-        enabledByDefault: true,
-    },
-    AD: {
-        name: 'ad',
-        category: "Security" /* SECURITY */,
-        enabledByDefault: true,
-    },
-    SCROLL_SNAP: {
-        name: 'scroll-snap',
-        category: "Layout" /* LAYOUT */,
-        enabledByDefault: true,
-    },
-};
-export const DefaultAdornerSettings = Object.values(AdornerRegistry).map(({ name, enabledByDefault }) => ({
+export function getRegisteredAdorner(which) {
+    switch (which) {
+        case RegisteredAdorners.GRID:
+            return {
+                name: 'grid',
+                category: "Layout" /* LAYOUT */,
+                enabledByDefault: true,
+            };
+        case RegisteredAdorners.FLEX:
+            return {
+                name: 'flex',
+                category: "Layout" /* LAYOUT */,
+                enabledByDefault: true,
+            };
+        case RegisteredAdorners.AD:
+            return {
+                name: 'ad',
+                category: "Security" /* SECURITY */,
+                enabledByDefault: true,
+            };
+        case RegisteredAdorners.SCROLL_SNAP:
+            return {
+                name: 'scroll-snap',
+                category: "Layout" /* LAYOUT */,
+                enabledByDefault: true,
+            };
+    }
+}
+let adornerNameToCategoryMap = undefined;
+function getCategoryFromAdornerName(name) {
+    if (!adornerNameToCategoryMap) {
+        adornerNameToCategoryMap = new Map();
+        for (const { name, category } of Object.values(RegisteredAdorners).map(getRegisteredAdorner)) {
+            adornerNameToCategoryMap.set(name, category);
+        }
+    }
+    return adornerNameToCategoryMap.get(name) || "Default" /* DEFAULT */;
+}
+export const DefaultAdornerSettings = Object.values(RegisteredAdorners).map(getRegisteredAdorner).map(({ name, enabledByDefault }) => ({
     adorner: name,
     isEnabled: enabledByDefault,
 }));
@@ -74,5 +99,17 @@ export class AdornerManager {
         }
         this.persistCurrentSettings();
     }
+}
+const OrderedAdornerCategories = [
+    "Security" /* SECURITY */,
+    "Layout" /* LAYOUT */,
+    "Default" /* DEFAULT */,
+];
+// Use idx + 1 for the order to avoid JavaScript's 0 == false issue
+export const AdornerCategoryOrder = new Map(OrderedAdornerCategories.map((category, idx) => [category, idx + 1]));
+export function compareAdornerNamesByCategory(nameA, nameB) {
+    const orderA = AdornerCategoryOrder.get(getCategoryFromAdornerName(nameA)) || Number.POSITIVE_INFINITY;
+    const orderB = AdornerCategoryOrder.get(getCategoryFromAdornerName(nameB)) || Number.POSITIVE_INFINITY;
+    return orderA - orderB;
 }
 //# sourceMappingURL=AdornerManager.js.map

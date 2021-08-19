@@ -1,7 +1,7 @@
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import { DOMModel } from './DOMModel.js'; // eslint-disable-line no-unused-vars
+import { DOMModel } from './DOMModel.js';
 export var Layer;
 (function (Layer) {
     // TODO(crbug.com/1167717): Make this a const enum again

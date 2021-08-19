@@ -1,5 +1,5 @@
 import type * as Platform from '../../core/platform/platform.js';
-import type * as IssuesManager from '../../models/issues_manager/issues_manager.js';
+import * as IssuesManager from '../../models/issues_manager/issues_manager.js';
 import { AffectedResourcesView } from './AffectedResourcesView.js';
 import type { IssueView } from './IssueView.js';
 export declare class AffectedBlockedByResponseView extends AffectedResourcesView {

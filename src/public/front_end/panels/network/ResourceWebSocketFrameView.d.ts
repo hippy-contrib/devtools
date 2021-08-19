@@ -26,6 +26,7 @@ export declare class ResourceWebSocketFrameView extends UI.Widget.VBox {
     _frameFilter(frame: SDK.NetworkRequest.WebSocketFrame): boolean;
     _clearFrames(): void;
     _updateFilterSetting(): void;
+    _applyFilter(text: string): void;
     _onFrameSelected(event: Common.EventTarget.EventTargetEvent): Promise<void>;
     _onFrameDeselected(_event: Common.EventTarget.EventTargetEvent): void;
     refresh(): void;

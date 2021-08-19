@@ -6,10 +6,10 @@ export interface HistoryEntry {
     reveal(): void;
 }
 export declare class SimpleHistoryManager {
-    _entries: HistoryEntry[];
-    _activeEntryIndex: number;
-    _coalescingReadonly: number;
-    _historyDepth: number;
+    private entries;
+    private activeEntryIndex;
+    private coalescingReadonly;
+    private readonly historyDepth;
     constructor(historyDepth: number);
     _readOnlyLock(): void;
     _releaseReadOnlyLock(): void;

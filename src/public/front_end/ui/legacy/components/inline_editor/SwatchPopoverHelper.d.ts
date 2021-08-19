@@ -8,12 +8,12 @@ export declare class SwatchPopoverHelper extends Common.ObjectWrapper.ObjectWrap
     _isHidden: boolean;
     _anchorElement: Element | null;
     _view?: UI.Widget.Widget;
-    _hiddenCallback?: ((arg0: boolean) => any);
+    _hiddenCallback?: ((arg0: boolean) => void);
     _focusRestorer?: UI.Widget.WidgetFocusRestorer;
     constructor();
     _onFocusOut(event: FocusEvent): void;
     isShowing(): boolean;
-    show(view: UI.Widget.Widget, anchorElement: Element, hiddenCallback?: ((arg0: boolean) => any)): void;
+    show(view: UI.Widget.Widget, anchorElement: Element, hiddenCallback?: ((arg0: boolean) => void)): void;
     reposition(): void;
     hide(commitEdit?: boolean): void;
     _onKeyDown(event: KeyboardEvent): void;

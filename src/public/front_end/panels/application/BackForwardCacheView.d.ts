@@ -7,4 +7,5 @@ export declare class BackForwardCacheView extends UI.ThrottledWidget.ThrottledWi
     private getMainFrame;
     private renderMainFrameInformation;
     private renderBackForwardCacheStatus;
+    private maybeRenderExplanations;
 }

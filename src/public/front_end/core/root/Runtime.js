@@ -26,6 +26,7 @@ export const mappingForLayoutTests = new Map([
     ['panels/browser_debugger', 'browser_debugger'],
     ['panels/changes', 'changes'],
     ['panels/console', 'console'],
+    ['panels/custom', 'custom'],
     ['panels/elements', 'elements'],
     ['panels/emulation', 'emulation'],
     ['panels/mobile_throttling', 'mobile_throttling'],
@@ -122,8 +123,6 @@ export class Runtime {
             return {};
         }
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static _assert(value, message) {
         if (value) {
             return;
@@ -305,10 +304,10 @@ export class ExperimentsSupport {
         }
         self.localStorage['experiments'] = JSON.stringify(value);
     }
-    register(experimentName, experimentTitle, unstable) {
+    register(experimentName, experimentTitle, unstable, docLink) {
         Runtime._assert(!this._experimentNames.has(experimentName), 'Duplicate registration of experiment ' + experimentName);
         this._experimentNames.add(experimentName);
-        this._experiments.push(new Experiment(this, experimentName, experimentTitle, Boolean(unstable)));
+        this._experiments.push(new Experiment(this, experimentName, experimentTitle, Boolean(unstable), docLink ?? ''));
     }
     isEnabled(experimentName) {
         this._checkExperiment(experimentName);
@@ -381,11 +380,13 @@ export class Experiment {
     name;
     title;
     unstable;
+    docLink;
     _experiments;
-    constructor(experiments, name, title, unstable) {
+    constructor(experiments, name, title, unstable, docLink) {
         this.name = name;
         this.title = title;
         this.unstable = unstable;
+        this.docLink = docLink;
         this._experiments = experiments;
     }
     isEnabled() {
@@ -401,13 +402,11 @@ export function loadResourcePromise(url) {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
         xhr.onreadystatechange = onreadystatechange;
-        function onreadystatechange(e) {
+        function onreadystatechange(_e) {
             if (xhr.readyState !== XMLHttpRequest.DONE) {
                 return;
             }
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { response } = e.target;
+            const response = this.response;
             // DevTools Proxy server can mask 404s as 200s, check the body to be sure
             const status = /^HTTP\/1.1 404/.test(response) ? 404 : xhr.status;
             if ([0, 200, 304].indexOf(status) === -1) // Testing harness file:/// results in 0.
@@ -460,7 +459,6 @@ export var ExperimentName;
     ExperimentName["ALL"] = "*";
     ExperimentName["PROTOCOL_MONITOR"] = "protocolMonitor";
     ExperimentName["WEBAUTHN_PANE"] = "webauthnPane";
-    ExperimentName["RECORDER"] = "recorder";
     ExperimentName["LOCALIZED_DEVTOOLS"] = "localizedDevTools";
 })(ExperimentName || (ExperimentName = {}));
 // TODO(crbug.com/1167717): Make this a const enum again

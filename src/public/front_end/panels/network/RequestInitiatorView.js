@@ -30,7 +30,7 @@ export class RequestInitiatorView extends UI.Widget.VBox {
     _hasShown;
     constructor(request) {
         super();
-        this.registerRequiredCSS('panels/network/requestInitiatorView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/network/requestInitiatorView.css');
         this.element.classList.add('request-initiator-view');
         this._linkifier = new Components.Linkifier.Linkifier();
         this._request = request;
@@ -50,7 +50,7 @@ export class RequestInitiatorView extends UI.Widget.VBox {
     }
     _createTree() {
         const treeOutline = new UI.TreeOutline.TreeOutlineInShadow();
-        treeOutline.registerRequiredCSS('panels/network/requestInitiatorViewTree.css', { enableLegacyPatching: false });
+        treeOutline.registerRequiredCSS('panels/network/requestInitiatorViewTree.css');
         treeOutline.contentElement.classList.add('request-initiator-view-tree');
         return treeOutline;
     }

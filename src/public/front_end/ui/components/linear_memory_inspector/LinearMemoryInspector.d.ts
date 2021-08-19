@@ -31,6 +31,7 @@ export declare class SettingsChangedEvent extends Event {
     constructor(settings: Settings);
 }
 export declare class LinearMemoryInspector extends HTMLElement {
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     private readonly history;
     private memory;
@@ -43,6 +44,7 @@ export declare class LinearMemoryInspector extends HTMLElement {
     private valueTypeModes;
     private valueTypes;
     private endianness;
+    connectedCallback(): void;
     set data(data: LinearMemoryInspectorData);
     private render;
     private onJumpToPointerAddress;
@@ -65,5 +67,10 @@ export declare class LinearMemoryInspector extends HTMLElement {
 declare global {
     interface HTMLElementTagNameMap {
         'devtools-linear-memory-inspector-inspector': LinearMemoryInspector;
+    }
+    interface HTMLElementEventMap {
+        'memoryrequest': MemoryRequestEvent;
+        'addresschanged': AddressChangedEvent;
+        'settingschanged': SettingsChangedEvent;
     }
 }

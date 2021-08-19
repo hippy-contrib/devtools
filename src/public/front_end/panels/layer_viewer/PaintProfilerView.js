@@ -31,6 +31,7 @@
 import * as i18n from '../../core/i18n/i18n.js';
 import * as Platform from '../../core/platform/platform.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
+import paintProfilerStyles from './paintProfiler.css.js';
 import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
@@ -88,7 +89,6 @@ export class PaintProfilerView extends UI.Widget.HBox {
     _updateImageTimer;
     constructor(showImageCallback) {
         super(true);
-        this.registerRequiredCSS('panels/layer_viewer/paintProfiler.css', { enableLegacyPatching: false });
         this.contentElement.classList.add('paint-profiler-overview');
         this._canvasContainer = this.contentElement.createChild('div', 'paint-profiler-canvas-container');
         this._progressBanner = this.contentElement.createChild('div', 'full-widget-dimmed-banner hidden');
@@ -320,7 +320,7 @@ export class PaintProfilerView extends UI.Widget.HBox {
         };
     }
     _formatPieChartTime(value) {
-        return i18n.i18n.millisToString(value * 1000, true);
+        return i18n.TimeUtilities.millisToString(value * 1000, true);
     }
     selectionWindow() {
         if (!this._log) {
@@ -363,6 +363,10 @@ export class PaintProfilerView extends UI.Widget.HBox {
         this._profiles = null;
         this._selectionWindow.reset();
         this._selectionWindow.setEnabled(false);
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([paintProfilerStyles]);
     }
 }
 // TODO(crbug.com/1167717): Make this a const enum again

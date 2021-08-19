@@ -56,7 +56,7 @@ export class NetworkOverview extends PerfUI.TimelineOverviewPane.TimelineOvervie
         this.scheduleUpdate();
     }
     _domContentLoadedEventFired(event) {
-        const data = event.data;
+        const { data } = event;
         if (data) {
             this._domContentLoadedEvents.push(data * 1000);
         }
@@ -137,7 +137,7 @@ export class NetworkOverview extends PerfUI.TimelineOverviewPane.TimelineOvervie
             }
             const n = lines.length;
             context.beginPath();
-            context.strokeStyle = ThemeSupport.ThemeSupport.instance().getComputedValue('--neutral-layer-l4');
+            context.strokeStyle = ThemeSupport.ThemeSupport.instance().getComputedValue('--color-background-opacity-80');
             context.lineWidth = BORDER_WIDTH;
             context.fillStyle = ThemeSupport.ThemeSupport.instance().getComputedValue(RequestTimeRangeNameToColor[type]);
             for (let i = 0; i < n;) {

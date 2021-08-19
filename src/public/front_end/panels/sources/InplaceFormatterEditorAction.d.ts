@@ -13,10 +13,10 @@ export declare class InplaceFormatterEditorAction implements EditorAction {
     _editorSelected(event: Common.EventTarget.EventTargetEvent): void;
     _editorClosed(event: Common.EventTarget.EventTargetEvent): void;
     _updateButton(uiSourceCode: Workspace.UISourceCode.UISourceCode | null): void;
-    button(sourcesView: SourcesView): UI.Toolbar.ToolbarButton;
+    getOrCreateButton(sourcesView: SourcesView): UI.Toolbar.ToolbarButton;
     _isFormattable(uiSourceCode: Workspace.UISourceCode.UISourceCode | null): boolean;
     _formatSourceInPlace(_event: Common.EventTarget.EventTargetEvent): void;
-    _contentLoaded(uiSourceCode: Workspace.UISourceCode.UISourceCode, content: string): void;
+    _contentLoaded(uiSourceCode: Workspace.UISourceCode.UISourceCode, content: string): Promise<void>;
     /**
      * Post-format callback
      */

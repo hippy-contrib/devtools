@@ -18,7 +18,7 @@ export declare class ChunkedFileReader implements ChunkedReader {
     _chunkTransferredCallback: ((arg0: ChunkedReader) => void) | undefined;
     _decoder: TextDecoder;
     _isCanceled: boolean;
-    _error: DOMError | null;
+    _error: DOMException | null;
     _transferFinished: (arg0: boolean) => void;
     _output?: Common.StringOutputStream.OutputStream;
     _reader?: FileReader | null;
@@ -28,7 +28,7 @@ export declare class ChunkedFileReader implements ChunkedReader {
     loadedSize(): number;
     fileSize(): number;
     fileName(): string;
-    error(): DOMError | null;
+    error(): DOMException | null;
     _decompressStream(stream: ReadableStream): ReadableStream;
     _onChunkLoaded(event: Event): void;
     _decodeChunkBuffer(buffer: ArrayBuffer, endOfFile: boolean): Promise<void>;

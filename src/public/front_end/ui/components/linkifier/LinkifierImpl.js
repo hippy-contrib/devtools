@@ -4,6 +4,7 @@
 import * as LitHtml from '../../lit-html/lit-html.js';
 import * as ComponentHelpers from '../helpers/helpers.js';
 import * as Coordinator from '../render_coordinator/render_coordinator.js';
+import linkifierImplStyles from './linkifierImpl.css.js';
 import * as LinkifierUtils from './LinkifierUtils.js';
 const coordinator = Coordinator.RenderCoordinator.RenderCoordinator.instance();
 export class LinkifierClick extends Event {
@@ -14,29 +15,33 @@ export class LinkifierClick extends Event {
             composed: true,
         });
         this.data = data;
+        this.data = data;
     }
 }
 export class Linkifier extends HTMLElement {
     static litTagName = LitHtml.literal `devtools-linkifier`;
-    shadow = this.attachShadow({ mode: 'open' });
-    url = '';
-    lineNumber;
-    columnNumber;
+    #shadow = this.attachShadow({ mode: 'open' });
+    #url = '';
+    #lineNumber;
+    #columnNumber;
     set data(data) {
-        this.url = data.url;
-        this.lineNumber = data.lineNumber;
-        this.columnNumber = data.columnNumber;
-        if (!this.url) {
+        this.#url = data.url;
+        this.#lineNumber = data.lineNumber;
+        this.#columnNumber = data.columnNumber;
+        if (!this.#url) {
             throw new Error('Cannot construct a Linkifier without providing a valid string URL.');
         }
         this.render();
     }
+    connectedCallback() {
+        this.#shadow.adoptedStyleSheets = [linkifierImplStyles];
+    }
     onLinkActivation(event) {
         event.preventDefault();
         const linkifierClickEvent = new LinkifierClick({
-            url: this.url,
-            lineNumber: this.lineNumber,
-            columnNumber: this.columnNumber,
+            url: this.#url,
+            lineNumber: this.#lineNumber,
+            columnNumber: this.#columnNumber,
         });
         this.dispatchEvent(linkifierClickEvent);
     }
@@ -44,17 +49,7 @@ export class Linkifier extends HTMLElement {
         // Disabled until https://crbug.com/1079231 is fixed.
         await coordinator.write(() => {
             // clang-format off
-            LitHtml.render(LitHtml.html `
-        <style>
-          .link:link,
-          .link:visited {
-            color: var(--color-link);
-            text-decoration: underline;
-            cursor: pointer;
-          }
-        </style>
-        <a class="link" href=${this.url} @click=${this.onLinkActivation}>${LinkifierUtils.linkText(this.url, this.lineNumber)}</a>
-      `, this.shadow, { host: this });
+            LitHtml.render(LitHtml.html `<a class="link" href=${this.#url} @click=${this.onLinkActivation}><slot>${LinkifierUtils.linkText(this.#url, this.#lineNumber)}</slot></a>`, this.#shadow, { host: this });
             // clang-format on
         });
     }

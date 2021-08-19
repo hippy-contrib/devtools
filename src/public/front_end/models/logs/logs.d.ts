@@ -1,3 +1,4 @@
 import * as LogManager from './LogManager.js';
 import * as NetworkLog from './NetworkLog.js';
-export { LogManager, NetworkLog };
+import * as RequestResolver from './RequestResolver.js';
+export { LogManager, NetworkLog, RequestResolver };

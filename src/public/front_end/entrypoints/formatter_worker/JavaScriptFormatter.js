@@ -29,7 +29,7 @@
  */
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Acorn from '../../third_party/acorn/acorn.js';
-import { AcornTokenizer, ECMA_VERSION } from './AcornTokenizer.js'; // eslint-disable-line no-unused-vars
+import { AcornTokenizer, ECMA_VERSION } from './AcornTokenizer.js';
 import { ESTreeWalker } from './ESTreeWalker.js';
 export class JavaScriptFormatter {
     _builder;

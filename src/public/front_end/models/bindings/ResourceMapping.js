@@ -166,7 +166,7 @@ class ModelInfo {
         if (!binding) {
             return;
         }
-        await binding._styleSheetChanged(header, event.data.edit);
+        await binding._styleSheetChanged(header, event.data.edit || null);
     }
     _acceptsResource(resource) {
         const resourceType = resource.resourceType();
@@ -226,12 +226,10 @@ class ModelInfo {
         }
     }
     _frameWillNavigate(event) {
-        const frame = event.data;
-        this._removeFrameResources(frame);
+        this._removeFrameResources(event.data);
     }
     _frameDetached(event) {
-        const frame = event.data.frame;
-        this._removeFrameResources(frame);
+        this._removeFrameResources(event.data.frame);
     }
     _resetForTest() {
         for (const binding of this._bindings.values()) {
@@ -240,7 +238,7 @@ class ModelInfo {
         this._bindings.clear();
     }
     dispose() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         for (const binding of this._bindings.values()) {
             binding.dispose();
         }
@@ -270,7 +268,7 @@ class Binding {
         }
         const cssModel = target.model(SDK.CSSModel.CSSModel);
         if (cssModel) {
-            for (const headerId of cssModel.styleSheetIdsForURL(this._uiSourceCode.url())) {
+            for (const headerId of cssModel.getStyleSheetIdsForURL(this._uiSourceCode.url())) {
                 const header = cssModel.styleSheetHeaderForId(headerId);
                 if (header) {
                     stylesheets.push(header);

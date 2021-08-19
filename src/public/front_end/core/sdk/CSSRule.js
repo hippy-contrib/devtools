@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as TextUtils from '../../models/text_utils/text_utils.js';
+import { CSSContainerQuery } from './CSSContainerQuery.js';
 import { CSSMedia } from './CSSMedia.js';
 import { CSSStyleDeclaration, Type } from './CSSStyleDeclaration.js';
 export class CSSRule {
@@ -73,12 +74,16 @@ class CSSValue {
 export class CSSStyleRule extends CSSRule {
     selectors;
     media;
+    containerQueries;
     wasUsed;
     constructor(cssModel, payload, wasUsed) {
         // TODO(crbug.com/1011811): Replace with spread operator or better types once Closure is gone.
         super(cssModel, { origin: payload.origin, style: payload.style, styleSheetId: payload.styleSheetId });
         this._reinitializeSelectors(payload.selectorList);
         this.media = payload.media ? CSSMedia.parseMediaArrayPayload(cssModel, payload.media) : [];
+        this.containerQueries = payload.containerQueries ?
+            CSSContainerQuery.parseContainerQueriesPayload(cssModel, payload.containerQueries) :
+            [];
         this.wasUsed = wasUsed || false;
     }
     static createDummyRule(cssModel, selectorText) {
@@ -156,6 +161,9 @@ export class CSSStyleRule extends CSSRule {
         }
         for (const media of this.media) {
             media.rebase(edit);
+        }
+        for (const containerQuery of this.containerQueries) {
+            containerQuery.rebase(edit);
         }
         super.rebase(edit);
     }

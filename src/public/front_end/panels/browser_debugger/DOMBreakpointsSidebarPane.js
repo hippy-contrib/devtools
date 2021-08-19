@@ -33,6 +33,7 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as Sources from '../sources/sources.js';
+import domBreakpointsSidebarPaneStyles from './domBreakpointsSidebarPane.css.js';
 const UIStrings = {
     /**
     *@description Text to indicate there are no breakpoints
@@ -118,7 +119,6 @@ export class DOMBreakpointsSidebarPane extends UI.Widget.VBox {
     _highlightedBreakpoint;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/browser_debugger/domBreakpointsSidebarPane.css', { enableLegacyPatching: false });
         this.elementToCheckboxes = new WeakMap();
         this._emptyElement = this.contentElement.createChild('div', 'gray-info-message');
         this._emptyElement.textContent = i18nString(UIStrings.noBreakpoints);
@@ -312,6 +312,10 @@ export class DOMBreakpointsSidebarPane extends UI.Widget.VBox {
             this._list.refreshItem(this._highlightedBreakpoint);
         }
         UI.ViewManager.ViewManager.instance().showView('sources.domBreakpoints');
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([domBreakpointsSidebarPaneStyles]);
     }
 }
 const BreakpointTypeLabels = new Map([

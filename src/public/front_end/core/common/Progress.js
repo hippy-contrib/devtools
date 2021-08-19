@@ -35,7 +35,7 @@ export class Progress {
     }
     setWorked(worked, title) {
     }
-    worked(worked) {
+    incrementWorked(worked) {
     }
     done() {
     }
@@ -44,112 +44,121 @@ export class Progress {
     }
 }
 export class CompositeProgress {
-    _parent;
-    _children;
-    _childrenDone;
+    parent;
+    children;
+    childrenDone;
     constructor(parent) {
-        this._parent = parent;
-        this._children = [];
-        this._childrenDone = 0;
-        this._parent.setTotalWork(1);
-        this._parent.setWorked(0);
+        this.parent = parent;
+        this.children = [];
+        this.childrenDone = 0;
+        this.parent.setTotalWork(1);
+        this.parent.setWorked(0);
     }
     _childDone() {
-        if (++this._childrenDone !== this._children.length) {
+        if (++this.childrenDone !== this.children.length) {
             return;
         }
-        this._parent.done();
+        this.parent.done();
     }
     createSubProgress(weight) {
         const child = new SubProgress(this, weight);
-        this._children.push(child);
+        this.children.push(child);
         return child;
     }
     _update() {
         let totalWeights = 0;
         let done = 0;
-        for (let i = 0; i < this._children.length; ++i) {
-            const child = this._children[i];
-            if (child._totalWork) {
-                done += child._weight * child._worked / child._totalWork;
+        for (let i = 0; i < this.children.length; ++i) {
+            const child = this.children[i];
+            if (child.getTotalWork()) {
+                done += child.getWeight() * child.getWorked() / child.getTotalWork();
             }
-            totalWeights += child._weight;
+            totalWeights += child.getWeight();
         }
-        this._parent.setWorked(done / totalWeights);
+        this.parent.setWorked(done / totalWeights);
     }
 }
 export class SubProgress {
-    _composite;
-    _weight;
-    _worked;
-    _totalWork;
+    composite;
+    weight;
+    worked;
+    totalWork;
     constructor(composite, weight) {
-        this._composite = composite;
-        this._weight = weight || 1;
-        this._worked = 0;
-        this._totalWork = 0;
+        this.composite = composite;
+        this.weight = weight || 1;
+        this.worked = 0;
+        this.totalWork = 0;
     }
     isCanceled() {
-        return this._composite._parent.isCanceled();
+        return this.composite.parent.isCanceled();
     }
     setTitle(title) {
-        this._composite._parent.setTitle(title);
+        this.composite.parent.setTitle(title);
     }
     done() {
-        this.setWorked(this._totalWork);
-        this._composite._childDone();
+        this.setWorked(this.totalWork);
+        this.composite._childDone();
     }
     setTotalWork(totalWork) {
-        this._totalWork = totalWork;
-        this._composite._update();
+        this.totalWork = totalWork;
+        this.composite._update();
     }
     setWorked(worked, title) {
-        this._worked = worked;
+        this.worked = worked;
         if (typeof title !== 'undefined') {
             this.setTitle(title);
         }
-        this._composite._update();
+        this.composite._update();
     }
-    worked(worked) {
-        this.setWorked(this._worked + (worked || 1));
+    incrementWorked(worked) {
+        this.setWorked(this.worked + (worked || 1));
+    }
+    getWeight() {
+        return this.weight;
+    }
+    getWorked() {
+        return this.worked;
+    }
+    getTotalWork() {
+        return this.totalWork;
     }
 }
 export class ProgressProxy {
-    _delegate;
-    _doneCallback;
+    delegate;
+    doneCallback;
     constructor(delegate, doneCallback) {
-        this._delegate = delegate;
-        this._doneCallback = doneCallback;
+        this.delegate = delegate;
+        this.doneCallback = doneCallback;
     }
     isCanceled() {
-        return this._delegate ? this._delegate.isCanceled() : false;
+        return this.delegate ? this.delegate.isCanceled() : false;
     }
     setTitle(title) {
-        if (this._delegate) {
-            this._delegate.setTitle(title);
+        if (this.delegate) {
+            this.delegate.setTitle(title);
         }
     }
     done() {
-        if (this._delegate) {
-            this._delegate.done();
+        if (this.delegate) {
+            this.delegate.done();
         }
-        if (this._doneCallback) {
-            this._doneCallback();
+        if (this.doneCallback) {
+            this.doneCallback();
         }
     }
     setTotalWork(totalWork) {
-        if (this._delegate) {
-            this._delegate.setTotalWork(totalWork);
+        if (this.delegate) {
+            this.delegate.setTotalWork(totalWork);
         }
     }
     setWorked(worked, title) {
-        if (this._delegate) {
-            this._delegate.setWorked(worked, title);
+        if (this.delegate) {
+            this.delegate.setWorked(worked, title);
         }
     }
-    worked(worked) {
-        if (this._delegate) {
-            this._delegate.worked(worked);
+    incrementWorked(worked) {
+        if (this.delegate) {
+            this.delegate.incrementWorked(worked);
         }
     }
 }

@@ -18,7 +18,7 @@ export declare enum MIME_TYPE {
 }
 export declare class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper implements TextUtils.ContentProvider.ContentProvider {
     _requestId: string;
-    _backendRequestId: string;
+    _backendRequestId?: Protocol.Network.RequestId;
     _documentURL: string;
     _frameId: string;
     _loaderId: string;
@@ -78,6 +78,7 @@ export declare class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper i
     _finished: boolean;
     _failed: boolean;
     _canceled: boolean;
+    _preserved: boolean;
     _mimeType: MIME_TYPE;
     _parsedURL: Common.ParsedURL.ParsedURL;
     _name: string | undefined;
@@ -103,10 +104,14 @@ export declare class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper i
     _queryString?: string | null;
     _parsedQueryParameters?: NameValue[];
     _contentDataProvider?: (() => Promise<ContentData>);
-    constructor(requestId: string, url: string, documentURL: string, frameId: string, loaderId: string, initiator: Protocol.Network.Initiator | null);
+    _isSameSite: boolean | null;
+    private constructor();
+    static create(backendRequestId: Protocol.Network.RequestId, url: string, documentURL: string, frameId: string, loaderId: string, initiator: Protocol.Network.Initiator | null): NetworkRequest;
+    static createForWebSocket(backendRequestId: Protocol.Network.RequestId, requestURL: string, initiator?: Protocol.Network.Initiator): NetworkRequest;
+    static createWithoutBackendRequest(requestId: string, url: string, documentURL: string, initiator: Protocol.Network.Initiator | null): NetworkRequest;
     identityCompare(other: NetworkRequest): number;
     requestId(): string;
-    backendRequestId(): string;
+    backendRequestId(): Protocol.Network.RequestId | undefined;
     url(): string;
     isBlobRequest(): boolean;
     setUrl(x: string): void;
@@ -159,6 +164,8 @@ export declare class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper i
     set failed(x: boolean);
     get canceled(): boolean;
     set canceled(x: boolean);
+    get preserved(): boolean;
+    set preserved(x: boolean);
     blockedReason(): Protocol.Network.BlockedReason | undefined;
     setBlockedReason(reason: Protocol.Network.BlockedReason): void;
     corsErrorStatus(): Protocol.Network.CorsErrorStatus | undefined;
@@ -273,7 +280,7 @@ export declare class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper i
     addEventSourceMessage(time: number, eventName: string, eventId: string, data: string): void;
     markAsRedirect(redirectCount: number): void;
     isRedirect(): boolean;
-    setRequestIdForTest(requestId: string): void;
+    setRequestIdForTest(requestId: Protocol.Network.RequestId): void;
     charset(): string | null;
     addExtraRequestInfo(extraRequestInfo: ExtraRequestInfo): void;
     hasExtraRequestInfo(): boolean;
@@ -289,6 +296,8 @@ export declare class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper i
     trustTokenParams(): Protocol.Network.TrustTokenParams | undefined;
     setTrustTokenOperationDoneEvent(doneEvent: Protocol.Network.TrustTokenOperationDoneEvent): void;
     trustTokenOperationDoneEvent(): Protocol.Network.TrustTokenOperationDoneEvent | undefined;
+    setIsSameSite(isSameSite: boolean): void;
+    isSameSite(): boolean | null;
 }
 export declare enum Events {
     FinishedLoading = "FinishedLoading",
@@ -367,6 +376,7 @@ export interface ExtraResponseInfo {
     responseHeaders: NameValue[];
     responseHeadersText?: string;
     resourceIPAddressSpace: Protocol.Network.IPAddressSpace;
+    statusCode: number | undefined;
 }
 export interface WebBundleInfo {
     resourceUrls?: string[];

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
-import * as Common from '../../core/common/common.js'; // eslint-disable-line no-unused-vars
+import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as SourceFrame from '../../ui/legacy/components/source_frame/source_frame.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { ApplicationPanelSidebar, StorageCategoryView } from './ApplicationPanelSidebar.js'; // eslint-disable-line no-unused-vars
+import { ApplicationPanelSidebar, StorageCategoryView } from './ApplicationPanelSidebar.js';
 import { CookieItemsView } from './CookieItemsView.js';
 import { DatabaseQueryView } from './DatabaseQueryView.js';
 import { DatabaseTableView } from './DatabaseTableView.js';
@@ -26,7 +26,7 @@ export class ResourcesPanel extends UI.Panel.PanelWithSidebar {
     _sidebar;
     constructor() {
         super('resources');
-        this.registerRequiredCSS('panels/application/resourcesPanel.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/application/resourcesPanel.css');
         this._resourcesLastSelectedItemSetting =
             Common.Settings.Settings.instance().createSetting('resourcesLastSelectedElementPath', []);
         this.visibleView = null;

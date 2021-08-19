@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as TextUtils from '../../models/text_utils/text_utils.js';
-import { CSSLocation } from './CSSModel.js'; // eslint-disable-line no-unused-vars
+import { CSSQuery } from './CSSQuery.js';
 export class CSSMediaQuery {
     _active;
     _expressions;
@@ -56,29 +56,18 @@ export class CSSMediaQueryExpression {
         return this._computedLength;
     }
 }
-export class CSSMedia {
-    _cssModel;
-    text;
+export class CSSMedia extends CSSQuery {
     source;
     sourceURL;
-    range;
-    styleSheetId;
     mediaList;
-    constructor(cssModel, payload) {
-        this._cssModel = cssModel;
-        this._reinitialize(payload);
-    }
-    static parsePayload(cssModel, payload) {
-        return new CSSMedia(cssModel, payload);
-    }
     static parseMediaArrayPayload(cssModel, payload) {
-        const result = [];
-        for (let i = 0; i < payload.length; ++i) {
-            result.push(CSSMedia.parsePayload(cssModel, payload[i]));
-        }
-        return result;
+        return payload.map(mq => new CSSMedia(cssModel, mq));
     }
-    _reinitialize(payload) {
+    constructor(cssModel, payload) {
+        super(cssModel);
+        this.reinitialize(payload);
+    }
+    reinitialize(payload) {
         this.text = payload.text;
         this.source = payload.source;
         this.sourceURL = payload.sourceURL || '';
@@ -92,23 +81,6 @@ export class CSSMedia {
             }
         }
     }
-    rebase(edit) {
-        if (this.styleSheetId !== edit.styleSheetId || !this.range) {
-            return;
-        }
-        if (edit.oldRange.equal(this.range)) {
-            this._reinitialize(edit.payload);
-        }
-        else {
-            this.range = this.range.rebaseAfterTextEdit(edit.oldRange, edit.newRange);
-        }
-    }
-    equal(other) {
-        if (!this.styleSheetId || !this.range || !other.range) {
-            return false;
-        }
-        return this.styleSheetId === other.styleSheetId && this.range.equal(other.range);
-    }
     active() {
         if (!this.mediaList) {
             return true;
@@ -119,37 +91,6 @@ export class CSSMedia {
             }
         }
         return false;
-    }
-    lineNumberInSource() {
-        if (!this.range) {
-            return undefined;
-        }
-        const header = this.header();
-        if (!header) {
-            return undefined;
-        }
-        return header.lineNumberInSource(this.range.startLine);
-    }
-    columnNumberInSource() {
-        if (!this.range) {
-            return undefined;
-        }
-        const header = this.header();
-        if (!header) {
-            return undefined;
-        }
-        return header.columnNumberInSource(this.range.startLine, this.range.startColumn);
-    }
-    header() {
-        return this.styleSheetId ? this._cssModel.styleSheetHeaderForId(this.styleSheetId) : null;
-    }
-    rawLocation() {
-        const header = this.header();
-        if (!header || this.lineNumberInSource() === undefined) {
-            return null;
-        }
-        const lineNumber = Number(this.lineNumberInSource());
-        return new CSSLocation(header, lineNumber, this.columnNumberInSource());
     }
 }
 export const Source = {

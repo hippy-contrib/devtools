@@ -13,6 +13,7 @@ import * as DataGrid from '../../ui/components/data_grid/data_grid.js';
 import * as SourceFrame from '../../ui/legacy/components/source_frame/source_frame.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as LitHtml from '../../ui/lit-html/lit-html.js';
+import protocolMonitorStyles from './protocolMonitor.css.js';
 const UIStrings = {
     /**
     *@description Text for one or a group of functions
@@ -82,7 +83,7 @@ const UIStrings = {
 const str_ = i18n.i18n.registerUIStrings('panels/protocol_monitor/ProtocolMonitor.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 const timestampRenderer = (value) => {
-    return LitHtml.html `${i18nString(UIStrings.sMs, { PH1: value })}`;
+    return LitHtml.html `${i18nString(UIStrings.sMs, { PH1: String(value) })}`;
 };
 let protocolMonitorImplInstance;
 export class ProtocolMonitorImpl extends UI.Widget.VBox {
@@ -102,7 +103,6 @@ export class ProtocolMonitorImpl extends UI.Widget.VBox {
         this._startTime = 0;
         this._dataGridRowForId = new Map();
         const topToolbar = new UI.Toolbar.Toolbar('protocol-monitor-toolbar', this.contentElement);
-        this.registerRequiredCSS('panels/protocol_monitor/protocolMonitor.css', { enableLegacyPatching: false });
         this.contentElement.classList.add('protocol-monitor');
         const recordButton = new UI.Toolbar.ToolbarToggle(i18nString(UIStrings.record), 'largeicon-start-recording', 'largeicon-stop-recording');
         recordButton.addEventListener(UI.Toolbar.ToolbarButton.Events.Click, () => {
@@ -216,9 +216,8 @@ export class ProtocolMonitorImpl extends UI.Widget.VBox {
         };
         this._dataGridIntegrator =
             new DataGrid.DataGridControllerIntegrator.DataGridControllerIntegrator(dataGridInitialData);
-        this._dataGridIntegrator.dataGrid.addEventListener('cellfocused', (event) => {
-            const focusedEvent = event;
-            const focusedRow = focusedEvent.data.row;
+        this._dataGridIntegrator.dataGrid.addEventListener('cellfocused', event => {
+            const focusedRow = event.data.row;
             const infoWidgetData = {
                 request: DataGrid.DataGridUtils.getRowEntryForColumnId(focusedRow, 'request'),
                 response: DataGrid.DataGridUtils.getRowEntryForColumnId(focusedRow, 'response'),
@@ -226,9 +225,8 @@ export class ProtocolMonitorImpl extends UI.Widget.VBox {
             };
             this._infoWidget.render(infoWidgetData);
         });
-        this._dataGridIntegrator.dataGrid.addEventListener('newuserfiltertext', (event) => {
-            const filterTextEvent = event;
-            this._textFilterUI.setValue(filterTextEvent.data.filterText, /* notify listeners */ true);
+        this._dataGridIntegrator.dataGrid.addEventListener('newuserfiltertext', event => {
+            this._textFilterUI.setValue(event.data.filterText, /* notify listeners */ true);
         });
         split.setMainWidget(this._dataGridIntegrator);
         split.setSidebarWidget(this._infoWidget);
@@ -277,6 +275,7 @@ export class ProtocolMonitorImpl extends UI.Widget.VBox {
         if (this._started) {
             return;
         }
+        this.registerCSSFiles([protocolMonitorStyles]);
         this._started = true;
         this._startTime = Date.now();
         this._setRecording(true);

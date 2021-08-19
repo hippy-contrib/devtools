@@ -101,8 +101,6 @@ Sources.SearchSourcesView = SourcesModule.SearchSourcesView.SearchSourcesView;
 Sources.SearchSourcesView.ActionDelegate = SourcesModule.SearchSourcesView.ActionDelegate;
 /** @constructor */
 Sources.SnippetsPlugin = SourcesModule.SnippetsPlugin.SnippetsPlugin;
-/** @constructor */
-Sources.RecorderPlugin = SourcesModule.RecorderPlugin.RecorderPlugin;
 Sources.SourceMapNamesResolver = {};
 Sources.SourceMapNamesResolver.setScopeResolvedForTest = SourcesModule.SourceMapNamesResolver.setScopeResolvedForTest;
 // Tests can override this global symbol and therefore can't be exported
@@ -130,8 +128,6 @@ Sources.OverridesNavigatorView = SourcesModule.SourcesNavigator.OverridesNavigat
 Sources.ContentScriptsNavigatorView = SourcesModule.SourcesNavigator.ContentScriptsNavigatorView;
 /** @constructor */
 Sources.SnippetsNavigatorView = SourcesModule.SourcesNavigator.SnippetsNavigatorView;
-/** @constructor */
-Sources.RecordingsNavigatorView = SourcesModule.SourcesNavigator.RecordingsNavigatorView;
 /** @constructor */
 Sources.ActionDelegate = SourcesModule.SourcesNavigator.ActionDelegate;
 /** @constructor */

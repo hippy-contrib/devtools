@@ -5,6 +5,7 @@ import * as Platform from '../../../core/platform/platform.js';
 import * as LitHtml from '../../lit-html/lit-html.js';
 import * as ComponentHelpers from '../helpers/helpers.js';
 import * as Coordinator from '../render_coordinator/render_coordinator.js';
+import treeOutlineStyles from './treeOutline.css.js';
 import { findNextNodeForTreeOutlineKeyboardNavigation, getNodeChildren, getPathToTreeNode, isExpandableNode, trackDOMNodeToTreeNode } from './TreeOutlineUtils.js';
 const coordinator = Coordinator.RenderCoordinator.RenderCoordinator.instance();
 export function defaultRenderer(node) {
@@ -32,6 +33,7 @@ export class ItemMouseOutEvent extends Event {
     }
 }
 export class TreeOutline extends HTMLElement {
+    static litTagName = LitHtml.literal `devtools-tree-outline`;
     shadow = this.attachShadow({ mode: 'open' });
     treeData = [];
     nodeExpandedMap = new WeakMap();
@@ -77,6 +79,7 @@ export class TreeOutline extends HTMLElement {
     connectedCallback() {
         this.setTopLevelNodeBorderColorCSSVariable(this.getAttribute('toplevelbordercolor'));
         this.setNodeKeyNoWrapCSSVariable(this.getAttribute('nowrap'));
+        this.shadow.adoptedStyleSheets = [treeOutlineStyles];
     }
     get data() {
         return {
@@ -107,7 +110,7 @@ export class TreeOutline extends HTMLElement {
     async expandToAndSelectTreeNode(targetTreeNode) {
         const pathToTreeNode = await getPathToTreeNode(this.treeData, targetTreeNode);
         if (pathToTreeNode === null) {
-            throw new Error(`Could not find node ${JSON.stringify(targetTreeNode)} in the tree.`);
+            throw new Error(`Could not find node with id ${targetTreeNode.id} in the tree.`);
         }
         pathToTreeNode.forEach((node, index) => {
             // We don't expand the very last node, which was the target node.
@@ -372,90 +375,6 @@ export class TreeOutline extends HTMLElement {
             // Disabled until https://crbug.com/1079231 is fixed.
             // clang-format off
             LitHtml.render(LitHtml.html `
-      <style>
-        li {
-          list-style: none;
-          text-overflow: ellipsis;
-          min-height: 12px;
-        }
-
-        .tree-node-key {
-          white-space: var(--override-key-whitespace-wrapping);
-        }
-
-        .arrow-icon {
-          display: block;
-          user-select: none;
-          -webkit-mask-image: var(--image-file-treeoutlineTriangles);
-          -webkit-mask-size: 32px 24px;
-          -webkit-mask-position: 0 0;
-          background-color: var(--color-text-primary);
-          content: "";
-          text-shadow: none;
-          height: 12px;
-          width: 13px;
-          overflow: hidden;
-        }
-
-        ul {
-          margin: 0;
-          padding: 0;
-        }
-
-        ul[role="group"] {
-          padding-left: 16px;
-        }
-
-        li:not(.parent) > .arrow-and-key-wrapper > .arrow-icon {
-          -webkit-mask-size: 0;
-        }
-
-        li.parent.expanded > .arrow-and-key-wrapper > .arrow-icon {
-          -webkit-mask-position: -16px 0;
-        }
-
-        li.is-top-level {
-          border-top: var(--override-top-node-border);
-        }
-
-        li.is-top-level:last-child {
-          border-bottom: var(--override-top-node-border);
-        }
-
-        :host([animated]) li:not(.is-top-level) {
-          animation-name: slideIn;
-          animation-duration: 150ms;
-          animation-timing-function: cubic-bezier(0, 0, 0.3, 1);
-          animation-fill-mode: forwards;
-        }
-
-        @keyframes slideIn {
-          from {
-            transform: translateY(-5px);
-            opacity: 0%;
-          }
-
-          to {
-            transform: none;
-            opacity: 100%;
-          }
-        }
-
-        .arrow-and-key-wrapper {
-          border: 2px solid transparent;
-          display: flex;
-          align-content: center;
-        }
-
-        [role="treeitem"]:focus {
-          outline: 0;
-        }
-
-        [role="treeitem"].selected > .arrow-and-key-wrapper {
-          /* stylelint-disable-next-line color-named */
-          background-color: var(--legacy-selection-bg-color);
-        }
-      </style>
       <div class="wrapping-container">
       <ul role="tree" @keydown=${this.onTreeKeyDown}>
         ${this.treeData.map((topLevelNode, index) => {

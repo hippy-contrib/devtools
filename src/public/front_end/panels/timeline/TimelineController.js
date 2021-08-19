@@ -8,7 +8,7 @@ import * as Platform from '../../core/platform/platform.js';
 import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Bindings from '../../models/bindings/bindings.js';
-import * as Extensions from '../../models/extensions/extensions.js'; // eslint-disable-line no-unused-vars
+import * as Extensions from '../../models/extensions/extensions.js';
 import * as TimelineModel from '../../models/timeline_model/timeline_model.js';
 import { ExtensionTracingSession } from './ExtensionTracingSession.js';
 import { PerformanceModel } from './PerformanceModel.js';
@@ -73,6 +73,7 @@ export class TimelineController {
             disabledByDefault('devtools.timeline'),
             disabledByDefault('devtools.timeline.frame'),
             'v8.execute',
+            disabledByDefault('v8.compile'),
             TimelineModel.TimelineModel.TimelineModelImpl.Category.Console,
             TimelineModel.TimelineModel.TimelineModelImpl.Category.UserTiming,
             TimelineModel.TimelineModel.TimelineModelImpl.Category.Loading,
@@ -250,7 +251,7 @@ export class TimelineController {
         }
         const mainFrame = frames.find(frame => !frame.parent);
         const mainRendererProcessId = mainFrame.processId;
-        const mainProcess = this._tracingModel.processById(mainRendererProcessId);
+        const mainProcess = this._tracingModel.getProcessById(mainRendererProcessId);
         if (mainProcess) {
             const target = SDK.TargetManager.TargetManager.instance().mainTarget();
             if (target) {
@@ -272,7 +273,7 @@ export class TimelineController {
                 if (!pid) {
                     continue;
                 }
-                const process = this._tracingModel.processById(pid);
+                const process = this._tracingModel.getProcessById(pid);
                 const thread = process && process.threadByName(TimelineModel.TimelineModel.TimelineModelImpl.RendererMainThreadName);
                 if (thread) {
                     this._injectCpuProfileEvent(pid, thread.id(), profile);

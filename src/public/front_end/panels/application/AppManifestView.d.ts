@@ -1,8 +1,17 @@
 import * as Common from '../../core/common/common.js';
+import type * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as InlineEditor from '../../ui/legacy/components/inline_editor/inline_editor.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import type * as Protocol from '../../generated/protocol.js';
+declare type ParsedSize = {
+    any: 'any';
+    formatted: string;
+} | {
+    width: number;
+    height: number;
+    formatted: string;
+};
 export declare class AppManifestView extends UI.Widget.VBox implements SDK.TargetManager.Observer {
     _emptyView: UI.EmptyWidget.EmptyWidget;
     _reportView: UI.ReportView.ReportView;
@@ -21,6 +30,7 @@ export declare class AppManifestView extends UI.Widget.VBox implements SDK.Targe
     _backgroundColorSwatch: InlineEditor.ColorSwatch.ColorSwatch;
     _orientationField: HTMLElement;
     _displayField: HTMLElement;
+    _newNoteUrlField: HTMLElement;
     _throttler: Common.Throttler.Throttler;
     _registeredListeners: Common.EventTarget.EventDescriptor[];
     _target?: SDK.Target.Target;
@@ -38,5 +48,14 @@ export declare class AppManifestView extends UI.Widget.VBox implements SDK.Targe
         image: HTMLImageElement;
         wrapper: Element;
     } | null>;
-    _appendImageResourceToSection(baseUrl: string, imageResource: any, section: UI.ReportView.Section, isScreenshot: boolean): Promise<string[]>;
+    parseSizes(sizes: string, resourceName: Platform.UIString.LocalizedString, imageUrl: string, imageResourceErrors: Platform.UIString.LocalizedString[]): ParsedSize[];
+    checkSizeProblem(size: ParsedSize, type: string | undefined, image: HTMLImageElement, resourceName: Platform.UIString.LocalizedString, imageUrl: string): {
+        error?: Platform.UIString.LocalizedString;
+        hasSquareSize: boolean;
+    };
+    _appendImageResourceToSection(baseUrl: string, imageResource: any, section: UI.ReportView.Section, isScreenshot: boolean): Promise<{
+        imageResourceErrors: Platform.UIString.LocalizedString[];
+        squareSizedIconAvailable?: boolean;
+    }>;
 }
+export {};

@@ -43,7 +43,7 @@ export class FilePathScoreFunction {
         this._dataUpperCase = '';
         this._fileNameIndex = 0;
     }
-    score(data, matchIndexes) {
+    calculateScore(data, matchIndexes) {
         if (!data || !this._query) {
             return 0;
         }

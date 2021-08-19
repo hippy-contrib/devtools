@@ -5,6 +5,7 @@ import * as i18n from '../../../core/i18n/i18n.js';
 import * as LitHtml from '../../lit-html/lit-html.js';
 import * as ComponentHelpers from '../helpers/helpers.js';
 import { valueTypeToLocalizedString } from './ValueInterpreterDisplayUtils.js';
+import valueInterpreterSettingsStyles from './valueInterpreterSettings.css.js';
 const { render, html } = LitHtml;
 const UIStrings = {
     /**
@@ -37,6 +38,9 @@ export class ValueInterpreterSettings extends HTMLElement {
     static litTagName = LitHtml.literal `devtools-linear-memory-inspector-interpreter-settings`;
     shadow = this.attachShadow({ mode: 'open' });
     valueTypes = new Set();
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [valueInterpreterSettingsStyles];
+    }
     set data(data) {
         this.valueTypes = data.valueTypes;
         this.render();
@@ -45,48 +49,6 @@ export class ValueInterpreterSettings extends HTMLElement {
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
         render(html `
-      <style>
-        :host {
-          flex: auto;
-          display: flex;
-          min-height: 20px;
-        }
-
-        .settings {
-          display: flex;
-          flex-wrap: wrap;
-          margin: 0 12px 12px 12px;
-          column-gap: 45px;
-          row-gap: 15px;
-        }
-
-        .value-types-selection {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .group {
-          font-weight: bold;
-          margin-bottom: 11px;
-        }
-
-        .type-label {
-          white-space: nowrap;
-        }
-
-        .group + .type-label {
-          margin-top: 5px;
-        }
-
-        .type-label input {
-          margin: 0 6px 0 0;
-          padding: 0;
-        }
-
-        .type-label + .type-label {
-          margin-top: 6px;
-        }
-      </style>
       <div class="settings">
        ${[...GROUP_TO_TYPES.keys()].map(group => {
             return html `

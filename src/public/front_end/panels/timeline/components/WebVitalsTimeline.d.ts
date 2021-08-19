@@ -54,6 +54,7 @@ declare type Constructor<T> = {
 };
 export declare function assertInstanceOf<T>(instance: any, constructor: Constructor<T>): asserts instance is T;
 export declare class WebVitalsTimeline extends HTMLElement {
+    static readonly litTagName: import("../../../ui/lit-html/static.js").Static;
     private readonly shadow;
     private mainFrameNavigations;
     private startTime;

@@ -5,6 +5,7 @@ import * as i18n from '../../../core/i18n/i18n.js';
 import * as ComponentHelpers from '../../../ui/components/helpers/helpers.js';
 import * as IconButton from '../../../ui/components/icon_button/icon_button.js';
 import * as LitHtml from '../../../ui/lit-html/lit-html.js';
+import stylePropertyEditorStyles from './stylePropertyEditor.css.js';
 import { findFlexContainerIcon, findGridContainerIcon } from './CSSPropertyIconResolver.js';
 const UIStrings = {
     /**
@@ -37,6 +38,7 @@ export class PropertyDeselectedEvent extends Event {
         this.data = { name, value };
     }
 }
+// eslint-disable-next-line rulesdir/check_component_naming
 export class StylePropertyEditor extends HTMLElement {
     shadow = this.attachShadow({ mode: 'open' });
     authoredProperties = new Map();
@@ -44,6 +46,9 @@ export class StylePropertyEditor extends HTMLElement {
     editableProperties = [];
     constructor() {
         super();
+    }
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [stylePropertyEditorStyles];
     }
     getEditableProperties() {
         return this.editableProperties;
@@ -57,83 +62,6 @@ export class StylePropertyEditor extends HTMLElement {
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
         render(html `
-      <style>
-        .container {
-          padding: 12px;
-          min-width: 170px;
-        }
-
-        .row {
-          padding: 0;
-          color: var(--color-text-primary);
-          padding-bottom: 16px;
-        }
-
-        .row:last-child {
-          padding-bottom: 0;
-        }
-
-        .property {
-          padding-bottom: 4px;
-          white-space: nowrap;
-        }
-
-        .property-name {
-          color: var(--color-syntax-1);
-        }
-
-        .property-value {
-          color: var(--color-text-primary);
-        }
-
-        .property-value.not-authored {
-          color: var(--color-text-disabled);
-        }
-
-        .buttons {
-          display: flex;
-          flex-direction: row;
-        }
-
-        .buttons > :first-child {
-          border-radius: 3px 0 0 3px;
-        }
-
-        .buttons > :last-child {
-          border-radius: 0 3px 3px 0;
-        }
-
-        .button {
-          border: 1px solid var(--color-background-elevation-2);
-          background-color: var(--color-background);
-          width: 24px;
-          height: 24px;
-          min-width: 24px;
-          min-height: 24px;
-          padding: 0;
-          margin: 0;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          cursor: pointer;
-        }
-
-        .button:focus-visible {
-          outline: auto 5px -webkit-focus-ring-color;
-        }
-
-        .button devtools-icon {
-          --icon-color: var(--color-text-secondary);
-        }
-
-        .button.selected {
-          background-color: var(--color-background-elevation-1);
-        }
-
-        .button.selected devtools-icon {
-          --icon-color: var(--color-primary);
-        }
-      </style>
       <div class="container">
         ${this.editableProperties.map(prop => this.renderProperty(prop))}
       </div>
@@ -170,7 +98,8 @@ export class StylePropertyEditor extends HTMLElement {
             'button': true,
             'selected': selected,
         });
-        const title = i18nString(selected ? UIStrings.deselectButton : UIStrings.selectButton, { propertyName, propertyValue });
+        const values = { propertyName, propertyValue };
+        const title = selected ? i18nString(UIStrings.deselectButton, values) : i18nString(UIStrings.selectButton, values);
         return html `<button title=${title} class=${classes} @click=${() => this.onButtonClick(propertyName, propertyValue, selected)}>
        <${IconButton.Icon.Icon.litTagName} style=${transform} .data=${{ iconName: iconInfo.iconName, color: 'var(--icon-color)', width: '18px', height: '18px' }}></${IconButton.Icon.Icon.litTagName}>
     </button>`;

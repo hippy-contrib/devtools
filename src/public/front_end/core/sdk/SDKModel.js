@@ -4,6 +4,9 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../common/common.js';
 const registeredModels = new Map();
+// TODO(crbug.com/1228674) Remove defaults for generic type parameters once
+//                         all event emitters and sinks have been migrated.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class SDKModel extends Common.ObjectWrapper.ObjectWrapper {
     _target;
     constructor(target) {

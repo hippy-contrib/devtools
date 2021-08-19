@@ -33,7 +33,7 @@ export class ComputedStyleModel extends Common.ObjectWrapper.ObjectWrapper {
         if (this._cssModel === cssModel) {
             return;
         }
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         this._cssModel = cssModel;
         const domModel = cssModel ? cssModel.domModel() : null;
         const resourceTreeModel = cssModel ? cssModel.target().model(SDK.ResourceTreeModel.ResourceTreeModel) : null;
@@ -64,7 +64,7 @@ export class ComputedStyleModel extends Common.ObjectWrapper.ObjectWrapper {
         }
         this._onComputedStyleChanged(null);
     }
-    _onFrameResized(_event) {
+    _onFrameResized() {
         function refreshContents() {
             this._onComputedStyleChanged(null);
             delete this._frameResizedTimer;

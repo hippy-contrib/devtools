@@ -4,6 +4,7 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import cssOverviewSidebarPanelStyles from './cssOverviewSidebarPanel.css.js';
 const UIStrings = {
     /**
     *@description Label for the 'Clear overview' button in the CSS Overview report
@@ -23,7 +24,6 @@ export class CSSOverviewSidebarPanel extends UI.Widget.VBox {
     }
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/css_overview/cssOverviewSidebarPanel.css', { enableLegacyPatching: false });
         this.contentElement.classList.add('overview-sidebar-panel');
         this.contentElement.addEventListener('click', this._onItemClick.bind(this));
         // Clear overview.
@@ -70,6 +70,10 @@ export class CSSOverviewSidebarPanel extends UI.Widget.VBox {
         }
         this._deselectAllItems();
         target.classList.add(CSSOverviewSidebarPanel.SELECTED);
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([cssOverviewSidebarPanelStyles]);
     }
 }
 //# sourceMappingURL=CSSOverviewSidebarPanel.js.map

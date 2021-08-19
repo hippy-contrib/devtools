@@ -11,10 +11,10 @@ export declare class ConsoleContextSelector implements SDK.TargetManager.SDKMode
     titleFor(executionContext: SDK.RuntimeModel.ExecutionContext): string;
     _depthFor(executionContext: SDK.RuntimeModel.ExecutionContext): number;
     _executionContextCreated(executionContext: SDK.RuntimeModel.ExecutionContext): void;
-    _onExecutionContextCreated(event: Common.EventTarget.EventTargetEvent): void;
-    _onExecutionContextChanged(event: Common.EventTarget.EventTargetEvent): void;
+    _onExecutionContextCreated(event: Common.EventTarget.EventTargetEvent<SDK.RuntimeModel.ExecutionContext>): void;
+    _onExecutionContextChanged(event: Common.EventTarget.EventTargetEvent<SDK.RuntimeModel.ExecutionContext>): void;
     _executionContextDestroyed(executionContext: SDK.RuntimeModel.ExecutionContext): void;
-    _onExecutionContextDestroyed(event: Common.EventTarget.EventTargetEvent): void;
+    _onExecutionContextDestroyed(event: Common.EventTarget.EventTargetEvent<SDK.RuntimeModel.ExecutionContext>): void;
     _executionContextChangedExternally(event: Common.EventTarget.EventTargetEvent): void;
     _isTopContext(executionContext: SDK.RuntimeModel.ExecutionContext | null): boolean;
     _hasTopContext(): boolean;
@@ -25,6 +25,6 @@ export declare class ConsoleContextSelector implements SDK.TargetManager.SDKMode
     isItemSelectable(item: SDK.RuntimeModel.ExecutionContext): boolean;
     itemSelected(item: SDK.RuntimeModel.ExecutionContext | null): void;
     _callFrameSelectedInUI(): void;
-    _callFrameSelectedInModel(event: Common.EventTarget.EventTargetEvent): void;
-    _frameNavigated(event: Common.EventTarget.EventTargetEvent): void;
+    _callFrameSelectedInModel(event: Common.EventTarget.EventTargetEvent<SDK.DebuggerModel.DebuggerModel>): void;
+    _frameNavigated(event: Common.EventTarget.EventTargetEvent<SDK.ResourceTreeModel.ResourceTreeFrame>): void;
 }

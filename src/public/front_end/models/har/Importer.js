@@ -26,7 +26,7 @@ export class Importer {
                     lineNumber: initiatorEntry.lineNumber,
                 };
             }
-            const request = new SDK.NetworkRequest.NetworkRequest('har-' + requests.length, entry.request.url, documentURL, '', '', initiator);
+            const request = SDK.NetworkRequest.NetworkRequest.createWithoutBackendRequest('har-' + requests.length, entry.request.url, documentURL, initiator);
             const page = pageref ? pages.get(pageref) : undefined;
             if (!pageLoad && pageref && page) {
                 pageLoad = Importer._buildPageLoad(page, request);

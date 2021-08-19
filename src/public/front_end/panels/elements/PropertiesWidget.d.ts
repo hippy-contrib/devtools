@@ -13,7 +13,9 @@ export declare class PropertiesWidget extends UI.ThrottledWidget.ThrottledWidget
     } | undefined): PropertiesWidget;
     _setNode(event: Common.EventTarget.EventTargetEvent): void;
     doUpdate(): Promise<void>;
-    _createSectionTreeElement(property: SDK.RemoteObject.RemoteObject, title: string): ObjectUI.ObjectPropertiesSection.RootElement;
-    _onNodeChange(event: Common.EventTarget.EventTargetEvent): void;
+    _createSectionTreeElement(property: SDK.RemoteObject.RemoteObject, title: string, object: SDK.RemoteObject.RemoteObject): ObjectUI.ObjectPropertiesSection.RootElement;
+    _onNodeChange(event: Common.EventTarget.EventTargetEvent<{
+        node: SDK.DOMModel.DOMNode;
+        name: string;
+    } | SDK.DOMModel.DOMNode>): void;
 }
-export declare const _objectGroupName = "properties-sidebar-pane";

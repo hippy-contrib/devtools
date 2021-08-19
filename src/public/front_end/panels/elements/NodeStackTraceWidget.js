@@ -21,7 +21,7 @@ export class NodeStackTraceWidget extends UI.ThrottledWidget.ThrottledWidget {
     _linkifier;
     constructor() {
         super(true /* isWebComponent */);
-        this.registerRequiredCSS('panels/elements/nodeStackTraceWidget.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/elements/nodeStackTraceWidget.css');
         this._noStackTraceElement = this.contentElement.createChild('div', 'gray-info-message');
         this._noStackTraceElement.textContent = i18nString(UIStrings.noStackTraceAvailable);
         this._creationStackTraceElement = this.contentElement.createChild('div', 'stack-trace');

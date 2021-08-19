@@ -7,9 +7,11 @@ import * as UI from '../../legacy/legacy.js';
 import * as LitHtml from '../../lit-html/lit-html.js';
 import * as ComponentHelpers from '../helpers/helpers.js';
 import * as Coordinator from '../render_coordinator/render_coordinator.js';
+import dataGridStyles from './dataGrid.css.js';
+import { BodyCellFocusedEvent, ColumnHeaderClickEvent, ContextMenuHeaderResetClickEvent } from './DataGridEvents.js';
 const coordinator = Coordinator.RenderCoordinator.RenderCoordinator.instance();
 import { addColumnVisibilityCheckboxes, addSortableColumnItems } from './DataGridContextMenuUtils.js';
-import { calculateColumnWidthPercentageFromWeighting, calculateFirstFocusableCell, ContextMenuHeaderResetClickEvent, getRowEntryForColumnId, handleArrowKeyNavigation, renderCellValue } from './DataGridUtils.js';
+import { calculateColumnWidthPercentageFromWeighting, calculateFirstFocusableCell, getRowEntryForColumnId, handleArrowKeyNavigation, renderCellValue } from './DataGridUtils.js';
 import * as i18n from '../../../core/i18n/i18n.js';
 const UIStrings = {
     /**
@@ -27,45 +29,6 @@ const UIStrings = {
 };
 const str_ = i18n.i18n.registerUIStrings('ui/components/data_grid/DataGrid.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
-export class ColumnHeaderClickEvent extends Event {
-    data;
-    constructor(column, columnIndex) {
-        super('columnheaderclick');
-        this.data = {
-            column,
-            columnIndex,
-        };
-    }
-}
-export class NewUserFilterTextEvent extends Event {
-    data;
-    constructor(filterText) {
-        super('newuserfiltertext', {
-            composed: true,
-        });
-        this.data = {
-            filterText,
-        };
-    }
-}
-export class BodyCellFocusedEvent extends Event {
-    /**
-     * Although the DataGrid cares only about the focused cell, and has no concept
-     * of a focused row, many components that render a data grid want to know what
-     * row is active, so on the cell focused event we also send the row that the
-     * cell is part of.
-     */
-    data;
-    constructor(cell, row) {
-        super('cellfocused', {
-            composed: true,
-        });
-        this.data = {
-            cell,
-            row,
-        };
-    }
-}
 const KEYS_TREATED_AS_CLICKS = new Set([' ', 'Enter']);
 const ROW_HEIGHT_PIXELS = 18;
 const PADDING_ROWS_COUNT = 10;
@@ -106,17 +69,19 @@ export class DataGrid extends HTMLElement {
      * first render if any of the columns are sortable we'll set the active cell
      * to [0, 0].
      */
-    focusableCell = [0, 1];
+    cellToFocusIfUserTabsIn = [0, 1];
+    cellUserHasFocused = null;
     hasRenderedAtLeastOnce = false;
     userHasFocusInDataGrid = false;
     scheduleRender = false;
     constructor() {
         super();
         this.shadow.adoptedStyleSheets = [
-            ...ComponentHelpers.GetStylesheet.getStyleSheets('ui/legacy/inspectorScrollbars.css', { enableLegacyPatching: false }),
+            ...ComponentHelpers.GetStylesheet.getStyleSheets('ui/legacy/inspectorScrollbars.css'),
         ];
     }
     connectedCallback() {
+        this.shadow.adoptedStyleSheets = [dataGridStyles];
         ComponentHelpers.SetCSSProperty.set(this, '--table-row-height', `${ROW_HEIGHT_PIXELS}px`);
     }
     get data() {
@@ -151,17 +116,17 @@ export class DataGrid extends HTMLElement {
          * user has focused a cell, this logic will reset it.
          */
         if (!this.hasRenderedAtLeastOnce) {
-            this.focusableCell = calculateFirstFocusableCell({ columns: this.columns, rows: this.rows });
+            this.cellToFocusIfUserTabsIn = calculateFirstFocusableCell({ columns: this.columns, rows: this.rows });
         }
-        if (this.hasRenderedAtLeastOnce) {
-            const [selectedColIndex, selectedRowIndex] = this.focusableCell;
+        if (this.hasRenderedAtLeastOnce && this.userHasCellFocused()) {
+            const [selectedColIndex, selectedRowIndex] = this.tabbableCell();
             const columnOutOfBounds = selectedColIndex > this.columns.length;
             const rowOutOfBounds = selectedRowIndex > this.rows.length;
             /** If the row or column was removed, so the user is out of bounds, we
              * move them to the last focusable cell, which should be close to where
              * they were. */
             if (columnOutOfBounds || rowOutOfBounds) {
-                this.focusableCell = [
+                this.cellUserHasFocused = [
                     columnOutOfBounds ? this.columns.length : selectedColIndex,
                     rowOutOfBounds ? this.rows.length : selectedRowIndex,
                 ];
@@ -211,22 +176,33 @@ export class DataGrid extends HTMLElement {
             this.resizeObserver.observe(this.shadow.host);
         }
     }
-    getCurrentlyFocusableCellElement() {
-        const [columnIndex, rowIndex] = this.focusableCell;
+    userHasCellFocused() {
+        return this.cellUserHasFocused !== null;
+    }
+    getTableElementForCellUserHasFocused() {
+        if (!this.cellUserHasFocused) {
+            return null;
+        }
+        const [columnIndex, rowIndex] = this.cellUserHasFocused;
         const cell = this.shadow.querySelector(`[data-row-index="${rowIndex}"][data-col-index="${columnIndex}"]`);
         return cell;
     }
-    focusCell([newColumnIndex, newRowIndex]) {
-        const userDidNotHaveFocusPreviously = this.userHasFocusInDataGrid === false;
+    async focusTableCellInDOM(cell) {
+        await coordinator.write(() => {
+            cell.focus();
+        });
+    }
+    focusCellIfRequired([newColumnIndex, newRowIndex]) {
         this.userHasFocusInDataGrid = true;
-        const [currentColumnIndex, currentRowIndex] = this.focusableCell;
-        const newCellIsCurrentlyFocusedCell = (currentColumnIndex === newColumnIndex && currentRowIndex === newRowIndex);
-        if (!newCellIsCurrentlyFocusedCell || userDidNotHaveFocusPreviously) {
-            this.focusableCell = [newColumnIndex, newRowIndex];
-            this.render();
+        if (this.cellUserHasFocused && this.cellUserHasFocused[0] === newColumnIndex &&
+            this.cellUserHasFocused[1] === newRowIndex) {
+            // The cell is already active and focused so we don't need to do anything.
+            return;
         }
-        const cellElement = this.getCurrentlyFocusableCellElement();
-        if (!cellElement) {
+        this.cellUserHasFocused = [newColumnIndex, newRowIndex];
+        this.render();
+        const tableCell = this.getTableElementForCellUserHasFocused();
+        if (!tableCell) {
             // Return in case the cell is out of bounds and we do nothing
             return;
         }
@@ -234,17 +210,17 @@ export class DataGrid extends HTMLElement {
          * add arrow key support, so in the case where we're programatically moving the
          * focus, ensure we actually focus the cell.
          */
-        coordinator.write(() => {
-            cellElement.focus();
-        });
+        this.focusTableCellInDOM(tableCell);
     }
     onTableKeyDown(event) {
         const key = event.key;
+        if (!this.cellUserHasFocused) {
+            return;
+        }
         if (KEYS_TREATED_AS_CLICKS.has(key)) {
-            const focusedCell = this.getCurrentlyFocusableCellElement();
-            const [focusedColumnIndex, focusedRowIndex] = this.focusableCell;
+            const [focusedColumnIndex, focusedRowIndex] = this.cellUserHasFocused;
             const activeColumn = this.columns[focusedColumnIndex];
-            if (focusedCell && focusedRowIndex === 0 && activeColumn && activeColumn.sortable) {
+            if (focusedRowIndex === 0 && activeColumn && activeColumn.sortable) {
                 this.onColumnHeaderClick(activeColumn, focusedColumnIndex);
             }
         }
@@ -253,12 +229,12 @@ export class DataGrid extends HTMLElement {
         }
         const nextFocusedCell = handleArrowKeyNavigation({
             key: key,
-            currentFocusedCell: this.focusableCell,
+            currentFocusedCell: this.cellUserHasFocused,
             columns: this.columns,
             rows: this.rows,
         });
         event.preventDefault();
-        this.focusCell(nextFocusedCell);
+        this.focusCellIfRequired(nextFocusedCell);
     }
     onColumnHeaderClick(col, index) {
         this.dispatchEvent(new ColumnHeaderClickEvent(col, index));
@@ -279,7 +255,7 @@ export class DataGrid extends HTMLElement {
         // Column is not sortable, so don't apply any label
         return undefined;
     }
-    renderEmptyFillerRow() {
+    renderEmptyFillerRow(numberOfVisibleRows) {
         const emptyCells = this.columns.map((col, colIndex) => {
             if (!col.visible) {
                 return LitHtml.nothing;
@@ -289,7 +265,12 @@ export class DataGrid extends HTMLElement {
             });
             return LitHtml.html `<td tabindex="-1" class=${emptyCellClasses} data-filler-row-column-index=${colIndex}></td>`;
         });
-        return LitHtml.html `<tr tabindex="-1" class="filler-row padding-row">${emptyCells}</tr>`;
+        const emptyRowClasses = LitHtml.Directives.classMap({
+            'filler-row': true,
+            'padding-row': true,
+            'empty-table': numberOfVisibleRows === 0,
+        });
+        return LitHtml.html `<tr tabindex="-1" class=${emptyRowClasses}>${emptyCells}</tr>`;
     }
     cleanUpAfterResizeColumnComplete() {
         if (!this.currentResize) {
@@ -565,6 +546,15 @@ export class DataGrid extends HTMLElement {
          */
         this.userHasFocusInDataGrid = false;
     }
+    tabbableCell() {
+        /**
+         * If the user has selected a cell, this is the cell that should be
+         * "tabbable" if the user tabs out and into the data-grid. If the user
+         * hasn't selected a cell, we fallback to the default cell that we set as
+         * tabbable when we render.
+         */
+        return this.cellUserHasFocused || this.cellToFocusIfUserTabsIn;
+    }
     /**
      * Renders the data-grid table. Note that we do not render all rows; the
      * performance cost are too high once you have a large enough table. Instead
@@ -591,123 +581,6 @@ export class DataGrid extends HTMLElement {
             // Disabled until https://crbug.com/1079231 is fixed.
             // clang-format off
             LitHtml.render(LitHtml.html `
-      <style>
-        :host {
-          height: 100%;
-          display: block;
-          position: relative;
-        }
-        /* Ensure that vertically we don't overflow */
-        .wrapping-container {
-          overflow-y: scroll;
-          /* Use max-height instead of height to ensure that the
-            table does not use more space than necessary. */
-          height: 100%;
-        }
-
-        table {
-          border-spacing: 0;
-          width: 100%;
-          height: 100%;
-          /* To make sure that we properly hide overflowing text
-            when horizontal space is too narrow. */
-          table-layout: fixed;
-        }
-
-        tr {
-          outline: none;
-        }
-
-        tbody tr {
-          background-color: var(--override-data-grid-row-background-color, --color-background);
-        }
-
-        tbody tr.selected {
-          background-color: var(--color-background-elevation-1);
-        }
-
-        td,
-        th {
-          padding: 1px 4px;
-          /* Divider between each cell, except the first one (see below) */
-          border-left: 1px solid var(--color-details-hairline);
-          color: var(--color-text-primary);
-          line-height: var(--table-row-height);
-          height: var(--table-row-height);
-          user-select: text;
-          /* Ensure that text properly cuts off if horizontal space is too narrow */
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
-        }
-
-        th {
-          font-weight: normal;
-          text-align: left;
-          border-bottom: 1px solid var(--color-details-hairline);
-          position: sticky;
-          top: 0;
-          z-index: 2;
-          background-color: var(--color-background-elevation-1);
-        }
-
-        td:focus,
-        th:focus {
-          outline: var(--color-primary) auto 1px;
-        }
-
-        .cell-resize-handle {
-          top: 0;
-          height: 100%;
-          z-index: 3;
-          width: 20px;
-          cursor: col-resize;
-          position: absolute;
-        }
-        /* There is no divider before the first cell */
-        td.firstVisibleColumn,
-        th.firstVisibleColumn {
-          border-left: none;
-        }
-
-        .hidden {
-          display: none;
-        }
-
-        .filler-row td {
-          /* By making the filler row cells 100% they take up any extra height,
-          * leaving the cells with content to be the regular height, and the
-          * final filler row to be as high as it needs to be to fill the empty
-          * space.
-          */
-          height: 100%;
-          pointer-events: none;
-        }
-
-        [aria-sort]:hover {
-          cursor: pointer;
-        }
-
-        [aria-sort="descending"]::after {
-          content: " ";
-          border-left: 0.3em solid transparent;
-          border-right: 0.3em solid transparent;
-          border-top: 0.3em solid var(--color-text-primary);
-          position: absolute;
-          right: 0.5em;
-          top: 0.6em;
-        }
-
-        [aria-sort="ascending"]::after {
-          content: " ";
-          border-bottom: 0.3em solid var(--color-text-primary);
-          border-left: 0.3em solid transparent;
-          border-right: 0.3em solid transparent;
-          position: absolute;
-          right: 0.5em;
-          top: 0.6em;
-        }
-      </style>
       ${this.columns.map((col, columnIndex) => {
                 /**
                 * We render the resizers outside of the table. One is rendered for each
@@ -740,11 +613,21 @@ export class DataGrid extends HTMLElement {
                     hidden: !col.visible,
                     firstVisibleColumn: columnIndex === indexOfFirstVisibleColumn,
                 });
-                const cellIsFocusableCell = anyColumnsSortable && columnIndex === this.focusableCell[0] && this.focusableCell[1] === 0;
+                const tabbableCell = this.tabbableCell();
+                const cellIsFocusableCell = anyColumnsSortable && columnIndex === tabbableCell[0] && tabbableCell[1] === 0;
                 return LitHtml.html `<th class=${thClasses}
                   data-grid-header-cell=${col.id}
+                  @focus=${() => {
+                    this.focusCellIfRequired([columnIndex, 0]);
+                }}
                   @click=${() => {
-                    this.focusCell([columnIndex, 0]);
+                    /**
+                     * We use click here rather than focus because if you've
+                     * clicked on the header to sort, you've also focused it. If
+                     * you then click it again to change the sorting, this
+                     * doesn't emit a focus event as the cell is already
+                     * focused.
+                     */
                     this.onColumnHeaderClick(col, columnIndex);
                 }}
                   title=${col.title}
@@ -766,7 +649,8 @@ export class DataGrid extends HTMLElement {
                 if (rowIndex === undefined) {
                     throw new Error('Trying to render a row that has no index in the rowIndexMap');
                 }
-                const [, focusableCellRowIndex] = this.focusableCell;
+                const tabbableCell = this.tabbableCell();
+                const [, focusableCellRowIndex] = tabbableCell;
                 // Remember that row 0 is considered the header row, so the first tbody row is row 1.
                 const tableRowIndex = rowIndex + 1;
                 // Check for hasFocusInDataGrid so that we don't highlight the
@@ -788,7 +672,7 @@ export class DataGrid extends HTMLElement {
                         hidden: !col.visible,
                         firstVisibleColumn: columnIndex === indexOfFirstVisibleColumn,
                     });
-                    const cellIsFocusableCell = columnIndex === this.focusableCell[0] && tableRowIndex === this.focusableCell[1];
+                    const cellIsFocusableCell = columnIndex === tabbableCell[0] && tableRowIndex === tabbableCell[1];
                     const cellOutput = col.visible ? renderCellValue(cell) : null;
                     return LitHtml.html `<td
                     class=${cellClasses}
@@ -799,16 +683,14 @@ export class DataGrid extends HTMLElement {
                     data-col-index=${columnIndex}
                     data-grid-value-cell-for-column=${col.id}
                     @focus=${() => {
+                        this.focusCellIfRequired([columnIndex, tableRowIndex]);
                         this.dispatchEvent(new BodyCellFocusedEvent(cell, row));
-                    }}
-                    @click=${() => {
-                        this.focusCell([columnIndex, tableRowIndex]);
                     }}
                   >${cellOutput}</td>`;
                 })}
               `;
             })}
-            ${this.renderEmptyFillerRow()}
+            ${this.renderEmptyFillerRow(renderableRows.length)}
             <tr class="filler-row-bottom padding-row" style=${LitHtml.Directives.styleMap({
                 height: `${Math.max(0, nonHiddenRows.length - bottomVisibleRow) * ROW_HEIGHT_PIXELS}px`,
             })}></tr>
@@ -825,9 +707,11 @@ export class DataGrid extends HTMLElement {
         // back in, that it becomes rendered.
         // However, if the cell is a column header, we don't do this, as that
         // can never be not-rendered.
-        const currentlyFocusedRowIndex = this.focusableCell[1];
-        if (this.userHasFocusInDataGrid && currentlyFocusedRowIndex > 0) {
-            this.focusCell(this.focusableCell);
+        const tabbableCell = this.tabbableCell();
+        const currentlyFocusedRowIndex = tabbableCell[1];
+        const tabbableCellElement = this.getTableElementForCellUserHasFocused();
+        if (this.userHasFocusInDataGrid && currentlyFocusedRowIndex > 0 && tabbableCellElement) {
+            this.focusTableCellInDOM(tabbableCellElement);
         }
         this.scrollToBottomIfRequired();
         this.engageResizeObserver();

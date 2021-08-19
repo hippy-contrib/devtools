@@ -102,7 +102,7 @@ export class NetworkTimeCalculator extends Common.ObjectWrapper.ObjectWrapper {
         return (time - this.minimumBoundary()) / this.boundarySpan() * (this._workingArea || 0);
     }
     formatValue(value, precision) {
-        return i18n.i18n.secondsToString(value, Boolean(precision));
+        return i18n.TimeUtilities.secondsToString(value, Boolean(precision));
     }
     minimumBoundary() {
         return this._window ? this._window.minimum : this._minimumBoundary;
@@ -188,16 +188,16 @@ export class NetworkTimeCalculator extends Common.ObjectWrapper.ObjectWrapper {
     computeBarGraphLabels(request) {
         let rightLabel = '';
         if (request.responseReceivedTime !== -1 && request.endTime !== -1) {
-            rightLabel = i18n.i18n.secondsToString(request.endTime - request.responseReceivedTime);
+            rightLabel = i18n.TimeUtilities.secondsToString(request.endTime - request.responseReceivedTime);
         }
         const hasLatency = request.latency > 0;
-        const leftLabel = hasLatency ? i18n.i18n.secondsToString(request.latency) : rightLabel;
+        const leftLabel = hasLatency ? i18n.TimeUtilities.secondsToString(request.latency) : rightLabel;
         if (request.timing) {
             return { left: leftLabel, right: rightLabel, tooltip: undefined };
         }
         let tooltip;
         if (hasLatency && rightLabel) {
-            const total = i18n.i18n.secondsToString(request.duration);
+            const total = i18n.TimeUtilities.secondsToString(request.duration);
             tooltip = i18nString(UIStrings.sLatencySDownloadSTotal, { PH1: leftLabel, PH2: rightLabel, PH3: total });
         }
         else if (hasLatency) {
@@ -207,10 +207,10 @@ export class NetworkTimeCalculator extends Common.ObjectWrapper.ObjectWrapper {
             tooltip = i18nString(UIStrings.sDownload, { PH1: rightLabel });
         }
         if (request.fetchedViaServiceWorker) {
-            tooltip = i18nString(UIStrings.sFromServiceworker, { PH1: tooltip });
+            tooltip = i18nString(UIStrings.sFromServiceworker, { PH1: String(tooltip) });
         }
         else if (request.cached()) {
-            tooltip = i18nString(UIStrings.sFromCache, { PH1: tooltip });
+            tooltip = i18nString(UIStrings.sFromCache, { PH1: String(tooltip) });
         }
         return { left: leftLabel, right: rightLabel, tooltip: tooltip };
     }
@@ -263,7 +263,7 @@ export class NetworkTransferTimeCalculator extends NetworkTimeCalculator {
         super(false);
     }
     formatValue(value, precision) {
-        return i18n.i18n.secondsToString(value - this.zeroTime(), Boolean(precision));
+        return i18n.TimeUtilities.secondsToString(value - this.zeroTime(), Boolean(precision));
     }
     _lowerBound(request) {
         return request.issueTime();
@@ -277,7 +277,7 @@ export class NetworkTransferDurationCalculator extends NetworkTimeCalculator {
         super(true);
     }
     formatValue(value, precision) {
-        return i18n.i18n.secondsToString(value, Boolean(precision));
+        return i18n.TimeUtilities.secondsToString(value, Boolean(precision));
     }
     _upperBound(request) {
         return request.duration;

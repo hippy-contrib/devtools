@@ -9,10 +9,7 @@ export declare class SourceFrameImpl extends UI.View.SimpleView implements UI.Se
     _lazyContent: () => Promise<TextUtils.ContentProvider.DeferredContent>;
     _pretty: boolean;
     _rawContent: string | null;
-    _formattedContentPromise: Promise<{
-        content: string;
-        map: Formatter.ScriptFormatter.FormatterSourceMapping;
-    }> | null;
+    _formattedContentPromise: Promise<Formatter.ScriptFormatter.FormattedContent> | null;
     _formattedMap: Formatter.ScriptFormatter.FormatterSourceMapping | null;
     _prettyToggle: UI.Toolbar.ToolbarToggle;
     _shouldAutoPrettyPrint: boolean;
@@ -67,10 +64,7 @@ export declare class SourceFrameImpl extends UI.View.SimpleView implements UI.Se
     get textEditor(): SourcesTextEditor;
     get pretty(): boolean;
     _ensureContentLoaded(): Promise<void>;
-    _requestFormattedContent(): Promise<{
-        content: string;
-        map: Formatter.ScriptFormatter.FormatterSourceMapping;
-    }>;
+    _requestFormattedContent(): Promise<Formatter.ScriptFormatter.FormattedContent>;
     revealPosition(line: number, column?: number, shouldHighlight?: boolean): void;
     _innerRevealPositionIfNeeded(): void;
     _clearPositionToReveal(): void;

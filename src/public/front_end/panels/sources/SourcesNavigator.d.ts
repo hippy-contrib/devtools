@@ -1,4 +1,5 @@
 import * as Common from '../../core/common/common.js';
+import * as SDK from '../../core/sdk/sdk.js';
 import * as Workspace from '../../models/workspace/workspace.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import type { NavigatorUISourceCodeTreeNode } from './NavigatorView.js';
@@ -9,7 +10,7 @@ export declare class NetworkNavigatorView extends NavigatorView {
         forceNew: boolean | null;
     }): NetworkNavigatorView;
     acceptProject(project: Workspace.Workspace.Project): boolean;
-    _inspectedURLChanged(event: Common.EventTarget.EventTargetEvent): void;
+    _inspectedURLChanged(event: Common.EventTarget.EventTargetEvent<SDK.Target.Target>): void;
     uiSourceCodeAdded(uiSourceCode: Workspace.UISourceCode.UISourceCode): void;
 }
 export declare class FilesNavigatorView extends NavigatorView {
@@ -40,14 +41,6 @@ export declare class ContentScriptsNavigatorView extends NavigatorView {
 export declare class SnippetsNavigatorView extends NavigatorView {
     constructor();
     static instance(): SnippetsNavigatorView;
-    acceptProject(project: Workspace.Workspace.Project): boolean;
-    handleContextMenu(event: Event): void;
-    handleFileContextMenu(event: Event, node: NavigatorUISourceCodeTreeNode): void;
-    _handleSaveAs(uiSourceCode: Workspace.UISourceCode.UISourceCode): Promise<void>;
-}
-export declare class RecordingsNavigatorView extends NavigatorView {
-    private constructor();
-    static instance(): RecordingsNavigatorView;
     acceptProject(project: Workspace.Workspace.Project): boolean;
     handleContextMenu(event: Event): void;
     handleFileContextMenu(event: Event, node: NavigatorUISourceCodeTreeNode): void;

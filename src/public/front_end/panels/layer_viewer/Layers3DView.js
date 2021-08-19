@@ -31,6 +31,7 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as Platform from '../../core/platform/platform.js';
+import layers3DViewStyles from './layers3DView.css.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { LayerSelection, Selection, SnapshotSelection, ScrollRectSelection } from './LayerViewHost.js';
 import { Events as TransformControllerEvents, TransformController } from './TransformController.js';
@@ -113,7 +114,6 @@ export class Layers3DView extends UI.Widget.VBox {
     _mouseDownY;
     constructor(layerViewHost) {
         super(true);
-        this.registerRequiredCSS('panels/layer_viewer/layers3DView.css', { enableLegacyPatching: false });
         this.contentElement.classList.add('layers-3d-view');
         this._failBanner = new UI.Widget.VBox();
         this._failBanner.element.classList.add('full-widget-dimmed-banner');
@@ -171,6 +171,7 @@ export class Layers3DView extends UI.Widget.VBox {
     }
     wasShown() {
         this._textureManager.resume();
+        this.registerCSSFiles([layers3DViewStyles]);
         if (!this._needsUpdate) {
             return;
         }
@@ -685,7 +686,7 @@ export class Layers3DView extends UI.Widget.VBox {
     }
     _createVisibilitySetting(caption, name, value, toolbar) {
         const setting = Common.Settings.Settings.instance().createSetting(name, value);
-        setting.setTitle(i18nString(caption));
+        setting.setTitle(caption);
         setting.addChangeListener(this._update, this);
         toolbar.appendToolbarItem(new UI.Toolbar.ToolbarSettingCheckbox(setting));
         return setting;
@@ -706,7 +707,7 @@ export class Layers3DView extends UI.Widget.VBox {
         contextMenu.defaultSection().appendItem(i18nString(UIStrings.resetView), () => this._transformController.resetAndNotify(), false);
         const selection = this._selectionFromEventPoint(event);
         if (selection && selection.type() === "Snapshot" /* Snapshot */) {
-            contextMenu.defaultSection().appendItem(i18nString(UIStrings.showPaintProfiler), this.dispatchEventToListeners.bind(this, Events.PaintProfilerRequested, selection), false);
+            contextMenu.defaultSection().appendItem(i18nString(UIStrings.showPaintProfiler), () => this.dispatchEventToListeners(Events.PaintProfilerRequested, selection), false);
         }
         this._layerViewHost.showContextMenu(contextMenu, selection);
     }

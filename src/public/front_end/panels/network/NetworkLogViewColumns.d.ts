@@ -14,7 +14,7 @@ export declare class NetworkLogViewColumns {
             title: string;
         };
     }>;
-    _networkLogLargeRowsSetting: Common.Settings.Setting<number>;
+    _networkLogLargeRowsSetting: Common.Settings.Setting<boolean>;
     _eventDividers: Map<string, number[]>;
     _eventDividersShown: boolean;
     _gridMode: boolean;
@@ -37,7 +37,7 @@ export declare class NetworkLogViewColumns {
     _popoverHelper?: UI.PopoverHelper.PopoverHelper;
     _hasScrollerTouchStarted?: boolean;
     _scrollerTouchStartPos?: number;
-    constructor(networkLogView: NetworkLogView, timeCalculator: NetworkTransferTimeCalculator, durationCalculator: NetworkTransferDurationCalculator, networkLogLargeRowsSetting: Common.Settings.Setting<number>);
+    constructor(networkLogView: NetworkLogView, timeCalculator: NetworkTransferTimeCalculator, durationCalculator: NetworkTransferDurationCalculator, networkLogLargeRowsSetting: Common.Settings.Setting<boolean>);
     static _convertToDataGridDescriptor(columnConfig: Descriptor): DataGrid.DataGrid.ColumnDescriptor;
     wasShown(): void;
     willHide(): void;

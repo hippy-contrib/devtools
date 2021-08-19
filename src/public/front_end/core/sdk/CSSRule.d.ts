@@ -1,5 +1,6 @@
 import * as Protocol from '../../generated/protocol.js';
 import * as TextUtils from '../../models/text_utils/text_utils.js';
+import { CSSContainerQuery } from './CSSContainerQuery.js';
 import { CSSMedia } from './CSSMedia.js';
 import type { CSSModel, Edit } from './CSSModel.js';
 import { CSSStyleDeclaration } from './CSSStyleDeclaration.js';
@@ -33,6 +34,7 @@ declare class CSSValue {
 export declare class CSSStyleRule extends CSSRule {
     selectors: CSSValue[];
     media: CSSMedia[];
+    containerQueries: CSSContainerQuery[];
     wasUsed: boolean;
     constructor(cssModel: CSSModel, payload: Protocol.CSS.CSSRule, wasUsed?: boolean);
     static createDummyRule(cssModel: CSSModel, selectorText: string): CSSStyleRule;

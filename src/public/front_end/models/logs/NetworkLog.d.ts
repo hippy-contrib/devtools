@@ -25,23 +25,26 @@ export declare class NetworkLog extends Common.ObjectWrapper.ObjectWrapper imple
     requestByManagerAndId(networkManager: SDK.NetworkManager.NetworkManager, requestId: string): SDK.NetworkRequest.NetworkRequest | null;
     _requestByManagerAndURL(networkManager: SDK.NetworkManager.NetworkManager, url: string): SDK.NetworkRequest.NetworkRequest | null;
     _initializeInitiatorSymbolIfNeeded(request: SDK.NetworkRequest.NetworkRequest): InitiatorData;
-    initiatorInfoForRequest(request: SDK.NetworkRequest.NetworkRequest): _InitiatorInfo;
+    initiatorInfoForRequest(request: SDK.NetworkRequest.NetworkRequest): InitiatorInfo;
     initiatorGraphForRequest(request: SDK.NetworkRequest.NetworkRequest): InitiatorGraph;
     _initiatorChain(request: SDK.NetworkRequest.NetworkRequest): Set<SDK.NetworkRequest.NetworkRequest>;
     _initiatorRequest(request: SDK.NetworkRequest.NetworkRequest): SDK.NetworkRequest.NetworkRequest | null;
     _willReloadPage(): void;
-    _onMainFrameNavigated(event: Common.EventTarget.EventTargetEvent): void;
+    _onMainFrameNavigated(event: Common.EventTarget.EventTargetEvent<SDK.ResourceTreeModel.ResourceTreeFrame>): void;
     _addRequest(request: SDK.NetworkRequest.NetworkRequest): void;
     _tryResolvePreflightRequests(request: SDK.NetworkRequest.NetworkRequest): void;
     importRequests(requests: SDK.NetworkRequest.NetworkRequest[]): void;
-    _onRequestStarted(event: Common.EventTarget.EventTargetEvent): void;
-    _onResponseReceived(event: Common.EventTarget.EventTargetEvent): void;
-    _onRequestUpdated(event: Common.EventTarget.EventTargetEvent): void;
-    _onRequestRedirect(event: Common.EventTarget.EventTargetEvent): void;
-    _onDOMContentLoaded(resourceTreeModel: SDK.ResourceTreeModel.ResourceTreeModel, event: Common.EventTarget.EventTargetEvent): void;
-    _onLoad(event: Common.EventTarget.EventTargetEvent): void;
+    _onRequestStarted(event: Common.EventTarget.EventTargetEvent<SDK.NetworkManager.RequestStartedEvent>): void;
+    _onResponseReceived(event: Common.EventTarget.EventTargetEvent<SDK.NetworkManager.ResponseReceivedEvent>): void;
+    _onRequestUpdated(event: Common.EventTarget.EventTargetEvent<SDK.NetworkRequest.NetworkRequest>): void;
+    _onRequestRedirect(event: Common.EventTarget.EventTargetEvent<SDK.NetworkRequest.NetworkRequest>): void;
+    _onDOMContentLoaded(resourceTreeModel: SDK.ResourceTreeModel.ResourceTreeModel, event: Common.EventTarget.EventTargetEvent<number>): void;
+    _onLoad(event: Common.EventTarget.EventTargetEvent<{
+        resourceTreeModel: SDK.ResourceTreeModel.ResourceTreeModel;
+        loadTime: number;
+    }>): void;
     reset(clearIfPreserved: boolean): void;
-    _networkMessageGenerated(networkManager: SDK.NetworkManager.NetworkManager, event: Common.EventTarget.EventTargetEvent): void;
+    _networkMessageGenerated(networkManager: SDK.NetworkManager.NetworkManager, event: Common.EventTarget.EventTargetEvent<SDK.NetworkManager.MessageGeneratedEvent>): void;
     associateConsoleMessageWithRequest(consoleMessage: SDK.ConsoleModel.ConsoleMessage, requestId: string): void;
     static requestForConsoleMessage(consoleMessage: SDK.ConsoleModel.ConsoleMessage): SDK.NetworkRequest.NetworkRequest | null;
     requestsForId(requestId: string): SDK.NetworkRequest.NetworkRequest[];
@@ -52,7 +55,7 @@ export declare const Events: {
     RequestUpdated: symbol;
 };
 interface InitiatorData {
-    info: _InitiatorInfo | null;
+    info: InitiatorInfo | null;
     chain: Set<SDK.NetworkRequest.NetworkRequest> | null;
     request?: SDK.NetworkRequest.NetworkRequest | null;
 }
@@ -60,7 +63,7 @@ export interface InitiatorGraph {
     initiators: Set<SDK.NetworkRequest.NetworkRequest>;
     initiated: Map<SDK.NetworkRequest.NetworkRequest, SDK.NetworkRequest.NetworkRequest>;
 }
-export interface _InitiatorInfo {
+interface InitiatorInfo {
     type: SDK.NetworkRequest.InitiatorType;
     url: string;
     lineNumber: number;

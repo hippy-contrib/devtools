@@ -45,6 +45,10 @@ const UIStrings = {
     *@description Error text for duplicate list widget input in Request Blocking tool
     */
     patternAlreadyExists: 'Pattern already exists.',
+    /**
+    *@description Message to be announced for a when list item is removed from list widget
+    */
+    itemDeleted: 'Item successfully deleted',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/network/BlockedURLsPane.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -59,7 +63,7 @@ export class BlockedURLsPane extends UI.Widget.VBox {
     _updateThrottler;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/network/blockedURLsPane.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/network/blockedURLsPane.css');
         this._manager = SDK.NetworkManager.MultitargetNetworkManager.instance();
         this._manager.addEventListener(SDK.NetworkManager.MultitargetNetworkManager.Events.BlockedPatternsChanged, () => {
             this._update();
@@ -76,7 +80,7 @@ export class BlockedURLsPane extends UI.Widget.VBox {
         this._toolbar.appendToolbarItem(clearButton);
         this._list = new UI.ListWidget.ListWidget(this);
         this._list.element.classList.add('blocked-urls');
-        this._list.registerRequiredCSS('panels/network/blockedURLsPane.css', { enableLegacyPatching: false });
+        this._list.registerRequiredCSS('panels/network/blockedURLsPane.css');
         this._list.setEmptyPlaceholder(this._createEmptyPlaceholder());
         this._list.show(this.contentElement);
         this._editor = null;
@@ -136,6 +140,7 @@ export class BlockedURLsPane extends UI.Widget.VBox {
         const patterns = this._manager.blockedPatterns();
         patterns.splice(index, 1);
         this._manager.setBlockedPatterns(patterns);
+        UI.ARIAUtils.alert(UIStrings.itemDeleted);
     }
     beginEdit(pattern) {
         this._editor = this._createEditor();

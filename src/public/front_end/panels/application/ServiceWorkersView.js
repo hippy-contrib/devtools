@@ -10,7 +10,7 @@ import * as Logs from '../../models/logs/logs.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as MobileThrottling from '../mobile_throttling/mobile_throttling.js';
-import * as Network from '../network/network.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 import { ServiceWorkerUpdateCycleView } from './ServiceWorkerUpdateCycleView.js';
 const UIStrings = {
     /**
@@ -47,8 +47,9 @@ const UIStrings = {
     */
     networkRequests: 'Network requests',
     /**
-    *@description Text in Service Workers View of the Application panel
-    */
+     * @description Label for a button in the Service Workers View of the Application panel.
+     * Imperative noun. Clicking the button will refresh the list of service worker registrations.
+     */
     update: 'Update',
     /**
     *@description Text in Service Workers View of the Application panel
@@ -162,6 +163,10 @@ const UIStrings = {
     * the focus is moved to the service worker's client page.
     */
     focus: 'focus',
+    /**
+    *@description Link to view all the Service Workers that have been registered.
+    */
+    seeAllRegistrations: 'See all registrations',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/application/ServiceWorkersView.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -179,7 +184,7 @@ export class ServiceWorkersView extends UI.Widget.VBox {
     _eventListeners;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/application/serviceWorkersView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/application/serviceWorkersView.css');
         // TODO(crbug.com/1156978): Replace UI.ReportView.ReportView with ReportView.ts web component.
         this._currentWorkersView = new UI.ReportView.ReportView(i18n.i18n.lockedString('Service Workers'));
         this._currentWorkersView.setBodyScrollable(false);
@@ -200,7 +205,7 @@ export class ServiceWorkersView extends UI.Widget.VBox {
         const othersSection = othersView.appendSection(i18nString(UIStrings.serviceWorkersFromOtherOrigins));
         const othersSectionRow = othersSection.appendRow();
         const seeOthers = UI.Fragment
-            .html `<a class="devtools-link" role="link" tabindex="0" href="chrome://serviceworker-internals" target="_blank" style="display: inline; cursor: pointer;">See all registrations</a>`;
+            .html `<a class="devtools-link" role="link" tabindex="0" href="chrome://serviceworker-internals" target="_blank" style="display: inline; cursor: pointer;">${i18nString(UIStrings.seeAllRegistrations)}</a>`;
         self.onInvokeElement(seeOthers, event => {
             const mainTarget = SDK.TargetManager.TargetManager.instance().mainTarget();
             mainTarget && mainTarget.targetAgent().invoke_createTarget({ url: 'chrome://serviceworker-internals?devtools' });
@@ -227,7 +232,7 @@ export class ServiceWorkersView extends UI.Widget.VBox {
                 if (isOpen) {
                     const networkLocation = UI.ViewManager.ViewManager.instance().locationNameForViewId('network');
                     UI.ViewManager.ViewManager.instance().showViewInLocation('network', networkLocation, false);
-                    Network.NetworkPanel.NetworkPanel.revealAndFilter([]);
+                    Common.Revealer.reveal(NetworkForward.UIFilter.UIRequestFilter.filters([]));
                     const currentTime = Date.now();
                     const timeDifference = currentTime - openedAt;
                     if (timeDifference < 2000) {
@@ -263,7 +268,7 @@ export class ServiceWorkersView extends UI.Widget.VBox {
         if (!this._manager || this._manager !== serviceWorkerManager) {
             return;
         }
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners.get(serviceWorkerManager) || []);
+        Common.EventTarget.removeEventListeners(this._eventListeners.get(serviceWorkerManager) || []);
         this._eventListeners.delete(serviceWorkerManager);
         this._manager = null;
         this._securityOriginManager = null;
@@ -501,8 +506,9 @@ export class Section {
         this._section.setFieldVisible(i18nString(UIStrings.clients), Boolean(version.controlledClients.length));
         for (const client of version.controlledClients) {
             const clientLabelText = this._clientsField.createChild('div', 'service-worker-client');
-            if (this._clientInfoCache.has(client)) {
-                this._updateClientInfo(clientLabelText, this._clientInfoCache.get(client));
+            const info = this._clientInfoCache.get(client);
+            if (info) {
+                this._updateClientInfo(clientLabelText, info);
             }
             this._manager.target()
                 .targetAgent()
@@ -583,8 +589,9 @@ export class Section {
         if (installing) {
             const installingEntry = this._addVersion(versionsStack, 'service-worker-installing-circle', i18nString(UIStrings.sTryingToInstall, { PH1: installing.id }));
             if (installing.scriptResponseTime !== undefined) {
-                installingEntry.createChild('div', 'service-worker-subtitle').textContent =
-                    i18nString('Received %s', new Date(installing.scriptResponseTime * 1000).toLocaleString());
+                installingEntry.createChild('div', 'service-worker-subtitle').textContent = i18nString(UIStrings.receivedS, {
+                    PH1: new Date(installing.scriptResponseTime * 1000).toLocaleString(),
+                });
             }
             if (!this._targetForVersionId(installing.id) && (installing.isRunning() || installing.isStarting())) {
                 this._createLink(installingEntry, i18nString(UIStrings.inspect), this._inspectButtonClicked.bind(this, installing.id));
@@ -619,12 +626,12 @@ export class Section {
         const applicationTabLocation = UI.ViewManager.ViewManager.instance().locationNameForViewId('resources');
         const networkTabLocation = applicationTabLocation === 'drawer-view' ? 'panel' : 'drawer-view';
         UI.ViewManager.ViewManager.instance().showViewInLocation('network', networkTabLocation);
-        Network.NetworkPanel.NetworkPanel.revealAndFilter([
+        Common.Revealer.reveal(NetworkForward.UIFilter.UIRequestFilter.filters([
             {
-                filterType: Network.NetworkLogView.FilterType.Is,
-                filterValue: Network.NetworkLogView.IsFilterType.ServiceWorkerIntercepted,
+                filterType: NetworkForward.UIFilter.FilterType.Is,
+                filterValue: NetworkForward.UIFilter.IsFilterType.ServiceWorkerIntercepted,
             },
-        ]);
+        ]));
         const requests = Logs.NetworkLog.NetworkLog.instance().requests();
         let lastRequest = null;
         if (Array.isArray(requests)) {
@@ -639,7 +646,8 @@ export class Section {
             }
         }
         if (lastRequest) {
-            Network.NetworkPanel.NetworkPanel.selectAndShowRequest(lastRequest, Network.NetworkItemView.Tabs.Timing, { clearFilter: false });
+            const requestLocation = NetworkForward.UIRequestLocation.UIRequestLocation.tab(lastRequest, NetworkForward.UIRequestLocation.UIRequestTabs.Timing, { clearFilter: false });
+            Common.Revealer.reveal(requestLocation);
         }
         this._manager.serviceWorkerNetworkRequestsPanelStatus = {
             isOpen: true,
@@ -694,8 +702,8 @@ export class Section {
         this._manager.inspectWorker(versionId);
     }
     _wrapWidget(container) {
-        const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(container, { cssFile: undefined, enableLegacyPatching: false, delegatesFocus: undefined });
-        UI.Utils.appendStyle(shadowRoot, 'panels/application/serviceWorkersView.css', { enableLegacyPatching: false });
+        const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(container, { cssFile: undefined, delegatesFocus: undefined });
+        UI.Utils.appendStyle(shadowRoot, 'panels/application/serviceWorkersView.css');
         const contentElement = document.createElement('div');
         shadowRoot.appendChild(contentElement);
         return contentElement;

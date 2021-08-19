@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "."
+    },
+    "files": [
+        "accessibilityTreeNode.css",
+        "adornerSettingsPane.css",
+        "computedStyleProperty.css",
+        "computedStyleTrace.css",
+        "cssQuery.css",
+        "elementsBreadcrumbs.css",
+        "elementsPanelLink.css",
+        "nodeText.css",
+        "queryContainer.css",
+        "stylePropertyEditor.css"
+    ]
+}

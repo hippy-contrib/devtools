@@ -1,7 +1,6 @@
+import * as Protocol from '../../generated/protocol.js';
 import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as Common from '../common/common.js';
-import type * as ProtocolClient from '../protocol_client/protocol_client.js';
-import * as Protocol from '../../generated/protocol.js';
 import type { DebuggerModel } from './DebuggerModel.js';
 import { Location } from './DebuggerModel.js';
 import type { FrameAssociated } from './FrameAssociated.js';
@@ -50,7 +49,7 @@ export declare class Script implements TextUtils.ContentProvider.ContentProvider
     originalContentProvider(): TextUtils.ContentProvider.ContentProvider;
     searchInContent(query: string, caseSensitive: boolean, isRegex: boolean): Promise<TextUtils.ContentProvider.SearchMatch[]>;
     _appendSourceURLCommentIfNeeded(source: string): string;
-    editSource(newSource: string, callback: (arg0: ProtocolClient.InspectorBackend.ProtocolError | null, arg1?: Protocol.Runtime.ExceptionDetails | undefined, arg2?: Array<Protocol.Debugger.CallFrame> | undefined, arg3?: Protocol.Runtime.StackTrace | undefined, arg4?: Protocol.Runtime.StackTraceId | undefined, arg5?: boolean | undefined) => void): Promise<void>;
+    editSource(newSource: string, callback: (error: string | null, arg1?: Protocol.Runtime.ExceptionDetails | undefined, arg2?: Array<Protocol.Debugger.CallFrame> | undefined, arg3?: Protocol.Runtime.StackTrace | undefined, arg4?: Protocol.Runtime.StackTraceId | undefined, arg5?: boolean | undefined) => void): Promise<void>;
     rawLocation(lineNumber: number, columnNumber: number): Location | null;
     toRelativeLocation(location: Location): number[];
     isInlineScript(): boolean;

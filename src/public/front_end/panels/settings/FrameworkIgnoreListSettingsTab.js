@@ -5,6 +5,7 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import frameworkIgnoreListSettingsTabStyles from './frameworkIgnoreListSettingsTab.css.js';
 const UIStrings = {
     /**
     *@description Header text content in Framework Ignore List Settings Tab of the Settings
@@ -80,7 +81,6 @@ export class FrameworkIgnoreListSettingsTab extends UI.Widget.VBox {
     _editor;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/settings/frameworkIgnoreListSettingsTab.css', { enableLegacyPatching: false });
         const header = this.contentElement.createChild('div', 'header');
         header.textContent = i18nString(UIStrings.frameworkIgnoreList);
         UI.ARIAUtils.markAsHeading(header, 1);
@@ -92,7 +92,6 @@ export class FrameworkIgnoreListSettingsTab extends UI.Widget.VBox {
         this._disabledLabel = i18nString(UIStrings.disabled);
         this._list = new UI.ListWidget.ListWidget(this);
         this._list.element.classList.add('ignore-list');
-        this._list.registerRequiredCSS('panels/settings/frameworkIgnoreListSettingsTab.css', { enableLegacyPatching: false });
         const placeholder = document.createElement('div');
         placeholder.classList.add('ignore-list-empty');
         placeholder.textContent = i18nString(UIStrings.noIgnoreListPatterns);
@@ -115,6 +114,8 @@ export class FrameworkIgnoreListSettingsTab extends UI.Widget.VBox {
     }
     wasShown() {
         super.wasShown();
+        this._list.registerCSSFiles([frameworkIgnoreListSettingsTabStyles]);
+        this.registerCSSFiles([frameworkIgnoreListSettingsTabStyles]);
         this._settingUpdated();
     }
     _settingUpdated() {

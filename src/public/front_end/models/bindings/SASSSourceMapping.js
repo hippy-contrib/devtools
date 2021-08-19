@@ -32,7 +32,7 @@ import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Workspace from '../workspace/workspace.js';
 import { ContentProviderBasedProject } from './ContentProviderBasedProject.js';
-import { CSSWorkspaceBinding } from './CSSWorkspaceBinding.js'; // eslint-disable-line no-unused-vars
+import { CSSWorkspaceBinding } from './CSSWorkspaceBinding.js';
 import { NetworkProject } from './NetworkProject.js';
 export class SASSSourceMapping {
     _sourceMapManager;
@@ -131,7 +131,7 @@ export class SASSSourceMapping {
         return locations;
     }
     dispose() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         this._project.dispose();
     }
 }

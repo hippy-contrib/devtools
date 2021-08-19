@@ -56,9 +56,8 @@ export declare class TreeOutlineInShadow extends TreeOutline {
     _disclosureElement: Element;
     _renderSelection: boolean;
     constructor();
-    registerRequiredCSS(cssFile: string, options: {
-        enableLegacyPatching: false;
-    }): void;
+    registerRequiredCSS(cssFile: string): void;
+    registerCSSFiles(cssFiles: CSSStyleSheet[]): void;
     hideOverflow(): void;
     makeDense(): void;
     onStartedEditingTitle(treeElement: TreeElement): void;

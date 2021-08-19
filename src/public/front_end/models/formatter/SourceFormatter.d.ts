@@ -21,7 +21,9 @@ export declare class SourceFormatter {
     _scriptMapping: ScriptMapping;
     _styleMapping: StyleMapping;
     constructor();
-    static instance(): SourceFormatter;
+    static instance({ forceNew }?: {
+        forceNew?: boolean;
+    }): SourceFormatter;
     _onUISourceCodeRemoved(event: Common.EventTarget.EventTargetEvent): Promise<void>;
     discardFormattedUISourceCode(formattedUISourceCode: Workspace.UISourceCode.UISourceCode): Promise<Workspace.UISourceCode.UISourceCode | null>;
     _discardFormatData(formatData: SourceFormatData): Promise<void>;

@@ -158,7 +158,6 @@ export const ActionCategory = {
     BACKGROUND_SERVICES: 'Background Services',
     SETTINGS: 'Settings',
     DEBUGGER: 'Debugger',
-    RECORDER: 'Recorder',
     SOURCES: 'Sources',
 };
 //# sourceMappingURL=ActionRegistration.js.map

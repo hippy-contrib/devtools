@@ -45,7 +45,7 @@ import { GlassPane, PointerEventsBehavior, SizeBehavior } from './GlassPane.js';
 import { Icon } from './Icon.js';
 import { KeyboardShortcut } from './KeyboardShortcut.js';
 import * as ThemeSupport from './theme_support/theme_support.js'; // eslint-disable-line rulesdir/es_modules_import
-import { Toolbar } from './Toolbar.js'; // eslint-disable-line no-unused-vars
+import { Toolbar } from './Toolbar.js';
 import { Tooltip } from './Tooltip.js';
 import { createShadowRootWithCoreStyles } from './utils/create-shadow-root-with-core-styles.js';
 import { focusChanged } from './utils/focus-changed.js';
@@ -324,9 +324,7 @@ export function markBeingEdited(element, value) {
 }
 const elementsBeingEdited = new Set();
 // Avoids Infinity, NaN, and scientific notation (e.g. 1e20), see crbug.com/81165.
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _numberRegex = /^(-?(?:\d+(?:\.\d+)?|\.\d+))$/;
+const numberRegex = /^(-?(?:\d+(?:\.\d+)?|\.\d+))$/;
 export const StyleValueDelimiters = ' \xA0\t\n"\':;,/()';
 export function getValueModificationDirection(event) {
     let direction = null;
@@ -351,9 +349,7 @@ export function getValueModificationDirection(event) {
     }
     return direction;
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-function _modifiedHexValue(hexString, event) {
+function modifiedHexValue(hexString, event) {
     const direction = getValueModificationDirection(event);
     if (!direction) {
         return null;
@@ -376,7 +372,7 @@ function _modifiedHexValue(hexString, event) {
     // If no shortcut keys are pressed then increase hex value by 1.
     // Keys can be pressed together to increase RGB channels. e.g trying different shades.
     let delta = 0;
-    if (KeyboardShortcut.eventHasCtrlOrMeta(mouseEvent)) {
+    if (KeyboardShortcut.eventHasCtrlEquivalentKey(mouseEvent)) {
         delta += Math.pow(16, channelLen * 2);
     }
     if (mouseEvent.shiftKey) {
@@ -401,9 +397,7 @@ function _modifiedHexValue(hexString, event) {
     }
     return resultString;
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-function _modifiedFloatNumber(number, event, modifierMultiplier) {
+function modifiedFloatNumber(number, event, modifierMultiplier) {
     const direction = getValueModificationDirection(event);
     if (!direction) {
         return null;
@@ -415,7 +409,7 @@ function _modifiedFloatNumber(number, event, modifierMultiplier) {
     // When alt is pressed, increase by 0.1.
     // Otherwise increase by 1.
     let delta = 1;
-    if (KeyboardShortcut.eventHasCtrlOrMeta(mouseEvent)) {
+    if (KeyboardShortcut.eventHasCtrlEquivalentKey(mouseEvent)) {
         delta = 100;
     }
     else if (mouseEvent.shiftKey) {
@@ -433,7 +427,7 @@ function _modifiedFloatNumber(number, event, modifierMultiplier) {
     // Make the new number and constrain it to a precision of 6, this matches numbers the engine returns.
     // Use the Number constructor to forget the fixed precision, so 1.100000 will print as 1.1.
     const result = Number((number + delta).toFixed(6));
-    if (!String(result).match(_numberRegex)) {
+    if (!String(result).match(numberRegex)) {
         return null;
     }
     return result;
@@ -447,7 +441,7 @@ export function createReplacementString(wordString, event, customNumberHandler) 
     if (matches && matches.length) {
         prefix = matches[1];
         suffix = matches[3];
-        number = _modifiedHexValue(matches[2], event);
+        number = modifiedHexValue(matches[2], event);
         if (number !== null) {
             replacementString = prefix + number + suffix;
         }
@@ -457,7 +451,7 @@ export function createReplacementString(wordString, event, customNumberHandler) 
         if (matches && matches.length) {
             prefix = matches[1];
             suffix = matches[3];
-            number = _modifiedFloatNumber(parseFloat(matches[2]), event);
+            number = modifiedFloatNumber(parseFloat(matches[2]), event);
             if (number !== null) {
                 replacementString =
                     customNumberHandler ? customNumberHandler(prefix, number, suffix) : prefix + number + suffix;
@@ -506,14 +500,10 @@ export function handleElementValueModifications(event, element, finishHandler, s
     }
     return false;
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatLocalized(format, substitutions) {
     const formatters = {
         s: (substitution) => substitution,
     };
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function append(a, b) {
         a.appendChild(typeof b === 'string' ? document.createTextNode(b) : b);
         return a;
@@ -553,16 +543,12 @@ export function installComponentRootStyles(element) {
         element.classList.add('overlay-scrollbar-enabled');
     }
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-function _windowFocused(document, event) {
+function windowFocused(document, event) {
     if (event.target instanceof Window && event.target.document.nodeType === Node.DOCUMENT_NODE) {
         document.body.classList.remove('inactive');
     }
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-function _windowBlurred(document, event) {
+function windowBlurred(document, event) {
     if (event.target instanceof Window && event.target.document.nodeType === Node.DOCUMENT_NODE) {
         document.body.classList.add('inactive');
     }
@@ -586,8 +572,6 @@ export class ElementFocusRestorer {
         this._element = null;
     }
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function highlightSearchResult(element, offset, length, domChanges) {
     const result = highlightSearchResults(element, [new TextUtils.TextRange.SourceRange(offset, length)], domChanges);
     return result.length ? result[0] : null;
@@ -669,8 +653,6 @@ export function highlightRangesWithStyleClass(element, resultRanges, styleClass,
             const prefixNode = ownerDocument.createTextNode(lastText.substring(0, startOffset - nodeRanges[startIndex].offset));
             lastTextNode.parentElement.insertBefore(prefixNode, highlightNode);
             changes.push({
-                // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 node: prefixNode,
                 type: 'added',
                 nextSibling: highlightNode,
@@ -724,23 +706,19 @@ export function highlightRangesWithStyleClass(element, resultRanges, styleClass,
     }
     return highlightNodes;
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applyDomChanges(domChanges) {
     for (let i = 0, size = domChanges.length; i < size; ++i) {
         const entry = domChanges[i];
         switch (entry.type) {
             case 'added':
-                entry.parent.insertBefore(entry.node, entry.nextSibling);
+                entry.parent?.insertBefore(entry.node, entry.nextSibling ?? null);
                 break;
             case 'changed':
-                entry.node.textContent = entry.newText;
+                entry.node.textContent = entry.newText ?? null;
                 break;
         }
     }
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function revertDomChanges(domChanges) {
     for (let i = domChanges.length - 1; i >= 0; --i) {
         const entry = domChanges[i];
@@ -749,7 +727,7 @@ export function revertDomChanges(domChanges) {
                 entry.node.remove();
                 break;
             case 'changed':
-                entry.node.textContent = entry.oldText;
+                entry.node.textContent = entry.oldText ?? null;
                 break;
         }
     }
@@ -771,10 +749,6 @@ export function measurePreferredSize(element, containerElement) {
     return new Size(result.width, result.height);
 }
 class InvokeOnceHandlers {
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _handlers;
     _autoInvoke;
     constructor(autoInvoke) {
@@ -801,45 +775,40 @@ class InvokeOnceHandlers {
         }
     }
     _invoke() {
-        const handlers = this._handlers || new Map(); // Make closure happy. This should not be null.
+        const handlers = this._handlers;
         this._handlers = null;
-        for (const [object, methods] of handlers) {
-            for (const method of methods) {
-                method.call(object);
+        if (handlers) {
+            for (const [object, methods] of handlers) {
+                for (const method of methods) {
+                    method.call(object);
+                }
             }
         }
     }
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-let _coalescingLevel = 0;
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-let _postUpdateHandlers = null;
+let coalescingLevel = 0;
+let postUpdateHandlers = null;
 export function startBatchUpdate() {
-    if (!_coalescingLevel++) {
-        _postUpdateHandlers = new InvokeOnceHandlers(false);
+    if (!coalescingLevel++) {
+        postUpdateHandlers = new InvokeOnceHandlers(false);
     }
 }
 export function endBatchUpdate() {
-    if (--_coalescingLevel) {
+    if (--coalescingLevel) {
         return;
     }
-    if (_postUpdateHandlers) {
-        _postUpdateHandlers.scheduleInvoke();
-        _postUpdateHandlers = null;
+    if (postUpdateHandlers) {
+        postUpdateHandlers.scheduleInvoke();
+        postUpdateHandlers = null;
     }
 }
 export function invokeOnceAfterBatchUpdate(object, method) {
-    if (!_postUpdateHandlers) {
-        _postUpdateHandlers = new InvokeOnceHandlers(true);
+    if (!postUpdateHandlers) {
+        postUpdateHandlers = new InvokeOnceHandlers(true);
     }
-    _postUpdateHandlers.add(object, method);
+    postUpdateHandlers.add(object, method);
 }
-export function animateFunction(window, func, params, 
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-duration, animationComplete) {
+export function animateFunction(window, func, params, duration, animationComplete) {
     const start = window.performance.now();
     let raf = window.requestAnimationFrame(animationStep);
     function animationStep(timestamp) {
@@ -924,15 +893,13 @@ export class LongClickController extends Common.ObjectWrapper.ObjectWrapper {
         this._element.addEventListener('click', this._longClickData.reset, true);
         delete this._longClickData;
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     static TIME_MS = 200;
 }
 export function initializeUIUtils(document, themeSetting) {
     document.body.classList.toggle('inactive', !document.hasFocus());
     if (document.defaultView) {
-        document.defaultView.addEventListener('focus', _windowFocused.bind(undefined, document), false);
-        document.defaultView.addEventListener('blur', _windowBlurred.bind(undefined, document), false);
+        document.defaultView.addEventListener('focus', windowFocused.bind(undefined, document), false);
+        document.defaultView.addEventListener('blur', windowBlurred.bind(undefined, document), false);
     }
     document.addEventListener('focus', focusChanged.bind(undefined), true);
     if (!ThemeSupport.ThemeSupport.hasInstance()) {
@@ -955,10 +922,7 @@ export const createTextChildren = (element, ...childrenText) => {
         createTextChild(element, child);
     }
 };
-export function createTextButton(
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-text, eventHandler, className, primary, alternativeEvent) {
+export function createTextButton(text, eventHandler, className, primary, alternativeEvent) {
     const element = document.createElement('button');
     if (className) {
         element.className = className;
@@ -987,7 +951,8 @@ export function createInput(className, type) {
     return /** @type {!HTMLInputElement} */ element;
 }
 export function createSelect(name, options) {
-    const select = document.createElementWithClass('select', 'chrome-select');
+    const select = document.createElement('select');
+    select.classList.add('chrome-select');
     ARIAUtils.setAccessibleName(select, name);
     for (const option of options) {
         if (option instanceof Map) {
@@ -1053,7 +1018,8 @@ export class CheckboxLabel extends HTMLSpanElement {
         super();
         CheckboxLabel._lastId = CheckboxLabel._lastId + 1;
         const id = 'ui-checkbox-label' + CheckboxLabel._lastId;
-        this._shadowRoot = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/checkboxTextLabel.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        this._shadowRoot =
+            createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/checkboxTextLabel.css', delegatesFocus: undefined });
         this.checkboxElement = this._shadowRoot.createChild('input');
         this.checkboxElement.type = 'checkbox';
         this.checkboxElement.setAttribute('id', id);
@@ -1098,7 +1064,6 @@ export class DevToolsIconLabel extends HTMLSpanElement {
     constructor() {
         super();
         const root = createShadowRootWithCoreStyles(this, {
-            enableLegacyPatching: false,
             cssFile: undefined,
             delegatesFocus: undefined,
         });
@@ -1123,7 +1088,7 @@ export class DevToolsRadioButton extends HTMLSpanElement {
         this.radioElement.id = id;
         this.radioElement.type = 'radio';
         this.labelElement.htmlFor = id;
-        const root = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/radioButton.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        const root = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/radioButton.css', delegatesFocus: undefined });
         root.createChild('slot');
         this.addEventListener('click', this.radioClickHandler.bind(this), false);
     }
@@ -1141,7 +1106,7 @@ export class DevToolsSlider extends HTMLSpanElement {
     sliderElement;
     constructor() {
         super();
-        const root = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/slider.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        const root = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/slider.css', delegatesFocus: undefined });
         this.sliderElement = document.createElement('input');
         this.sliderElement.classList.add('dt-range-input');
         this.sliderElement.type = 'range';
@@ -1159,7 +1124,7 @@ export class DevToolsSmallBubble extends HTMLSpanElement {
     _textElement;
     constructor() {
         super();
-        const root = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/smallBubble.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        const root = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/smallBubble.css', delegatesFocus: undefined });
         this._textElement = root.createChild('div');
         this._textElement.className = 'info';
         this._textElement.createChild('slot');
@@ -1175,7 +1140,7 @@ export class DevToolsCloseButton extends HTMLDivElement {
     _activeIcon;
     constructor() {
         super();
-        const root = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/closeButton.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        const root = createShadowRootWithCoreStyles(this, { cssFile: 'ui/legacy/closeButton.css', delegatesFocus: undefined });
         this._buttonElement = root.createChild('div', 'close-button');
         ARIAUtils.setAccessibleName(this._buttonElement, i18nString(UIStrings.close));
         ARIAUtils.markAsButton(this._buttonElement);
@@ -1236,7 +1201,7 @@ export function bindInput(input, apply, validate, numeric, modifierMultiplier) {
         if (!numeric) {
             return;
         }
-        const value = _modifiedFloatNumber(parseFloat(input.value), event, modifierMultiplier);
+        const value = modifiedFloatNumber(parseFloat(input.value), event, modifierMultiplier);
         const stringValue = value ? String(value) : '';
         const { valid } = validate(stringValue);
         if (!valid || !value) {
@@ -1352,8 +1317,6 @@ export function loadImage(url) {
 export function loadImageFromData(data) {
     return data ? loadImage('data:image/jpg;base64,' + data) : Promise.resolve(null);
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createFileSelectorElement(callback) {
     const fileSelectorElement = document.createElement('input');
     fileSelectorElement.type = 'file';
@@ -1372,7 +1335,7 @@ export class MessageDialog {
         const dialog = new Dialog();
         dialog.setSizeBehavior(SizeBehavior.MeasureContent);
         dialog.setDimmed(true);
-        const shadowRoot = createShadowRootWithCoreStyles(dialog.contentElement, { cssFile: 'ui/legacy/confirmDialog.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        const shadowRoot = createShadowRootWithCoreStyles(dialog.contentElement, { cssFile: 'ui/legacy/confirmDialog.css', delegatesFocus: undefined });
         const content = shadowRoot.createChild('div', 'widget');
         await new Promise(resolve => {
             const okButton = createTextButton(i18nString(UIStrings.ok), resolve, '', true);
@@ -1394,7 +1357,7 @@ export class ConfirmDialog {
         dialog.setSizeBehavior(SizeBehavior.MeasureContent);
         dialog.setDimmed(true);
         ARIAUtils.setAccessibleName(dialog.contentElement, message);
-        const shadowRoot = createShadowRootWithCoreStyles(dialog.contentElement, { cssFile: 'ui/legacy/confirmDialog.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        const shadowRoot = createShadowRootWithCoreStyles(dialog.contentElement, { cssFile: 'ui/legacy/confirmDialog.css', delegatesFocus: undefined });
         const content = shadowRoot.createChild('div', 'widget');
         content.createChild('div', 'message').createChild('span').textContent = message;
         const buttonsBar = content.createChild('div', 'button');
@@ -1417,7 +1380,7 @@ export class ConfirmDialog {
 }
 export function createInlineButton(toolbarButton) {
     const element = document.createElement('span');
-    const shadowRoot = createShadowRootWithCoreStyles(element, { cssFile: 'ui/legacy/inlineButton.css', enableLegacyPatching: false, delegatesFocus: undefined });
+    const shadowRoot = createShadowRootWithCoreStyles(element, { cssFile: 'ui/legacy/inlineButton.css', delegatesFocus: undefined });
     element.classList.add('inline-button');
     const toolbar = new Toolbar('');
     toolbar.appendToolbarItem(toolbarButton);
@@ -1512,8 +1475,6 @@ export function getApplicableRegisteredRenderers(object) {
             return true;
         }
         for (const contextType of rendererRegistration.contextTypes()) {
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-            // @ts-expect-error
             if (object instanceof contextType) {
                 return true;
             }

@@ -14,6 +14,8 @@ import type * as Protocol from './protocol.js'
  * API generated from Protocol commands and events.
  */
 declare namespace ProtocolProxyApi {
+  export type ProtocolDomainName = keyof ProtocolApi;
+
   export interface ProtocolApi {
     Accessibility: AccessibilityApi;
 
@@ -104,6 +106,98 @@ declare namespace ProtocolProxyApi {
     Runtime: RuntimeApi;
 
     Schema: SchemaApi;
+  }
+
+  export interface ProtocolDispatchers {
+    Accessibility: AccessibilityDispatcher;
+
+    Animation: AnimationDispatcher;
+
+    ApplicationCache: ApplicationCacheDispatcher;
+
+    Audits: AuditsDispatcher;
+
+    BackgroundService: BackgroundServiceDispatcher;
+
+    Browser: BrowserDispatcher;
+
+    CSS: CSSDispatcher;
+
+    CacheStorage: CacheStorageDispatcher;
+
+    Cast: CastDispatcher;
+
+    DOM: DOMDispatcher;
+
+    DOMDebugger: DOMDebuggerDispatcher;
+
+    DOMSnapshot: DOMSnapshotDispatcher;
+
+    DOMStorage: DOMStorageDispatcher;
+
+    Database: DatabaseDispatcher;
+
+    DeviceOrientation: DeviceOrientationDispatcher;
+
+    Emulation: EmulationDispatcher;
+
+    HeadlessExperimental: HeadlessExperimentalDispatcher;
+
+    IO: IODispatcher;
+
+    IndexedDB: IndexedDBDispatcher;
+
+    Input: InputDispatcher;
+
+    Inspector: InspectorDispatcher;
+
+    LayerTree: LayerTreeDispatcher;
+
+    Log: LogDispatcher;
+
+    Memory: MemoryDispatcher;
+
+    Network: NetworkDispatcher;
+
+    Overlay: OverlayDispatcher;
+
+    Page: PageDispatcher;
+
+    Performance: PerformanceDispatcher;
+
+    PerformanceTimeline: PerformanceTimelineDispatcher;
+
+    Security: SecurityDispatcher;
+
+    ServiceWorker: ServiceWorkerDispatcher;
+
+    Storage: StorageDispatcher;
+
+    SystemInfo: SystemInfoDispatcher;
+
+    Target: TargetDispatcher;
+
+    Tethering: TetheringDispatcher;
+
+    Tracing: TracingDispatcher;
+
+    Fetch: FetchDispatcher;
+
+    WebAudio: WebAudioDispatcher;
+
+    WebAuthn: WebAuthnDispatcher;
+
+    Media: MediaDispatcher;
+
+    Debugger: DebuggerDispatcher;
+
+    HeapProfiler: HeapProfilerDispatcher;
+
+    Profiler: ProfilerDispatcher;
+
+    Runtime: RuntimeDispatcher;
+
+    Schema: SchemaDispatcher;
   }
 
 
@@ -537,6 +631,12 @@ declare namespace ProtocolProxyApi {
     invoke_setMediaText(params: Protocol.CSS.SetMediaTextRequest): Promise<Protocol.CSS.SetMediaTextResponse>;
 
     /**
+     * Modifies the expression of a container query.
+     */
+    invoke_setContainerQueryText(params: Protocol.CSS.SetContainerQueryTextRequest):
+        Promise<Protocol.CSS.SetContainerQueryTextResponse>;
+
+    /**
      * Modifies the rule selector.
      */
     invoke_setRuleSelector(params: Protocol.CSS.SetRuleSelectorRequest): Promise<Protocol.CSS.SetRuleSelectorResponse>;
@@ -946,6 +1046,14 @@ declare namespace ProtocolProxyApi {
      * Returns iframe node that owns iframe with the given domain.
      */
     invoke_getFrameOwner(params: Protocol.DOM.GetFrameOwnerRequest): Promise<Protocol.DOM.GetFrameOwnerResponse>;
+
+    /**
+     * Returns the container of the given node based on container query conditions.
+     * If containerName is given, it will find the nearest container with a matching name;
+     * otherwise it will find the nearest container regardless of its container name.
+     */
+    invoke_getContainerForNode(params: Protocol.DOM.GetContainerForNodeRequest):
+        Promise<Protocol.DOM.GetContainerForNodeResponse>;
   }
   export interface DOMDispatcher {
     /**
@@ -1844,12 +1952,6 @@ declare namespace ProtocolProxyApi {
     invoke_setCookies(params: Protocol.Network.SetCookiesRequest): Promise<Protocol.ProtocolResponseWithError>;
 
     /**
-     * For testing.
-     */
-    invoke_setDataSizeLimitsForTest(params: Protocol.Network.SetDataSizeLimitsForTestRequest):
-        Promise<Protocol.ProtocolResponseWithError>;
-
-    /**
      * Specifies whether to always send extra HTTP headers with the requests from this page.
      */
     invoke_setExtraHTTPHeaders(params: Protocol.Network.SetExtraHTTPHeadersRequest):
@@ -2072,6 +2174,9 @@ declare namespace ProtocolProxyApi {
 
     /**
      * Highlights owner element of the frame with given id.
+     * Deprecated: Doesn't work reliablity and cannot be fixed due to process
+     * separatation (the owner node might be in a different process). Determine
+     * the owner node in the client and use highlightNode.
      */
     invoke_highlightFrame(params: Protocol.Overlay.HighlightFrameRequest): Promise<Protocol.ProtocolResponseWithError>;
 
@@ -2135,6 +2240,9 @@ declare namespace ProtocolProxyApi {
         Promise<Protocol.ProtocolResponseWithError>;
 
     invoke_setShowScrollSnapOverlays(params: Protocol.Overlay.SetShowScrollSnapOverlaysRequest):
+        Promise<Protocol.ProtocolResponseWithError>;
+
+    invoke_setShowContainerQueryOverlays(params: Protocol.Overlay.SetShowContainerQueryOverlaysRequest):
         Promise<Protocol.ProtocolResponseWithError>;
 
     /**

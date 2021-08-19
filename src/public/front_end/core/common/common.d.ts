@@ -14,6 +14,7 @@ import * as ObjectWrapper from './Object.js';
 import * as ParsedURL from './ParsedURL.js';
 import * as Progress from './Progress.js';
 import * as QueryParamHandler from './QueryParamHandler.js';
+import * as ResolverBase from './ResolverBase.js';
 import * as ResourceType from './ResourceType.js';
 import * as Revealer from './Revealer.js';
 import * as Runnable from './Runnable.js';
@@ -31,4 +32,4 @@ export { UIString } from '../platform/platform.js';
  * @type {!Settings.Settings}
  */
 export declare let settings: any;
-export { App, AppProvider, Base64, CharacterIdMap, Color, ColorUtils, Console, Debouncer, EventTarget, JavaScriptMetaData, Lazy, Linkifier, ObjectWrapper, ParsedURL, Progress, QueryParamHandler, ResourceType, Revealer, Runnable, SegmentedRange, Settings, SimpleHistoryManager, StringOutputStream, TextDictionary, Throttler, Trie, Worker, WasmDisassembly, };
+export { App, AppProvider, Base64, CharacterIdMap, Color, ColorUtils, Console, Debouncer, EventTarget, JavaScriptMetaData, Lazy, Linkifier, ObjectWrapper, ParsedURL, Progress, QueryParamHandler, ResolverBase, ResourceType, Revealer, Runnable, SegmentedRange, Settings, SimpleHistoryManager, StringOutputStream, TextDictionary, Throttler, Trie, Worker, WasmDisassembly, };

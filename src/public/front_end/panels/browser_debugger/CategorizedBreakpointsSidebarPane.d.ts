@@ -20,6 +20,7 @@ export declare class CategorizedBreakpointsSidebarPane extends UI.Widget.VBox {
     _categoryCheckboxClicked(category: string): void;
     _toggleBreakpoint(breakpoint: SDK.DOMDebuggerModel.CategorizedBreakpoint, enabled: boolean): void;
     _breakpointCheckboxClicked(breakpoint: SDK.DOMDebuggerModel.CategorizedBreakpoint): void;
+    wasShown(): void;
 }
 export interface Item {
     element: UI.TreeOutline.TreeElement;

@@ -26,7 +26,8 @@ export declare class TimelineFrameModel {
     _layerTreeId?: number | null;
     _currentProcessMainThread?: SDK.TracingModel.Thread | null;
     constructor(categoryMapper: (arg0: SDK.TracingModel.Event) => string);
-    frames(startTime?: number, endTime?: number): TimelineFrame[];
+    getFrames(): TimelineFrame[];
+    getFramesWithinWindow(startTime: number, endTime: number): TimelineFrame[];
     hasRasterTile(rasterTask: SDK.TracingModel.Event): boolean;
     rasterTilePromise(rasterTask: SDK.TracingModel.Event): Promise<{
         rect: Protocol.DOM.Rect;

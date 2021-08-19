@@ -1,6 +1,5 @@
-import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
-export declare class ContrastCheckTrigger extends Common.ObjectWrapper.ObjectWrapper {
+export declare class ContrastCheckTrigger {
     private pageLoadListeners;
     private frameAddedListeners;
     constructor();

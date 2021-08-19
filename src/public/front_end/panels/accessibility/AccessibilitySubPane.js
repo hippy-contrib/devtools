@@ -1,6 +1,8 @@
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+/* eslint-disable rulesdir/no_underscored_properties */
+import accessibilityPropertiesStyles from './accessibilityProperties.css.js';
 import * as UI from '../../ui/legacy/legacy.js';
 export class AccessibilitySubPane extends UI.View.SimpleView {
     _axNode;
@@ -8,7 +10,6 @@ export class AccessibilitySubPane extends UI.View.SimpleView {
     constructor(name) {
         super(name);
         this._axNode = null;
-        this.registerRequiredCSS('panels/accessibility/accessibilityProperties.css', { enableLegacyPatching: false });
     }
     setAXNode(_axNode) {
     }
@@ -26,13 +27,17 @@ export class AccessibilitySubPane extends UI.View.SimpleView {
     }
     createTreeOutline() {
         const treeOutline = new UI.TreeOutline.TreeOutlineInShadow();
-        treeOutline.registerRequiredCSS('panels/accessibility/accessibilityNode.css', { enableLegacyPatching: false });
-        treeOutline.registerRequiredCSS('panels/accessibility/accessibilityProperties.css', { enableLegacyPatching: false });
-        treeOutline.registerRequiredCSS('ui/legacy/components/object_ui/objectValue.css', { enableLegacyPatching: false });
+        treeOutline.registerRequiredCSS('panels/accessibility/accessibilityNode.css');
+        treeOutline.registerRequiredCSS('panels/accessibility/accessibilityProperties.css');
+        treeOutline.registerRequiredCSS('ui/legacy/components/object_ui/objectValue.css');
         treeOutline.element.classList.add('hidden');
         treeOutline.hideOverflow();
         this.element.appendChild(treeOutline.element);
         return treeOutline;
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([accessibilityPropertiesStyles]);
     }
 }
 //# sourceMappingURL=AccessibilitySubPane.js.map

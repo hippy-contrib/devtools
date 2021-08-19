@@ -9,10 +9,6 @@ Formatter = Formatter || {};
 Formatter.FormatterWorkerPool = FormatterModule.FormatterWorkerPool.FormatterWorkerPool;
 Formatter.formatterWorkerPool = FormatterModule.FormatterWorkerPool.formatterWorkerPool;
 /** @interface */
-Formatter.Formatter = FormatterModule.ScriptFormatter.FormatterInterface;
-/** @constructor */
-Formatter.ScriptFormatter = FormatterModule.ScriptFormatter.ScriptFormatter;
-/** @interface */
 Formatter.FormatterSourceMapping = FormatterModule.ScriptFormatter.FormatterSourceMapping;
 /** @constructor */
 Formatter.SourceFormatter = FormatterModule.SourceFormatter.SourceFormatter;

@@ -4,6 +4,7 @@
 import * as ComponentHelpers from '../../../ui/components/helpers/helpers.js';
 import * as LitHtml from '../../../ui/lit-html/lit-html.js';
 import * as Coordinator from '../render_coordinator/render_coordinator.js';
+import iconStyles from './icon.css.js';
 const isString = (value) => value !== undefined;
 const coordinator = Coordinator.RenderCoordinator.RenderCoordinator.instance();
 export class Icon extends HTMLElement {
@@ -14,6 +15,9 @@ export class Icon extends HTMLElement {
     width = '100%';
     height = '100%';
     iconName;
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [iconStyles];
+    }
     set data(data) {
         const { width, height } = data;
         this.color = data.color;
@@ -76,12 +80,6 @@ export class Icon extends HTMLElement {
         coordinator.write(() => {
             // clang-format off
             LitHtml.render(LitHtml.html `
-        <style>
-          :host {
-            display: inline-block;
-            white-space: nowrap;
-          }
-        </style>
         <div class="icon-basic" style=${LitHtml.Directives.styleMap(this.getStyles())}></div>
       `, this.shadow);
             // clang-format on

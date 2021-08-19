@@ -4,13 +4,13 @@ import { CSSModel } from './CSSModel.js';
 import { OverlayModel } from './OverlayModel.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
-export declare class EmulationModel extends SDKModel {
+export declare class EmulationModel extends SDKModel<void> {
     _emulationAgent: ProtocolProxyApi.EmulationApi;
     _pageAgent: ProtocolProxyApi.PageApi;
     _deviceOrientationAgent: ProtocolProxyApi.DeviceOrientationApi;
     _cssModel: CSSModel | null;
     _overlayModel: OverlayModel | null;
-    _mediaConfiguration: Map<string, any>;
+    _mediaConfiguration: Map<string, string>;
     _touchEnabled: boolean;
     _touchMobile: boolean;
     _customTouchEnabled: boolean;
@@ -21,7 +21,7 @@ export declare class EmulationModel extends SDKModel {
     constructor(target: Target);
     supportsDeviceEmulation(): boolean;
     resetPageScaleFactor(): Promise<void>;
-    emulateDevice(metrics: Protocol.Page.SetDeviceMetricsOverrideRequest | null): Promise<any>;
+    emulateDevice(metrics: Protocol.Page.SetDeviceMetricsOverrideRequest | null): Promise<void>;
     overlayModel(): OverlayModel | null;
     emulateLocation(location: Location | null): Promise<void>;
     emulateDeviceOrientation(deviceOrientation: DeviceOrientation | null): Promise<void>;
@@ -69,7 +69,7 @@ export declare class Location {
         errorMessage: (string | undefined);
     };
     toSetting(): string;
-    static DefaultGeoMockAccuracy: number;
+    static defaultGeoMockAccuracy: number;
 }
 export declare class DeviceOrientation {
     alpha: number;

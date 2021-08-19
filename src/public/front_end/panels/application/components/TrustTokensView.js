@@ -6,6 +6,8 @@ import * as DataGrid from '../../../ui/components/data_grid/data_grid.js';
 import * as ComponentHelpers from '../../../ui/components/helpers/helpers.js';
 import * as IconButton from '../../../ui/components/icon_button/icon_button.js';
 import * as LitHtml from '../../../ui/lit-html/lit-html.js';
+import trustTokensViewStyles from './trustTokensView.css.js';
+import trustTokensViewDeleteButtonStyles from './trustTokensViewDeleteButton.css.js';
 const UIStrings = {
     /**
     *@description Text for the issuer of an item
@@ -33,11 +35,44 @@ const UIStrings = {
 };
 const str_ = i18n.i18n.registerUIStrings('panels/application/components/TrustTokensView.ts', UIStrings);
 export const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
+class TrustTokensDeleteButton extends HTMLElement {
+    static litTagName = LitHtml.literal `devtools-trust-tokens-delete-button`;
+    shadow = this.attachShadow({ mode: 'open' });
+    issuer = null;
+    deleteClickHandler = () => { };
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [trustTokensViewDeleteButtonStyles];
+    }
+    set data(data) {
+        this.issuer = data.issuer;
+        this.deleteClickHandler = data.deleteClickHandler;
+        this.render();
+    }
+    render() {
+        if (!this.issuer) {
+            return;
+        }
+        // clang-format off
+        LitHtml.render(LitHtml.html `
+      <!-- Wrap the button in a container, otherwise we can't center it inside the column. -->
+      <span class="button-container">
+        <button class="delete-button"
+          title=${i18nString(UIStrings.deleteTrustTokens, { PH1: this.issuer })}
+          @click=${() => this.deleteClickHandler(this.issuer)}>
+          <${IconButton.Icon.Icon.litTagName} .data=${{ iconName: 'trash_bin_icon', color: 'var(--color-text-secondary)', width: '9px', height: '14px' }}>
+          </${IconButton.Icon.Icon.litTagName}>
+        </button>
+      </span>`, this.shadow, { host: this });
+        // clang-format on
+    }
+}
 export class TrustTokensView extends HTMLElement {
+    static litTagName = LitHtml.literal `devtools-trust-tokens-storage-view`;
     shadow = this.attachShadow({ mode: 'open' });
     tokens = [];
     deleteClickHandler = () => { };
     connectedCallback() {
+        this.shadow.adoptedStyleSheets = [trustTokensViewStyles];
         this.render();
     }
     set data(data) {
@@ -46,30 +81,8 @@ export class TrustTokensView extends HTMLElement {
         this.render();
     }
     render() {
+        // clang-format off
         LitHtml.render(LitHtml.html `
-      <style>
-        :host {
-          padding: 20px;
-        }
-
-        .heading {
-          font-size: 15px;
-        }
-
-        devtools-data-grid-controller {
-          border: 1px solid var(--color-details-hairline);
-          margin-top: 20px;
-        }
-
-        .info-icon {
-          vertical-align: text-bottom;
-          height: 14px;
-        }
-
-        .no-tt-message {
-          margin-top: 20px;
-        }
-      </style>
       <div>
         <span class="heading">Trust Tokens</span>
         <${IconButton.Icon.Icon.litTagName} class="info-icon" title=${i18nString(UIStrings.allStoredTrustTokensAvailableIn)}
@@ -78,6 +91,7 @@ export class TrustTokensView extends HTMLElement {
         ${this.renderGridOrNoDataMessage()}
       </div>
     `, this.shadow);
+        // clang-format on
     }
     renderGridOrNoDataMessage() {
         if (this.tokens.length === 0) {
@@ -127,55 +141,26 @@ export class TrustTokensView extends HTMLElement {
                 {
                     columnId: 'delete-button',
                     value: removeTrailingSlash(token.issuerOrigin),
-                    renderer: this.deleteButtonRenderer.bind(this),
+                    renderer: this.deleteButtonRendererForDataGridCell.bind(this),
                 },
                 { columnId: 'issuer', value: removeTrailingSlash(token.issuerOrigin) },
                 { columnId: 'count', value: token.count },
             ],
         }));
     }
-    deleteButtonRenderer(issuer) {
+    deleteButtonRendererForDataGridCell(issuer) {
         // clang-format off
-        return LitHtml.html `
-      <style>
-        .delete-button {
-          width: 16px;
-          height: 16px;
-          background: transparent;
-          overflow: hidden;
-          border: none;
-          padding: 0;
-          outline: none;
-          cursor: pointer;
-        }
-
-        .delete-button:hover devtools-icon {
-          --icon-color: var(--color-text-primary);
-        }
-
-        .delete-button:focus devtools-icon {
-          --icon-color: var(--color-text-secondary);
-        }
-
-        .button-container {
-          display: block;
-          text-align: center;
-        }
-      </style>
-      <!-- Wrap the button in a container, otherwise we can't center it inside the column. -->
-      <span class="button-container">
-        <button class="delete-button"
-          title=${i18nString(UIStrings.deleteTrustTokens, { PH1: issuer })}
-          @click=${() => this.deleteClickHandler(issuer)}>
-          <${IconButton.Icon.Icon.litTagName} .data=${{ iconName: 'trash_bin_icon', color: 'var(--color-text-secondary)', width: '9px', height: '14px' }}>
-          </${IconButton.Icon.Icon.litTagName}>
-        </button>
-      </span>`;
+        return LitHtml.html `<${TrustTokensDeleteButton.litTagName}
+     .data=${{ issuer, deleteClickHandler: this.deleteClickHandler }}
+    ></${TrustTokensDeleteButton.litTagName}>`;
         // clang-format on
     }
 }
 function removeTrailingSlash(s) {
     return s.replace(/\/$/, '');
 }
+// TODO(jacktfranklin): re-enable once https://crbug.com/1226741 is resolved.
+// eslint-disable-next-line rulesdir/check_component_naming
+ComponentHelpers.CustomElements.defineComponent('devtools-trust-tokens-delete-button', TrustTokensDeleteButton);
 ComponentHelpers.CustomElements.defineComponent('devtools-trust-tokens-storage-view', TrustTokensView);
 //# sourceMappingURL=TrustTokensView.js.map

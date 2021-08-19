@@ -1,16 +1,15 @@
-import { DOMNode, NodeSelectedEvent } from './ElementsBreadcrumbsUtils.js';
-export { DOMNode };
+import type * as SDK from '../../../core/sdk/sdk.js';
+import type { DOMNode } from './Helper.js';
+export declare class NodeSelectedEvent extends Event {
+    data: SDK.DOMModel.DOMNode;
+    constructor(node: DOMNode);
+}
 export interface ElementsBreadcrumbsData {
     selectedNode: DOMNode | null;
     crumbs: DOMNode[];
 }
-export interface ElementsBreadcrumbs extends HTMLElement {
-    addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, // eslint-disable-line @typescript-eslint/no-explicit-any
-    options?: boolean | AddEventListenerOptions): void;
-    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-    addEventListener(type: 'breadcrumbsnodeselected', callback: (event: NodeSelectedEvent) => void): void;
-}
 export declare class ElementsBreadcrumbs extends HTMLElement {
+    static readonly litTagName: import("../../../ui/lit-html/static.js").Static;
     private readonly shadow;
     private readonly resizeObserver;
     private crumbsData;
@@ -19,6 +18,7 @@ export declare class ElementsBreadcrumbs extends HTMLElement {
     private userScrollPosition;
     private isObservingResize;
     private userHasManuallyScrolled;
+    connectedCallback(): void;
     set data(data: ElementsBreadcrumbsData);
     disconnectedCallback(): void;
     private onCrumbClick;
@@ -48,5 +48,8 @@ export declare class ElementsBreadcrumbs extends HTMLElement {
 declare global {
     interface HTMLElementTagNameMap {
         'devtools-elements-breadcrumbs': ElementsBreadcrumbs;
+    }
+    interface HTMLElementEventMap {
+        'breadcrumbsnodeselected': NodeSelectedEvent;
     }
 }

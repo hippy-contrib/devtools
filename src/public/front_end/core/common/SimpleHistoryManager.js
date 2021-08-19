@@ -28,31 +28,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 export class SimpleHistoryManager {
-    _entries;
-    _activeEntryIndex;
-    _coalescingReadonly;
-    _historyDepth;
+    entries;
+    activeEntryIndex;
+    coalescingReadonly;
+    historyDepth;
     constructor(historyDepth) {
-        this._entries = [];
-        this._activeEntryIndex = -1;
+        this.entries = [];
+        this.activeEntryIndex = -1;
         // Lock is used to make sure that reveal() does not
         // make any changes to the history while we are
         // rolling back or rolling over.
-        this._coalescingReadonly = 0;
-        this._historyDepth = historyDepth;
+        this.coalescingReadonly = 0;
+        this.historyDepth = historyDepth;
     }
     _readOnlyLock() {
-        ++this._coalescingReadonly;
+        ++this.coalescingReadonly;
     }
     _releaseReadOnlyLock() {
-        --this._coalescingReadonly;
+        --this.coalescingReadonly;
     }
     _getPreviousValidIndex() {
         if (this.empty()) {
             return -1;
         }
-        let revealIndex = this._activeEntryIndex - 1;
-        while (revealIndex >= 0 && !this._entries[revealIndex].valid()) {
+        let revealIndex = this.activeEntryIndex - 1;
+        while (revealIndex >= 0 && !this.entries[revealIndex].valid()) {
             --revealIndex;
         }
         if (revealIndex < 0) {
@@ -61,17 +61,17 @@ export class SimpleHistoryManager {
         return revealIndex;
     }
     _getNextValidIndex() {
-        let revealIndex = this._activeEntryIndex + 1;
-        while (revealIndex < this._entries.length && !this._entries[revealIndex].valid()) {
+        let revealIndex = this.activeEntryIndex + 1;
+        while (revealIndex < this.entries.length && !this.entries[revealIndex].valid()) {
             ++revealIndex;
         }
-        if (revealIndex >= this._entries.length) {
+        if (revealIndex >= this.entries.length) {
             return -1;
         }
         return revealIndex;
     }
     _readOnly() {
-        return Boolean(this._coalescingReadonly);
+        return Boolean(this.coalescingReadonly);
     }
     filterOut(filterOutCallback) {
         if (this._readOnly()) {
@@ -79,35 +79,35 @@ export class SimpleHistoryManager {
         }
         const filteredEntries = [];
         let removedBeforeActiveEntry = 0;
-        for (let i = 0; i < this._entries.length; ++i) {
-            if (!filterOutCallback(this._entries[i])) {
-                filteredEntries.push(this._entries[i]);
+        for (let i = 0; i < this.entries.length; ++i) {
+            if (!filterOutCallback(this.entries[i])) {
+                filteredEntries.push(this.entries[i]);
             }
-            else if (i <= this._activeEntryIndex) {
+            else if (i <= this.activeEntryIndex) {
                 ++removedBeforeActiveEntry;
             }
         }
-        this._entries = filteredEntries;
-        this._activeEntryIndex = Math.max(0, this._activeEntryIndex - removedBeforeActiveEntry);
+        this.entries = filteredEntries;
+        this.activeEntryIndex = Math.max(0, this.activeEntryIndex - removedBeforeActiveEntry);
     }
     empty() {
-        return !this._entries.length;
+        return !this.entries.length;
     }
     active() {
-        return this.empty() ? null : this._entries[this._activeEntryIndex];
+        return this.empty() ? null : this.entries[this.activeEntryIndex];
     }
     push(entry) {
         if (this._readOnly()) {
             return;
         }
         if (!this.empty()) {
-            this._entries.splice(this._activeEntryIndex + 1);
+            this.entries.splice(this.activeEntryIndex + 1);
         }
-        this._entries.push(entry);
-        if (this._entries.length > this._historyDepth) {
-            this._entries.shift();
+        this.entries.push(entry);
+        if (this.entries.length > this.historyDepth) {
+            this.entries.shift();
         }
-        this._activeEntryIndex = this._entries.length - 1;
+        this.activeEntryIndex = this.entries.length - 1;
     }
     canRollback() {
         return this._getPreviousValidIndex() >= 0;
@@ -121,8 +121,8 @@ export class SimpleHistoryManager {
             return false;
         }
         this._readOnlyLock();
-        this._activeEntryIndex = revealIndex;
-        this._entries[revealIndex].reveal();
+        this.activeEntryIndex = revealIndex;
+        this.entries[revealIndex].reveal();
         this._releaseReadOnlyLock();
         return true;
     }
@@ -132,8 +132,8 @@ export class SimpleHistoryManager {
             return false;
         }
         this._readOnlyLock();
-        this._activeEntryIndex = revealIndex;
-        this._entries[revealIndex].reveal();
+        this.activeEntryIndex = revealIndex;
+        this.entries[revealIndex].reveal();
         this._releaseReadOnlyLock();
         return true;
     }

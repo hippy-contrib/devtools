@@ -94,7 +94,7 @@ export class StylesSourceMapping {
         return rawLocations;
     }
     _acceptsHeader(header) {
-        if (header.isConstructed) {
+        if (header.isConstructedByNew()) {
             return false;
         }
         if (header.isInline && !header.hasSourceURL && header.origin !== 'inspector') {
@@ -152,7 +152,7 @@ export class StylesSourceMapping {
             styleFile.dispose();
         }
         this._styleFiles.clear();
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         this._project.removeProject();
     }
 }
@@ -257,7 +257,7 @@ export class StyleFile {
         }
         this._terminated = true;
         this._project.removeFile(this._uiSourceCode.url());
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
     }
     contentURL() {
         console.assert(this._headers.size > 0);

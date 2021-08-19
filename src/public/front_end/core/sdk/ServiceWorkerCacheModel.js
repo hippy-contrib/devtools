@@ -76,7 +76,7 @@ export class ServiceWorkerCacheModel extends SDKModel {
     async deleteCacheEntry(cache, request) {
         const response = await this._cacheAgent.invoke_deleteEntry({ cacheId: cache.cacheId, request });
         if (response.getError()) {
-            Common.Console.Console.instance().error(i18nString(UIStrings.serviceworkercacheagentError, { PH1: cache.toString(), PH2: response.getError() }));
+            Common.Console.Console.instance().error(i18nString(UIStrings.serviceworkercacheagentError, { PH1: cache.toString(), PH2: String(response.getError()) }));
             return;
         }
     }

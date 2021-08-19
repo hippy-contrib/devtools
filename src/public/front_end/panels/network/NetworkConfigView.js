@@ -6,6 +6,7 @@ import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import * as EmulationComponents from '../emulation/components/components.js';
 import * as MobileThrottling from '../mobile_throttling/mobile_throttling.js';
 const UIStrings = {
     /**
@@ -52,7 +53,7 @@ let networkConfigViewInstance;
 export class NetworkConfigView extends UI.Widget.VBox {
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/network/networkConfigView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/network/networkConfigView.css');
         this.contentElement.classList.add('network-config');
         this._createCacheSection();
         this.contentElement.createChild('div').classList.add('panel-section-separator');
@@ -71,6 +72,7 @@ export class NetworkConfigView extends UI.Widget.VBox {
     }
     static createUserAgentSelectAndInput(title) {
         const userAgentSetting = Common.Settings.Settings.instance().createSetting('customUserAgent', '');
+        const userAgentMetadataSetting = Common.Settings.Settings.instance().createSetting('customUserAgentMetadata', null);
         const userAgentSelectElement = document.createElement('select');
         UI.ARIAUtils.setAccessibleName(userAgentSelectElement, title);
         const customOverride = { title: i18nString(UIStrings.custom), value: 'custom' };
@@ -106,12 +108,16 @@ export class NetworkConfigView extends UI.Widget.VBox {
                 otherUserAgentElement.value = value;
                 UI.Tooltip.Tooltip.install(otherUserAgentElement, value);
                 const userAgentMetadata = getUserAgentMetadata(value);
+                userAgentMetadataSetting.set(userAgentMetadata);
                 SDK.NetworkManager.MultitargetNetworkManager.instance().setCustomUserAgentOverride(value, userAgentMetadata);
             }
             else {
+                userAgentMetadataSetting.set(null);
                 otherUserAgentElement.select();
             }
             errorElement.textContent = '';
+            const userAgentChangeEvent = new CustomEvent('user-agent-change', { detail: { value } });
+            userAgentSelectElement.dispatchEvent(userAgentChangeEvent);
         }
         function settingChanged() {
             const value = userAgentSetting.get();
@@ -168,6 +174,7 @@ export class NetworkConfigView extends UI.Widget.VBox {
         const checkboxLabel = UI.UIUtils.CheckboxLabel.create(i18nString(UIStrings.selectAutomatically), true);
         section.appendChild(checkboxLabel);
         const autoCheckbox = checkboxLabel.checkboxElement;
+        const userAgentMetadataSetting = Common.Settings.Settings.instance().createSetting('customUserAgentMetadata', null);
         const customUserAgentSetting = Common.Settings.Settings.instance().createSetting('customUserAgent', '');
         customUserAgentSetting.addChangeListener(() => {
             if (autoCheckbox.checked) {
@@ -184,6 +191,34 @@ export class NetworkConfigView extends UI.Widget.VBox {
         customUserAgentSelectBox.appendChild(customSelectAndInput.select);
         customUserAgentSelectBox.appendChild(customSelectAndInput.input);
         customUserAgentSelectBox.appendChild(customSelectAndInput.error);
+        const clientHintsContainer = customUserAgentSelectBox.createChild('div', 'client-hints-form');
+        const clientHints = new EmulationComponents.UserAgentClientHintsForm.UserAgentClientHintsForm();
+        const userAgentMetaDataSetting = userAgentMetadataSetting.get();
+        const initialUserAgentMetaData = getUserAgentMetadata(customSelectAndInput.select.value);
+        clientHints.value = {
+            showMobileCheckbox: true,
+            showSubmitButton: true,
+            metaData: userAgentMetaDataSetting || initialUserAgentMetaData || undefined,
+        };
+        clientHintsContainer.appendChild(clientHints);
+        customSelectAndInput.select.addEventListener('user-agent-change', (event) => {
+            const userStringValue = event.detail.value;
+            const userAgentMetadata = userStringValue ? getUserAgentMetadata(userStringValue) : null;
+            clientHints.value = {
+                metaData: userAgentMetadata || undefined,
+                showMobileCheckbox: true,
+                showSubmitButton: true,
+            };
+        });
+        clientHints.addEventListener('clienthintschange', () => {
+            customSelectAndInput.select.value = 'custom';
+        });
+        clientHints.addEventListener('clienthintssubmit', (event) => {
+            const metaData = event.detail.value;
+            const customUA = customUserAgentSetting.get();
+            userAgentMetadataSetting.set(metaData);
+            SDK.NetworkManager.MultitargetNetworkManager.instance().setCustomUserAgentOverride(customUA, metaData);
+        });
         userAgentSelectBoxChanged();
         function userAgentSelectBoxChanged() {
             const useCustomUA = !autoCheckbox.checked;
@@ -191,6 +226,7 @@ export class NetworkConfigView extends UI.Widget.VBox {
             customSelectAndInput.select.disabled = !useCustomUA;
             customSelectAndInput.input.disabled = !useCustomUA;
             customSelectAndInput.error.hidden = !useCustomUA;
+            clientHints.disabled = !useCustomUA;
             const customUA = useCustomUA ? customUserAgentSetting.get() : '';
             const userAgentMetadata = useCustomUA ? getUserAgentMetadata(customUA) : null;
             SDK.NetworkManager.MultitargetNetworkManager.instance().setCustomUserAgentOverride(customUA, userAgentMetadata);
@@ -276,6 +312,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Google Chrome', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Android',
                     platformVersion: '4.0.2',
                     architecture: '',
@@ -292,6 +329,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Google Chrome', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Android',
                     platformVersion: '2.3.6',
                     architecture: '',
@@ -333,6 +371,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Google Chrome', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Android',
                     platformVersion: '6.0',
                     architecture: '',
@@ -349,6 +388,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Google Chrome', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Android',
                     platformVersion: '10',
                     architecture: '',
@@ -365,6 +405,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Google Chrome', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Android',
                     platformVersion: '4.3',
                     architecture: '',
@@ -391,6 +432,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Google Chrome', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Chrome OS',
                     platformVersion: '10066.0.0',
                     architecture: 'x86',
@@ -407,6 +449,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Google Chrome', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'macOS',
                     platformVersion: '10_14_6',
                     architecture: 'x86',
@@ -423,6 +466,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Google Chrome', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Windows',
                     platformVersion: '10.0',
                     architecture: 'x86',
@@ -525,6 +569,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Microsoft Edge', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Windows',
                     platformVersion: '10.0',
                     architecture: 'x86',
@@ -541,6 +586,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Microsoft Edge', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'macOS',
                     platformVersion: '10_14_6',
                     architecture: 'x86',
@@ -567,6 +613,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Microsoft Edge', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Android',
                     platformVersion: '8.1.0',
                     architecture: '',
@@ -583,6 +630,7 @@ export const userAgentGroups = [
                         { brand: 'Chromium', version: '%s' },
                         { brand: 'Microsoft Edge', version: '%s' },
                     ],
+                    fullVersion: '%s',
                     platform: 'Android',
                     platformVersion: '6.0.1',
                     architecture: '',

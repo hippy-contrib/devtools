@@ -33,6 +33,7 @@ export declare class StylePropertyEditor extends HTMLElement {
     private computedProperties;
     protected readonly editableProperties: EditableProperty[];
     constructor();
+    connectedCallback(): void;
     getEditableProperties(): EditableProperty[];
     set data(data: FlexEditorData);
     private render;

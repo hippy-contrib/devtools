@@ -7,7 +7,7 @@ import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as ThemeSupport from '../../ui/legacy/theme_support/theme_support.js';
 import { RequestTimeRangeNameToColor } from './NetworkOverview.js';
-import { RequestTimeRangeNames, RequestTimingView } from './RequestTimingView.js'; // eslint-disable-line no-unused-vars
+import { RequestTimeRangeNames, RequestTimingView } from './RequestTimingView.js';
 const BAR_SPACING = 1;
 export class NetworkWaterfallColumn extends UI.Widget.VBox {
     _canvas;
@@ -39,7 +39,7 @@ export class NetworkWaterfallColumn extends UI.Widget.VBox {
     constructor(calculator) {
         // TODO(allada) Make this a shadowDOM when the NetworkWaterfallColumn gets moved into NetworkLogViewColumns.
         super(false);
-        this.registerRequiredCSS('panels/network/networkWaterfallColumn.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/network/networkWaterfallColumn.css');
         this._canvas = this.contentElement.createChild('canvas');
         this._canvas.tabIndex = -1;
         this.setDefaultFocusedElement(this._canvas);
@@ -357,7 +357,7 @@ export class NetworkWaterfallColumn extends UI.Widget.VBox {
                 }
             }
         }
-        this._drawLayers(context);
+        this._drawLayers(context, useTimingBars);
         context.save();
         context.fillStyle =
             ThemeSupport.ThemeSupport.instance().patchColorText('#888', ThemeSupport.ThemeSupport.ColorUsage.Foreground);
@@ -378,7 +378,7 @@ export class NetworkWaterfallColumn extends UI.Widget.VBox {
         context.restore();
         this._didDrawForTest();
     }
-    _drawLayers(context) {
+    _drawLayers(context, useTimingBars) {
         for (const entry of this._pathForStyle) {
             const style = entry[0];
             const path = entry[1];
@@ -392,7 +392,8 @@ export class NetworkWaterfallColumn extends UI.Widget.VBox {
                 context.stroke(path);
             }
             if (style.fillStyle) {
-                context.fillStyle = ThemeSupport.ThemeSupport.instance().getComputedValue(style.fillStyle);
+                context.fillStyle =
+                    useTimingBars ? ThemeSupport.ThemeSupport.instance().getComputedValue(style.fillStyle) : style.fillStyle;
                 context.fill(path);
             }
             context.restore();

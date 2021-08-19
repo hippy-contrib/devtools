@@ -48,7 +48,7 @@ export class AffectedDocumentsInQuirksModeView extends AffectedElementsView {
         row.classList.add('affected-resource-quirks-mode');
         const details = issue.details();
         const target = SDK.FrameManager.FrameManager.instance().getFrame(details.frameId)?.resourceTreeModel().target() || null;
-        row.appendChild(await this.renderElementCell({ nodeName: 'document', backendNodeId: details.documentNodeId, target }));
+        row.appendChild(await this.createElementCell({ nodeName: 'document', backendNodeId: details.documentNodeId, target }, issue.getCategory()));
         this.appendIssueDetailCell(row, details.isLimitedQuirksMode ? 'Limited Quirks Mode' : 'Quirks Mode');
         this.appendIssueDetailCell(row, details.url);
         this.affectedResources.appendChild(row);

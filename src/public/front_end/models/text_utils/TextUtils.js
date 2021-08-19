@@ -171,40 +171,65 @@ export class FilterParser {
         return { key: filter.key, text: filter.text, regex: filter.regex, negative: filter.negative };
     }
     parse(query) {
-        const splitResult = Utils.splitStringByRegexes(query, [Utils._keyValueFilterRegex, Utils._regexFilterRegex, Utils._textFilterRegex]);
-        const filters = [];
-        for (let i = 0; i < splitResult.length; i++) {
-            const regexIndex = splitResult[i].regexIndex;
+        const splitFilters = Utils.splitStringByRegexes(query, [Utils._keyValueFilterRegex, Utils._regexFilterRegex, Utils._textFilterRegex]);
+        const parsedFilters = [];
+        for (const { regexIndex, captureGroups } of splitFilters) {
             if (regexIndex === -1) {
                 continue;
             }
-            const result = splitResult[i].captureGroups;
             if (regexIndex === 0) {
-                if (this._keys.indexOf(result[1]) !== -1) {
-                    filters.push({ key: result[1], regex: undefined, text: result[2], negative: Boolean(result[0]) });
+                const startsWithMinus = captureGroups[0];
+                const parsedKey = captureGroups[1];
+                const parsedValue = captureGroups[2];
+                if (this._keys.indexOf(parsedKey) !== -1) {
+                    parsedFilters.push({
+                        key: parsedKey,
+                        regex: undefined,
+                        text: parsedValue,
+                        negative: Boolean(startsWithMinus),
+                    });
                 }
                 else {
-                    filters.push({ key: undefined, regex: undefined, text: result[1] + ':' + result[2], negative: Boolean(result[0]) });
+                    parsedFilters.push({
+                        key: undefined,
+                        regex: undefined,
+                        text: `${parsedKey}:${parsedValue}`,
+                        negative: Boolean(startsWithMinus),
+                    });
                 }
             }
             else if (regexIndex === 1) {
+                const startsWithMinus = captureGroups[0];
+                const parsedRegex = captureGroups[1];
                 try {
-                    filters.push({
+                    parsedFilters.push({
                         key: undefined,
-                        regex: new RegExp(result[1], 'i'),
+                        regex: new RegExp(parsedRegex, 'i'),
                         text: undefined,
-                        negative: Boolean(result[0]),
+                        negative: Boolean(startsWithMinus),
                     });
                 }
                 catch (e) {
-                    filters.push({ key: undefined, regex: undefined, text: '/' + result[1] + '/', negative: Boolean(result[0]) });
+                    parsedFilters.push({
+                        key: undefined,
+                        regex: undefined,
+                        text: `/${parsedRegex}/`,
+                        negative: Boolean(startsWithMinus),
+                    });
                 }
             }
             else if (regexIndex === 2) {
-                filters.push({ key: undefined, regex: undefined, text: result[1], negative: Boolean(result[0]) });
+                const startsWithMinus = captureGroups[0];
+                const parsedText = captureGroups[1];
+                parsedFilters.push({
+                    key: undefined,
+                    regex: undefined,
+                    text: parsedText,
+                    negative: Boolean(startsWithMinus),
+                });
             }
         }
-        return filters;
+        return parsedFilters;
     }
 }
 export class BalancedJSONTokenizer {
@@ -311,8 +336,9 @@ export const performSearchInContent = function (content, query, caseSensitive, i
     for (let i = 0; i < text.lineCount(); ++i) {
         const lineContent = text.lineAt(i);
         regex.lastIndex = 0;
-        if (regex.exec(lineContent)) {
-            result.push(new SearchMatch(i, lineContent));
+        const match = regex.exec(lineContent);
+        if (match) {
+            result.push(new SearchMatch(i, lineContent, match.index));
         }
     }
     return result;

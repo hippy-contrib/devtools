@@ -1,7 +1,7 @@
 import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { UIHeaderSection } from './NetworkSearchScope.js';
 export declare class RequestHeadersView extends UI.Widget.VBox {
     _request: SDK.NetworkRequest.NetworkRequest;
     _decodeRequestParameters: boolean;
@@ -53,7 +53,7 @@ export declare class RequestHeadersView extends UI.Widget.VBox {
     _clearHighlight(): void;
     _revealAndHighlight(category: UI.TreeOutline.TreeElement | null, name?: string): void;
     private getCategoryForSection;
-    revealHeader(section: UIHeaderSection, header?: string): void;
+    revealHeader(section: NetworkForward.UIRequestLocation.UIHeaderSection, header?: string): void;
 }
 export declare class Category extends UI.TreeOutline.TreeElement {
     toggleOnClick: boolean;

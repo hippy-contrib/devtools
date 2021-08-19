@@ -128,7 +128,7 @@ export class ObjectPropertiesSection extends UI.TreeOutline.TreeOutlineInShadow 
     _objectTreeElement;
     titleElement;
     _skipProto;
-    constructor(object, title, linkifier, emptyPlaceholder, ignoreHasOwnProperty, extraProperties, showOverflow) {
+    constructor(object, title, linkifier, showOverflow) {
         super();
         this._object = object;
         this._editable = true;
@@ -137,8 +137,7 @@ export class ObjectPropertiesSection extends UI.TreeOutline.TreeOutlineInShadow 
         }
         this.setFocusable(true);
         this.setShowSelectionOnKeyboardFocus(true);
-        this._objectTreeElement =
-            new RootElement(object, linkifier, emptyPlaceholder, ignoreHasOwnProperty, extraProperties);
+        this._objectTreeElement = new RootElement(object, linkifier);
         this.appendChild(this._objectTreeElement);
         if (typeof title === 'string' || !title) {
             this.titleElement = this.element.createChild('span');
@@ -152,8 +151,8 @@ export class ObjectPropertiesSection extends UI.TreeOutline.TreeOutlineInShadow 
             this.titleElement.tabIndex = -1;
         }
         objectPropertiesSectionMap.set(this.element, this);
-        this.registerRequiredCSS('ui/legacy/components/object_ui/objectValue.css', { enableLegacyPatching: false });
-        this.registerRequiredCSS('ui/legacy/components/object_ui/objectPropertiesSection.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/components/object_ui/objectValue.css');
+        this.registerRequiredCSS('ui/legacy/components/object_ui/objectPropertiesSection.css');
         this.rootElement().childrenListElement.classList.add('source-code', 'object-properties-section');
     }
     static defaultObjectPresentation(object, linkifier, skipProto, readOnly) {
@@ -168,7 +167,6 @@ export class ObjectPropertiesSection extends UI.TreeOutline.TreeOutlineInShadow 
         titleElement.classList.add('source-code');
         const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(titleElement, {
             cssFile: 'ui/legacy/components/object_ui/objectValue.css',
-            enableLegacyPatching: false,
             delegatesFocus: undefined,
         });
         const propertyValue = ObjectPropertiesSection.createPropertyValue(object, /* wasThrown */ false, /* showPreview */ true);
@@ -184,18 +182,16 @@ export class ObjectPropertiesSection extends UI.TreeOutline.TreeOutlineInShadow 
         return objectPropertiesSection;
     }
     static compareProperties(propertyA, propertyB) {
-        const a = propertyA.name;
-        const b = propertyB.name;
+        if (!propertyA.synthetic && propertyB.synthetic) {
+            return 1;
+        }
+        if (!propertyB.synthetic && propertyA.synthetic) {
+            return -1;
+        }
         if (!propertyA.enumerable && propertyB.enumerable) {
             return 1;
         }
         if (!propertyB.enumerable && propertyA.enumerable) {
-            return -1;
-        }
-        if (a.startsWith('_') && !b.startsWith('_')) {
-            return 1;
-        }
-        if (b.startsWith('_') && !a.startsWith('_')) {
             return -1;
         }
         if (propertyA.symbol && !propertyB.symbol) {
@@ -208,6 +204,14 @@ export class ObjectPropertiesSection extends UI.TreeOutline.TreeOutlineInShadow 
             return 1;
         }
         if (propertyB.private && !propertyA.private) {
+            return -1;
+        }
+        const a = propertyA.name;
+        const b = propertyB.name;
+        if (a.startsWith('_') && !b.startsWith('_')) {
+            return 1;
+        }
+        if (b.startsWith('_') && !a.startsWith('_')) {
             return -1;
         }
         return Platform.StringUtilities.naturalOrderComparator(a, b);
@@ -339,6 +343,7 @@ export class ObjectPropertiesSection extends UI.TreeOutline.TreeOutlineInShadow 
             event.stopPropagation();
         };
         UI.Tooltip.Tooltip.install(memoryIcon, 'Reveal in Memory Inspector panel');
+        element.classList.add('object-value-with-memory-icon');
         element.appendChild(memoryIcon);
     }
     static createPropertyValue(value, wasThrown, showPreview, parentElement, linkifier) {
@@ -515,8 +520,8 @@ export class ObjectPropertiesSectionsTreeOutline extends UI.TreeOutline.TreeOutl
     _editable;
     constructor(options) {
         super();
-        this.registerRequiredCSS('ui/legacy/components/object_ui/objectValue.css', { enableLegacyPatching: false });
-        this.registerRequiredCSS('ui/legacy/components/object_ui/objectPropertiesSection.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/components/object_ui/objectValue.css');
+        this.registerRequiredCSS('ui/legacy/components/object_ui/objectPropertiesSection.css');
         this._editable = !(options && options.readOnly);
         this.contentElement.classList.add('source-code');
         this.contentElement.classList.add('object-properties-section');
@@ -525,24 +530,26 @@ export class ObjectPropertiesSectionsTreeOutline extends UI.TreeOutline.TreeOutl
 }
 export class RootElement extends UI.TreeOutline.TreeElement {
     _object;
-    _extraProperties;
-    _ignoreHasOwnProperty;
-    _emptyPlaceholder;
-    toggleOnClick;
     _linkifier;
-    constructor(object, linkifier, emptyPlaceholder, ignoreHasOwnProperty, extraProperties) {
+    _emptyPlaceholder;
+    _propertiesMode;
+    _extraProperties;
+    _targetObject;
+    toggleOnClick;
+    constructor(object, linkifier, emptyPlaceholder, propertiesMode = 2 /* OwnAndInternalAndInherited */, extraProperties = [], targetObject = object) {
         const contentElement = document.createElement('slot');
         super(contentElement);
         this._object = object;
-        this._extraProperties = extraProperties || [];
-        this._ignoreHasOwnProperty = Boolean(ignoreHasOwnProperty);
+        this._linkifier = linkifier;
         this._emptyPlaceholder = emptyPlaceholder;
+        this._propertiesMode = propertiesMode;
+        this._extraProperties = extraProperties;
+        this._targetObject = targetObject;
         this.setExpandable(true);
         this.selectable = true;
         this.toggleOnClick = true;
         this.listItemElement.classList.add('object-properties-section-root-element');
         this.listItemElement.addEventListener('contextmenu', this.onContextMenu.bind(this), false);
-        this._linkifier = linkifier;
     }
     onexpand() {
         if (this.treeOutline) {
@@ -576,7 +583,7 @@ export class RootElement extends UI.TreeOutline.TreeElement {
     async onpopulate() {
         const treeOutline = this.treeOutline;
         const skipProto = treeOutline ? Boolean(treeOutline._skipProto) : false;
-        return ObjectPropertyTreeElement._populate(this, this._object, skipProto, this._linkifier, this._emptyPlaceholder, this._ignoreHasOwnProperty, this._extraProperties);
+        return ObjectPropertyTreeElement._populate(this, this._object, skipProto, this._linkifier, this._emptyPlaceholder, this._propertiesMode, this._extraProperties, this._targetObject);
     }
 }
 // Number of initially visible children in an ObjectPropertyTreeElement.
@@ -607,32 +614,35 @@ export class ObjectPropertyTreeElement extends UI.TreeOutline.TreeElement {
         this.listItemElement.addEventListener('contextmenu', this._contextMenuFired.bind(this), false);
         this.listItemElement.dataset.objectPropertyNameForTest = property.name;
     }
-    static async _populate(treeElement, value, skipProto, linkifier, emptyPlaceholder, flattenProtoChain, extraProperties, targetValue) {
+    static async _populate(treeElement, value, skipProto, linkifier, emptyPlaceholder, propertiesMode = 2 /* OwnAndInternalAndInherited */, extraProperties, targetValue) {
         if (value.arrayLength() > ARRAY_LOAD_THRESHOLD) {
             treeElement.removeChildren();
             ArrayGroupingTreeElement._populateArray(treeElement, value, 0, value.arrayLength() - 1, linkifier);
             return;
         }
-        let allProperties;
-        if (flattenProtoChain) {
-            allProperties = await value.getAllProperties(false /* accessorPropertiesOnly */, true /* generatePreview */);
+        let properties, internalProperties = null;
+        switch (propertiesMode) {
+            case 0 /* All */:
+                ({ properties } = await value.getAllProperties(false /* accessorPropertiesOnly */, true /* generatePreview */));
+                break;
+            case 1 /* OwnOnly */:
+                ({ properties } = await value.getOwnProperties(true /* generatePreview */));
+                break;
+            case 2 /* OwnAndInternalAndInherited */:
+                ({ properties, internalProperties } =
+                    await SDK.RemoteObject.RemoteObject.loadFromObjectPerProto(value, true /* generatePreview */));
+                break;
         }
-        else {
-            allProperties = await SDK.RemoteObject.RemoteObject.loadFromObjectPerProto(value, true /* generatePreview */);
-        }
-        const properties = allProperties.properties;
-        const internalProperties = allProperties.internalProperties;
         treeElement.removeChildren();
         if (!properties) {
             return;
         }
-        extraProperties = extraProperties || [];
-        for (let i = 0; i < extraProperties.length; ++i) {
-            properties.push(extraProperties[i]);
+        if (extraProperties !== undefined) {
+            properties.push(...extraProperties);
         }
-        ObjectPropertyTreeElement.populateWithProperties(treeElement, properties, internalProperties, skipProto, targetValue || value, linkifier, emptyPlaceholder);
+        ObjectPropertyTreeElement.populateWithProperties(treeElement, properties, internalProperties, skipProto, targetValue || value, linkifier, emptyPlaceholder, propertiesMode === 1 /* OwnOnly */);
     }
-    static populateWithProperties(treeNode, properties, internalProperties, skipProto, value, linkifier, emptyPlaceholder) {
+    static populateWithProperties(treeNode, properties, internalProperties, skipProto, value, linkifier, emptyPlaceholder, skipGettersAndSetters) {
         properties.sort(ObjectPropertiesSection.compareProperties);
         internalProperties = internalProperties || [];
         const entriesProperty = internalProperties.find(property => property.name === '[[Entries]]');
@@ -652,18 +662,20 @@ export class ObjectPropertyTreeElement extends UI.TreeOutline.TreeElement {
             if (!ObjectPropertiesSection._isDisplayableProperty(property, treeNode.property)) {
                 continue;
             }
-            if (property.isOwn && property.getter) {
-                const getterProperty = new SDK.RemoteObject.RemoteObjectProperty('get ' + property.name, property.getter, false);
-                parentMap.set(getterProperty, value);
-                tailProperties.push(getterProperty);
-            }
-            if (property.isOwn && property.setter) {
-                const setterProperty = new SDK.RemoteObject.RemoteObjectProperty('set ' + property.name, property.setter, false);
-                parentMap.set(setterProperty, value);
-                tailProperties.push(setterProperty);
+            if (property.isOwn && !skipGettersAndSetters) {
+                if (property.getter) {
+                    const getterProperty = new SDK.RemoteObject.RemoteObjectProperty('get ' + property.name, property.getter, false);
+                    parentMap.set(getterProperty, value);
+                    tailProperties.push(getterProperty);
+                }
+                if (property.setter) {
+                    const setterProperty = new SDK.RemoteObject.RemoteObjectProperty('set ' + property.name, property.setter, false);
+                    parentMap.set(setterProperty, value);
+                    tailProperties.push(setterProperty);
+                }
             }
             const canShowProperty = property.getter || !property.isAccessorProperty();
-            if (canShowProperty && property.name !== '__proto__') {
+            if (canShowProperty) {
                 const element = new ObjectPropertyTreeElement(property, linkifier);
                 if (property.name === 'memories' && property.value?.className === 'Memories') {
                     element._updateExpandable();
@@ -898,7 +910,7 @@ export class ObjectPropertyTreeElement extends UI.TreeOutline.TreeElement {
         this.listItemElement.appendChild(this._rowContainer);
     }
     _updatePropertyPath() {
-        if (UI.Tooltip.Tooltip.getContent(this.nameElement)) {
+        if (this.nameElement.title) {
             return;
         }
         const name = this.property.name;
@@ -911,7 +923,7 @@ export class ObjectPropertyTreeElement extends UI.TreeOutline.TreeElement {
         const isInteger = /^(?:0|[1-9]\d*)$/;
         const parentPath = (this.parent instanceof ObjectPropertyTreeElement && this.parent.nameElement &&
             !this.parent.property.synthetic) ?
-            UI.Tooltip.Tooltip.getContent(this.parent.nameElement) :
+            this.parent.nameElement.title :
             '';
         if (this.property.private || useDotNotation.test(name)) {
             UI.Tooltip.Tooltip.install(this.nameElement, parentPath ? `${parentPath}.${name}` : name);
@@ -941,8 +953,8 @@ export class ObjectPropertyTreeElement extends UI.TreeOutline.TreeElement {
                 contextMenu.clipboardSection().appendItem(i18nString(UIStrings.copyValue), copyValueHandler);
             }
         }
-        if (!this.property.synthetic && this.nameElement && UI.Tooltip.Tooltip.getContent(this.nameElement)) {
-            const copyPathHandler = Host.InspectorFrontendHost.InspectorFrontendHostInstance.copyText.bind(Host.InspectorFrontendHost.InspectorFrontendHostInstance, UI.Tooltip.Tooltip.getContent(this.nameElement));
+        if (!this.property.synthetic && this.nameElement && this.nameElement.title) {
+            const copyPathHandler = Host.InspectorFrontendHost.InspectorFrontendHostInstance.copyText.bind(Host.InspectorFrontendHost.InspectorFrontendHostInstance, this.nameElement.title);
             contextMenu.clipboardSection().appendItem(i18nString(UIStrings.copyPropertyPath), copyPathHandler);
         }
         if (parentMap.get(this.property) instanceof SDK.RemoteObject.LocalJSONObject) {
@@ -1012,7 +1024,7 @@ export class ObjectPropertyTreeElement extends UI.TreeOutline.TreeElement {
             this._editingCommitted(originalContent);
             return;
         }
-        if (keyboardEvent.key === 'Escape') {
+        if (keyboardEvent.key === Platform.KeyboardUtilities.ESCAPE_KEY) {
             keyboardEvent.consume();
             this._editingCancelled();
             return;
@@ -1077,7 +1089,7 @@ export class ObjectPropertyTreeElement extends UI.TreeOutline.TreeElement {
         }
     }
     path() {
-        return UI.Tooltip.Tooltip.getContent(this.nameElement);
+        return this.nameElement.title;
     }
 }
 export class ArrayGroupingTreeElement extends UI.TreeOutline.TreeElement {

@@ -1,2 +1,3 @@
 import * as IssueCounter from './IssueCounter.js';
-export { IssueCounter, };
+import * as IssueLinkIcon from './IssueLinkIcon.js';
+export { IssueCounter, IssueLinkIcon, };

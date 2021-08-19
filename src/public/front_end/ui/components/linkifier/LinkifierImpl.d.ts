@@ -8,12 +8,10 @@ export declare class LinkifierClick extends Event {
     constructor(data: LinkifierData);
 }
 export declare class Linkifier extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
-    private readonly shadow;
-    private url;
-    private lineNumber?;
-    private columnNumber?;
+    #private;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     set data(data: LinkifierData);
+    connectedCallback(): void;
     private onLinkActivation;
     private render;
 }

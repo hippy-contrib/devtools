@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
-import * as Common from '../../../core/common/common.js'; // eslint-disable-line no-unused-vars
+import * as Common from '../../../core/common/common.js';
 import { GraphView } from './GraphView.js';
 // A class that maps each context to its corresponding graph.
 // It controls which graph to render when the context is switched or updated.

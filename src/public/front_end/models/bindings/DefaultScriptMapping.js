@@ -119,7 +119,7 @@ export class DefaultScriptMapping {
         this._project.reset();
     }
     dispose() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         this._debuggerReset();
         this._project.dispose();
     }

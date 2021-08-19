@@ -124,7 +124,7 @@ export class FileSystemWorkspaceBinding {
         }
     }
     dispose() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         for (const fileSystem of this._boundFileSystems.values()) {
             fileSystem.dispose();
             this._boundFileSystems.delete(fileSystem._fileSystem.path());
@@ -249,7 +249,7 @@ export class FileSystem extends Workspace.Workspace.ProjectStore {
         for (const query of queriesToRun) {
             const files = await this._fileSystem.searchInPath(searchConfig.isRegex() ? '' : query, progress);
             result = Platform.ArrayUtilities.intersectOrdered(result, files.sort(), Platform.StringUtilities.naturalOrderComparator);
-            progress.worked(1);
+            progress.incrementWorked(1);
         }
         progress.done();
         return result;

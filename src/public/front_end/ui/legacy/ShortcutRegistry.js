@@ -6,10 +6,10 @@ import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
 import * as Platform from '../../core/platform/platform.js';
 import * as Root from '../../core/root/root.js';
-import { getRegisteredActionExtensions } from './ActionRegistration.js'; // eslint-disable-line no-unused-vars
+import { getRegisteredActionExtensions } from './ActionRegistration.js';
 import { Context } from './Context.js';
 import { Dialog } from './Dialog.js';
-import { KeyboardShortcut, Modifiers, Type } from './KeyboardShortcut.js'; // eslint-disable-line no-unused-vars
+import { KeyboardShortcut, Modifiers, Type } from './KeyboardShortcut.js';
 import { isEditing } from './UIUtils.js';
 let shortcutRegistryInstance;
 export class ShortcutRegistry {

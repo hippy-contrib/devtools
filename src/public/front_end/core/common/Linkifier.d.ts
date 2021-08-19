@@ -10,5 +10,5 @@ export declare function registerLinkifier(registration: LinkifierRegistration): 
 export declare function getApplicableRegisteredlinkifiers(object: Object): LinkifierRegistration[];
 export interface LinkifierRegistration {
     loadLinkifier: () => Promise<Linkifier>;
-    contextTypes?: (() => Array<unknown>);
+    contextTypes?: (() => Array<Function>);
 }

@@ -13,7 +13,7 @@ export declare class ScriptFormatterEditorAction implements EditorAction {
     _editorSelected(event: Common.EventTarget.EventTargetEvent): void;
     _editorClosed(event: Common.EventTarget.EventTargetEvent): Promise<void>;
     _updateButton(uiSourceCode: Workspace.UISourceCode.UISourceCode | null): void;
-    button(sourcesView: SourcesView): UI.Toolbar.ToolbarButton;
+    getOrCreateButton(sourcesView: SourcesView): UI.Toolbar.ToolbarButton;
     _isFormattableScript(uiSourceCode: Workspace.UISourceCode.UISourceCode | null): boolean;
     isCurrentUISourceCodeFormattable(): boolean;
     _onFormatScriptButtonClicked(_event: Common.EventTarget.EventTargetEvent): void;

@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
+import * as Root from '../../core/root/root.js';
 import * as IssuesManager from '../../models/issues_manager/issues_manager.js';
+import * as IconButton from '../../ui/components/icon_button/icon_button.js';
 import * as IssueCounter from '../../ui/components/issue_counter/issue_counter.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { IssueAggregator } from './IssueAggregator.js';
@@ -83,6 +85,10 @@ const UIStrings = {
      *              browser behaviors.
      */
     quirksMode: 'Quirks Mode',
+    /**
+     * @description Tooltip label for the button which reveals all hidden isssues.
+     */
+    unHideAllHiddenIssues: 'Unhide all hidden issues',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/issues/IssuesPane.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -150,14 +156,14 @@ export class IssuesPane extends UI.Widget.VBox {
     issueViewUpdatePromise = Promise.resolve();
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/issues/issuesPane.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/issues/issuesPane.css');
         this.contentElement.classList.add('issues-pane');
         this.categoryViews = new Map();
         this.issueViews = new Map();
         this.showThirdPartyCheckbox = null;
         this.createToolbars();
         this.issuesTree = new UI.TreeOutline.TreeOutlineInShadow();
-        this.issuesTree.registerRequiredCSS('panels/issues/issuesTree.css', { enableLegacyPatching: false });
+        this.issuesTree.registerRequiredCSS('panels/issues/issuesTree.css');
         this.issuesTree.setShowSelectionOnKeyboardFocus(true);
         this.issuesTree.contentElement.classList.add('issues');
         this.contentElement.appendChild(this.issuesTree.element);
@@ -167,11 +173,11 @@ export class IssuesPane extends UI.Widget.VBox {
         this.issuesManager = IssuesManager.IssuesManager.IssuesManager.instance();
         this.aggregator = new IssueAggregator(this.issuesManager);
         this.aggregator.addEventListener("AggregatedIssueUpdated" /* AggregatedIssueUpdated */, this.issueUpdated, this);
-        this.aggregator.addEventListener("FullUpdateRequired" /* FullUpdateRequired */, this.fullUpdate, this);
+        this.aggregator.addEventListener("FullUpdateRequired" /* FullUpdateRequired */, this.onFullUpdate, this);
         for (const issue of this.aggregator.aggregatedIssues()) {
             this.scheduleIssueViewUpdate(issue);
         }
-        this.issuesManager.addEventListener(IssuesManager.IssuesManager.Events.IssuesCountUpdated, this.updateCounts, this);
+        this.issuesManager.addEventListener("IssuesCountUpdated" /* IssuesCountUpdated */, this.updateCounts, this);
         this.updateCounts();
     }
     static instance(opts = { forceNew: null }) {
@@ -192,9 +198,19 @@ export class IssuesPane extends UI.Widget.VBox {
         const groupByCategoryCheckbox = new UI.Toolbar.ToolbarSettingCheckbox(groupByCategorySetting, i18nString(UIStrings.groupDisplayedIssuesUnder), i18nString(UIStrings.groupByCategory));
         // Hide the option to toggle category grouping for now.
         groupByCategoryCheckbox.setVisible(false);
+        if (Root.Runtime.experiments.isEnabled('hideIssuesFeature')) {
+            const button = new UI.Toolbar.ToolbarButton(i18nString(UIStrings.unHideAllHiddenIssues));
+            button.element.classList.add('unhide-all-issues-btn');
+            button.addEventListener(UI.Toolbar.ToolbarButton.Events.Click, () => IssuesManager.IssuesManager.IssuesManager.instance().unhideAllIssues());
+            UI.ARIAUtils.markAsMenuButton(button.element);
+            const icon = new IconButton.Icon.Icon();
+            icon.data = { iconName: 'refresh_12x12_icon', color: '', height: '12px', width: '12px' };
+            button.element.appendChild(icon);
+            rightToolbar.appendToolbarItem(button);
+        }
         rightToolbar.appendToolbarItem(groupByCategoryCheckbox);
         groupByCategorySetting.addChangeListener(() => {
-            this.fullUpdate();
+            this.fullUpdate(true);
         });
         const thirdPartySetting = IssuesManager.Issue.getShowThirdPartyIssuesSetting();
         this.showThirdPartyCheckbox = new UI.Toolbar.ToolbarSettingCheckbox(thirdPartySetting, i18nString(UIStrings.includeCookieIssuesCausedBy), i18nString(UIStrings.includeThirdpartyCookieIssues));
@@ -216,8 +232,7 @@ export class IssuesPane extends UI.Widget.VBox {
         return { toolbarContainer };
     }
     issueUpdated(event) {
-        const issue = event.data;
-        this.scheduleIssueViewUpdate(issue);
+        this.scheduleIssueViewUpdate(event.data);
     }
     scheduleIssueViewUpdate(issue) {
         this.issueViewUpdatePromise = this.issueViewUpdatePromise.then(() => this.updateIssueView(issue));
@@ -265,15 +280,21 @@ export class IssuesPane extends UI.Widget.VBox {
         this.categoryViews.set(category, newView);
         return newView;
     }
-    clearViews(views) {
-        for (const view of views.values()) {
+    clearViews(views, preservedSet) {
+        for (const [key, view] of Array.from(views.entries())) {
+            if (preservedSet?.has(key)) {
+                continue;
+            }
             view.parent && view.parent.removeChild(view);
+            views.delete(key);
         }
-        views.clear();
     }
-    fullUpdate() {
-        this.clearViews(this.categoryViews);
-        this.clearViews(this.issueViews);
+    onFullUpdate() {
+        this.fullUpdate(false);
+    }
+    fullUpdate(force) {
+        this.clearViews(this.categoryViews, force ? undefined : this.aggregator.aggregatedIssueCategories());
+        this.clearViews(this.issueViews, force ? undefined : this.aggregator.aggregatedIssueCodes());
         if (this.aggregator) {
             for (const issue of this.aggregator.aggregatedIssues()) {
                 this.scheduleIssueViewUpdate(issue);
@@ -306,12 +327,13 @@ export class IssuesPane extends UI.Widget.VBox {
             this.noIssuesMessageDiv.style.display = 'flex';
         }
     }
-    revealByCode(code) {
+    async revealByCode(code) {
+        await this.issueViewUpdatePromise;
         const issueView = this.issueViews.get(code);
         if (issueView) {
             issueView.expand();
             issueView.reveal();
-            issueView.select();
+            issueView.select(false, true);
         }
     }
 }

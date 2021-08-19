@@ -74,6 +74,7 @@ export declare class WorkspaceImpl extends Common.ObjectWrapper.ObjectWrapper {
     static instance(opts?: {
         forceNew: boolean | null;
     }): WorkspaceImpl;
+    static removeInstance(): void;
     uiSourceCode(projectId: string, url: string): UISourceCode | null;
     uiSourceCodeForURL(url: string): UISourceCode | null;
     uiSourceCodesForProjectType(type: string): UISourceCode[];

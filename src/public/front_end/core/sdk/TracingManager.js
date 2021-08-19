@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import { Capability } from './Target.js';
-import { SDKModel } from './SDKModel.js'; // eslint-disable-line no-unused-vars
+import { SDKModel } from './SDKModel.js';
 export class TracingManager extends SDKModel {
     _tracingAgent;
     _activeClient;

@@ -4,6 +4,7 @@
 import * as i18n from '../../../../core/i18n/i18n.js';
 import * as ComponentHelpers from '../../../components/helpers/helpers.js';
 import * as LitHtml from '../../../lit-html/lit-html.js';
+import cssVarSwatchStyles from './cssVarSwatch.css.js';
 const UIStrings = {
     /**
     *@description Text displayed in a tooltip shown when hovering over a var() CSS function in the Styles pane when the custom property in this function does not exist. The parameter is the name of the property.
@@ -16,6 +17,7 @@ const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 const { render, html, Directives } = LitHtml;
 const VARIABLE_FUNCTION_REGEX = /(var\()(\s*--[^,)]+)(.*)/;
 export class CSSVarSwatch extends HTMLElement {
+    static litTagName = LitHtml.literal `devtools-css-var-swatch`;
     shadow = this.attachShadow({ mode: 'open' });
     text = '';
     computedValue = null;
@@ -30,6 +32,9 @@ export class CSSVarSwatch extends HTMLElement {
                 link.focus();
             }
         });
+    }
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [cssVarSwatchStyles];
     }
     set data(data) {
         this.text = data.text;
@@ -88,26 +93,7 @@ export class CSSVarSwatch extends HTMLElement {
         const link = this.renderLink(functionParts.name);
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
-        render(html `<style>
-      .css-var-link:not(.undefined) {
-        cursor: pointer;
-        text-underline-offset: 2px;
-        color: var(--color-link);
-      }
-
-      .css-var-link:hover:not(.undefined) {
-        text-decoration: underline;
-      }
-
-      .css-var-link:focus:not(:focus-visible) {
-        outline: none;
-      }
-
-      .css-var-link.undefined {
-        /* stylelint-disable-next-line plugin/use_theme_colors */
-        color: hsl(0deg 0% 46%);
-      }
-      </style><span title="${this.computedValue || ''}">${functionParts.pre}${link}${functionParts.post}</span>`, this.shadow, { host: this });
+        render(html `<span title="${this.computedValue || ''}">${functionParts.pre}${link}${functionParts.post}</span>`, this.shadow, { host: this });
         // clang-format on
     }
 }

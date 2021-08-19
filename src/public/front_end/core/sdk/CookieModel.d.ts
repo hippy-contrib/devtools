@@ -2,12 +2,12 @@ import type { Attributes } from './Cookie.js';
 import { Cookie } from './Cookie.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
-export declare class CookieModel extends SDKModel {
-    _blockedCookies: Map<any, any>;
-    _cookieToBlockedReasons: Map<any, any>;
+export declare class CookieModel extends SDKModel<void> {
+    _blockedCookies: Map<string, Cookie>;
+    _cookieToBlockedReasons: Map<Cookie, BlockedReason[]>;
     constructor(target: Target);
     addBlockedCookie(cookie: Cookie, blockedReasons: BlockedReason[] | null): void;
-    getCookieToBlockedReasonsMap(): Map<any, any>;
+    getCookieToBlockedReasonsMap(): ReadonlyMap<Cookie, BlockedReason[]>;
     getCookies(urls: string[]): Promise<Cookie[]>;
     deleteCookie(cookie: Cookie): Promise<void>;
     clear(domain?: string, securityOrigin?: string): Promise<void>;

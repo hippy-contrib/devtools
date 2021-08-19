@@ -19,7 +19,7 @@ export interface LinearMemoryValueInterpreterData {
     memoryLength: number;
 }
 export declare class LinearMemoryValueInterpreter extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     private endianness;
     private buffer;
@@ -28,6 +28,7 @@ export declare class LinearMemoryValueInterpreter extends HTMLElement {
     private memoryLength;
     private showSettings;
     constructor();
+    connectedCallback(): void;
     set data(data: LinearMemoryValueInterpreterData);
     private render;
     private onEndiannessChange;

@@ -51,6 +51,7 @@ export class ExtensionView extends UI.Widget.Widget {
         this.element.appendChild(this._iframe);
     }
     wasShown() {
+        super.wasShown();
         if (typeof this._frameIndex === 'number') {
             this._server.notifyViewShown(this._id, this._frameIndex);
         }

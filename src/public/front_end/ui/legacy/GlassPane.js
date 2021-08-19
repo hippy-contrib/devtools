@@ -32,7 +32,7 @@ export class GlassPane extends Common.ObjectWrapper.ObjectWrapper {
         if (this.element.shadowRoot) {
             this.element.shadowRoot.appendChild(this._arrowElement);
         }
-        this.registerRequiredCSS('ui/legacy/glassPane.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/glassPane.css');
         this.setPointerEventsBehavior(PointerEventsBehavior.PierceGlassPane);
         this._onMouseDownBound = this._onMouseDown.bind(this);
         this._onClickOutsideCallback = null;
@@ -47,8 +47,8 @@ export class GlassPane extends Common.ObjectWrapper.ObjectWrapper {
     isShowing() {
         return this._widget.isShowing();
     }
-    registerRequiredCSS(cssFile, options) {
-        this._widget.registerRequiredCSS(cssFile, options);
+    registerRequiredCSS(cssFile) {
+        this._widget.registerRequiredCSS(cssFile);
     }
     setDefaultFocusedElement(element) {
         this._widget.setDefaultFocusedElement(element);

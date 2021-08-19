@@ -5,14 +5,14 @@ import type { EventDescriptor, EventTargetEvent } from './EventTarget.js';
 import { ObjectWrapper } from './Object.js';
 import { getLocalizedSettingsCategory, getRegisteredSettings, maybeRemoveSettingExtension, RegExpSettingItem, registerSettingExtension, registerSettingsForTest, resetSettings, SettingCategory, SettingExtensionOption, SettingRegistration, SettingType } from './SettingRegistration.js';
 export declare class Settings {
-    _globalStorage: SettingsStorage;
-    _localStorage: SettingsStorage;
-    _sessionStorage: SettingsStorage;
+    readonly globalStorage: SettingsStorage;
+    private readonly localStorage;
+    private readonly sessionStorage;
     settingNameSet: Set<string>;
     orderValuesBySettingCategory: Map<SettingCategory, Set<number>>;
-    _eventSupport: ObjectWrapper;
-    _registry: Map<string, Setting<unknown>>;
-    _moduleSettings: Map<string, Setting<unknown>>;
+    private eventSupport;
+    private registry;
+    readonly moduleSettings: Map<string, Setting<unknown>>;
     private constructor();
     static hasInstance(): boolean;
     static instance(opts?: {
@@ -24,20 +24,19 @@ export declare class Settings {
     _registerModuleSetting(setting: Setting<unknown>): void;
     moduleSetting<T = any>(settingName: string): Setting<T>;
     settingForTest(settingName: string): Setting<unknown>;
-    createSetting<T = any>(key: string, defaultValue: T, storageType?: SettingStorageType): Setting<T>;
-    createLocalSetting<T = any>(key: string, defaultValue: T): Setting<T>;
+    createSetting<T>(key: string, defaultValue: T, storageType?: SettingStorageType): Setting<T>;
+    createLocalSetting<T>(key: string, defaultValue: T): Setting<T>;
     createRegExpSetting(key: string, defaultValue: string, regexFlags?: string, storageType?: SettingStorageType): RegExpSetting;
     clearAll(): void;
     _storageFromType(storageType?: SettingStorageType): SettingsStorage;
+    getRegistry(): Map<string, Setting<unknown>>;
 }
 export declare class SettingsStorage {
-    _object: {
-        [x: string]: string;
-    };
-    _setCallback: (arg0: string, arg1: string) => void;
-    _removeCallback: (arg0: string) => void;
-    _removeAllCallback: (arg0?: string | undefined) => void;
-    _storagePrefix: string;
+    private object;
+    private readonly setCallback;
+    private readonly removeCallback;
+    private readonly removeAllCallback;
+    private storagePrefix;
     constructor(object: {
         [x: string]: string;
     }, setCallback?: ((arg0: string, arg1: string) => void), removeCallback?: ((arg0: string) => void), removeAllCallback?: ((arg0?: string | undefined) => void), storagePrefix?: string);
@@ -49,17 +48,19 @@ export declare class SettingsStorage {
     _dumpSizes(): void;
 }
 export declare class Setting<V> {
-    _name: string;
-    _defaultValue: V;
-    _eventSupport: ObjectWrapper;
-    _storage: SettingsStorage;
-    _titleFunction: () => Platform.UIString.LocalizedString;
-    _title: string;
-    _registration: SettingRegistration | null;
-    _requiresUserAction?: boolean;
-    _value?: any;
-    _hadUserAction?: boolean;
+    private nameInternal;
+    private defaultValueInternal;
+    private readonly eventSupport;
+    private storage;
+    private titleFunction;
+    private titleInternal;
+    private registration;
+    private requiresUserAction?;
+    private value?;
+    private serializer;
+    private hadUserAction?;
     constructor(name: string, defaultValue: V, eventSupport: ObjectWrapper, storage: SettingsStorage);
+    setSerializer(serializer: Serializer<unknown, V>): void;
     addChangeListener(listener: (arg0: EventTargetEvent) => void, thisObject?: Object): EventDescriptor;
     removeChangeListener(listener: (arg0: EventTargetEvent) => void, thisObject?: Object): void;
     get name(): string;
@@ -78,10 +79,11 @@ export declare class Setting<V> {
     order(): number | null;
     _printSettingsSavingError(message: string, name: string, value: string): void;
     defaultValue(): V;
+    getStorage(): SettingsStorage;
 }
 export declare class RegExpSetting extends Setting<any> {
-    _regexFlags: string | undefined;
-    _regex?: RegExp | null;
+    private regexFlags;
+    private regex?;
     constructor(name: string, defaultValue: string, eventSupport: ObjectWrapper, storage: SettingsStorage, regexFlags?: string);
     get(): string;
     getAsArray(): RegExpSettingItem[];
@@ -90,7 +92,7 @@ export declare class RegExpSetting extends Setting<any> {
     asRegExp(): RegExp | null;
 }
 export declare class VersionController {
-    static get _currentVersionName(): string;
+    static get currentVersionName(): string;
     static get currentVersion(): number;
     updateVersion(): void;
     _methodsToRunToUpdateVersion(oldVersion: number, currentVersion: number): string[];
@@ -136,6 +138,10 @@ export declare function moduleSetting(settingName: string): Setting<unknown>;
 export declare function settingForTest(settingName: string): Setting<unknown>;
 export declare function detectColorFormat(color: Color): Format;
 export { getLocalizedSettingsCategory, getRegisteredSettings, maybeRemoveSettingExtension, registerSettingExtension, RegExpSettingItem, SettingCategory, SettingExtensionOption, SettingRegistration, SettingType, registerSettingsForTest, resetSettings, };
+export interface Serializer<I, O> {
+    stringify: (value: I) => string;
+    parse: (value: string) => O;
+}
 export interface SimpleSettingOption {
     value: string | boolean;
     title: string;

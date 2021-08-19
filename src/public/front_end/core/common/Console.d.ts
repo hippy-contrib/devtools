@@ -1,6 +1,6 @@
 import { ObjectWrapper } from './Object.js';
 export declare class Console extends ObjectWrapper {
-    _messages: Message[];
+    private readonly messagesInternal;
     /**
      * Instantiable via the instance() factory below.
      */

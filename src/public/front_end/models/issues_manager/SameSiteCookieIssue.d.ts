@@ -19,6 +19,7 @@ export declare class SameSiteCookieIssue extends Issue {
      */
     static codeForSameSiteDetails(reason: Protocol.Audits.SameSiteCookieExclusionReason | Protocol.Audits.SameSiteCookieWarningReason, warningReasons: Protocol.Audits.SameSiteCookieWarningReason[], operation: Protocol.Audits.SameSiteCookieOperation, cookieUrl?: string): string | null;
     cookies(): Iterable<Protocol.Audits.AffectedCookie>;
+    rawCookieLines(): Iterable<string>;
     requests(): Iterable<Protocol.Audits.AffectedRequest>;
     getCategory(): IssueCategory;
     getDescription(): MarkdownIssueDescription | null;

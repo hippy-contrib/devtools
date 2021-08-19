@@ -28,7 +28,7 @@ export class MediaQueryInspector extends UI.Widget.Widget {
     _cachedQueryModels;
     constructor(getWidthCallback, setWidthCallback) {
         super(true);
-        this.registerRequiredCSS('panels/emulation/mediaQueryInspector.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/emulation/mediaQueryInspector.css');
         this.contentElement.classList.add('media-inspector-view');
         this.contentElement.addEventListener('click', this._onMediaQueryClicked.bind(this), false);
         this.contentElement.addEventListener('contextmenu', this._onContextMenu.bind(this), false);
@@ -225,6 +225,7 @@ export class MediaQueryInspector extends UI.Widget.Widget {
         return UI.ZoomManager.ZoomManager.instance().zoomFactor() / this._scale;
     }
     wasShown() {
+        super.wasShown();
         this._scheduleMediaQueriesUpdate();
     }
     _createElementFromMediaQueryModel(model) {

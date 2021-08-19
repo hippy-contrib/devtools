@@ -4,6 +4,7 @@
 import * as ComponentHelpers from '../../components/helpers/helpers.js';
 import * as IconButton from '../../components/icon_button/icon_button.js';
 import * as LitHtml from '../../lit-html/lit-html.js';
+import markdownImageStyles from './markdownImage.css.js';
 import { getMarkdownImage } from './MarkdownImagesMap.js';
 /**
  * Component to render images from parsed markdown.
@@ -17,6 +18,9 @@ export class MarkdownImage extends HTMLElement {
     imageTitle;
     constructor() {
         super();
+    }
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [markdownImageStyles];
     }
     set data(data) {
         const { key, title } = data;
@@ -40,11 +44,6 @@ export class MarkdownImage extends HTMLElement {
         }
         const { src, width = '100%', height = '100%' } = this.imageData;
         return LitHtml.html `
-      <style>
-        .markdown-image {
-          display: block;
-        }
-      </style>
       <img class="markdown-image" src=${src} alt=${this.imageTitle} width=${width} height=${height}/>
     `;
     }

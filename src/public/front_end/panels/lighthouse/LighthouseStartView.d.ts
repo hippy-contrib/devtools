@@ -18,4 +18,5 @@ export declare class StartView extends UI.Widget.Widget {
     setStartButtonEnabled(isEnabled: boolean): void;
     setUnauditableExplanation(text: string | null): void;
     setWarningText(text: string | null): void;
+    wasShown(): void;
 }

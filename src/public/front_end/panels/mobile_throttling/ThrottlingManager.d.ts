@@ -2,13 +2,13 @@ import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { NetworkThrottlingSelector } from './NetworkThrottlingSelector.js';
-export declare class ThrottlingManager extends Common.ObjectWrapper.ObjectWrapper implements SDK.TargetManager.SDKModelObserver<SDK.EmulationModel.EmulationModel> {
-    _cpuThrottlingRate: number;
+export declare class ThrottlingManager {
     _cpuThrottlingControls: Set<UI.Toolbar.ToolbarComboBox>;
     _cpuThrottlingRates: number[];
     _customNetworkConditionsSetting: Common.Settings.Setting<SDK.NetworkManager.Conditions[]>;
-    _currentNetworkThrottlingConditions: SDK.NetworkManager.Conditions;
+    _currentNetworkThrottlingConditionsSetting: Common.Settings.Setting<SDK.NetworkManager.Conditions>;
     _lastNetworkThrottlingConditions: SDK.NetworkManager.Conditions;
+    _cpuThrottlingManager: SDK.CPUThrottlingManager.CPUThrottlingManager;
     private constructor();
     static instance(opts?: {
         forceNew: boolean | null;
@@ -16,14 +16,9 @@ export declare class ThrottlingManager extends Common.ObjectWrapper.ObjectWrappe
     decorateSelectWithNetworkThrottling(selectElement: HTMLSelectElement): NetworkThrottlingSelector;
     createOfflineToolbarCheckbox(): UI.Toolbar.ToolbarCheckbox;
     createMobileThrottlingButton(): UI.Toolbar.ToolbarMenuButton;
-    cpuThrottlingRate(): number;
     setCPUThrottlingRate(rate: number): void;
-    modelAdded(emulationModel: SDK.EmulationModel.EmulationModel): void;
-    modelRemoved(_emulationModel: SDK.EmulationModel.EmulationModel): void;
     createCPUThrottlingSelector(): UI.Toolbar.ToolbarComboBox;
-}
-export declare enum Events {
-    RateChanged = "RateChanged"
+    _isDirty(): boolean;
 }
 export declare class ActionDelegate implements UI.ActionRegistration.ActionDelegate {
     static instance(opts?: {

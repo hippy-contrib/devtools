@@ -7,8 +7,8 @@ interface FunctionBodyOffset {
     end: number;
 }
 export declare class WasmDisassembly {
-    _offsets: number[];
-    _functionBodyOffsets: FunctionBodyOffset[];
+    private readonly offsets;
+    private functionBodyOffsets;
     constructor(offsets: number[], functionBodyOffsets: FunctionBodyOffset[]);
     get lineNumbers(): number;
     bytecodeOffsetToLineNumber(bytecodeOffset: number): number;

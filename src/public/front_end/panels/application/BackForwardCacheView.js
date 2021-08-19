@@ -36,6 +36,10 @@ const UIStrings = {
      */
     unknown: 'unknown',
     /**
+     * @description Text for the row with explanations for the back-forward cache status
+     */
+    explanations: 'Explanations',
+    /**
      * @description Status text for the status of the back-forward cache status indicating that
      * the back-forward cache was not used and a normal navigation occured instead.
      */
@@ -87,6 +91,7 @@ export class BackForwardCacheView extends UI.ThrottledWidget.ThrottledWidget {
       <${ReportView.ReportView.ReportValue.litTagName}>${mainFrame.url}</${ReportView.ReportView.ReportValue.litTagName}>
       <${ReportView.ReportView.ReportKey.litTagName}>${i18nString(UIStrings.bfcacheStatus)}</${ReportView.ReportView.ReportKey.litTagName}>
       <${ReportView.ReportView.ReportValue.litTagName}>${this.renderBackForwardCacheStatus(mainFrame.backForwardCacheDetails.restoredFromCache)}</${ReportView.ReportView.ReportValue.litTagName}>
+       ${this.maybeRenderExplanations(mainFrame.backForwardCacheDetails.explanations)}
     `;
     }
     renderBackForwardCacheStatus(status) {
@@ -97,6 +102,15 @@ export class BackForwardCacheView extends UI.ThrottledWidget.ThrottledWidget {
                 return i18nString(UIStrings.normalNavigation);
         }
         return i18nString(UIStrings.unknown);
+    }
+    maybeRenderExplanations(explanations) {
+        if (explanations.length === 0) {
+            return LitHtml.nothing;
+        }
+        return LitHtml.html `<${ReportView.ReportView.ReportKey.litTagName}>${i18nString(UIStrings.explanations)}</${ReportView.ReportView.ReportKey.litTagName}>
+    <${ReportView.ReportView.ReportValue.litTagName}>${LitHtml.html `${explanations.map(explanation => {
+            return LitHtml.html `<div>${explanation.reason} (${explanation.type})</div>`;
+        })}`}</${ReportView.ReportView.ReportValue.litTagName}>`;
     }
 }
 //# sourceMappingURL=BackForwardCacheView.js.map

@@ -32,12 +32,12 @@ import * as Host from '../host/host.js';
 import * as i18n from '../i18n/i18n.js';
 import { FrontendMessageSource, FrontendMessageType } from './ConsoleModelTypes.js';
 export { FrontendMessageSource, FrontendMessageType } from './ConsoleModelTypes.js';
-import { CPUProfilerModel, Events as CPUProfilerModelEvents } from './CPUProfilerModel.js'; // eslint-disable-line no-unused-vars
-import { Events as DebuggerModelEvents } from './DebuggerModel.js'; // eslint-disable-line no-unused-vars
+import { CPUProfilerModel, Events as CPUProfilerModelEvents } from './CPUProfilerModel.js';
+import { Events as DebuggerModelEvents } from './DebuggerModel.js';
 import { LogModel } from './LogModel.js';
 import { RemoteObject } from './RemoteObject.js';
 import { Events as ResourceTreeModelEvents, ResourceTreeModel } from './ResourceTreeModel.js';
-import { Events as RuntimeModelEvents, RuntimeModel } from './RuntimeModel.js'; // eslint-disable-line no-unused-vars
+import { Events as RuntimeModelEvents, RuntimeModel } from './RuntimeModel.js';
 import { TargetManager } from './TargetManager.js';
 const UIStrings = {
     /**
@@ -69,7 +69,7 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
     _warnings;
     _errors;
     _violations;
-    _pageLoadSequenceNumber;
+    pageLoadSequenceNumber;
     _targetListeners;
     constructor() {
         super();
@@ -78,7 +78,7 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
         this._warnings = 0;
         this._errors = 0;
         this._violations = 0;
-        this._pageLoadSequenceNumber = 0;
+        this.pageLoadSequenceNumber = 0;
         this._targetListeners = new WeakMap();
         TargetManager.instance().observeTargets(this);
     }
@@ -96,7 +96,7 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
             return;
         }
         const eventListener = resourceTreeModel.addEventListener(ResourceTreeModelEvents.CachedResourcesLoaded, () => {
-            Common.EventTarget.EventTarget.removeEventListeners([eventListener]);
+            Common.EventTarget.removeEventListeners([eventListener]);
             this._initTarget(target);
         });
     }
@@ -128,7 +128,7 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
         if (runtimeModel) {
             this._messageByExceptionId.delete(runtimeModel);
         }
-        Common.EventTarget.EventTarget.removeEventListeners(this._targetListeners.get(target) || []);
+        Common.EventTarget.removeEventListeners(this._targetListeners.get(target) || []);
     }
     async evaluateCommandInConsole(executionContext, originatingMessage, expression, useCommandLineAPI) {
         const result = await executionContext.evaluate({
@@ -152,33 +152,35 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
         this.dispatchEventToListeners(Events.CommandEvaluated, { result: result.object, commandMessage: originatingMessage, exceptionDetails: result.exceptionDetails });
     }
     addCommandMessage(executionContext, text) {
-        const commandMessage = new ConsoleMessage(executionContext.runtimeModel, "javascript" /* Javascript */, null, text, FrontendMessageType.Command);
+        const commandMessage = new ConsoleMessage(executionContext.runtimeModel, "javascript" /* Javascript */, null, text, { type: FrontendMessageType.Command });
         commandMessage.setExecutionContextId(executionContext.id);
         this.addMessage(commandMessage);
         return commandMessage;
     }
     addMessage(msg) {
-        msg._pageLoadSequenceNumber = this._pageLoadSequenceNumber;
+        msg.setPageLoadSequenceNumber(this.pageLoadSequenceNumber);
         if (msg.source === FrontendMessageSource.ConsoleAPI &&
             msg.type === "clear" /* Clear */) {
             this._clearIfNecessary();
         }
         this._messages.push(msg);
         const runtimeModel = msg.runtimeModel();
-        if (msg._exceptionId && runtimeModel) {
+        const exceptionId = msg.getExceptionId();
+        if (exceptionId && runtimeModel) {
             let modelMap = this._messageByExceptionId.get(runtimeModel);
             if (!modelMap) {
                 modelMap = new Map();
                 this._messageByExceptionId.set(runtimeModel, modelMap);
             }
-            modelMap.set(msg._exceptionId, msg);
+            modelMap.set(exceptionId, msg);
         }
         this._incrementErrorWarningCount(msg);
         this.dispatchEventToListeners(Events.MessageAdded, msg);
     }
     _exceptionThrown(runtimeModel, event) {
         const exceptionWithTimestamp = event.data;
-        const consoleMessage = ConsoleMessage.fromException(runtimeModel, exceptionWithTimestamp.details, undefined, exceptionWithTimestamp.timestamp, undefined);
+        const affectedResources = extractExceptionMetaData(exceptionWithTimestamp.details.exceptionMetaData);
+        const consoleMessage = ConsoleMessage.fromException(runtimeModel, exceptionWithTimestamp.details, undefined, exceptionWithTimestamp.timestamp, undefined, affectedResources);
         consoleMessage.setExceptionId(exceptionWithTimestamp.details.exceptionId);
         this.addMessage(consoleMessage);
     }
@@ -221,19 +223,35 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
             message = call.args[0].description;
         }
         const callFrame = call.stackTrace && call.stackTrace.callFrames.length ? call.stackTrace.callFrames[0] : null;
-        const consoleMessage = new ConsoleMessage(runtimeModel, FrontendMessageSource.ConsoleAPI, level, message, call.type, callFrame ? callFrame.url : undefined, callFrame ? callFrame.lineNumber : undefined, callFrame ? callFrame.columnNumber : undefined, call.args, call.stackTrace, call.timestamp, call.executionContextId, undefined, undefined, call.context);
+        const details = {
+            type: call.type,
+            url: callFrame?.url,
+            line: callFrame?.lineNumber,
+            column: callFrame?.columnNumber,
+            parameters: call.args,
+            stackTrace: call.stackTrace,
+            timestamp: call.timestamp,
+            executionContextId: call.executionContextId,
+            context: call.context,
+        };
+        const consoleMessage = new ConsoleMessage(runtimeModel, FrontendMessageSource.ConsoleAPI, level, message, details);
         this.addMessage(consoleMessage);
     }
     _queryObjectRequested(runtimeModel, event) {
-        const data = event.data;
-        const consoleMessage = new ConsoleMessage(runtimeModel, FrontendMessageSource.ConsoleAPI, "info" /* Info */, '', FrontendMessageType.QueryObjectResult, undefined, undefined, undefined, [data.objects]);
+        const { objects, executionContextId } = event.data;
+        const details = {
+            type: FrontendMessageType.QueryObjectResult,
+            parameters: [objects],
+            executionContextId,
+        };
+        const consoleMessage = new ConsoleMessage(runtimeModel, FrontendMessageSource.ConsoleAPI, "info" /* Info */, '', details);
         this.addMessage(consoleMessage);
     }
     _clearIfNecessary() {
         if (!Common.Settings.Settings.instance().moduleSetting('preserveConsoleLog').get()) {
             this._clear();
         }
-        ++this._pageLoadSequenceNumber;
+        ++this.pageLoadSequenceNumber;
     }
     _mainFrameNavigated(event) {
         if (Common.Settings.Settings.instance().moduleSetting('preserveConsoleLog').get()) {
@@ -241,11 +259,11 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
     _consoleProfileStarted(cpuProfilerModel, event) {
-        const data = event.data;
+        const { data } = event;
         this._addConsoleProfileMessage(cpuProfilerModel, "profile" /* Profile */, data.scriptLocation, i18nString(UIStrings.profileSStarted, { PH1: data.title }));
     }
     _consoleProfileFinished(cpuProfilerModel, event) {
-        const data = event.data;
+        const { data } = event;
         this._addConsoleProfileMessage(cpuProfilerModel, "profileEnd" /* ProfileEnd */, data.scriptLocation, i18nString(UIStrings.profileSFinished, { PH1: data.title }));
     }
     _addConsoleProfileMessage(cpuProfilerModel, type, scriptLocation, messageText) {
@@ -257,7 +275,7 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
                 lineNumber: scriptLocation.lineNumber,
                 columnNumber: scriptLocation.columnNumber || 0,
             }];
-        this.addMessage(new ConsoleMessage(cpuProfilerModel.runtimeModel(), FrontendMessageSource.ConsoleAPI, "info" /* Info */, messageText, type, undefined, undefined, undefined, undefined, { callFrames }));
+        this.addMessage(new ConsoleMessage(cpuProfilerModel.runtimeModel(), FrontendMessageSource.ConsoleAPI, "info" /* Info */, messageText, { type, stackTrace: { callFrames } }));
     }
     _incrementErrorWarningCount(msg) {
         if (msg.source === "violation" /* Violation */) {
@@ -359,12 +377,23 @@ export var Events;
     Events["MessageUpdated"] = "MessageUpdated";
     Events["CommandEvaluated"] = "CommandEvaluated";
 })(Events || (Events = {}));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractExceptionMetaData(metaData) {
+    if (!metaData) {
+        return undefined;
+    }
+    return { requestId: metaData.requestId || undefined, issueId: metaData.issueId || undefined };
+}
+function areAffectedResourcesEquivalent(a, b) {
+    // Not considering issueId, as that would prevent de-duplication of console messages.
+    return a?.requestId === b?.requestId;
+}
 export class ConsoleMessage {
     _runtimeModel;
     source;
     level;
     messageText;
-    _type;
+    type;
     url;
     line;
     column;
@@ -375,24 +404,26 @@ export class ConsoleMessage {
     scriptId;
     workerId;
     context;
-    _originatingConsoleMessage;
-    _pageLoadSequenceNumber;
-    _exceptionId;
-    constructor(runtimeModel, source, level, messageText, type, url, line, column, parameters, stackTrace, timestamp, executionContextId, scriptId, workerId, context) {
+    originatingConsoleMessage = null;
+    pageLoadSequenceNumber = undefined;
+    exceptionId = undefined;
+    affectedResources;
+    constructor(runtimeModel, source, level, messageText, details) {
         this._runtimeModel = runtimeModel;
         this.source = source;
         this.level = level;
         this.messageText = messageText;
-        this._type = type || "log" /* Log */;
-        this.url = url || undefined;
-        this.line = line || 0;
-        this.column = column || 0;
-        this.parameters = parameters;
-        this.stackTrace = stackTrace;
-        this.timestamp = timestamp || Date.now();
-        this.executionContextId = executionContextId || 0;
-        this.scriptId = scriptId || null;
-        this.workerId = workerId || null;
+        this.type = details?.type || "log" /* Log */;
+        this.url = details?.url;
+        this.line = details?.line || 0;
+        this.column = details?.column || 0;
+        this.parameters = details?.parameters;
+        this.stackTrace = details?.stackTrace;
+        this.timestamp = details?.timestamp || Date.now();
+        this.executionContextId = details?.executionContextId || 0;
+        this.scriptId = details?.scriptId;
+        this.workerId = details?.workerId;
+        this.affectedResources = details?.affectedResources;
         if (!this.executionContextId && this._runtimeModel) {
             if (this.scriptId) {
                 this.executionContextId = this._runtimeModel.executionContextIdForScriptId(this.scriptId);
@@ -401,20 +432,33 @@ export class ConsoleMessage {
                 this.executionContextId = this._runtimeModel.executionContextForStackTrace(this.stackTrace);
             }
         }
-        if (context) {
-            const match = context.match(/[^#]*/);
-            this.context = match && match[0];
+        if (details?.context) {
+            const match = details?.context.match(/[^#]*/);
+            this.context = match?.[0];
         }
-        this._originatingConsoleMessage = null;
-        this._pageLoadSequenceNumber = undefined;
-        this._exceptionId = undefined;
     }
-    get type() {
-        return this._type;
+    getAffectedResources() {
+        return this.affectedResources;
     }
-    static fromException(runtimeModel, exceptionDetails, messageType, timestamp, forceUrl) {
-        return new ConsoleMessage(runtimeModel, "javascript" /* Javascript */, "error" /* Error */, RuntimeModel.simpleTextFromException(exceptionDetails), messageType, forceUrl || exceptionDetails.url, exceptionDetails.lineNumber, exceptionDetails.columnNumber, exceptionDetails.exception ? [RemoteObject.fromLocalObject(exceptionDetails.text), exceptionDetails.exception] :
-            undefined, exceptionDetails.stackTrace, timestamp, exceptionDetails.executionContextId, exceptionDetails.scriptId);
+    setPageLoadSequenceNumber(pageLoadSequenceNumber) {
+        this.pageLoadSequenceNumber = pageLoadSequenceNumber;
+    }
+    static fromException(runtimeModel, exceptionDetails, messageType, timestamp, forceUrl, affectedResources) {
+        const details = {
+            type: messageType,
+            url: forceUrl || exceptionDetails.url,
+            line: exceptionDetails.lineNumber,
+            column: exceptionDetails.columnNumber,
+            parameters: exceptionDetails.exception ?
+                [RemoteObject.fromLocalObject(exceptionDetails.text), exceptionDetails.exception] :
+                undefined,
+            stackTrace: exceptionDetails.stackTrace,
+            timestamp,
+            executionContextId: exceptionDetails.executionContextId,
+            scriptId: exceptionDetails.scriptId,
+            affectedResources,
+        };
+        return new ConsoleMessage(runtimeModel, "javascript" /* Javascript */, "error" /* Error */, RuntimeModel.simpleTextFromException(exceptionDetails), details);
     }
     runtimeModel() {
         return this._runtimeModel;
@@ -423,17 +467,23 @@ export class ConsoleMessage {
         return this._runtimeModel ? this._runtimeModel.target() : null;
     }
     setOriginatingMessage(originatingMessage) {
-        this._originatingConsoleMessage = originatingMessage;
+        this.originatingConsoleMessage = originatingMessage;
         this.executionContextId = originatingMessage.executionContextId;
+    }
+    originatingMessage() {
+        return this.originatingConsoleMessage;
     }
     setExecutionContextId(executionContextId) {
         this.executionContextId = executionContextId;
     }
-    setExceptionId(exceptionId) {
-        this._exceptionId = exceptionId;
+    getExecutionContextId() {
+        return this.executionContextId;
     }
-    originatingMessage() {
-        return this._originatingConsoleMessage;
+    getExceptionId() {
+        return this.exceptionId;
+    }
+    setExceptionId(exceptionId) {
+        this.exceptionId = exceptionId;
     }
     isGroupMessage() {
         return this.type === "startGroup" /* StartGroup */ ||
@@ -454,13 +504,13 @@ export class ConsoleMessage {
             this.type !== FrontendMessageType.Result && this.type !== FrontendMessageType.System && !isUngroupableError);
     }
     groupCategoryKey() {
-        return [this.source, this.level, this.type, this._pageLoadSequenceNumber].join(':');
+        return [this.source, this.level, this.type, this.pageLoadSequenceNumber].join(':');
     }
     isEqual(msg) {
         if (!msg) {
             return false;
         }
-        if (!this._isEqualStackTraces(this.stackTrace, msg.stackTrace)) {
+        if (!this.isEqualStackTraces(this.stackTrace, msg.stackTrace)) {
             return false;
         }
         if (this.parameters) {
@@ -490,9 +540,10 @@ export class ConsoleMessage {
         return (this.runtimeModel() === msg.runtimeModel()) && (this.source === msg.source) && (this.type === msg.type) &&
             (this.level === msg.level) && (this.line === msg.line) && (this.url === msg.url) &&
             (bothAreWatchExpressions || this.scriptId === msg.scriptId) && (this.messageText === msg.messageText) &&
-            (this.executionContextId === msg.executionContextId);
+            (this.executionContextId === msg.executionContextId) &&
+            areAffectedResourcesEquivalent(this.affectedResources, msg.affectedResources);
     }
-    _isEqualStackTraces(stackTrace1, stackTrace2) {
+    isEqualStackTraces(stackTrace1, stackTrace2) {
         if (!stackTrace1 !== !stackTrace2) {
             return false;
         }
@@ -511,7 +562,7 @@ export class ConsoleMessage {
                 return false;
             }
         }
-        return this._isEqualStackTraces(stackTrace1.parent, stackTrace2.parent);
+        return this.isEqualStackTraces(stackTrace1.parent, stackTrace2.parent);
     }
 }
 export const MessageSourceDisplayName = new Map(([

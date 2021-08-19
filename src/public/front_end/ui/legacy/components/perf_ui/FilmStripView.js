@@ -39,7 +39,7 @@ export class FilmStripView extends UI.Widget.HBox {
     _mode;
     constructor() {
         super(true);
-        this.registerRequiredCSS('ui/legacy/components/perf_ui/filmStripView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/components/perf_ui/filmStripView.css');
         this.contentElement.classList.add('film-strip-view');
         this._statusLabel = this.contentElement.createChild('div', 'label');
         this.reset();
@@ -68,7 +68,7 @@ export class FilmStripView extends UI.Widget.HBox {
     }
     createFrameElement(frame) {
         const time = frame.timestamp;
-        const frameTime = i18n.i18n.millisToString(time - this._zeroTime);
+        const frameTime = i18n.TimeUtilities.millisToString(time - this._zeroTime);
         const element = document.createElement('div');
         element.classList.add('frame');
         UI.Tooltip.Tooltip.install(element, i18nString(UIStrings.doubleclickToZoomImageClickTo));
@@ -149,6 +149,8 @@ export class FilmStripView extends UI.Widget.HBox {
         this.update();
     }
     _onMouseEvent(eventName, timestamp) {
+        // TODO(crbug.com/1228674): Use type-safe event dispatch and remove <any>.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.dispatchEventToListeners(eventName, timestamp);
     }
     _onDoubleClick(filmStripFrame) {
@@ -270,7 +272,7 @@ export class Dialog {
     }
     _render() {
         const frame = this._frames[this._index];
-        this._fragment.$('time').textContent = i18n.i18n.millisToString(frame.timestamp - this._zeroTime);
+        this._fragment.$('time').textContent = i18n.TimeUtilities.millisToString(frame.timestamp - this._zeroTime);
         return frame.imageDataPromise()
             .then(imageData => {
             const image = this._fragment.$('image');

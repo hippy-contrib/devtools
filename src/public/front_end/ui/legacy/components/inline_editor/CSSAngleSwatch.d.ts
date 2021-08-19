@@ -3,9 +3,10 @@ export interface CSSAngleSwatchData {
     angle: Angle;
 }
 export declare class CSSAngleSwatch extends HTMLElement {
-    static litTagName: import("../../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../../lit-html/static.js").Static;
     private readonly shadow;
     private angle;
+    connectedCallback(): void;
     set data(data: CSSAngleSwatchData);
     private render;
 }

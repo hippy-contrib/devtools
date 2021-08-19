@@ -94,7 +94,7 @@ export class FormatterWorkerPool {
     }
     format(mimeType, content, indentString) {
         const parameters = { mimeType: mimeType, content: content, indentString: indentString };
-        return /** @type {!Promise<!FormatResult>} */ this._runTask("format" /* FORMAT */, parameters);
+        return this._runTask("format" /* FORMAT */, parameters);
     }
     javaScriptIdentifiers(content) {
         return this._runTask("javaScriptIdentifiers" /* JAVASCRIPT_IDENTIFIERS */, { content: content })

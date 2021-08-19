@@ -77,7 +77,7 @@ export declare class CSSOverviewCompletedView extends UI.Panel.PanelWithSidebar 
     _colorsToFragment(section: string, color: string): UI.Fragment.Fragment | undefined;
     _sortColorsByLuminance(srcColors: Map<string, Set<number>>): string[];
     setOverviewData(data: OverviewData): void;
-    static readonly pushedNodes: Set<unknown>;
+    static readonly pushedNodes: Set<Protocol.DOM.BackendNodeId>;
 }
 export declare class DetailsView extends UI.Widget.VBox {
     _tabbedPane: UI.TabbedPane.TabbedPane;
@@ -96,7 +96,7 @@ export declare class ElementDetailsView extends UI.Widget.Widget {
     _sortMediaQueryDataGrid(): void;
     _onMouseOver(evt: Event): void;
     populateNodes(data: {
-        nodeId: number;
+        nodeId: Protocol.DOM.BackendNodeId;
         hasChildren: boolean;
         [x: string]: unknown;
     }[]): Promise<void>;

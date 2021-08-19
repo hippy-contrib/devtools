@@ -22,8 +22,9 @@ export declare class IssuesPane extends UI.Widget.VBox {
     private updateIssueView;
     private getIssueViewParent;
     private clearViews;
+    private onFullUpdate;
     private fullUpdate;
     private updateCounts;
     private showIssuesTreeOrNoIssuesDetectedMessage;
-    revealByCode(code: string): void;
+    revealByCode(code: string): Promise<void>;
 }

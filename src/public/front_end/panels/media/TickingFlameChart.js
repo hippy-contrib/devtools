@@ -43,7 +43,7 @@ export class Event {
     _updateMaxTime;
     _selfIndex;
     _live;
-    _title;
+    title;
     _color;
     _fontColor;
     _hoverData;
@@ -65,7 +65,7 @@ export class Event {
         if (duration === -1) {
             this.endTime = -1;
         }
-        this._title = eventProperties['name'] || '';
+        this.title = eventProperties['name'] || '';
         this._color = eventProperties['color'] || HotColorScheme[0];
         this._fontColor = calculateFontColor(this._color);
         this._hoverData = eventProperties['hoverData'] || {};
@@ -74,7 +74,7 @@ export class Event {
      * Render hovertext into the |htmlElement|
      */
     decorate(htmlElement) {
-        htmlElement.createChild('span').textContent = `Name: ${this._title}`;
+        htmlElement.createChild('span').textContent = `Name: ${this.title}`;
         htmlElement.createChild('br');
         const startTimeReadable = formatMillisecondsToSeconds(this.startTime, 2);
         if (this._live) {
@@ -112,12 +112,6 @@ export class Event {
     }
     set level(level) {
         this._timelineData.entryLevels[this._selfIndex] = level;
-    }
-    set title(text) {
-        this._title = text;
-    }
-    get title() {
-        return this._title;
     }
     set color(color) {
         this._color = color;

@@ -9,7 +9,8 @@ import { NetworkRequest } from './NetworkRequest.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
 import type { SDKModelObserver } from './TargetManager.js';
-export declare class NetworkManager extends SDKModel {
+import type { Serializer } from '../common/Settings.js';
+export declare class NetworkManager extends SDKModel<EventTypes> {
     _dispatcher: NetworkDispatcher;
     _networkAgent: ProtocolProxyApi.NetworkApi;
     _bypassServiceWorkerSetting: Common.Settings.Setting<boolean>;
@@ -44,6 +45,29 @@ export declare enum Events {
     RequestRedirected = "RequestRedirected",
     LoadingFinished = "LoadingFinished"
 }
+export interface RequestStartedEvent {
+    request: NetworkRequest;
+    originalRequest: Protocol.Network.Request | null;
+}
+export interface ResponseReceivedEvent {
+    request: NetworkRequest;
+    response: Protocol.Network.Response;
+}
+export interface MessageGeneratedEvent {
+    message: Common.UIString.LocalizedString;
+    requestId: string;
+    warning: boolean;
+}
+export declare type EventTypes = {
+    [Events.RequestStarted]: RequestStartedEvent;
+    [Events.RequestUpdated]: NetworkRequest;
+    [Events.RequestFinished]: NetworkRequest;
+    [Events.RequestUpdateDropped]: RequestUpdateDroppedEventData;
+    [Events.ResponseReceived]: ResponseReceivedEvent;
+    [Events.MessageGenerated]: MessageGeneratedEvent;
+    [Events.RequestRedirected]: NetworkRequest;
+    [Events.LoadingFinished]: NetworkRequest;
+};
 export declare const NoThrottlingConditions: Conditions;
 export declare const OfflineConditions: Conditions;
 export declare const Slow3GConditions: Conditions;
@@ -78,14 +102,13 @@ export declare class NetworkDispatcher implements ProtocolProxyApi.NetworkDispat
     eventSourceMessageReceived({ requestId, timestamp: time, eventName, eventId, data }: Protocol.Network.EventSourceMessageReceivedEvent): void;
     requestIntercepted({ interceptionId, request, frameId, resourceType, isNavigationRequest, isDownload, redirectUrl, authChallenge, responseErrorReason, responseStatusCode, responseHeaders, requestId, }: Protocol.Network.RequestInterceptedEvent): void;
     requestWillBeSentExtraInfo({ requestId, associatedCookies, headers, clientSecurityState }: Protocol.Network.RequestWillBeSentExtraInfoEvent): void;
-    responseReceivedExtraInfo({ requestId, blockedCookies, headers, headersText, resourceIPAddressSpace }: Protocol.Network.ResponseReceivedExtraInfoEvent): void;
+    responseReceivedExtraInfo({ requestId, blockedCookies, headers, headersText, resourceIPAddressSpace, statusCode }: Protocol.Network.ResponseReceivedExtraInfoEvent): void;
     _getExtraInfoBuilder(requestId: string): ExtraInfoBuilder;
-    _appendRedirect(requestId: string, time: number, redirectURL: string): NetworkRequest;
+    _appendRedirect(requestId: Protocol.Network.RequestId, time: number, redirectURL: string): NetworkRequest;
     _maybeAdoptMainResourceRequest(requestId: string): NetworkRequest | null;
     _startNetworkRequest(networkRequest: NetworkRequest, originalRequest: Protocol.Network.Request | null): void;
     _updateNetworkRequest(networkRequest: NetworkRequest): void;
     _finishNetworkRequest(networkRequest: NetworkRequest, finishTime: number, encodedDataLength: number, shouldReportCorbBlocking?: boolean): void;
-    _createNetworkRequest(requestId: string, frameId: string, loaderId: string, url: string, documentURL: string, initiator: Protocol.Network.Initiator | null): NetworkRequest;
     clearRequests(): void;
     webTransportCreated({ transportId, url: requestURL, timestamp: time, initiator }: Protocol.Network.WebTransportCreatedEvent): void;
     webTransportConnectionEstablished({ transportId, timestamp: time }: Protocol.Network.WebTransportConnectionEstablishedEvent): void;
@@ -95,6 +118,11 @@ export declare class NetworkDispatcher implements ProtocolProxyApi.NetworkDispat
     subresourceWebBundleMetadataError({ requestId, errorMessage }: Protocol.Network.SubresourceWebBundleMetadataErrorEvent): void;
     subresourceWebBundleInnerResponseParsed({ innerRequestId, bundleRequestId }: Protocol.Network.SubresourceWebBundleInnerResponseParsedEvent): void;
     subresourceWebBundleInnerResponseError({ innerRequestId, errorMessage }: Protocol.Network.SubresourceWebBundleInnerResponseErrorEvent): void;
+    /**
+     * @deprecated
+     * This method is only kept for usage in a web test.
+     */
+    _createNetworkRequest(requestId: Protocol.Network.RequestId, frameId: string, loaderId: string, url: string, documentURL: string, initiator: Protocol.Network.Initiator | null): NetworkRequest;
 }
 export declare class MultitargetNetworkManager extends Common.ObjectWrapper.ObjectWrapper implements SDKModelObserver<NetworkManager> {
     _userAgentOverride: string;
@@ -206,13 +234,20 @@ declare class ExtraInfoBuilder {
     setWebBundleInnerRequestInfo(info: WebBundleInnerRequestInfo): void;
     finished(): void;
     _sync(index: number): void;
+    finalRequest(): NetworkRequest | null;
     private updateFinalRequest;
 }
+export declare class ConditionsSerializer implements Serializer<Conditions, Conditions> {
+    stringify(value: unknown): string;
+    parse(serialized: string): Conditions;
+}
+export declare function networkConditionsEqual(first: Conditions, second: Conditions): boolean;
 export interface Conditions {
     download: number;
     upload: number;
     latency: number;
     title: string | (() => string);
+    i18nTitleKey?: string;
 }
 export interface BlockedPattern {
     url: string;

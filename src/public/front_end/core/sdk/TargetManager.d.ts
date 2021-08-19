@@ -5,7 +5,7 @@ import type * as Protocol from '../../generated/protocol.js';
 import type { Type as TargetType } from './Target.js';
 import { Target } from './Target.js';
 import type { SDKModel } from './SDKModel.js';
-export declare class TargetManager extends Common.ObjectWrapper.ObjectWrapper {
+export declare class TargetManager extends Common.ObjectWrapper.ObjectWrapper<EventTypes> {
     _targets: Set<Target>;
     _observers: Set<Observer>;
     _modelListeners: Platform.MapUtilities.Multimap<string | symbol, {
@@ -47,6 +47,12 @@ export declare enum Events {
     NameChanged = "NameChanged",
     SuspendStateChanged = "SuspendStateChanged"
 }
+export declare type EventTypes = {
+    [Events.AvailableTargetsChanged]: Protocol.Target.TargetInfo[];
+    [Events.InspectedURLChanged]: Target;
+    [Events.NameChanged]: Target;
+    [Events.SuspendStateChanged]: void;
+};
 export declare class Observer {
     targetAdded(_target: Target): void;
     targetRemoved(_target: Target): void;

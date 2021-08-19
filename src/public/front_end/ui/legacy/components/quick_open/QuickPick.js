@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Diff from '../../../../third_party/diff/diff.js';
-import * as UI from '../../legacy.js'; // eslint-disable-line no-unused-vars
+import * as UI from '../../legacy.js';
 import { FilteredListWidget, Provider } from './FilteredListWidget.js';
 export class QuickPick {
     constructor() {

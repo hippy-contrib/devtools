@@ -10,15 +10,11 @@ import { SDKModel } from './SDKModel.js';
  * wants to preserve issues for targets (e.g. iframes) that are already gone as well.
  */
 export class IssuesModel extends SDKModel {
-    disposed;
-    enabled;
-    auditsAgent;
+    disposed = false;
+    enabled = false;
     constructor(target) {
         super(target);
-        this.enabled = false;
-        this.auditsAgent = null;
         this.ensureEnabled();
-        this.disposed = false;
     }
     async ensureEnabled() {
         if (this.enabled) {
@@ -26,11 +22,11 @@ export class IssuesModel extends SDKModel {
         }
         this.enabled = true;
         this.target().registerAuditsDispatcher(this);
-        this.auditsAgent = this.target().auditsAgent();
-        await this.auditsAgent.invoke_enable();
+        const auditsAgent = this.target().auditsAgent();
+        await auditsAgent.invoke_enable();
     }
     issueAdded(issueAddedEvent) {
-        this.dispatchEventToListeners(Events.IssueAdded, { issuesModel: this, inspectorIssue: issueAddedEvent.issue });
+        this.dispatchEventToListeners("IssueAdded" /* IssueAdded */, { issuesModel: this, inspectorIssue: issueAddedEvent.issue });
     }
     dispose() {
         super.dispose();
@@ -43,8 +39,5 @@ export class IssuesModel extends SDKModel {
         return null;
     }
 }
-export const Events = {
-    IssueAdded: Symbol('IssueAdded'),
-};
 SDKModel.register(IssuesModel, { capabilities: Capability.Audits, autostart: true });
 //# sourceMappingURL=IssuesModel.js.map

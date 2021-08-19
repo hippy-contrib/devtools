@@ -108,8 +108,13 @@ export class KeyboardShortcut {
         const keyCode = keyboardEvent.keyCode || keyboardEvent['__keyCode'];
         return KeyboardShortcut._makeKeyFromCodeAndModifiers(keyCode, Modifiers.None);
     }
-    static eventHasCtrlOrMeta(event) {
+    // This checks if a "control equivalent" key is pressed. For non-mac platforms this means checking
+    // if control is pressed but not meta. On mac, we instead check if meta is pressed but not control.
+    static eventHasCtrlEquivalentKey(event) {
         return Host.Platform.isMac() ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey;
+    }
+    static eventHasEitherCtrlOrMeta(event) {
+        return event.metaKey || event.ctrlKey;
     }
     static hasNoModifiers(event) {
         const keyboardEvent = event;

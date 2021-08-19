@@ -19,9 +19,7 @@ export declare class GlassPane extends Common.ObjectWrapper.ObjectWrapper {
     _marginBehavior: MarginBehavior;
     constructor();
     isShowing(): boolean;
-    registerRequiredCSS(cssFile: string, options: {
-        enableLegacyPatching: false;
-    }): void;
+    registerRequiredCSS(cssFile: string): void;
     setDefaultFocusedElement(element: Element | null): void;
     setDimmed(dimmed: boolean): void;
     setPointerEventsBehavior(pointerEventsBehavior: PointerEventsBehavior): void;

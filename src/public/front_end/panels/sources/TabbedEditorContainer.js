@@ -60,28 +60,15 @@ const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 export class TabbedEditorContainer extends Common.ObjectWrapper.ObjectWrapper {
     _delegate;
     _tabbedPane;
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _tabIds;
     _files;
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _previouslyViewedFilesSetting;
     _history;
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _uriToUISourceCode;
     _currentFile;
     _currentView;
     _scrollTimer;
-    constructor(
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delegate, setting, placeholderElement, focusedPlaceholderElement) {
+    constructor(delegate, setting, placeholderElement, focusedPlaceholderElement) {
         super();
         this._delegate = delegate;
         this._tabbedPane = new UI.TabbedPane.TabbedPane();
@@ -308,9 +295,10 @@ export class TabbedEditorContainer extends Common.ObjectWrapper.ObjectWrapper {
     }
     _canonicalUISourceCode(uiSourceCode) {
         // Check if we have already a UISourceCode for this url
-        if (this._uriToUISourceCode.has(uiSourceCode.url())) {
+        const existingSourceCode = this._uriToUISourceCode.get(uiSourceCode.url());
+        if (existingSourceCode) {
             // Ignore incoming uiSourceCode, we already have this file.
-            return this._uriToUISourceCode.get(uiSourceCode.url());
+            return existingSourceCode;
         }
         this._uriToUISourceCode.set(uiSourceCode.url(), uiSourceCode);
         return uiSourceCode;
@@ -444,7 +432,9 @@ export class TabbedEditorContainer extends Common.ObjectWrapper.ObjectWrapper {
             this._currentView = null;
             this._currentFile = null;
         }
-        this._tabIds.delete(uiSourceCode);
+        if (uiSourceCode) {
+            this._tabIds.delete(uiSourceCode);
+        }
         this._files.delete(tabId);
         if (uiSourceCode) {
             this._removeUISourceCodeListeners(uiSourceCode);
@@ -515,8 +505,9 @@ export class TabbedEditorContainer extends Common.ObjectWrapper.ObjectWrapper {
         return this._currentFile || null;
     }
 }
-export // TODO(crbug.com/1167717): Make this a const enum again
- var Events;
+// TODO(crbug.com/1167717): Make this a const enum again
+// eslint-disable-next-line rulesdir/const_enum
+export var Events;
 (function (Events) {
     Events["EditorSelected"] = "EditorSelected";
     Events["EditorClosed"] = "EditorClosed";
@@ -534,10 +525,8 @@ export class HistoryItem {
         this.selectionRange = selectionRange;
         this.scrollLineNumber = scrollLineNumber;
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static fromObject(serializedHistoryItem) {
-        const selectionRange = 'selectionRange' in serializedHistoryItem ?
+        const selectionRange = serializedHistoryItem.selectionRange ?
             TextUtils.TextRange.TextRange.fromObject(serializedHistoryItem.selectionRange) :
             undefined;
         return new HistoryItem(serializedHistoryItem.url, selectionRange, serializedHistoryItem.scrollLineNumber);
@@ -553,8 +542,6 @@ export class HistoryItem {
         };
         return serializedHistoryItem;
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     static serializableUrlLengthLimit = 4096;
 }
 export class History {
@@ -565,8 +552,6 @@ export class History {
         this._itemsIndex = new Map();
         this._rebuildItemIndex();
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static fromObject(serializedHistory) {
         const items = [];
         for (let i = 0; i < serializedHistory.length; ++i) {
@@ -638,8 +623,6 @@ export class History {
             this._rebuildItemIndex();
         }
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     save(setting) {
         setting.set(this._serializeToObject());
     }

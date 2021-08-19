@@ -6,8 +6,8 @@ import * as ARIAUtils from './ARIAUtils.js';
 import { Size } from './Geometry.js';
 import { AnchorBehavior, GlassPane, MarginBehavior, PointerEventsBehavior } from './GlassPane.js';
 import { Icon } from './Icon.js';
-import { ListControl, ListMode } from './ListControl.js'; // eslint-disable-line no-unused-vars
-import { Events as ListModelEvents } from './ListModel.js'; // eslint-disable-line no-unused-vars
+import { ListControl, ListMode } from './ListControl.js';
+import { Events as ListModelEvents } from './ListModel.js';
 import { appendStyle } from './utils/append-style.js';
 import { createShadowRootWithCoreStyles } from './utils/create-shadow-root-with-core-styles.js';
 const UIStrings = {
@@ -37,7 +37,7 @@ export class SoftDropDown {
         this._placeholderText = i18nString(UIStrings.noItemSelected);
         this.element = document.createElement('button');
         this.element.classList.add('soft-dropdown');
-        appendStyle(this.element, 'ui/legacy/softDropDownButton.css', { enableLegacyPatching: false });
+        appendStyle(this.element, 'ui/legacy/softDropDownButton.css');
         this._titleElement = this.element.createChild('span', 'title');
         const dropdownArrowIcon = Icon.create('smallicon-triangle-down');
         this.element.appendChild(dropdownArrowIcon);
@@ -53,7 +53,6 @@ export class SoftDropDown {
         this._width = 315;
         createShadowRootWithCoreStyles(this._glassPane.contentElement, {
             cssFile: 'ui/legacy/softDropDown.css',
-            enableLegacyPatching: false,
             delegatesFocus: undefined,
         }).appendChild(this._list.element);
         ARIAUtils.markAsMenu(this._list.element);

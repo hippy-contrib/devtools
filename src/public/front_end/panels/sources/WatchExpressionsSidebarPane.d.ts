@@ -7,7 +7,7 @@ import type * as Protocol from '../../generated/protocol.js';
 export declare class WatchExpressionsSidebarPane extends UI.ThrottledWidget.ThrottledWidget implements UI.ActionRegistration.ActionDelegate, UI.Toolbar.ItemsProvider, UI.ContextMenu.Provider {
     _watchExpressions: WatchExpression[];
     _emptyElement: HTMLElement;
-    _watchExpressionsSetting: Common.Settings.Setting<any>;
+    _watchExpressionsSetting: Common.Settings.Setting<string[]>;
     _addButton: UI.Toolbar.ToolbarButton;
     _refreshButton: UI.Toolbar.ToolbarButton;
     _treeOutline: ObjectUI.ObjectPropertiesSection.ObjectPropertiesSectionsTreeOutline;
@@ -20,7 +20,7 @@ export declare class WatchExpressionsSidebarPane extends UI.ThrottledWidget.Thro
     hasExpressions(): boolean;
     _saveExpressions(): void;
     _addButtonClicked(): Promise<void>;
-    doUpdate(): Promise<any>;
+    doUpdate(): Promise<void>;
     _createWatchExpression(expression: string | null): WatchExpression;
     _watchExpressionUpdated(event: Common.EventTarget.EventTargetEvent): void;
     _contextMenu(event: MouseEvent): void;
@@ -59,7 +59,7 @@ export declare class WatchExpression extends Common.ObjectWrapper.ObjectWrapper 
     _promptKeyDown(event: KeyboardEvent): void;
     _populateContextMenu(contextMenu: UI.ContextMenu.ContextMenu, event: Event): void;
     _copyValueButtonClicked(): void;
-    static readonly _watchObjectGroupId = "watch-group";
+    private static readonly watchObjectGroupId;
 }
 export declare namespace WatchExpression {
     const Events: {

@@ -4,7 +4,7 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../common/common.js';
 import * as i18n from '../i18n/i18n.js';
-import { DOMModel, Events as DOMModelEvents } from './DOMModel.js'; // eslint-disable-line no-unused-vars
+import { DOMModel, Events as DOMModelEvents } from './DOMModel.js';
 import { RemoteObject } from './RemoteObject.js';
 import { RuntimeModel } from './RuntimeModel.js';
 import { Capability } from './Target.js';
@@ -181,6 +181,10 @@ const UIStrings = {
     *@example {"script-src 'self'"} PH1
     */
     scriptBlockedDueToContent: 'Script blocked due to Content Security Policy directive: {PH1}',
+    /**
+    *@description Text for the service worker type.
+    */
+    worker: 'Worker',
 };
 const str_ = i18n.i18n.registerUIStrings('core/sdk/DOMDebuggerModel.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -367,7 +371,7 @@ export class DOMDebuggerModel extends SDKModel {
         if (this.suspended) {
             return;
         }
-        const node = event.data.node;
+        const { node } = event.data;
         const children = node.children() || [];
         this._removeDOMBreakpoints(breakpoint => breakpoint.node === node || children.indexOf(breakpoint.node) !== -1);
     }
@@ -701,7 +705,7 @@ export class DOMDebuggerManager {
             'pointerrawupdate',
         ], ['*']);
         this._createEventListenerBreakpoints(i18nString(UIStrings.touch), ['touchstart', 'touchmove', 'touchend', 'touchcancel'], ['*']);
-        this._createEventListenerBreakpoints(i18nString('Worker'), ['message', 'messageerror'], ['*']);
+        this._createEventListenerBreakpoints(i18nString(UIStrings.worker), ['message', 'messageerror'], ['*']);
         this._createEventListenerBreakpoints(i18nString(UIStrings.xhr), ['readystatechange', 'load', 'loadstart', 'loadend', 'abort', 'error', 'progress', 'timeout'], ['xmlhttprequest', 'xmlhttprequestupload']);
         let breakpoint;
         breakpoint = this._resolveEventListenerBreakpoint('instrumentation:setTimeout.callback');

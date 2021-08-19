@@ -34,7 +34,7 @@ import * as Platform from '../../core/platform/platform.js';
 import * as TimelineModel from '../../models/timeline_model/timeline_model.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { Events } from './PerformanceModel.js'; // eslint-disable-line no-unused-vars
+import { Events } from './PerformanceModel.js';
 const UIStrings = {
     /**
     *@description Text for a heap profile type
@@ -504,7 +504,7 @@ export class Calculator {
         this._workingArea = clientWidth;
     }
     formatValue(value, precision) {
-        return i18n.i18n.preciseMillisToString(value - this.zeroTime(), precision);
+        return i18n.TimeUtilities.preciseMillisToString(value - this.zeroTime(), precision);
     }
     maximumBoundary() {
         return this._maximumBoundary;

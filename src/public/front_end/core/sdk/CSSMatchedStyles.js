@@ -207,10 +207,10 @@ export class CSSMatchedStyles {
         return this._cssModel;
     }
     hasMatchingSelectors(rule) {
-        const matchingSelectors = this.matchingSelectors(rule);
+        const matchingSelectors = this.getMatchingSelectors(rule);
         return matchingSelectors.length > 0 && this.mediaMatches(rule.style);
     }
-    matchingSelectors(rule) {
+    getMatchingSelectors(rule) {
         const node = this.nodeForStyle(rule.style);
         if (!node || typeof node.id !== 'number') {
             return [];
@@ -227,9 +227,7 @@ export class CSSMatchedStyles {
         }
         return result;
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recomputeMatchingSelectors(rule) {
+    async recomputeMatchingSelectors(rule) {
         const node = this.nodeForStyle(rule.style);
         if (!node) {
             return Promise.resolve();
@@ -238,7 +236,7 @@ export class CSSMatchedStyles {
         for (const selector of rule.selectors) {
             promises.push(querySelector.call(this, node, selector.text));
         }
-        return Promise.all(promises);
+        await Promise.all(promises);
         async function querySelector(node, selectorText) {
             const ownerDocument = node.ownerDocument;
             if (!ownerDocument) {
@@ -266,8 +264,6 @@ export class CSSMatchedStyles {
             }
         }
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     addNewRule(rule, node) {
         this._addedStyles.set(rule.style, node);
         return this.recomputeMatchingSelectors(rule);
@@ -324,7 +320,7 @@ export class CSSMatchedStyles {
     }
     availableCSSVariables(style) {
         const domCascade = this._styleToDOMCascade.get(style) || null;
-        return domCascade ? domCascade.availableCSSVariables(style) : [];
+        return domCascade ? domCascade.findAvailableCSSVariables(style) : [];
     }
     computeCSSVariable(style, variableName) {
         const domCascade = this._styleToDOMCascade.get(style) || null;
@@ -392,7 +388,7 @@ class NodeCascade {
                     continue;
                 }
                 const canonicalName = metadata.canonicalPropertyName(property.name);
-                const isPropShorthand = Boolean(metadata.longhands(canonicalName));
+                const isPropShorthand = Boolean(metadata.getLonghands(canonicalName));
                 if (isPropShorthand) {
                     const longhandsFromShort = (property.value.match(CustomVariableRegex) || []).map(e => e.replace(CustomVariableRegex, '$2'));
                     longhandsFromShort.forEach(longhandProperty => {
@@ -442,7 +438,7 @@ class DOMInheritanceCascade {
             }
         }
     }
-    availableCSSVariables(style) {
+    findAvailableCSSVariables(style) {
         const nodeCascade = this._styleToNodeCascade.get(style);
         if (!nodeCascade) {
             return [];
@@ -625,10 +621,7 @@ class DOMInheritanceCascade {
             this._computedCSSVariables.set(nodeCascade, computedVariablesMap);
             for (const variableName of variableNames) {
                 accumulatedCSSVariables.delete(variableName);
-                accumulatedCSSVariables.set(
-                // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-                // @ts-expect-error
-                variableName, this._innerComputeCSSVariable(availableCSSVariablesMap, computedVariablesMap, variableName));
+                accumulatedCSSVariables.set(variableName, this._innerComputeCSSVariable(availableCSSVariablesMap, computedVariablesMap, variableName));
             }
         }
     }

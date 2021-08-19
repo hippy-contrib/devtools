@@ -47,11 +47,11 @@ import { AppManifestView } from './AppManifestView.js';
 import { BackgroundServiceModel } from './BackgroundServiceModel.js';
 import { BackgroundServiceView } from './BackgroundServiceView.js';
 import * as ApplicationComponents from './components/components.js';
-import { DatabaseModel, Events as DatabaseModelEvents } from './DatabaseModel.js'; // eslint-disable-line no-unused-vars
+import { DatabaseModel, Events as DatabaseModelEvents } from './DatabaseModel.js';
 import { DatabaseQueryView, Events as DatabaseQueryViewEvents } from './DatabaseQueryView.js';
 import { DatabaseTableView } from './DatabaseTableView.js';
-import { DOMStorageModel, Events as DOMStorageModelEvents } from './DOMStorageModel.js'; // eslint-disable-line no-unused-vars
-import { Events as IndexedDBModelEvents, IndexedDBModel } from './IndexedDBModel.js'; // eslint-disable-line no-unused-vars
+import { DOMStorageModel, Events as DOMStorageModelEvents } from './DOMStorageModel.js';
+import { Events as IndexedDBModelEvents, IndexedDBModel } from './IndexedDBModel.js';
 import { IDBDatabaseView, IDBDataView } from './IndexedDBViews.js';
 import { OpenedWindowDetailsView, WorkerDetailsView } from './OpenedWindowDetailsView.js';
 import { ServiceWorkersView } from './ServiceWorkersView.js';
@@ -206,7 +206,7 @@ export class ApplicationPanelSidebar extends UI.Widget.VBox {
         this._applicationCacheManifestElements = new Map();
         this._sidebarTree = new UI.TreeOutline.TreeOutlineInShadow();
         this._sidebarTree.element.classList.add('resources-sidebar');
-        this._sidebarTree.registerRequiredCSS('panels/application/resourcesSidebar.css', { enableLegacyPatching: false });
+        this._sidebarTree.registerRequiredCSS('panels/application/resourcesSidebar.css');
         this._sidebarTree.element.classList.add('filter-all');
         // Listener needs to have been set up before the elements are added
         this._sidebarTree.addEventListener(UI.TreeOutline.Events.ElementAttached, this._treeElementAdded, this);
@@ -1377,7 +1377,7 @@ export class ResourcesSection {
             const childTargetManager = frame.resourceTreeModel().target().model(SDK.ChildTargetManager.ChildTargetManager);
             if (childTargetManager) {
                 for (const targetInfo of childTargetManager.targetInfos()) {
-                    this._windowOpened({ data: { targetInfo } });
+                    this._windowOpened({ data: targetInfo });
                 }
             }
         }

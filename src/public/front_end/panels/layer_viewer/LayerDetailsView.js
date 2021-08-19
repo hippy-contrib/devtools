@@ -32,6 +32,7 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import layerDetailsViewStyles from './layerDetailsView.css.js';
 import { ScrollRectSelection } from './LayerViewHost.js';
 const UIStrings = {
     /**
@@ -164,7 +165,6 @@ export class LayerDetailsView extends UI.Widget.Widget {
     _selection;
     constructor(layerViewHost) {
         super(true);
-        this.registerRequiredCSS('panels/layer_viewer/layerDetailsView.css', { enableLegacyPatching: false });
         this._layerViewHost = layerViewHost;
         this._layerViewHost.registerView(this);
         this._emptyWidget = new UI.EmptyWidget.EmptyWidget(i18nString(UIStrings.selectALayerToSeeItsDetails));
@@ -184,6 +184,7 @@ export class LayerDetailsView extends UI.Widget.Widget {
     }
     wasShown() {
         super.wasShown();
+        this.registerCSSFiles([layerDetailsViewStyles]);
         this.update();
     }
     _onScrollRectClicked(index, event) {
@@ -215,7 +216,7 @@ export class LayerDetailsView extends UI.Widget.Widget {
             element.classList.add('active');
         }
         element.textContent = i18nString(UIStrings.scrollRectangleDimensions, {
-            PH1: slowScrollRectNames.get(scrollRect.type)?.(),
+            PH1: String(slowScrollRectNames.get(scrollRect.type)?.()),
             PH2: scrollRect.rect.width,
             PH3: scrollRect.rect.height,
             PH4: scrollRect.rect.x,

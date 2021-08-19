@@ -23,6 +23,7 @@ export interface CSSAngleData {
     containingPane: HTMLElement;
 }
 export declare class CSSAngle extends HTMLElement {
+    static readonly litTagName: import("../../../lit-html/static.js").Static;
     private readonly shadow;
     private angle;
     private displayedAngle;
@@ -36,6 +37,7 @@ export declare class CSSAngle extends HTMLElement {
     private popoverStyleLeft;
     private onMinifyingAction;
     private onAngleUpdate;
+    connectedCallback(): void;
     set data(data: CSSAngleData);
     disconnectedCallback(): void;
     popover(): void;

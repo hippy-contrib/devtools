@@ -294,6 +294,7 @@ export class HeapSnapshotView extends UI.View.SimpleView {
         if (isHeapTimeline) {
             this._createOverview();
         }
+        const hasAllocationStacks = instance.trackingHeapSnapshotProfileType.recordAllocationStacksSetting().get();
         this._parentDataDisplayDelegate = dataDisplayDelegate;
         this._searchableView = new UI.SearchableView.SearchableView(this, null);
         this._searchableView.setPlaceholder(i18nString(UIStrings.find), i18nString(UIStrings.find));
@@ -315,7 +316,7 @@ export class HeapSnapshotView extends UI.View.SimpleView {
         this._diffWidget = this._diffDataGrid.asWidget();
         this._diffWidget.setMinimumSize(50, 25);
         this._allocationDataGrid = null;
-        if (isHeapTimeline) {
+        if (isHeapTimeline && hasAllocationStacks) {
             this._allocationDataGrid = new AllocationDataGrid(heapProfilerModel, this);
             this._allocationDataGrid.addEventListener(DataGrid.DataGrid.Events.SelectedNode, this._onSelectAllocationNode, this);
             this._allocationWidget = this._allocationDataGrid.asWidget();
@@ -676,7 +677,7 @@ export class HeapSnapshotView extends UI.View.SimpleView {
         const option = this._perspectiveSelect.options().find(option => option.value === String(perspectiveIndex));
         this._perspectiveSelect.select(option);
         this._changePerspective(perspectiveIndex);
-        return promise;
+        await promise;
     }
     async _updateDataSourceAndView() {
         const dataGrid = this._dataGrid;
@@ -1101,17 +1102,16 @@ export class HeapSnapshotProfileType extends ProfileType {
         if (!profile) {
             return;
         }
-        const chunk = event.data;
-        profile.transferChunk(chunk);
+        profile.transferChunk(event.data);
     }
     _reportHeapSnapshotProgress(event) {
         const profile = this.profileBeingRecorded();
         if (!profile) {
             return;
         }
-        const data = event.data;
-        profile.updateStatus(i18nString(UIStrings.percentagePlaceholder, { PH1: ((data.done / data.total) * 100).toFixed(0) }), true);
-        if (data.finished) {
+        const { done, total, finished } = event.data;
+        profile.updateStatus(i18nString(UIStrings.percentagePlaceholder, { PH1: ((done / total) * 100).toFixed(0) }), true);
+        if (finished) {
             profile._prepareToLoad();
         }
     }
@@ -1176,15 +1176,15 @@ export class TrackingHeapSnapshotProfileType extends HeapSnapshotProfileType {
         if (!profileSamples) {
             return;
         }
-        const data = event.data;
+        const { lastSeenObjectId, timestamp } = event.data;
         const currentIndex = Math.max(profileSamples.ids.length, profileSamples.max.length - 1);
-        profileSamples.ids[currentIndex] = data.lastSeenObjectId;
+        profileSamples.ids[currentIndex] = lastSeenObjectId;
         if (!profileSamples.max[currentIndex]) {
             profileSamples.max[currentIndex] = 0;
             profileSamples.sizes[currentIndex] = 0;
         }
-        profileSamples.timestamps[currentIndex] = data.timestamp;
-        if (profileSamples.totalTime < data.timestamp - profileSamples.timestamps[0]) {
+        profileSamples.timestamps[currentIndex] = timestamp;
+        if (profileSamples.totalTime < timestamp - profileSamples.timestamps[0]) {
             profileSamples.totalTime *= 2;
         }
         this.dispatchEventToListeners(TrackingHeapSnapshotProfileType.HeapStatsUpdate, this._profileSamples);
@@ -1225,6 +1225,9 @@ export class TrackingHeapSnapshotProfileType extends HeapSnapshotProfileType {
         if (this._customContent) {
             this._customContent.checkboxElement.disabled = !enable;
         }
+    }
+    recordAllocationStacksSetting() {
+        return this._recordAllocationStacksSetting;
     }
     _addNewProfile() {
         const heapProfilerModel = UI.Context.Context.instance().flavor(SDK.HeapProfilerModel.HeapProfilerModel);

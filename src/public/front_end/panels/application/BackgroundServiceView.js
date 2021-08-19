@@ -7,7 +7,7 @@ import * as SDK from '../../core/sdk/sdk.js';
 import * as Bindings from '../../models/bindings/bindings.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { Events } from './BackgroundServiceModel.js'; // eslint-disable-line no-unused-vars
+import { Events } from './BackgroundServiceModel.js';
 const UIStrings = {
     /**
     *@description Text in Background Service View of the Application panel
@@ -147,8 +147,8 @@ export class BackgroundServiceView extends UI.Widget.VBox {
     }
     constructor(serviceName, model) {
         super(true);
-        this.registerRequiredCSS('panels/application/backgroundServiceView.css', { enableLegacyPatching: false });
-        this.registerRequiredCSS('ui/legacy/emptyWidget.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/application/backgroundServiceView.css');
+        this.registerRequiredCSS('ui/legacy/emptyWidget.css');
         this._serviceName = serviceName;
         this._model = model;
         this._model.addEventListener(Events.RecordingStateChanged, this._onRecordingStateChanged, this);

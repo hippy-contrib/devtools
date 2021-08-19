@@ -26,7 +26,7 @@ export declare class AdvancedApp implements Common.App.App {
     static _instance(): AdvancedApp;
     presentUI(document: Document): void;
     _openToolboxWindow(event: Event): void;
-    toolboxLoaded(toolboxDocument: Document): void;
+    deviceModeEmulationFrameLoaded(toolboxDocument: Document): void;
     _updateDeviceModeView(): void;
     _onBeforeDockSideChange(event: Event): void;
     _onDockSideChange(event?: Event): void;

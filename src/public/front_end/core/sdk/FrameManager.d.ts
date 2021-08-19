@@ -1,4 +1,5 @@
 import * as Common from '../common/common.js';
+import type { Resource } from './Resource.js';
 import type { ResourceTreeFrame } from './ResourceTreeModel.js';
 import { ResourceTreeModel } from './ResourceTreeModel.js';
 import type { Target } from './Target.js';
@@ -8,7 +9,7 @@ import type { SDKModelObserver } from './TargetManager.js';
  * ResourceTreeModel-instances (one per target), so that frames can be found by id
  * without needing to know their target.
  */
-export declare class FrameManager extends Common.ObjectWrapper.ObjectWrapper implements SDKModelObserver<ResourceTreeModel> {
+export declare class FrameManager extends Common.ObjectWrapper.ObjectWrapper<EventTypes> implements SDKModelObserver<ResourceTreeModel> {
     _eventListeners: WeakMap<ResourceTreeModel, Common.EventTarget.EventDescriptor[]>;
     _frames: Map<string, {
         frame: ResourceTreeFrame;
@@ -24,10 +25,13 @@ export declare class FrameManager extends Common.ObjectWrapper.ObjectWrapper imp
     }): FrameManager;
     modelAdded(resourceTreeModel: ResourceTreeModel): void;
     modelRemoved(resourceTreeModel: ResourceTreeModel): void;
-    _frameAdded(event: Common.EventTarget.EventTargetEvent): void;
-    _frameDetached(event: Common.EventTarget.EventTargetEvent): void;
+    _frameAdded(event: Common.EventTarget.EventTargetEvent<ResourceTreeFrame>): void;
+    _frameDetached(event: Common.EventTarget.EventTargetEvent<{
+        frame: ResourceTreeFrame;
+        isSwap: boolean;
+    }>): void;
     _frameNavigated(event: Common.EventTarget.EventTargetEvent): void;
-    _resourceAdded(event: Common.EventTarget.EventTargetEvent): void;
+    _resourceAdded(event: Common.EventTarget.EventTargetEvent<Resource>): void;
     _decreaseOrRemoveFrame(frameId: string): void;
     /**
      * Looks for the top frame in `_frames` and sets `_topFrame` accordingly.
@@ -46,6 +50,7 @@ export declare class FrameManager extends Common.ObjectWrapper.ObjectWrapper imp
     getAllFrames(): ResourceTreeFrame[];
     getTopFrame(): ResourceTreeFrame | null;
     getOrWaitForFrame(frameId: string, notInTarget?: Target): Promise<ResourceTreeFrame>;
+    private resolveAwaitedFrame;
 }
 export declare enum Events {
     FrameAddedToTarget = "FrameAddedToTarget",
@@ -54,3 +59,20 @@ export declare enum Events {
     ResourceAdded = "ResourceAdded",
     TopFrameNavigated = "TopFrameNavigated"
 }
+export declare type EventTypes = {
+    [Events.FrameAddedToTarget]: {
+        frame: ResourceTreeFrame;
+    };
+    [Events.FrameNavigated]: {
+        frame: ResourceTreeFrame;
+    };
+    [Events.FrameRemoved]: {
+        frameId: string;
+    };
+    [Events.ResourceAdded]: {
+        resource: Resource;
+    };
+    [Events.TopFrameNavigated]: {
+        frame: ResourceTreeFrame;
+    };
+};

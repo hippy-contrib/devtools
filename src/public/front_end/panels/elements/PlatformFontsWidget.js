@@ -56,7 +56,7 @@ export class PlatformFontsWidget extends UI.ThrottledWidget.ThrottledWidget {
     _fontStatsSection;
     constructor(sharedModel) {
         super(true);
-        this.registerRequiredCSS('panels/elements/platformFontsWidget.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/elements/platformFontsWidget.css');
         this._sharedModel = sharedModel;
         this._sharedModel.addEventListener("ComputedStyleChanged" /* ComputedStyleChanged */, this.update, this);
         this._sectionTitle = document.createElement('div');

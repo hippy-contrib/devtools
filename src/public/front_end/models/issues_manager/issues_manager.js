@@ -9,6 +9,7 @@ import * as CrossOriginEmbedderPolicyIssue from './CrossOriginEmbedderPolicyIssu
 import * as DeprecationIssue from './DeprecationIssue.js';
 import * as HeavyAdIssue from './HeavyAdIssue.js';
 import * as Issue from './Issue.js';
+import * as IssueResolver from './IssueResolver.js';
 import * as IssuesManager from './IssuesManager.js';
 import * as LowTextContrastIssue from './LowTextContrastIssue.js';
 import * as MarkdownIssueDescription from './MarkdownIssueDescription.js';
@@ -19,5 +20,6 @@ import * as SameSiteCookieIssue from './SameSiteCookieIssue.js';
 import * as SharedArrayBufferIssue from './SharedArrayBufferIssue.js';
 import * as SourceFrameIssuesManager from './SourceFrameIssuesManager.js';
 import * as TrustedWebActivityIssue from './TrustedWebActivityIssue.js';
-export { AttributionReportingIssue, ContentSecurityPolicyIssue, ContrastCheckTrigger, CorsIssue, CrossOriginEmbedderPolicyIssue, DeprecationIssue, HeavyAdIssue, Issue, IssuesManager, LowTextContrastIssue, MarkdownIssueDescription, MixedContentIssue, QuirksModeIssue, RelatedIssue, SameSiteCookieIssue, SharedArrayBufferIssue, SourceFrameIssuesManager, TrustedWebActivityIssue, };
+import * as WasmCrossOriginModuleSharingIssue from './WasmCrossOriginModuleSharingIssue.js';
+export { AttributionReportingIssue, ContentSecurityPolicyIssue, ContrastCheckTrigger, CorsIssue, CrossOriginEmbedderPolicyIssue, DeprecationIssue, HeavyAdIssue, Issue, IssueResolver, IssuesManager, LowTextContrastIssue, MarkdownIssueDescription, MixedContentIssue, QuirksModeIssue, RelatedIssue, SameSiteCookieIssue, SharedArrayBufferIssue, SourceFrameIssuesManager, TrustedWebActivityIssue, WasmCrossOriginModuleSharingIssue, };
 //# sourceMappingURL=issues_manager.js.map

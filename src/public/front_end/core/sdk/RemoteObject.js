@@ -147,7 +147,9 @@ export class RemoteObject {
             if (property.symbol) {
                 propertySymbols.push(property);
             }
-            else {
+            else if (property.isOwn || property.name !== '__proto__') {
+                // TODO(crbug/1076820): Eventually we should move away from
+                // showing accessor properties directly on the receiver.
                 propertiesMap.set(property.name, property);
             }
         }
@@ -461,9 +463,6 @@ export class RemoteObjectImpl extends RemoteObject {
             silent: true,
             returnByValue: true,
         });
-        if (!this._objectId) {
-            return this.value;
-        }
         return response.getError() || response.exceptionDetails ? null : response.result.value;
     }
     release() {

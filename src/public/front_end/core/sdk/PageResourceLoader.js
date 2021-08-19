@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../common/common.js';
-import * as Host from '../host/host.js'; // eslint-disable-line no-unused-vars
+import * as Host from '../host/host.js';
 import * as i18n from '../i18n/i18n.js';
 import { FrameManager } from './FrameManager.js';
 import { IOModel } from './IOModel.js';
 import { MultitargetNetworkManager } from './NetworkManager.js';
 import { NetworkManager } from './NetworkManager.js';
-import { Events as ResourceTreeModelEvents, ResourceTreeModel } from './ResourceTreeModel.js'; // eslint-disable-line no-unused-vars
+import { Events as ResourceTreeModelEvents, ResourceTreeModel } from './ResourceTreeModel.js';
 import { TargetManager } from './TargetManager.js';
 const UIStrings = {
     /**
@@ -57,8 +57,6 @@ export class PageResourceLoader extends Common.ObjectWrapper.ObjectWrapper {
         }
         return pageResourceLoader;
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _onMainFrameNavigated(event) {
         const mainFrame = event.data;
         if (!mainFrame.isTopFrame()) {
@@ -85,12 +83,12 @@ export class PageResourceLoader extends Common.ObjectWrapper.ObjectWrapper {
     async _acquireLoadSlot() {
         this._currentlyLoading++;
         if (this._currentlyLoading > this._maxConcurrentLoads) {
-            const pair = { resolve: () => { }, reject: () => { } };
+            const entry = { resolve: () => { }, reject: () => { } };
             const waitForCapacity = new Promise((resolve, reject) => {
-                pair.resolve = resolve;
-                pair.reject = reject;
+                entry.resolve = resolve;
+                entry.reject = reject;
             });
-            this._queuedLoads.push(pair);
+            this._queuedLoads.push(entry);
             await waitForCapacity;
         }
     }
@@ -98,7 +96,7 @@ export class PageResourceLoader extends Common.ObjectWrapper.ObjectWrapper {
         this._currentlyLoading--;
         const entry = this._queuedLoads.shift();
         if (entry) {
-            entry.resolve(undefined);
+            entry.resolve();
         }
     }
     static async _withTimeout(promise, timeout) {

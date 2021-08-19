@@ -5,7 +5,7 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as Formatter from '../../models/formatter/formatter.js';
 import * as Persistence from '../../models/persistence/persistence.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { Events, registerEditorAction } from './SourcesView.js'; // eslint-disable-line no-unused-vars
+import { Events, registerEditorAction } from './SourcesView.js';
 const UIStrings = {
     /**
     *@description Title of the format button in the Sources panel
@@ -49,7 +49,7 @@ export class InplaceFormatterEditorAction {
             this._button.setTitle(i18nString(UIStrings.formatS, { PH1: uiSourceCode.name() }));
         }
     }
-    button(sourcesView) {
+    getOrCreateButton(sourcesView) {
         if (this._button) {
             return this._button;
         }
@@ -87,11 +87,10 @@ export class InplaceFormatterEditorAction {
             });
         }
     }
-    _contentLoaded(uiSourceCode, content) {
+    async _contentLoaded(uiSourceCode, content) {
         const highlighterType = uiSourceCode.mimeType();
-        Formatter.ScriptFormatter.FormatterInterface.format(uiSourceCode.contentType(), highlighterType, content, async (formattedContent, formatterMapping) => {
-            this._formattingComplete(uiSourceCode, formattedContent, formatterMapping);
-        });
+        const { formattedContent, formattedMapping } = await Formatter.ScriptFormatter.format(uiSourceCode.contentType(), highlighterType, content);
+        this._formattingComplete(uiSourceCode, formattedContent, formattedMapping);
     }
     /**
      * Post-format callback

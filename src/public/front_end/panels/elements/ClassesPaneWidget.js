@@ -7,6 +7,7 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import classesPaneWidgetStyles from './classesPaneWidget.css.js';
 import { ElementsPanel } from './ElementsPanel.js';
 const UIStrings = {
     /**
@@ -42,7 +43,6 @@ export class ClassesPaneWidget extends UI.Widget.Widget {
     _previousTarget;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/elements/classesPaneWidget.css', { enableLegacyPatching: false });
         this.contentElement.className = 'styles-element-classes-pane';
         const container = this.contentElement.createChild('div', 'title-container');
         this._input = container.createChild('div', 'new-class-input monospace');
@@ -130,7 +130,9 @@ export class ClassesPaneWidget extends UI.Widget.Widget {
         this._update();
     }
     wasShown() {
+        super.wasShown();
         this._update();
+        this.registerCSSFiles([classesPaneWidgetStyles]);
     }
     _update() {
         if (!this.isShowing()) {

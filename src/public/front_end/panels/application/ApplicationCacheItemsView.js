@@ -5,7 +5,7 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as Platform from '../../core/platform/platform.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { CHECKING, DOWNLOADING, IDLE, OBSOLETE, UNCACHED, UPDATEREADY } from './ApplicationCacheModel.js'; // eslint-disable-line no-unused-vars
+import { CHECKING, DOWNLOADING, IDLE, OBSOLETE, UNCACHED, UPDATEREADY } from './ApplicationCacheModel.js';
 const UIStrings = {
     /**
     *@description Text in Application Cache Items View of the Application panel
@@ -199,16 +199,12 @@ export class ApplicationCacheItemsView extends UI.View.SimpleView {
         const selectedResource = (this._dataGrid.selectedNode ? this._nodeResources.get(this._dataGrid.selectedNode) : null) || null;
         const sortDirection = this._dataGrid.isSortOrderAscending() ? 1 : -1;
         function numberCompare(field, resource1, resource2) {
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return sortDirection * (resource1[field] - resource2[field]);
         }
         function localeCompare(field, resource1, resource2) {
-            // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return sortDirection * String(resource1[field]).localeCompare(String(resource2[field]));
+            return sortDirection * resource1[field].localeCompare(resource2[field]);
         }
-        let comparator;
+        let comparator = null;
         switch (this._dataGrid.sortColumnId()) {
             case 'resource':
                 comparator = localeCompare.bind(null, 'url');
@@ -219,14 +215,14 @@ export class ApplicationCacheItemsView extends UI.View.SimpleView {
             case 'size':
                 comparator = numberCompare.bind(null, 'size');
                 break;
-            default:
-                localeCompare.bind(null, 'resource'); // FIXME: comparator = ?
         }
         this._dataGrid.rootNode().removeChildren();
         if (!this._resources) {
             return;
         }
-        this._resources.sort(comparator);
+        if (comparator) {
+            this._resources.sort(comparator);
+        }
         let nodeToSelect;
         for (let i = 0; i < this._resources.length; ++i) {
             const resource = this._resources[i];

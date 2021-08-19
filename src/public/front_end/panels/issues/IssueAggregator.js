@@ -9,39 +9,24 @@ import * as IssuesManager from '../../models/issues_manager/issues_manager.js';
  * of all resources that are affected by the aggregated issues.
  */
 export class AggregatedIssue extends IssuesManager.Issue.Issue {
-    affectedCookies;
-    affectedRequests;
-    affectedLocations;
-    heavyAdIssues;
-    blockedByResponseDetails;
-    corsIssues;
-    cspIssues;
-    issueKind;
-    lowContrastIssues;
-    mixedContentIssues;
-    sharedArrayBufferIssues;
-    trustedWebActivityIssues;
-    quirksModeIssues;
+    affectedCookies = new Map();
+    affectedRawCookieLines = new Map();
+    affectedRequests = new Map();
+    affectedLocations = new Map();
+    heavyAdIssues = new Set();
+    blockedByResponseDetails = new Map();
+    corsIssues = new Set();
+    cspIssues = new Set();
+    issueKind = IssuesManager.Issue.IssueKind.Improvement;
+    lowContrastIssues = new Set();
+    mixedContentIssues = new Set();
+    sharedArrayBufferIssues = new Set();
+    trustedWebActivityIssues = new Set();
+    quirksModeIssues = new Set();
+    attributionReportingIssues = new Set();
+    wasmCrossOriginModuleSharingIssues = new Set();
     representative;
-    aggregatedIssuesCount;
-    constructor(code) {
-        super(code);
-        this.affectedCookies = new Map();
-        this.affectedRequests = new Map();
-        this.affectedLocations = new Map();
-        this.heavyAdIssues = new Set();
-        this.blockedByResponseDetails = new Map();
-        this.corsIssues = new Set();
-        this.cspIssues = new Set();
-        this.issueKind = IssuesManager.Issue.IssueKind.Improvement;
-        this.lowContrastIssues = new Set();
-        this.mixedContentIssues = new Set();
-        this.sharedArrayBufferIssues = new Set();
-        this.trustedWebActivityIssues = new Set();
-        this.quirksModeIssues = new Set();
-        this.representative = null;
-        this.aggregatedIssuesCount = 0;
-    }
+    aggregatedIssuesCount = 0;
     primaryKey() {
         throw new Error('This should never be called');
     }
@@ -50,6 +35,9 @@ export class AggregatedIssue extends IssuesManager.Issue.Issue {
     }
     cookies() {
         return Array.from(this.affectedCookies.values()).map(x => x.cookie);
+    }
+    getRawCookieLines() {
+        return this.affectedRawCookieLines.values();
     }
     sources() {
         return this.affectedLocations.values();
@@ -83,6 +71,12 @@ export class AggregatedIssue extends IssuesManager.Issue.Issue {
     }
     getQuirksModeIssues() {
         return this.quirksModeIssues;
+    }
+    getAttributionReportingIssues() {
+        return this.attributionReportingIssues;
+    }
+    getWasmCrossOriginModuleSharingIssue() {
+        return this.wasmCrossOriginModuleSharingIssues;
     }
     getDescription() {
         if (this.representative) {
@@ -126,6 +120,11 @@ export class AggregatedIssue extends IssuesManager.Issue.Issue {
                 this.affectedCookies.set(key, { cookie, hasRequest });
             }
         }
+        for (const rawCookieLine of issue.rawCookieLines()) {
+            if (!this.affectedRawCookieLines.has(rawCookieLine)) {
+                this.affectedRawCookieLines.set(rawCookieLine, { rawCookieLine, hasRequest });
+            }
+        }
         for (const location of issue.sources()) {
             const key = JSON.stringify(location);
             if (!this.affectedLocations.has(key)) {
@@ -160,50 +159,76 @@ export class AggregatedIssue extends IssuesManager.Issue.Issue {
         if (issue instanceof IssuesManager.QuirksModeIssue.QuirksModeIssue) {
             this.quirksModeIssues.add(issue);
         }
+        if (issue instanceof IssuesManager.AttributionReportingIssue.AttributionReportingIssue) {
+            this.attributionReportingIssues.add(issue);
+        }
+        if (issue instanceof IssuesManager.WasmCrossOriginModuleSharingIssue.WasmCrossOriginModuleSharingIssue) {
+            this.wasmCrossOriginModuleSharingIssues.add(issue);
+        }
     }
     getKind() {
         return this.issueKind;
     }
 }
 export class IssueAggregator extends Common.ObjectWrapper.ObjectWrapper {
-    aggregatedIssuesByCode;
     issuesManager;
+    aggregatedIssuesByCode = new Map();
+    hiddenAggregatedIssuesByCode = new Map();
     constructor(issuesManager) {
         super();
-        this.aggregatedIssuesByCode = new Map();
         this.issuesManager = issuesManager;
-        this.issuesManager.addEventListener(IssuesManager.IssuesManager.Events.IssueAdded, this.onIssueAdded, this);
-        this.issuesManager.addEventListener(IssuesManager.IssuesManager.Events.FullUpdateRequired, this.onFullUpdateRequired, this);
+        this.issuesManager.addEventListener("IssueAdded" /* IssueAdded */, this.onIssueAdded, this);
+        this.issuesManager.addEventListener("FullUpdateRequired" /* FullUpdateRequired */, this.onFullUpdateRequired, this);
         for (const issue of this.issuesManager.issues()) {
             this.aggregateIssue(issue);
         }
     }
     onIssueAdded(event) {
-        const { issue } = event.data;
-        this.aggregateIssue(issue);
+        this.aggregateIssue(event.data.issue);
     }
     onFullUpdateRequired() {
         this.aggregatedIssuesByCode.clear();
+        this.hiddenAggregatedIssuesByCode.clear();
         for (const issue of this.issuesManager.issues()) {
             this.aggregateIssue(issue);
         }
         this.dispatchEventToListeners("FullUpdateRequired" /* FullUpdateRequired */);
     }
     aggregateIssue(issue) {
-        let aggregatedIssue = this.aggregatedIssuesByCode.get(issue.code());
+        if (issue.isHidden()) {
+            return this.aggregateIssueByStatus(this.hiddenAggregatedIssuesByCode, issue);
+        }
+        const aggregatedIssue = this.aggregateIssueByStatus(this.aggregatedIssuesByCode, issue);
+        this.dispatchEventToListeners("AggregatedIssueUpdated" /* AggregatedIssueUpdated */, aggregatedIssue);
+        return aggregatedIssue;
+    }
+    aggregateIssueByStatus(aggregatedIssuesMap, issue) {
+        let aggregatedIssue = aggregatedIssuesMap.get(issue.code());
         if (!aggregatedIssue) {
             aggregatedIssue = new AggregatedIssue(issue.code());
-            this.aggregatedIssuesByCode.set(issue.code(), aggregatedIssue);
+            aggregatedIssuesMap.set(issue.code(), aggregatedIssue);
         }
         aggregatedIssue.addInstance(issue);
-        this.dispatchEventToListeners("AggregatedIssueUpdated" /* AggregatedIssueUpdated */, aggregatedIssue);
         return aggregatedIssue;
     }
     aggregatedIssues() {
         return this.aggregatedIssuesByCode.values();
     }
+    aggregatedIssueCodes() {
+        return new Set(this.aggregatedIssuesByCode.keys());
+    }
+    aggregatedIssueCategories() {
+        const result = new Set();
+        for (const issue of this.aggregatedIssuesByCode.values()) {
+            result.add(issue.getCategory());
+        }
+        return result;
+    }
     numberOfAggregatedIssues() {
         return this.aggregatedIssuesByCode.size;
+    }
+    numberOfHiddenAggregatedIssues() {
+        return this.hiddenAggregatedIssuesByCode.size;
     }
 }
 //# sourceMappingURL=IssueAggregator.js.map

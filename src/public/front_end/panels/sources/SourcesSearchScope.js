@@ -210,7 +210,7 @@ export class SourcesSearchScope {
             function matchesComparator(a, b) {
                 return a.lineNumber - b.lineNumber;
             }
-            progress.worked(1);
+            progress.incrementWorked(1);
             let matches = [];
             const searchConfig = this._searchConfig;
             const queries = searchConfig.queries();
@@ -253,7 +253,7 @@ export class FileBasedSearchResult {
     }
     matchRevealable(index) {
         const match = this._searchMatches[index];
-        return this._uiSourceCode.uiLocation(match.lineNumber, undefined);
+        return this._uiSourceCode.uiLocation(match.lineNumber, match.columnNumber);
     }
     // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -9,7 +9,7 @@ import * as Logs from '../../models/logs/logs.js';
 import * as IconButton from '../../ui/components/icon_button/icon_button.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import * as Network from '../network/network.js';
+import * as RequestLinkIcon from '../../ui/components/request_link_icon/request_link_icon.js';
 const UIStrings = {
     /**
     *@description Text in Object Properties Section
@@ -20,13 +20,9 @@ const UIStrings = {
     */
     clickToRevealTheFramesDomNodeIn: 'Click to reveal the frame\'s DOM node in the Elements panel',
     /**
-    *@description Title for a link to a request in the network panel
+    *@description Replacement text for a link to an HTML element which is not available (anymore).
     */
-    clickToShowRequestInTheNetwork: 'Click to show request in the network panel',
-    /**
-    *@description Title for an unavailable link a request in the network panel
-    */
-    requestUnavailableInTheNetwork: 'Request unavailable in the network panel, try reloading the inspected page',
+    unavailable: 'unavailable',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/issues/AffectedResourcesView.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -44,10 +40,9 @@ export class AffectedResourcesView extends UI.TreeOutline.TreeElement {
     affectedResourcesCountElement;
     affectedResources;
     affectedResourcesCount;
-    networkListener;
     frameListeners;
-    unresolvedRequestIds;
     unresolvedFrameIds;
+    requestResolver;
     /**
      * @param resourceName - Singular and plural of the affected resource name.
      */
@@ -58,9 +53,8 @@ export class AffectedResourcesView extends UI.TreeOutline.TreeElement {
         this.affectedResourcesCountElement = this.createAffectedResourcesCounter();
         this.affectedResources = this.createAffectedResources();
         this.affectedResourcesCount = 0;
-        this.networkListener = null;
+        this.requestResolver = new Logs.RequestResolver.RequestResolver();
         this.frameListeners = [];
-        this.unresolvedRequestIds = new Set();
         this.unresolvedFrameIds = new Set();
     }
     createAffectedResourcesCounter() {
@@ -88,37 +82,11 @@ export class AffectedResourcesView extends UI.TreeOutline.TreeElement {
     }
     clear() {
         this.affectedResources.textContent = '';
+        this.requestResolver.clear();
     }
     expandIfOneResource() {
         if (this.affectedResourcesCount === 1) {
             this.expand();
-        }
-    }
-    /**
-     * This function resolves a requestId to network requests. If the requestId does not resolve, a listener is installed
-     * that takes care of updating the view if the network request is added. This is useful if the issue is added before
-     * the network request gets reported.
-     */
-    resolveRequestId(requestId) {
-        const requests = Logs.NetworkLog.NetworkLog.instance().requestsForId(requestId);
-        if (!requests.length) {
-            this.unresolvedRequestIds.add(requestId);
-            if (!this.networkListener) {
-                this.networkListener = Logs.NetworkLog.NetworkLog.instance().addEventListener(Logs.NetworkLog.Events.RequestAdded, this.onRequestAdded, this);
-            }
-        }
-        return requests;
-    }
-    onRequestAdded(event) {
-        const request = event.data;
-        const requestWasUnresolved = this.unresolvedRequestIds.delete(request.requestId());
-        if (this.unresolvedRequestIds.size === 0 && this.networkListener) {
-            // Stop listening once all requests are resolved.
-            Common.EventTarget.EventTarget.removeEventListeners([this.networkListener]);
-            this.networkListener = null;
-        }
-        if (requestWasUnresolved) {
-            this.update();
         }
     }
     /**
@@ -146,7 +114,7 @@ export class AffectedResourcesView extends UI.TreeOutline.TreeElement {
         const frameWasUnresolved = this.unresolvedFrameIds.delete(frame.id);
         if (this.unresolvedFrameIds.size === 0 && this.frameListeners.length) {
             // Stop listening once all requests are resolved.
-            Common.EventTarget.EventTarget.removeEventListeners(this.frameListeners);
+            Common.EventTarget.removeEventListeners(this.frameListeners);
             this.frameListeners = [];
         }
         if (frameWasUnresolved) {
@@ -185,46 +153,36 @@ export class AffectedResourcesView extends UI.TreeOutline.TreeElement {
         frameCell.onmouseleave = () => SDK.OverlayModel.OverlayModel.hideDOMNodeHighlight();
         return frameCell;
     }
-    createRequestCell(request, options = {}) {
-        let url = request.url;
-        let filename = url ? extractShortPath(url) : '';
+    createRequestCell(affectedRequest, options = {}) {
         const requestCell = document.createElement('td');
         requestCell.classList.add('affected-resource-cell');
-        const icon = new IconButton.Icon.Icon();
-        icon.data = { iconName: 'network_panel_icon', color: 'var(--color-link)', width: '16px', height: '16px' };
-        icon.classList.add('network-panel');
-        requestCell.appendChild(icon);
-        const requests = this.resolveRequestId(request.requestId);
-        if (requests.length) {
-            const linkToPreflight = options.linkToPreflight ?? false;
-            const request = requests[0];
-            requestCell.onclick = () => {
-                const linkedRequest = linkToPreflight ? request.preflightRequest() : request;
-                if (!linkedRequest) {
-                    return;
-                }
-                if (options.highlightHeader) {
-                    const requestLocation = Network.NetworkSearchScope.UIRequestLocation.header(linkedRequest, options.highlightHeader.section, options.highlightHeader.name);
-                    Network.NetworkPanel.RequestLocationRevealer.instance().reveal(requestLocation);
-                }
-                else {
-                    Network.NetworkPanel.NetworkPanel.selectAndShowRequest(linkedRequest, Network.NetworkItemView.Tabs.Headers);
-                }
-            };
-            requestCell.classList.add('link');
-            url = request.url();
-            filename = extractShortPath(url);
-            UI.Tooltip.Tooltip.install(icon, i18nString(UIStrings.clickToShowRequestInTheNetwork));
-        }
-        else {
-            UI.Tooltip.Tooltip.install(icon, i18nString(UIStrings.requestUnavailableInTheNetwork));
-            icon.data = { ...icon.data, color: 'var(--issue-color-yellow)' };
-        }
-        if (url) {
-            UI.Tooltip.Tooltip.install(requestCell, url);
-        }
-        requestCell.appendChild(document.createTextNode(filename));
+        const requestLinkIcon = new RequestLinkIcon.RequestLinkIcon.RequestLinkIcon();
+        requestLinkIcon.data = { ...options, affectedRequest, requestResolver: this.requestResolver, displayURL: true };
+        requestCell.appendChild(requestLinkIcon);
         return requestCell;
+    }
+    async createElementCell({ backendNodeId, nodeName, target }, issueCategory) {
+        if (!target) {
+            const cellElement = document.createElement('td');
+            cellElement.textContent = nodeName || i18nString(UIStrings.unavailable);
+            return cellElement;
+        }
+        function sendTelemetry() {
+            Host.userMetrics.issuesPanelResourceOpened(issueCategory, "Element" /* Element */);
+        }
+        const deferredDOMNode = new SDK.DOMModel.DeferredDOMNode(target, backendNodeId);
+        const anchorElement = (await Common.Linkifier.Linkifier.linkify(deferredDOMNode));
+        anchorElement.textContent = nodeName;
+        anchorElement.addEventListener('click', () => sendTelemetry());
+        anchorElement.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendTelemetry();
+            }
+        });
+        const cellElement = document.createElement('td');
+        cellElement.classList.add('affected-resource-element', 'devtools-link');
+        cellElement.appendChild(anchorElement);
+        return cellElement;
     }
     appendSourceLocation(element, sourceLocation, target) {
         const sourceCodeLocation = document.createElement('td');

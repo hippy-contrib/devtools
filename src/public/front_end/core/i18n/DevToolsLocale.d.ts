@@ -21,7 +21,20 @@ export declare type DevToolsLocaleCreationOptions = {
  */
 export declare class DevToolsLocale {
     readonly locale: string;
+    readonly lookupClosestDevToolsLocale: (locale: string) => string;
     private constructor();
     static instance(opts?: DevToolsLocaleCreationOptions): DevToolsLocale;
     forceFallbackLocale(): void;
+    /**
+     * Returns true iff DevTools supports the language of the passed locale.
+     * Note that it doesn't have to be a one-to-one match, e.g. if DevTools supports
+     * 'de', then passing 'de-AT' will return true.
+     */
+    languageIsSupportedByDevTools(localeString: string): boolean;
 }
+/**
+ * Returns true iff the two locales have matching languages. This means the
+ * passing 'de-AT' and 'de-DE' will return true, while 'de-DE' and 'en' will
+ * return false.
+ */
+export declare function localeLanguagesMatch(localeString1: string, localeString2: string): boolean;

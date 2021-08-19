@@ -337,50 +337,6 @@ export class Size {
         return new Size(this.width, this.height + (typeof size === 'number' ? size : size.height));
     }
 }
-export class Insets {
-    left;
-    top;
-    right;
-    bottom;
-    constructor(left, top, right, bottom) {
-        this.left = left;
-        this.top = top;
-        this.right = right;
-        this.bottom = bottom;
-    }
-    isEqual(insets) {
-        return insets !== null && this.left === insets.left && this.top === insets.top && this.right === insets.right &&
-            this.bottom === insets.bottom;
-    }
-}
-export class Rect {
-    left;
-    top;
-    width;
-    height;
-    constructor(left, top, width, height) {
-        this.left = left;
-        this.top = top;
-        this.width = width;
-        this.height = height;
-    }
-    isEqual(rect) {
-        return rect !== null && this.left === rect.left && this.top === rect.top && this.width === rect.width &&
-            this.height === rect.height;
-    }
-    scale(scale) {
-        return new Rect(this.left * scale, this.top * scale, this.width * scale, this.height * scale);
-    }
-    size() {
-        return new Size(this.width, this.height);
-    }
-    relativeTo(origin) {
-        return new Rect(this.left - origin.left, this.top - origin.top, this.width, this.height);
-    }
-    rebaseTo(origin) {
-        return new Rect(this.left + origin.left, this.top + origin.top, this.width, this.height);
-    }
-}
 export class Constraints {
     minimum;
     preferred;

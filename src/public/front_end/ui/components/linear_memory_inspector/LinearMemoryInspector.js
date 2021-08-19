@@ -4,6 +4,7 @@
 import * as Common from '../../../core/common/common.js';
 import * as LitHtml from '../../lit-html/lit-html.js';
 import * as ComponentHelpers from '../helpers/helpers.js';
+import linearMemoryInspectorStyles from './linearMemoryInspector.css.js';
 const { render, html } = LitHtml;
 import { LinearMemoryNavigator } from './LinearMemoryNavigator.js';
 import { LinearMemoryValueInterpreter } from './LinearMemoryValueInterpreter.js';
@@ -60,6 +61,7 @@ class AddressHistoryEntry {
     }
 }
 export class LinearMemoryInspector extends HTMLElement {
+    static litTagName = LitHtml.literal `devtools-linear-memory-inspector-inspector`;
     shadow = this.attachShadow({ mode: 'open' });
     history = new Common.SimpleHistoryManager.SimpleHistoryManager(10);
     memory = new Uint8Array();
@@ -72,6 +74,9 @@ export class LinearMemoryInspector extends HTMLElement {
     valueTypeModes = getDefaultValueTypeMapping();
     valueTypes = new Set(this.valueTypeModes.keys());
     endianness = "Little Endian" /* Little */;
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [linearMemoryInspectorStyles];
+    }
     set data(data) {
         if (data.address < data.memoryOffset || data.address > data.memoryOffset + data.memory.length || data.address < 0) {
             throw new Error('Address is out of bounds.');
@@ -99,30 +104,6 @@ export class LinearMemoryInspector extends HTMLElement {
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
         render(html `
-      <style>
-        :host {
-          flex: auto;
-          display: flex;
-        }
-
-        .view {
-          width: 100%;
-          display: flex;
-          flex: 1;
-          flex-direction: column;
-          font-family: var(--monospace-font-family);
-          font-size: var(--monospace-font-size);
-          padding: 9px 12px 9px 7px;
-        }
-
-        devtools-linear-memory-inspector-navigator + devtools-linear-memory-inspector-viewer {
-          margin-top: 12px;
-        }
-
-        .value-interpreter {
-          display: flex;
-        }
-      </style>
       <div class="view">
         <${LinearMemoryNavigator.litTagName}
           .data=${{ address: navigatorAddressToShow, valid: navigatorAddressIsValid, mode: this.currentNavigatorMode, error: errorMsg, canGoBackInHistory, canGoForwardInHistory }}

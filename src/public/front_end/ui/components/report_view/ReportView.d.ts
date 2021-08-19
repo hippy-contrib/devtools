@@ -21,7 +21,7 @@ export interface ReportData {
     reportTitle: string;
 }
 export declare class Report extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     private reportTitle;
     set data({ reportTitle }: ReportData);
@@ -32,25 +32,25 @@ export interface ReportSectionData {
     sectionTitle: string;
 }
 export declare class ReportSectionHeader extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     connectedCallback(): void;
     private render;
 }
 export declare class ReportSectionDivider extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     connectedCallback(): void;
     private render;
 }
 export declare class ReportKey extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     connectedCallback(): void;
     private render;
 }
 export declare class ReportValue extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     connectedCallback(): void;
     private render;

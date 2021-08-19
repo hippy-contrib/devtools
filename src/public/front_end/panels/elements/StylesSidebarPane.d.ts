@@ -132,12 +132,12 @@ export declare class StylePropertiesSection {
     _selectedSinceMouseDown: boolean;
     _elementToSelectorIndex: WeakMap<Element, number>;
     navigable: boolean | null | undefined;
-    _mediaListElement: HTMLElement;
     _selectorRefElement: HTMLElement;
     _selectorContainer: HTMLDivElement;
     _fontPopoverIcon: FontEditorSectionManager | null;
     _hoverableSelectorsMode: boolean;
     _isHidden: boolean;
+    private queryListElement;
     constructor(parentPane: StylesSidebarPane, matchedStyles: SDK.CSSMatchedStyles.CSSMatchedStyles, style: SDK.CSSStyleDeclaration.CSSStyleDeclaration);
     registerFontProperty(treeElement: StylePropertyTreeElement): void;
     resetToolbars(): void;
@@ -167,7 +167,9 @@ export declare class StylePropertiesSection {
     _onNewRuleClick(event: Common.EventTarget.EventTargetEvent): void;
     _styleSheetEdited(edit: SDK.CSSModel.Edit): void;
     _createMediaList(mediaRules: SDK.CSSMedia.CSSMedia[]): void;
-    _updateMediaList(): void;
+    protected createContainerQueryList(containerQueries: SDK.CSSContainerQuery.CSSContainerQuery[]): void;
+    private addContainerForContainerQuery;
+    private updateQueryList;
     isPropertyInherited(propertyName: string): boolean;
     nextEditableSibling(): StylePropertiesSection | null;
     previousEditableSibling(): StylePropertiesSection | null;
@@ -189,11 +191,11 @@ export declare class StylePropertiesSection {
     addNewBlankProperty(index?: number | undefined): StylePropertyTreeElement;
     _handleEmptySpaceMouseDown(): void;
     _handleEmptySpaceClick(event: Event): void;
-    _handleMediaRuleClick(media: SDK.CSSMedia.CSSMedia, element: Element, event: Event): void;
+    private handleQueryRuleClick;
     _editingMediaFinished(element: Element): void;
     _editingMediaCancelled(element: Element): void;
     _editingMediaBlurHandler(): boolean;
-    _editingMediaCommitted(media: SDK.CSSMedia.CSSMedia, element: Element, newContent: string, _oldContent: string, _context: Context | undefined, _moveDirection: string): void;
+    _editingMediaCommitted(query: SDK.CSSMedia.CSSMedia | SDK.CSSContainerQuery.CSSContainerQuery, element: Element, newContent: string, _oldContent: string, _context: Context | undefined, _moveDirection: string): void;
     _editingMediaTextCommittedForTest(): void;
     _handleSelectorClick(event: Event): void;
     _handleContextMenuEvent(event: Event): void;

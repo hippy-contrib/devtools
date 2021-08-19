@@ -43,7 +43,7 @@ export class MetricsSidebarPane extends ElementsSidebarPane {
     _isEditingMetrics;
     constructor() {
         super();
-        this.registerRequiredCSS('panels/elements/metricsSidebarPane.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/elements/metricsSidebarPane.css');
         this.originalPropertyData = null;
         this.previousPropertyDataCandidate = null;
         this._inlineStyle = null;

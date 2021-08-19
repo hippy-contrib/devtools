@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
-import * as Common from '../../../../core/common/common.js'; // eslint-disable-line no-unused-vars
+import * as Common from '../../../../core/common/common.js';
 import * as Host from '../../../../core/host/host.js';
 import * as SDK from '../../../../core/sdk/sdk.js';
 import { Memory } from './LineLevelProfile.js';

@@ -33,12 +33,12 @@ import * as Host from '../host/host.js';
 import * as i18n from '../i18n/i18n.js';
 import * as Platform from '../platform/platform.js';
 import * as Root from '../root/root.js';
-import { ScopeRef } from './RemoteObject.js'; // eslint-disable-line no-unused-vars
-import { Events as ResourceTreeModelEvents, ResourceTreeModel } from './ResourceTreeModel.js'; // eslint-disable-line no-unused-vars
-import { RuntimeModel } from './RuntimeModel.js'; // eslint-disable-line no-unused-vars
+import { ScopeRef } from './RemoteObject.js';
+import { Events as ResourceTreeModelEvents, ResourceTreeModel } from './ResourceTreeModel.js';
+import { RuntimeModel } from './RuntimeModel.js';
 import { Script } from './Script.js';
 import { Capability, Type } from './Target.js';
-import { SDKModel } from './SDKModel.js'; // eslint-disable-line no-unused-vars
+import { SDKModel } from './SDKModel.js';
 import { SourceMapManager } from './SourceMapManager.js';
 const UIStrings = {
     /**
@@ -124,7 +124,6 @@ export class DebuggerModel extends SDKModel {
     _computeAutoStepRangesCallback;
     _expandCallFramesCallback;
     _evaluateOnCallFrameCallback;
-    _ignoreDebuggerPausedEvents;
     _breakpointResolvedEventTarget;
     _autoStepOver;
     _isPausing;
@@ -148,7 +147,6 @@ export class DebuggerModel extends SDKModel {
         this._computeAutoStepRangesCallback = null;
         this._expandCallFramesCallback = null;
         this._evaluateOnCallFrameCallback = null;
-        this._ignoreDebuggerPausedEvents = false;
         this._breakpointResolvedEventTarget = new Common.ObjectWrapper.ObjectWrapper();
         this._autoStepOver = false;
         this._isPausing = false;
@@ -190,9 +188,6 @@ export class DebuggerModel extends SDKModel {
     }
     debuggerEnabled() {
         return Boolean(this._debuggerEnabled);
-    }
-    ignoreDebuggerPausedEvents(ignore) {
-        this._ignoreDebuggerPausedEvents = ignore;
     }
     async _enableDebugger() {
         if (this._debuggerEnabled) {
@@ -269,6 +264,7 @@ export class DebuggerModel extends SDKModel {
         if (typeof this._debuggerId === 'string') {
             _debuggerIdToModel.delete(this._debuggerId);
         }
+        this._debuggerId = null;
     }
     _skipAllPauses(skip) {
         if (this._skipAllPausesTimeout) {
@@ -533,9 +529,6 @@ export class DebuggerModel extends SDKModel {
         this._evaluateOnCallFrameCallback = callback;
     }
     async _pausedScript(callFrames, reason, auxData, breakpointIds, asyncStackTrace, asyncStackTraceId, asyncCallStackTraceId) {
-        if (this._ignoreDebuggerPausedEvents) {
-            return;
-        }
         if (asyncCallStackTraceId) {
             // Note: this is only to support old backends. Newer ones do not send asyncCallStackTraceId.
             _scheduledPauseOnAsyncCall = asyncCallStackTraceId;
@@ -820,11 +813,9 @@ export var Events;
     Events["DebuggerPaused"] = "DebuggerPaused";
     Events["DebuggerResumed"] = "DebuggerResumed";
     Events["ParsedScriptSource"] = "ParsedScriptSource";
-    Events["FailedToParseScriptSource"] = "FailedToParseScriptSource";
     Events["DiscardedAnonymousScriptSource"] = "DiscardedAnonymousScriptSource";
     Events["GlobalObjectCleared"] = "GlobalObjectCleared";
     Events["CallFrameSelected"] = "CallFrameSelected";
-    Events["ConsoleCommandEvaluatedInSelectedCallFrame"] = "ConsoleCommandEvaluatedInSelectedCallFrame";
     Events["DebuggerIsReadyToPause"] = "DebuggerIsReadyToPause";
 })(Events || (Events = {}));
 class DebuggerDispatcher {
@@ -986,6 +977,7 @@ export class CallFrame {
     _functionName;
     _functionLocation;
     _returnValue;
+    warnings = [];
     constructor(debuggerModel, script, payload, inlineFrameIndex, functionName) {
         this.debuggerModel = debuggerModel;
         this._script = script;
@@ -1019,8 +1011,11 @@ export class CallFrame {
         }
         return result;
     }
-    createVirtualCallFrame(inlineFrameIndex, functionName) {
-        return new CallFrame(this.debuggerModel, this._script, this._payload, inlineFrameIndex, functionName);
+    createVirtualCallFrame(inlineFrameIndex, name) {
+        return new CallFrame(this.debuggerModel, this._script, this._payload, inlineFrameIndex, name);
+    }
+    addWarning(warning) {
+        this.warnings.push(warning);
     }
     get script() {
         return this._script;

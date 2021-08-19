@@ -1,12 +1,24 @@
 import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import type { Issue, IssueKind } from './Issue.js';
+import { Events } from './IssuesManagerEvents.js';
+export { Events } from './IssuesManagerEvents.js';
 export interface IssuesManagerCreationOptions {
     forceNew: boolean;
     /** Throw an error if this is not the first instance created */
     ensureFirst: boolean;
     showThirdPartyIssuesSetting?: Common.Settings.Setting<boolean>;
+    hideIssueSetting?: Common.Settings.Setting<HideIssueMenuSetting>;
 }
+export declare type HideIssueMenuSetting = {
+    [x: string]: IssueStatus;
+};
+export declare const enum IssueStatus {
+    Hidden = "Hidden",
+    Unhidden = "Unhidden"
+}
+export declare function defaultHideIssueByCodeSetting(): HideIssueMenuSetting;
+export declare function getHideIssueByCodeSetting(): Common.Settings.Setting<HideIssueMenuSetting>;
 /**
  * The `IssuesManager` is the central storage for issues. It collects issues from all the
  * `IssuesModel` instances in the page, and deduplicates them wrt their primary key.
@@ -18,15 +30,17 @@ export interface IssuesManagerCreationOptions {
  * Issues that are accepted by the filter cause events to be fired or are returned by
  * `IssuesManager#issues()`.
  */
-export declare class IssuesManager extends Common.ObjectWrapper.ObjectWrapper implements SDK.TargetManager.SDKModelObserver<SDK.IssuesModel.IssuesModel> {
+export declare class IssuesManager extends Common.ObjectWrapper.ObjectWrapper<EventTypes> implements SDK.TargetManager.SDKModelObserver<SDK.IssuesModel.IssuesModel> {
+    private readonly showThirdPartyIssuesSetting?;
+    private readonly hideIssueSetting?;
     private eventListeners;
     private allIssues;
     private filteredIssues;
     private issueCounts;
     private hasSeenTopFrameNavigated;
     private sourceFrameIssuesManager;
-    private showThirdPartyIssuesSetting?;
-    constructor(showThirdPartyIssuesSetting?: Common.Settings.Setting<boolean>);
+    private issuesById;
+    constructor(showThirdPartyIssuesSetting?: Common.Settings.Setting<boolean> | undefined, hideIssueSetting?: Common.Settings.Setting<HideIssueMenuSetting> | undefined);
     static instance(opts?: IssuesManagerCreationOptions): IssuesManager;
     /**
      * Once we have seen at least one `TopFrameNavigated` event, we can be reasonably sure
@@ -45,10 +59,17 @@ export declare class IssuesManager extends Common.ObjectWrapper.ObjectWrapper im
     numberOfIssues(kind?: IssueKind): number;
     numberOfAllStoredIssues(): number;
     private issueFilter;
+    private updateIssueHiddenStatus;
     private updateFilteredIssues;
+    unhideAllIssues(): void;
+    getIssueById(id: string): Issue | undefined;
 }
-export declare enum Events {
-    IssuesCountUpdated = "IssuesCountUpdated",
-    IssueAdded = "IssueAdded",
-    FullUpdateRequired = "FullUpdateRequired"
+export interface IssueAddedEvent {
+    issuesModel: SDK.IssuesModel.IssuesModel;
+    issue: Issue;
 }
+export declare type EventTypes = {
+    [Events.IssuesCountUpdated]: void;
+    [Events.FullUpdateRequired]: void;
+    [Events.IssueAdded]: IssueAddedEvent;
+};

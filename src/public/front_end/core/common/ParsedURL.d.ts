@@ -10,9 +10,9 @@ export declare class ParsedURL {
     fragment: string;
     folderPathComponents: string;
     lastPathComponent: string;
-    _blobInnerScheme: string | undefined;
-    _displayName?: string;
-    _dataURLDisplayName?: string;
+    readonly blobInnerScheme: string | undefined;
+    private displayNameInternal?;
+    private dataURLDisplayNameInternal?;
     constructor(url: string);
     static fromString(string: string): ParsedURL | null;
     static platformPathToURL(fileSystemPath: string): string;

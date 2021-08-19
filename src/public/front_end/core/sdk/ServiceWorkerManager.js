@@ -30,7 +30,7 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../common/common.js';
 import * as i18n from '../i18n/i18n.js';
-import { Events as RuntimeModelEvents, RuntimeModel } from './RuntimeModel.js'; // eslint-disable-line no-unused-vars
+import { Events as RuntimeModelEvents, RuntimeModel } from './RuntimeModel.js';
 import { Capability, Type } from './Target.js';
 import { SDKModel } from './SDKModel.js';
 import { TargetManager } from './TargetManager.js';
@@ -544,7 +544,7 @@ class ServiceWorkerContextNamer {
         const parsedUrl = Common.ParsedURL.ParsedURL.fromString(context.origin);
         const label = parsedUrl ? parsedUrl.lastPathComponentWithFragment() : context.name;
         const localizedStatus = ServiceWorkerVersion.Status[version.status];
-        context.setLabel(i18nString(UIStrings.sSS, { PH1: label, PH2: version.id, PH3: localizedStatus }));
+        context.setLabel(i18nString(UIStrings.sSS, { PH1: label, PH2: version.id, PH3: localizedStatus() }));
     }
 }
 SDKModel.register(ServiceWorkerManager, { capabilities: Capability.ServiceWorker, autostart: true });

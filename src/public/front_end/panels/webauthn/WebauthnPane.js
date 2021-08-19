@@ -213,7 +213,7 @@ export class WebauthnPaneImpl extends UI.Widget.VBox {
     _isEnabling;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/webauthn/webauthnPane.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/webauthn/webauthnPane.css');
         this.contentElement.classList.add('webauthn-pane');
         this._enabled = false;
         this._activeAuthId = null;
@@ -533,7 +533,8 @@ export class WebauthnPaneImpl extends UI.Widget.VBox {
         toolbar.appendToolbarItem(editName);
         toolbar.appendToolbarItem(saveName);
         this._createAuthenticatorFields(section, authenticatorId, options);
-        const label = document.createElementWithClass('div', 'credentials-title');
+        const label = document.createElement('div');
+        label.classList.add('credentials-title');
         label.textContent = i18nString(UIStrings.credentials);
         section.appendChild(label);
         const dataGrid = this._createCredentialsDataGrid(authenticatorId);

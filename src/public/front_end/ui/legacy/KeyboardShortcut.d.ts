@@ -23,7 +23,8 @@ export declare class KeyboardShortcut {
     static makeKey(keyCode: string | number, modifiers?: number): number;
     static makeKeyFromEvent(keyboardEvent: KeyboardEvent): number;
     static makeKeyFromEventIgnoringModifiers(keyboardEvent: KeyboardEvent): number;
-    static eventHasCtrlOrMeta(event: KeyboardEvent | MouseEvent): boolean;
+    static eventHasCtrlEquivalentKey(event: KeyboardEvent | MouseEvent): boolean;
+    static eventHasEitherCtrlOrMeta(event: KeyboardEvent | MouseEvent): boolean;
     static hasNoModifiers(event: Event): boolean;
     static makeDescriptor(key: string | Key, modifiers?: number): Descriptor;
     static makeDescriptorFromBindingShortcut(shortcut: string): Descriptor;

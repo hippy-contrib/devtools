@@ -6,6 +6,7 @@ import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import axBreadcrumbsStyles from './axBreadcrumbs.css.js';
 import { AccessibilitySubPane } from './AccessibilitySubPane.js';
 const UIStrings = {
     /**
@@ -47,7 +48,6 @@ export class AXBreadcrumbsPane extends AccessibilitySubPane {
         this._rootElement.addEventListener('click', this._onClick.bind(this), false);
         this._rootElement.addEventListener('contextmenu', this._contextMenuEventFired.bind(this), false);
         this._rootElement.addEventListener('focusout', this._onFocusOut.bind(this), false);
-        this.registerRequiredCSS('panels/accessibility/axBreadcrumbs.css', { enableLegacyPatching: false });
     }
     focus() {
         if (this._inspectedNodeBreadcrumb) {
@@ -329,6 +329,10 @@ export class AXBreadcrumbsPane extends AccessibilitySubPane {
             contextMenu.appendApplicableItems(deferredNode);
         }
         contextMenu.show();
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([axBreadcrumbsStyles]);
     }
 }
 const elementsToAXBreadcrumb = new WeakMap();

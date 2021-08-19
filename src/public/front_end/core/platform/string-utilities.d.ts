@@ -16,7 +16,7 @@ export declare const tokenizeFormatString: (formatString: string, formatters: Re
 export declare type FormatterFunction<T> = (input: string | {
     description: string;
 } | undefined | T, token: FormatterToken) => unknown;
-export declare const format: <T, U>(formatString: string, substitutions: ArrayLike<U> | null, formatters: Record<string, FormatterFunction<U>>, initialValue: T, append: (initialValue: T, newString?: string | undefined) => T, tokenizedFormat?: FormatterToken[] | undefined) => {
+export declare const format: <T, U>(formatString: string, substitutions: ArrayLike<U> | null, formatters: Record<string, FormatterFunction<U>>, initialValue: T, append: (initialValue: T, newString: string) => T, tokenizedFormat?: FormatterToken[] | undefined) => {
     formattedResult: T;
     unusedSubstitutions: ArrayLike<U> | null;
 };
@@ -25,6 +25,7 @@ export declare const standardFormatters: {
     f: (substitution: unknown, token: FormatterToken) => string;
     s: (substitution: unknown) => string;
 };
+export declare const formatAsJSLiteral: (content: string) => string;
 export declare const vsprintf: (formatString: string, substitutions: unknown[]) => string;
 export declare const sprintf: (format: string, ...varArg: unknown[]) => string;
 export declare const toBase64: (inputString: string) => string;

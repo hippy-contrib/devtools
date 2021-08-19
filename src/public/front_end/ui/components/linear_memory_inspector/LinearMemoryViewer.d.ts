@@ -13,7 +13,7 @@ export declare class ResizeEvent extends Event {
     constructor(numBytesPerPage: number);
 }
 export declare class LinearMemoryViewer extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private static readonly BYTE_GROUP_MARGIN;
     private static readonly BYTE_GROUP_SIZE;
     private readonly shadow;

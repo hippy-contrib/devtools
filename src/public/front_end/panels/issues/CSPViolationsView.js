@@ -23,7 +23,7 @@ export class CSPViolationsView extends UI.Widget.VBox {
      */
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/issues/cspViolationsView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/issues/cspViolationsView.css');
         this.contentElement.classList.add('csp-violations-pane');
         const topToolbar = new UI.Toolbar.Toolbar('csp-violations-toolbar', this.contentElement);
         const textFilterUI = new UI.Toolbar.ToolbarInput(i18nString(UIStrings.filter), '', 1, .2, '');
@@ -47,8 +47,8 @@ export class CSPViolationsView extends UI.Widget.VBox {
         });
         topToolbar.appendToolbarItem(levelMenuButton);
         this.listView.show(this.contentElement);
-        this.issuesManager.addEventListener(IssuesManager.IssuesManager.Events.IssueAdded, this.onIssueAdded, this);
-        this.issuesManager.addEventListener(IssuesManager.IssuesManager.Events.FullUpdateRequired, this.onFullUpdateRequired, this);
+        this.issuesManager.addEventListener("IssueAdded" /* IssueAdded */, this.onIssueAdded, this);
+        this.issuesManager.addEventListener("FullUpdateRequired" /* FullUpdateRequired */, this.onFullUpdateRequired, this);
         this.addAllIssues();
     }
     static instance(opts = { forceNew: null }) {
@@ -59,8 +59,7 @@ export class CSPViolationsView extends UI.Widget.VBox {
         return cspViolationsViewInstance;
     }
     onIssueAdded(event) {
-        const { issue } = 
-        /** @type {!{issuesModel: !IssuesManager.IssuesModel.IssuesModel, issue: !SDK.Issue.Issue}} */ (event.data);
+        const { issue } = event.data;
         if (issue instanceof IssuesManager.ContentSecurityPolicyIssue.ContentSecurityPolicyIssue) {
             this.listView.addIssue(issue);
         }

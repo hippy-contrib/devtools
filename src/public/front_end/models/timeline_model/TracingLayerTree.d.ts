@@ -10,7 +10,7 @@ export declare class TracingLayerTree extends SDK.LayerTreeBase.LayerTreeBase {
     pictureForRasterTile(tileId: string): Promise<SDK.PaintProfiler.SnapshotWithRect | null>;
     _setPaints(paints: LayerPaintEvent[]): void;
     _innerSetLayers(oldLayersById: Map<string | number, SDK.LayerTreeBase.Layer>, payload: TracingLayerPayload): TracingLayer;
-    _extractNodeIdsToResolve(nodeIdsToResolve: Set<number>, seenNodeIds: Object, payload: TracingLayerPayload): void;
+    _extractNodeIdsToResolve(nodeIdsToResolve: Set<Protocol.DOM.BackendNodeId>, seenNodeIds: Object, payload: TracingLayerPayload): void;
 }
 export declare class TracingLayer implements SDK.LayerTreeBase.Layer {
     _parentLayerId: string | null;
@@ -74,7 +74,7 @@ export interface TracingLayerPayload {
     draws_content: number;
     gpu_memory_usage: number;
     transform: number[];
-    owner_node: number;
+    owner_node: Protocol.DOM.BackendNodeId;
     reasons: string[];
     compositing_reason: string[];
     compositing_reason_ids: string[];

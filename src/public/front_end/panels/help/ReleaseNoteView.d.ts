@@ -8,4 +8,5 @@ export declare class ReleaseNoteView extends UI.Widget.VBox {
     }): ReleaseNoteView;
     elementsToRestoreScrollPositionsFor(): Element[];
     _createReleaseNoteElement(releaseNote: ReleaseNote): Element;
+    wasShown(): void;
 }

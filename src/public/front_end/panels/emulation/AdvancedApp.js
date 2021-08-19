@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
-import * as Common from '../../core/common/common.js'; // eslint-disable-line no-unused-vars
+import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { DeviceModeWrapper } from './DeviceModeWrapper.js';
-import { InspectedPagePlaceholder } from './InspectedPagePlaceholder.js'; // eslint-disable-line no-unused-vars
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-let _appInstance;
+import { InspectedPagePlaceholder } from './InspectedPagePlaceholder.js';
+let appInstance;
 export class AdvancedApp {
     _rootSplitWidget;
     _deviceModeView;
@@ -24,10 +22,10 @@ export class AdvancedApp {
      * Note: it's used by toolbox.ts without real type checks.
      */
     static _instance() {
-        if (!_appInstance) {
-            _appInstance = new AdvancedApp();
+        if (!appInstance) {
+            appInstance = new AdvancedApp();
         }
-        return _appInstance;
+        return appInstance;
     }
     presentUI(document) {
         const rootView = new UI.RootView.RootView();
@@ -56,14 +54,13 @@ export class AdvancedApp {
         if (this._toolboxWindow) {
             return;
         }
-        const url = window.location.href.replace('devtools_app.html', 'toolbox.html');
+        const url = window.location.href.replace('devtools_app.html', 'device_mode_emulation_frame.html');
         this._toolboxWindow = window.open(url, undefined);
     }
-    toolboxLoaded(toolboxDocument) {
+    deviceModeEmulationFrameLoaded(toolboxDocument) {
         UI.UIUtils.initializeUIUtils(toolboxDocument, Common.Settings.Settings.instance().createSetting('uiTheme', 'default'));
         UI.UIUtils.installComponentRootStyles(toolboxDocument.body);
         UI.ContextMenu.ContextMenu.installHandler(toolboxDocument);
-        UI.Tooltip.Tooltip.installHandler(toolboxDocument);
         this._toolboxRootView = new UI.RootView.RootView();
         this._toolboxRootView.attachToDocument(toolboxDocument);
         this._updateDeviceModeView();

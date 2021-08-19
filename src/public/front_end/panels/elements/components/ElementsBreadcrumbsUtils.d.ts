@@ -1,16 +1,4 @@
-export interface DOMNode {
-    parentNode: DOMNode | null;
-    id: number;
-    nodeType: number;
-    pseudoType?: string;
-    shadowRootType: string | null;
-    nodeName: string;
-    nodeNameNicelyCased: string;
-    legacyDomNode: unknown;
-    highlightNode: () => void;
-    clearHighlight: () => void;
-    getAttribute: (attr: string) => string | undefined;
-}
+import type { DOMNode } from './Helper.js';
 export declare type UserScrollPosition = 'start' | 'middle' | 'end';
 export interface Crumb {
     title: CrumbTitle;
@@ -26,8 +14,4 @@ export interface CrumbTitle {
     };
 }
 export declare const crumbsToRender: (crumbs: readonly DOMNode[], selectedNode: Readonly<DOMNode> | null) => Crumb[];
-export declare class NodeSelectedEvent extends Event {
-    data: unknown;
-    constructor(node: DOMNode);
-}
 export declare const determineElementTitle: (domNode: DOMNode) => CrumbTitle;

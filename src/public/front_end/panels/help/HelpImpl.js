@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
-import * as UI from '../../ui/legacy/legacy.js'; // eslint-disable-line no-unused-vars
+import * as UI from '../../ui/legacy/legacy.js';
 import { releaseNoteText } from './ReleaseNoteText.js';
 export const releaseVersionSeen = 'releaseNoteVersionSeen';
 export const releaseNoteViewId = 'release-note';
@@ -62,7 +62,6 @@ export class HelpLateInitialization {
         }
     }
 }
-Common.Runnable.registerLateInitializationRunnable(HelpLateInitialization.instance);
 let releaseNotesActionDelegateInstance;
 export class ReleaseNotesActionDelegate {
     handleAction(_context, _actionId) {

@@ -7,11 +7,11 @@ import * as TimelineModel from '../../models/timeline_model/timeline_model.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { EventsTimelineTreeView } from './EventsTimelineTreeView.js';
-import { Events } from './PerformanceModel.js'; // eslint-disable-line no-unused-vars
+import { Events } from './PerformanceModel.js';
 import { TimelineLayersView } from './TimelineLayersView.js';
 import { TimelinePaintProfilerView } from './TimelinePaintProfilerView.js';
-import { TimelineSelection } from './TimelinePanel.js'; // eslint-disable-line no-unused-vars
-import { BottomUpTimelineTreeView, CallTreeTimelineTreeView } from './TimelineTreeView.js'; // eslint-disable-line no-unused-vars
+import { TimelineSelection } from './TimelinePanel.js';
+import { BottomUpTimelineTreeView, CallTreeTimelineTreeView } from './TimelineTreeView.js';
 import { TimelineDetailsContentHelper, TimelineUIUtils } from './TimelineUIUtils.js';
 const UIStrings = {
     /**
@@ -278,7 +278,7 @@ export class TimelineDetailsView extends UI.Widget.VBox {
         const startOffset = startTime - this._model.timelineModel().minimumRecordTime();
         const endOffset = endTime - this._model.timelineModel().minimumRecordTime();
         const contentHelper = new TimelineDetailsContentHelper(null, null);
-        contentHelper.addSection(i18nString(UIStrings.rangeSS, { PH1: i18n.i18n.millisToString(startOffset), PH2: i18n.i18n.millisToString(endOffset) }));
+        contentHelper.addSection(i18nString(UIStrings.rangeSS, { PH1: i18n.TimeUtilities.millisToString(startOffset), PH2: i18n.TimeUtilities.millisToString(endOffset) }));
         const pieChart = TimelineUIUtils.generatePieChart(aggregatedStats);
         contentHelper.appendElementRow('', pieChart);
         this._setContent(contentHelper.fragment);

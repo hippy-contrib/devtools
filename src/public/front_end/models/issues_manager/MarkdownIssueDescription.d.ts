@@ -60,3 +60,4 @@ export declare function createIssueDescriptionFromRawMarkdown(markdown: string, 
  */
 export declare function substitutePlaceholders(markdown: string, substitutions?: Map<string, string>): string;
 export declare function findTitleFromMarkdownAst(markdownAst: Marked.Marked.Token[]): string | null;
+export declare function getIssueTitleFromMarkdownDescription(description: MarkdownIssueDescription): Promise<string | null>;

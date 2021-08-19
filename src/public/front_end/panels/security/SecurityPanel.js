@@ -6,8 +6,8 @@ import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import * as Network from '../network/network.js';
 import { Events, SecurityModel, SecurityStyleExplanation, SummaryMessages } from './SecurityModel.js';
 const UIStrings = {
     /**
@@ -622,15 +622,15 @@ export class SecurityPanel extends UI.Panel.PanelWithSidebar {
         if (request.mixedContentType === "none" /* None */) {
             return;
         }
-        let filterKey = Network.NetworkLogView.MixedContentFilterValues.All;
+        let filterKey = NetworkForward.UIFilter.MixedContentFilterValues.All;
         if (request.wasBlocked()) {
-            filterKey = Network.NetworkLogView.MixedContentFilterValues.Blocked;
+            filterKey = NetworkForward.UIFilter.MixedContentFilterValues.Blocked;
         }
         else if (request.mixedContentType === "blockable" /* Blockable */) {
-            filterKey = Network.NetworkLogView.MixedContentFilterValues.BlockOverridden;
+            filterKey = NetworkForward.UIFilter.MixedContentFilterValues.BlockOverridden;
         }
         else if (request.mixedContentType === "optionally-blockable" /* OptionallyBlockable */) {
-            filterKey = Network.NetworkLogView.MixedContentFilterValues.Displayed;
+            filterKey = NetworkForward.UIFilter.MixedContentFilterValues.Displayed;
         }
         const currentCount = this._filterRequestCounts.get(filterKey);
         if (!currentCount) {
@@ -671,7 +671,7 @@ export class SecurityPanel extends UI.Panel.PanelWithSidebar {
             return;
         }
         this._securityModel = null;
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
     }
     _onMainFrameNavigated(event) {
         const frame = event.data;
@@ -712,8 +712,8 @@ export class SecurityPanelSidebarTree extends UI.TreeOutline.TreeOutlineInShadow
     _elementsByOrigin;
     constructor(mainViewElement, showOriginInPanel) {
         super();
-        this.registerRequiredCSS('panels/security/sidebar.css', { enableLegacyPatching: false });
-        this.registerRequiredCSS('panels/security/lockIcon.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/security/sidebar.css');
+        this.registerRequiredCSS('panels/security/lockIcon.css');
         this.appendChild(mainViewElement);
         this._showOriginInPanel = showOriginInPanel;
         this._mainOrigin = null;
@@ -871,8 +871,8 @@ export class SecurityMainView extends UI.Widget.VBox {
     _securityState;
     constructor(panel) {
         super(true);
-        this.registerRequiredCSS('panels/security/mainView.css', { enableLegacyPatching: false });
-        this.registerRequiredCSS('panels/security/lockIcon.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/security/mainView.css');
+        this.registerRequiredCSS('panels/security/lockIcon.css');
         this.setMinimumSize(200, 100);
         this.contentElement.classList.add('security-main-view');
         this._panel = panel;
@@ -1178,10 +1178,10 @@ export class SecurityMainView extends UI.Widget.VBox {
             else {
                 switch (explanation.mixedContentType) {
                     case "blockable" /* Blockable */:
-                        this._addMixedContentExplanation(this._securityExplanationsMain, explanation, Network.NetworkLogView.MixedContentFilterValues.BlockOverridden);
+                        this._addMixedContentExplanation(this._securityExplanationsMain, explanation, NetworkForward.UIFilter.MixedContentFilterValues.BlockOverridden);
                         break;
                     case "optionally-blockable" /* OptionallyBlockable */:
-                        this._addMixedContentExplanation(this._securityExplanationsMain, explanation, Network.NetworkLogView.MixedContentFilterValues.Displayed);
+                        this._addMixedContentExplanation(this._securityExplanationsMain, explanation, NetworkForward.UIFilter.MixedContentFilterValues.Displayed);
                         break;
                     default:
                         this._addExplanation(this._securityExplanationsMain, explanation);
@@ -1189,7 +1189,7 @@ export class SecurityMainView extends UI.Widget.VBox {
                 }
             }
         }
-        if (this._panel.filterRequestCount(Network.NetworkLogView.MixedContentFilterValues.Blocked) > 0) {
+        if (this._panel.filterRequestCount(NetworkForward.UIFilter.MixedContentFilterValues.Blocked) > 0) {
             const explanation = {
                 securityState: "info" /* Info */,
                 summary: i18nString(UIStrings.blockedMixedContent),
@@ -1198,7 +1198,7 @@ export class SecurityMainView extends UI.Widget.VBox {
                 certificate: [],
                 title: '',
             };
-            this._addMixedContentExplanation(this._securityExplanationsMain, explanation, Network.NetworkLogView.MixedContentFilterValues.Blocked);
+            this._addMixedContentExplanation(this._securityExplanationsMain, explanation, NetworkForward.UIFilter.MixedContentFilterValues.Blocked);
         }
     }
     _addMixedContentExplanation(parent, explanation, filterKey) {
@@ -1227,7 +1227,7 @@ export class SecurityMainView extends UI.Widget.VBox {
     }
     showNetworkFilter(filterKey, e) {
         e.consume();
-        Network.NetworkPanel.NetworkPanel.revealAndFilter([{ filterType: Network.NetworkLogView.FilterType.MixedContent, filterValue: filterKey }]);
+        Common.Revealer.reveal(NetworkForward.UIFilter.UIRequestFilter.filters([{ filterType: NetworkForward.UIFilter.FilterType.MixedContent, filterValue: filterKey }]));
     }
 }
 export class SecurityOriginView extends UI.Widget.VBox {
@@ -1238,8 +1238,8 @@ export class SecurityOriginView extends UI.Widget.VBox {
         this._panel = panel;
         this.setMinimumSize(200, 100);
         this.element.classList.add('security-origin-view');
-        this.registerRequiredCSS('panels/security/originView.css', { enableLegacyPatching: false });
-        this.registerRequiredCSS('panels/security/lockIcon.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/security/originView.css');
+        this.registerRequiredCSS('panels/security/lockIcon.css');
         const titleSection = this.element.createChild('div', 'title-section');
         const titleDiv = titleSection.createChild('div', 'title-section-header');
         titleDiv.textContent = i18nString(UIStrings.origin);
@@ -1252,10 +1252,10 @@ export class SecurityOriginView extends UI.Widget.VBox {
         const originNetworkButton = UI.UIUtils.createTextButton(i18nString(UIStrings.viewRequestsInNetworkPanel), event => {
             event.consume();
             const parsedURL = new Common.ParsedURL.ParsedURL(origin);
-            Network.NetworkPanel.NetworkPanel.revealAndFilter([
-                { filterType: Network.NetworkLogView.FilterType.Domain, filterValue: parsedURL.host },
-                { filterType: Network.NetworkLogView.FilterType.Scheme, filterValue: parsedURL.scheme },
-            ]);
+            Common.Revealer.reveal(NetworkForward.UIFilter.UIRequestFilter.filters([
+                { filterType: NetworkForward.UIFilter.FilterType.Domain, filterValue: parsedURL.host },
+                { filterType: NetworkForward.UIFilter.FilterType.Scheme, filterValue: parsedURL.scheme },
+            ]));
         });
         originNetworkDiv.appendChild(originNetworkButton);
         UI.ARIAUtils.markAsLink(originNetworkButton);

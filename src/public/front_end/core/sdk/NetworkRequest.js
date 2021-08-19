@@ -31,7 +31,7 @@ import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as Common from '../common/common.js';
 import * as i18n from '../i18n/i18n.js';
 import * as Platform from '../platform/platform.js';
-import { Attributes } from './Cookie.js'; // eslint-disable-line no-unused-vars
+import { Attributes } from './Cookie.js';
 import { CookieParser } from './CookieParser.js';
 import { NetworkManager } from './NetworkManager.js';
 import { Type } from './Target.js';
@@ -233,6 +233,7 @@ export class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper {
     _finished;
     _failed;
     _canceled;
+    _preserved;
     _mimeType;
     _parsedURL;
     _name;
@@ -258,10 +259,11 @@ export class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper {
     _queryString;
     _parsedQueryParameters;
     _contentDataProvider;
-    constructor(requestId, url, documentURL, frameId, loaderId, initiator) {
+    _isSameSite;
+    constructor(requestId, backendRequestId, url, documentURL, frameId, loaderId, initiator) {
         super();
         this._requestId = requestId;
-        this._backendRequestId = requestId;
+        this._backendRequestId = backendRequestId;
         this.setUrl(url);
         this._documentURL = documentURL;
         this._frameId = frameId;
@@ -312,6 +314,16 @@ export class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper {
         this._includedRequestCookies = [];
         this._blockedResponseCookies = [];
         this.localizedFailDescription = null;
+        this._isSameSite = null;
+    }
+    static create(backendRequestId, url, documentURL, frameId, loaderId, initiator) {
+        return new NetworkRequest(backendRequestId, backendRequestId, url, documentURL, frameId, loaderId, initiator);
+    }
+    static createForWebSocket(backendRequestId, requestURL, initiator) {
+        return new NetworkRequest(backendRequestId, backendRequestId, requestURL, '', '', '', initiator || null);
+    }
+    static createWithoutBackendRequest(requestId, url, documentURL, initiator) {
+        return new NetworkRequest(requestId, undefined, url, documentURL, '', '', initiator);
     }
     identityCompare(other) {
         const thisId = this.requestId();
@@ -503,6 +515,12 @@ export class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper {
     }
     set canceled(x) {
         this._canceled = x;
+    }
+    get preserved() {
+        return this._preserved;
+    }
+    set preserved(x) {
+        this._preserved = x;
     }
     blockedReason() {
         return this._blockedReason;
@@ -1131,6 +1149,9 @@ export class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper {
             }
         }
         this._remoteAddressSpace = extraResponseInfo.resourceIPAddressSpace;
+        if (extraResponseInfo.statusCode) {
+            this.statusCode = extraResponseInfo.statusCode;
+        }
         this._hasExtraResponseInfo = true;
     }
     hasExtraResponseInfo() {
@@ -1158,6 +1179,12 @@ export class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper {
     }
     trustTokenOperationDoneEvent() {
         return this._trustTokenOperationDoneEvent;
+    }
+    setIsSameSite(isSameSite) {
+        this._isSameSite = isSameSite;
+    }
+    isSameSite() {
+        return this._isSameSite;
     }
 }
 // TODO(crbug.com/1167717): Make this a const enum again

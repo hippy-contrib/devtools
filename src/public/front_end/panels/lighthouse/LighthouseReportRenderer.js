@@ -9,6 +9,7 @@ import * as Platform from '../../core/platform/platform.js';
 import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Workspace from '../../models/workspace/workspace.js';
+import * as LighthouseReport from '../../third_party/lighthouse/report/report.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as ThemeSupport from '../../ui/legacy/theme_support/theme_support.js';
@@ -30,8 +31,7 @@ const UIStrings = {
 const str_ = i18n.i18n.registerUIStrings('panels/lighthouse/LighthouseReportRenderer.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 const MaxLengthForLinks = 40;
-// @ts-ignore https://github.com/GoogleChrome/lighthouse/issues/11628
-export class LighthouseReportRenderer extends self.ReportRenderer {
+export class LighthouseReportRenderer extends LighthouseReport.ReportRenderer {
     constructor(dom) {
         super(dom);
     }
@@ -55,9 +55,11 @@ export class LighthouseReportRenderer extends self.ReportRenderer {
             text,
             onClick: onViewTraceClick,
         });
-        timelineButton.classList.add('lh-button--trace');
-        if (simulated) {
-            UI.Tooltip.Tooltip.install(timelineButton, i18nString(UIStrings.thePerformanceMetricsAboveAre));
+        if (timelineButton) {
+            timelineButton.classList.add('lh-button--trace');
+            if (simulated) {
+                UI.Tooltip.Tooltip.install(timelineButton, i18nString(UIStrings.thePerformanceMetricsAboveAre));
+            }
         }
         async function onViewTraceClick() {
             Host.userMetrics.actionTaken(Host.UserMetrics.Action.LighthouseViewTrace);
@@ -130,8 +132,8 @@ export class LighthouseReportRenderer extends self.ReportRenderer {
         }
     }
 }
-// @ts-ignore https://github.com/GoogleChrome/lighthouse/issues/11628
-export class LighthouseReportUIFeatures extends self.ReportUIFeatures {
+// @ts-expect-error https://github.com/GoogleChrome/lighthouse/issues/11628
+export class LighthouseReportUIFeatures extends LighthouseReport.ReportUIFeatures {
     _beforePrint;
     _afterPrint;
     constructor(dom) {
@@ -150,17 +152,15 @@ export class LighthouseReportUIFeatures extends self.ReportUIFeatures {
      */
     getReportHtml() {
         this.resetUIState();
-        // @ts-ignore https://github.com/GoogleChrome/lighthouse/issues/11628
+        // @ts-expect-error https://github.com/GoogleChrome/lighthouse/issues/11628
         return Lighthouse.ReportGenerator.generateReportHtml(this.json);
     }
     /**
      * Downloads a file (blob) using the system dialog prompt.
      */
     async _saveFile(blob) {
-        // @ts-ignore https://github.com/GoogleChrome/lighthouse/issues/11628
         const domain = new Common.ParsedURL.ParsedURL(this.json.finalUrl).domain();
         const sanitizedDomain = domain.replace(/[^a-z0-9.-]+/gi, '_');
-        // @ts-ignore https://github.com/GoogleChrome/lighthouse/issues/11628
         const timestamp = Platform.DateUtilities.toISO8601Compact(new Date(this.json.fetchTime));
         const ext = blob.type.match('json') ? '.json' : '.html';
         const basename = `${sanitizedDomain}-${timestamp}${ext}`;
@@ -191,11 +191,9 @@ export class LighthouseReportUIFeatures extends self.ReportUIFeatures {
         }
     }
     getDocument() {
-        // @ts-ignore https://github.com/GoogleChrome/lighthouse/issues/11628
         return this._document;
     }
     resetUIState() {
-        // @ts-ignore https://github.com/GoogleChrome/lighthouse/issues/11628
         this._resetUIState();
     }
 }

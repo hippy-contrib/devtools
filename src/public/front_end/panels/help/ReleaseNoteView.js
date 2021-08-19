@@ -6,6 +6,7 @@ import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { latestReleaseNote, releaseNoteViewId } from './HelpImpl.js';
+import releaseNoteStyles from './releaseNote.css.js';
 const UIStrings = {
     /**
     *@description Text that is usually a hyperlink to more documentation
@@ -23,7 +24,6 @@ export class ReleaseNoteView extends UI.Widget.VBox {
     _releaseNoteElement;
     constructor() {
         super(true);
-        this.registerRequiredCSS('panels/help/releaseNote.css', { enableLegacyPatching: false });
         this._releaseNoteElement = this._createReleaseNoteElement(latestReleaseNote());
         const topSection = this.contentElement.createChild('div', 'release-note-top-section');
         topSection.textContent = latestReleaseNote().header;
@@ -72,13 +72,18 @@ export class ReleaseNoteView extends UI.Widget.VBox {
         }, 'close-release-note'));
         const imageLink = UI.XLink.XLink.create(releaseNote.link, ' ');
         imageLink.classList.add('release-note-image');
-        UI.Tooltip.Tooltip.install(imageLink, latestReleaseNote().header);
+        const tooltipText = latestReleaseNote().header;
+        UI.Tooltip.Tooltip.install(imageLink, tooltipText);
         hbox.appendChild(imageLink);
         const image = imageLink.createChild('img');
         image.src = new URL('../../Images/whatsnew.avif', import.meta.url).toString();
-        UI.Tooltip.Tooltip.install(image, UI.Tooltip.Tooltip.getContent(imageLink));
-        image.alt = UI.Tooltip.Tooltip.getContent(image);
+        UI.Tooltip.Tooltip.install(image, tooltipText);
+        image.alt = tooltipText;
         return hbox;
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([releaseNoteStyles]);
     }
 }
 //# sourceMappingURL=ReleaseNoteView.js.map

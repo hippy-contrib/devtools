@@ -21,6 +21,7 @@ export declare class DebuggerWorkspaceBinding implements SDK.TargetManager.SDKMo
         targetManager: SDK.TargetManager.TargetManager | null;
         workspace: Workspace.Workspace.WorkspaceImpl | null;
     }): DebuggerWorkspaceBinding;
+    static removeInstance(): void;
     addSourceMapping(sourceMapping: DebuggerSourceMapping): void;
     _computeAutoStepRanges(mode: SDK.DebuggerModel.StepMode, callFrame: SDK.DebuggerModel.CallFrame): Promise<{
         start: SDK.DebuggerModel.Location;
@@ -48,12 +49,12 @@ export declare class DebuggerWorkspaceBinding implements SDK.TargetManager.SDKMo
     scriptsForResource(uiSourceCode: Workspace.UISourceCode.UISourceCode): SDK.Script.Script[];
     supportsConditionalBreakpoints(uiSourceCode: Workspace.UISourceCode.UISourceCode): boolean;
     sourceMapForScript(script: SDK.Script.Script): SDK.SourceMap.SourceMap | null;
-    _globalObjectCleared(event: Common.EventTarget.EventTargetEvent): void;
+    _globalObjectCleared(event: Common.EventTarget.EventTargetEvent<SDK.DebuggerModel.DebuggerModel>): void;
     _reset(debuggerModel: SDK.DebuggerModel.DebuggerModel): void;
     _resetForTest(target: SDK.Target.Target): void;
     _registerCallFrameLiveLocation(debuggerModel: SDK.DebuggerModel.DebuggerModel, location: Location): void;
     _removeLiveLocation(location: Location): void;
-    _debuggerResumed(event: Common.EventTarget.EventTargetEvent): void;
+    _debuggerResumed(event: Common.EventTarget.EventTargetEvent<SDK.DebuggerModel.DebuggerModel>): void;
 }
 declare class ModelData {
     _debuggerModel: SDK.DebuggerModel.DebuggerModel;

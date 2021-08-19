@@ -8,32 +8,19 @@ export interface AdornerSetting {
     isEnabled: boolean;
 }
 export declare type AdornerSettingsMap = Map<string, boolean>;
-export declare const AdornerRegistry: {
-    readonly GRID: {
-        readonly name: "grid";
-        readonly category: AdornerCategories.LAYOUT;
-        readonly enabledByDefault: true;
-    };
-    readonly FLEX: {
-        readonly name: "flex";
-        readonly category: AdornerCategories.LAYOUT;
-        readonly enabledByDefault: true;
-    };
-    readonly AD: {
-        readonly name: "ad";
-        readonly category: AdornerCategories.SECURITY;
-        readonly enabledByDefault: true;
-    };
-    readonly SCROLL_SNAP: {
-        readonly name: "scroll-snap";
-        readonly category: AdornerCategories.LAYOUT;
-        readonly enabledByDefault: true;
-    };
-};
-export declare const DefaultAdornerSettings: {
-    adorner: "grid" | "flex" | "ad" | "scroll-snap";
-    isEnabled: true;
-}[];
+export interface RegisteredAdorner {
+    readonly name: string;
+    readonly category: AdornerCategories;
+    readonly enabledByDefault: boolean;
+}
+export declare enum RegisteredAdorners {
+    GRID = "grid",
+    FLEX = "flex",
+    AD = "ad",
+    SCROLL_SNAP = "scroll-snap"
+}
+export declare function getRegisteredAdorner(which: RegisteredAdorners): RegisteredAdorner;
+export declare const DefaultAdornerSettings: AdornerSetting[];
 interface SettingStore<Setting> {
     get(): Setting;
     set(setting: Setting): void;
@@ -49,4 +36,6 @@ export declare class AdornerManager {
     private loadSettings;
     private syncSettings;
 }
+export declare const AdornerCategoryOrder: Map<AdornerCategories, number>;
+export declare function compareAdornerNamesByCategory(nameA: string, nameB: string): number;
 export {};

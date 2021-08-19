@@ -1,7 +1,7 @@
 import { Trie } from './Trie.js';
 export declare class TextDictionary {
-    _words: Map<string, number>;
-    _index: Trie;
+    readonly words: Map<string, number>;
+    readonly index: Trie;
     constructor();
     addWord(word: string): void;
     removeWord(word: string): void;

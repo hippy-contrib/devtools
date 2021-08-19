@@ -32,7 +32,7 @@ import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Workspace from '../workspace/workspace.js';
-import { BreakpointManager } from './BreakpointManager.js'; // eslint-disable-line no-unused-vars
+import { BreakpointManager } from './BreakpointManager.js';
 import { ContentProviderBasedProject } from './ContentProviderBasedProject.js';
 import { NetworkProject } from './NetworkProject.js';
 import { metadataForURL } from './ResourceUtils.js';
@@ -193,7 +193,7 @@ export class ResourceScriptMapping {
             this._removeScript(script);
         }
     }
-    _globalObjectCleared(_event) {
+    _globalObjectCleared() {
         const scripts = Array.from(this._acceptedScripts);
         for (const script of scripts) {
             this._removeScript(script);
@@ -206,7 +206,7 @@ export class ResourceScriptMapping {
         }
     }
     dispose() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         const scripts = Array.from(this._acceptedScripts);
         for (const script of scripts) {
             this._removeScript(script);
@@ -291,7 +291,7 @@ export class ResourceScriptFile extends Common.ObjectWrapper.ObjectWrapper {
             return;
         }
         if (!exceptionDetails) {
-            Common.Console.Console.instance().addMessage(i18nString(UIStrings.liveEditFailed, { PH1: error }), Common.Console.MessageLevel.Warning);
+            Common.Console.Console.instance().addMessage(i18nString(UIStrings.liveEditFailed, { PH1: String(error) }), Common.Console.MessageLevel.Warning);
             return;
         }
         const messageText = i18nString(UIStrings.liveEditCompileFailed, { PH1: exceptionDetails.text });

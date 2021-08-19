@@ -14,8 +14,8 @@ export declare class CSSMetadata {
     allProperties(): string[];
     nameValuePresets(includeSVG?: boolean): string[];
     isSVGProperty(name: string): boolean;
-    longhands(shorthand: string): string[] | null;
-    shorthands(longhand: string): string[] | null;
+    getLonghands(shorthand: string): string[] | null;
+    getShorthands(longhand: string): string[] | null;
     isColorAwareProperty(propertyName: string): boolean;
     isFontFamilyProperty(propertyName: string): boolean;
     isAngleAwareProperty(propertyName: string): boolean;
@@ -30,7 +30,7 @@ export declare class CSSMetadata {
     isCSSPropertyName(propertyName: string): boolean;
     isPropertyInherited(propertyName: string): boolean;
     _specificPropertyValues(propertyName: string): string[];
-    propertyValues(propertyName: string): string[];
+    getPropertyValues(propertyName: string): string[];
     propertyUsageWeight(property: string): number;
     getValuePreset(key: string, value: string): {
         text: string;

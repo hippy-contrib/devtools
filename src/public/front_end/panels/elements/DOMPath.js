@@ -16,7 +16,7 @@ export const cssPath = function (node, optimized) {
     const steps = [];
     let contextNode = node;
     while (contextNode) {
-        const step = _cssPathStep(contextNode, Boolean(optimized), contextNode === node);
+        const step = cssPathStep(contextNode, Boolean(optimized), contextNode === node);
         if (!step) {
             break;
         } // Error - bail out early.
@@ -63,9 +63,7 @@ export const jsPath = function (node, optimized) {
     }
     return result;
 };
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const _cssPathStep = function (node, optimized, isTargetNode) {
+const cssPathStep = function (node, optimized, isTargetNode) {
     if (node.nodeType() !== Node.ELEMENT_NODE) {
         return null;
     }
@@ -163,7 +161,7 @@ export const xPath = function (node, optimized) {
     const steps = [];
     let contextNode = node;
     while (contextNode) {
-        const step = _xPathValue(contextNode, optimized);
+        const step = xPathValue(contextNode, optimized);
         if (!step) {
             break;
         } // Error - bail out early.
@@ -176,11 +174,9 @@ export const xPath = function (node, optimized) {
     steps.reverse();
     return (steps.length && steps[0].optimized ? '' : '/') + steps.join('/');
 };
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const _xPathValue = function (node, optimized) {
+const xPathValue = function (node, optimized) {
     let ownValue;
-    const ownIndex = _xPathIndex(node);
+    const ownIndex = xPathIndex(node);
     if (ownIndex === -1) {
         return null;
     } // Error.
@@ -216,9 +212,7 @@ export const _xPathValue = function (node, optimized) {
     }
     return new Step(ownValue, node.nodeType() === Node.DOCUMENT_NODE);
 };
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const _xPathIndex = function (node) {
+const xPathIndex = function (node) {
     /**
      * Returns -1 in case of error, 0 if no siblings matching the same expression,
      * <XPath index among the same expression-matching sibling nodes> otherwise.

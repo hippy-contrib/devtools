@@ -40,7 +40,7 @@ export class WorkspaceSettingsTab extends UI.Widget.VBox {
     _mappingViewByPath;
     constructor() {
         super();
-        this.registerRequiredCSS('models/persistence/workspaceSettingsTab.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('models/persistence/workspaceSettingsTab.css');
         const header = this.element.createChild('header');
         UI.UIUtils.createTextChild(header.createChild('h1'), i18nString(UIStrings.workspace));
         this.containerElement = this.element.createChild('div', 'settings-container-wrapper')

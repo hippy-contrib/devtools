@@ -1,4 +1,3 @@
-import '../../third_party/lighthouse/report-assets/report.js';
 import '../../third_party/lighthouse/report-assets/report-generator.js';
 import * as LighthouseController from './LighthouseController.js';
 import * as LighthousePanel from './LighthousePanel.js';

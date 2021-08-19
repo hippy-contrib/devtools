@@ -26,6 +26,7 @@ export declare class AXBreadcrumbsPane extends AccessibilitySubPane {
     _setHoveredBreadcrumb(breadcrumb: AXBreadcrumb | null): void;
     _inspectDOMNode(axNode: SDK.AccessibilityModel.AccessibilityNode): boolean;
     _contextMenuEventFired(event: Event): void;
+    wasShown(): void;
 }
 export declare class AXBreadcrumb {
     _axNode: SDK.AccessibilityModel.AccessibilityNode;

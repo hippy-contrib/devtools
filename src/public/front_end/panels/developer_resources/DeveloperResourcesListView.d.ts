@@ -12,6 +12,7 @@ export declare class DeveloperResourcesListView extends UI.Widget.VBox {
     reset(): void;
     updateFilterAndHighlight(highlightRegExp: RegExp | null): void;
     _sortingChanged(): void;
+    wasShown(): void;
 }
 declare class GridNode extends DataGrid.SortableDataGrid.SortableDataGridNode<GridNode> {
     item: SDK.PageResourceLoader.PageResource;

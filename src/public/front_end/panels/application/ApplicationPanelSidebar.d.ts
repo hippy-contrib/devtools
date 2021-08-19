@@ -74,7 +74,7 @@ export declare class ApplicationPanelSidebar extends UI.Widget.VBox implements S
     _resetAppCache(): void;
     _treeElementAdded(event: Common.EventTarget.EventTargetEvent): void;
     _reset(): void;
-    _frameNavigated(event: Common.EventTarget.EventTargetEvent): void;
+    _frameNavigated(event: Common.EventTarget.EventTargetEvent<SDK.ResourceTreeModel.ResourceTreeFrame>): void;
     _databaseAdded(event: Common.EventTarget.EventTargetEvent): void;
     _addCookieDocument(frame: SDK.ResourceTreeModel.ResourceTreeFrame): void;
     _domStorageAdded(event: Common.EventTarget.EventTargetEvent): void;
@@ -255,9 +255,9 @@ export declare class ResourcesSection implements SDK.TargetManager.Observer {
     _frameDetached(frameId: string): void;
     _frameNavigated(frame: SDK.ResourceTreeModel.ResourceTreeFrame): void;
     _resourceAdded(resource: SDK.Resource.Resource): void;
-    _windowOpened(event: Common.EventTarget.EventTargetEvent): void;
-    _windowDestroyed(event: Common.EventTarget.EventTargetEvent): void;
-    _windowChanged(event: Common.EventTarget.EventTargetEvent): void;
+    _windowOpened(event: Common.EventTarget.EventTargetEvent<Protocol.Target.TargetInfo>): void;
+    _windowDestroyed(event: Common.EventTarget.EventTargetEvent<Protocol.Target.TargetID>): void;
+    _windowChanged(event: Common.EventTarget.EventTargetEvent<Protocol.Target.TargetInfo>): void;
     reset(): void;
 }
 export declare class FrameTreeElement extends ApplicationPanelTreeElement {

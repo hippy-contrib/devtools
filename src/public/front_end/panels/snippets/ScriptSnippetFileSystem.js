@@ -148,7 +148,14 @@ export async function evaluateScriptSnippet(uiSourceCode) {
         return;
     }
     const scriptId = scripts[scripts.length - 1].scriptId;
-    SDK.ConsoleModel.ConsoleModel.instance().addMessage(new SDK.ConsoleModel.ConsoleMessage(runtimeModel, "javascript" /* Javascript */, "info" /* Info */, '', SDK.ConsoleModel.FrontendMessageType.Result, url, undefined, undefined, [result.object], undefined, undefined, executionContext.id, scriptId));
+    const details = {
+        type: SDK.ConsoleModel.FrontendMessageType.Result,
+        url,
+        parameters: [result.object],
+        executionContextId: executionContext.id,
+        scriptId,
+    };
+    SDK.ConsoleModel.ConsoleModel.instance().addMessage(new SDK.ConsoleModel.ConsoleMessage(runtimeModel, "javascript" /* Javascript */, "info" /* Info */, '', details));
 }
 export function isSnippetsUISourceCode(uiSourceCode) {
     return uiSourceCode.url().startsWith('snippet://');

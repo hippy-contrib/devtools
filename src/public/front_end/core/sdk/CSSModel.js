@@ -38,7 +38,7 @@ import { CSSMedia } from './CSSMedia.js';
 import { CSSStyleRule } from './CSSRule.js';
 import { CSSStyleDeclaration, Type } from './CSSStyleDeclaration.js';
 import { CSSStyleSheetHeader } from './CSSStyleSheetHeader.js';
-import { DOMModel } from './DOMModel.js'; // eslint-disable-line no-unused-vars
+import { DOMModel } from './DOMModel.js';
 import { Events as ResourceTreeModelEvents, ResourceTreeModel } from './ResourceTreeModel.js';
 import { Capability } from './Target.js';
 import { SDKModel } from './SDKModel.js';
@@ -96,7 +96,7 @@ export class CSSModel extends SDKModel {
     }
     headersForSourceURL(sourceURL) {
         const headers = [];
-        for (const headerId of this.styleSheetIdsForURL(sourceURL)) {
+        for (const headerId of this.getStyleSheetIdsForURL(sourceURL)) {
             const header = this.styleSheetHeaderForId(headerId);
             if (header) {
                 headers.push(header);
@@ -224,8 +224,6 @@ export class CSSModel extends SDKModel {
     isEnabled() {
         return this._isEnabled;
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async _enable() {
         await this._agent.invoke_enable();
         this._isEnabled = true;
@@ -334,6 +332,23 @@ export class CSSModel extends SDKModel {
             }
             this._domModel.markUndoableState();
             const edit = new Edit(styleSheetId, range, newMediaText, media);
+            this._fireStyleSheetChanged(styleSheetId, edit);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+    async setContainerQueryText(styleSheetId, range, newContainerQueryText) {
+        Host.userMetrics.actionTaken(Host.UserMetrics.Action.StyleRuleEdited);
+        try {
+            await this._ensureOriginalStyleSheetText(styleSheetId);
+            const { containerQuery } = await this._agent.invoke_setContainerQueryText({ styleSheetId, range, text: newContainerQueryText });
+            if (!containerQuery) {
+                return false;
+            }
+            this._domModel.markUndoableState();
+            const edit = new Edit(styleSheetId, range, newContainerQueryText, containerQuery);
             this._fireStyleSheetChanged(styleSheetId, edit);
             return true;
         }
@@ -465,7 +480,7 @@ export class CSSModel extends SDKModel {
         this._sourceMapManager.detachSourceMap(header);
         this.dispatchEventToListeners(Events.StyleSheetRemoved, header);
     }
-    styleSheetIdsForURL(url) {
+    getStyleSheetIdsForURL(url) {
         const frameIdToStyleSheetIds = this._styleSheetIdsForURL.get(url);
         if (!frameIdToStyleSheetIds) {
             return [];
@@ -517,16 +532,12 @@ export class CSSModel extends SDKModel {
     _resetFontFaces() {
         this._fontFaces.clear();
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async suspendModel() {
         this._isEnabled = false;
         await this._agent.invoke_disable();
         this._resetStyleSheets();
         this._resetFontFaces();
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async resumeModel() {
         return this._enable();
     }

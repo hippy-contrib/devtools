@@ -533,7 +533,6 @@
       self.SDK.consoleModel.addEventListener(SDK.ConsoleModel.Events.MessageAdded, firstConsoleMessageReceived, this);
     }
 
-
     function firstConsoleMessageReceived(event) {
       if (event && event.data.source === Protocol.Log.LogEntrySource.Violation) {
         return;
@@ -650,8 +649,7 @@
 
       function checkMetrics(consoleResult) {
         test.assertEquals(
-            JSON.stringify(JSON.stringify(metrics)), consoleResult,
-            'Wrong metrics for params: ' + JSON.stringify(params));
+            `'${JSON.stringify(metrics)}'`, consoleResult, 'Wrong metrics for params: ' + JSON.stringify(params));
         callback();
       }
     }
@@ -709,8 +707,8 @@
     }
 
     function onResultOfInput(value) {
-      // Console adds "" around the response.
-      test.assertEquals('"Abbf"', value);
+      // Console adds '' around the response.
+      test.assertEquals('\'Abbf\'', value);
       test.releaseControl();
     }
 
@@ -1421,7 +1419,6 @@
     childFrameOutput = 'Event type: mousedown button: 0 x: 30 y: 40 Event type: mouseup button: 0 x: 30 y: 50';
     this.assertEquals(childFrameOutput, await takeLogs(self.SDK.targetManager.targets()[1]));
 
-
     await inputAgent.invoke_dispatchKeyEvent({type: 'keyDown', key: 'a'});
     await runtimeAgent.invoke_evaluate({expression: "document.querySelector('iframe').focus()"});
     await inputAgent.invoke_dispatchKeyEvent({type: 'keyDown', key: 'a'});
@@ -1653,7 +1650,6 @@
       }
     }
   };
-
 
   window.uiTests = new TestSuite(window.domAutomationController);
 })(window);

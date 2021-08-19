@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import { ViewManager } from './ViewManager.js';
-import { VBox } from './Widget.js'; // eslint-disable-line no-unused-vars
+import { VBox } from './Widget.js';
 export class SimpleView extends VBox {
     _title;
     constructor(title, isWebComponent) {

@@ -5,11 +5,10 @@ import * as Common from '../../core/common/common.js';
 import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
 let contrastCheckTriggerInstance = null;
-export class ContrastCheckTrigger extends Common.ObjectWrapper.ObjectWrapper {
+export class ContrastCheckTrigger {
     pageLoadListeners = new WeakMap();
     frameAddedListeners = new WeakMap();
     constructor() {
-        super();
         SDK.TargetManager.TargetManager.instance().observeModels(SDK.ResourceTreeModel.ResourceTreeModel, this);
     }
     static instance({ forceNew } = { forceNew: false }) {
@@ -25,11 +24,11 @@ export class ContrastCheckTrigger extends Common.ObjectWrapper.ObjectWrapper {
     modelRemoved(resourceTreeModel) {
         const pageLoadListener = this.pageLoadListeners.get(resourceTreeModel);
         if (pageLoadListener) {
-            Common.EventTarget.EventTarget.removeEventListeners([pageLoadListener]);
+            Common.EventTarget.removeEventListeners([pageLoadListener]);
         }
         const frameAddedListeners = this.frameAddedListeners.get(resourceTreeModel);
         if (frameAddedListeners) {
-            Common.EventTarget.EventTarget.removeEventListeners([frameAddedListeners]);
+            Common.EventTarget.removeEventListeners([frameAddedListeners]);
         }
     }
     checkContrast(resourceTreeModel) {

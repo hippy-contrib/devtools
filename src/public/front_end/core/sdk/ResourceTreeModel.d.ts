@@ -3,13 +3,14 @@ import type * as ProtocolProxyApi from '../../generated/protocol-proxy-api.js';
 import * as Protocol from '../../generated/protocol.js';
 import type { DeferredDOMNode, DOMNode } from './DOMModel.js';
 import { DOMModel } from './DOMModel.js';
+import type { RequestUpdateDroppedEventData } from './NetworkManager.js';
 import type { NetworkRequest } from './NetworkRequest.js';
 import { Resource } from './Resource.js';
 import { ExecutionContext } from './RuntimeModel.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
 import { SecurityOriginManager } from './SecurityOriginManager.js';
-export declare class ResourceTreeModel extends SDKModel {
+export declare class ResourceTreeModel extends SDKModel<EventTypes> {
     _agent: ProtocolProxyApi.PageApi;
     _securityOriginManager: SecurityOriginManager;
     _frames: Map<string, ResourceTreeFrame>;
@@ -36,8 +37,8 @@ export declare class ResourceTreeModel extends SDKModel {
     _frameNavigated(framePayload: Protocol.Page.Frame, type: Protocol.Page.NavigationType | undefined): void;
     _documentOpened(framePayload: Protocol.Page.Frame): void;
     _frameDetached(frameId: string, isSwap: boolean): void;
-    _onRequestFinished(event: Common.EventTarget.EventTargetEvent): void;
-    _onRequestUpdateDropped(event: Common.EventTarget.EventTargetEvent): void;
+    _onRequestFinished(event: Common.EventTarget.EventTargetEvent<NetworkRequest>): void;
+    _onRequestUpdateDropped(event: Common.EventTarget.EventTargetEvent<RequestUpdateDroppedEventData>): void;
     frameForId(frameId: string): ResourceTreeFrame | null;
     forAllResources(callback: (arg0: Resource) => boolean): boolean;
     frames(): ResourceTreeFrame[];
@@ -89,6 +90,34 @@ export declare enum Events {
     InterstitialHidden = "InterstitialHidden",
     BackForwardCacheDetailsUpdated = "BackForwardCacheDetailsUpdated"
 }
+export declare type EventTypes = {
+    [Events.FrameAdded]: ResourceTreeFrame;
+    [Events.FrameNavigated]: ResourceTreeFrame;
+    [Events.FrameDetached]: {
+        frame: ResourceTreeFrame;
+        isSwap: boolean;
+    };
+    [Events.FrameResized]: void;
+    [Events.FrameWillNavigate]: ResourceTreeFrame;
+    [Events.MainFrameNavigated]: ResourceTreeFrame;
+    [Events.ResourceAdded]: Resource;
+    [Events.WillLoadCachedResources]: void;
+    [Events.CachedResourcesLoaded]: ResourceTreeModel;
+    [Events.DOMContentLoaded]: number;
+    [Events.LifecycleEvent]: {
+        frameId: string;
+        name: string;
+    };
+    [Events.Load]: {
+        resourceTreeModel: ResourceTreeModel;
+        loadTime: number;
+    };
+    [Events.PageReloadRequested]: ResourceTreeModel;
+    [Events.WillReloadPage]: void;
+    [Events.InterstitialShown]: void;
+    [Events.InterstitialHidden]: void;
+    [Events.BackForwardCacheDetailsUpdated]: ResourceTreeFrame;
+};
 export declare class ResourceTreeFrame {
     _model: ResourceTreeModel;
     _sameTargetParentFrame: ResourceTreeFrame | null;
@@ -101,16 +130,18 @@ export declare class ResourceTreeFrame {
     _securityOrigin: string | null;
     _mimeType: string | null;
     _unreachableUrl: string;
-    _adFrameType: Protocol.Page.AdFrameType;
+    _adFrameStatus?: Protocol.Page.AdFrameStatus;
     _secureContextType: Protocol.Page.SecureContextType | null;
     _crossOriginIsolatedContextType: Protocol.Page.CrossOriginIsolatedContextType | null;
     _gatedAPIFeatures: Protocol.Page.GatedAPIFeatures[] | null;
+    private originTrials;
     private creationStackTrace;
     private creationStackTraceTarget;
     _childFrames: Set<ResourceTreeFrame>;
     _resourcesMap: Map<string, Resource>;
     backForwardCacheDetails: {
         restoredFromCache: boolean | undefined;
+        explanations: Protocol.Page.BackForwardCacheNotRestoredExplanation[];
     };
     constructor(model: ResourceTreeModel, parentFrame: ResourceTreeFrame | null, frameId: string, payload: Protocol.Page.Frame | null, creationStackTrace: Protocol.Runtime.StackTrace | null);
     isSecureContext(): boolean;
@@ -118,6 +149,7 @@ export declare class ResourceTreeFrame {
     isCrossOriginIsolated(): boolean;
     getCrossOriginIsolatedContextType(): Protocol.Page.CrossOriginIsolatedContextType | null;
     getGatedAPIFeatures(): Protocol.Page.GatedAPIFeatures[] | null;
+    getOriginTrials(): Protocol.Page.OriginTrial[] | null;
     getCreationStackTraceData(): {
         creationStackTrace: Protocol.Runtime.StackTrace | null;
         creationStackTraceTarget: Target;
@@ -132,6 +164,7 @@ export declare class ResourceTreeFrame {
     unreachableUrl(): string;
     get loaderId(): string;
     adFrameType(): Protocol.Page.AdFrameType;
+    adFrameStatus(): Protocol.Page.AdFrameStatus | undefined;
     get childFrames(): ResourceTreeFrame[];
     /**
      * Returns the parent frame if both frames are part of the same process/target.
@@ -173,6 +206,7 @@ export declare class ResourceTreeFrame {
         creationStackTrace: Protocol.Runtime.StackTrace | null;
         creationStackTraceTarget: Target;
     }): void;
+    setBackForwardCacheDetails(event: Protocol.Page.BackForwardCacheNotUsedEvent): void;
 }
 export declare class PageDispatcher implements ProtocolProxyApi.PageDispatcher {
     _resourceTreeModel: ResourceTreeModel;

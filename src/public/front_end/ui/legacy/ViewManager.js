@@ -8,10 +8,10 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as ARIAUtils from './ARIAUtils.js';
 import { Icon } from './Icon.js';
 import { Events as TabbedPaneEvents, TabbedPane } from './TabbedPane.js';
-import { Toolbar, ToolbarMenuButton } from './Toolbar.js'; // eslint-disable-line no-unused-vars
+import { Toolbar, ToolbarMenuButton } from './Toolbar.js';
 import { createTextChild } from './UIUtils.js';
 import { getRegisteredLocationResolvers, getRegisteredViewExtensions, maybeRemoveViewExtension, registerLocationResolver, registerViewExtension, ViewLocationCategoryValues } from './ViewRegistration.js';
-import { VBox } from './Widget.js'; // eslint-disable-line no-unused-vars
+import { VBox } from './Widget.js';
 const UIStrings = {
     /**
     *@description Aria label for the tab panel view container
@@ -115,7 +115,7 @@ export class ViewManager {
             views.sort((firstView, secondView) => {
                 const firstViewOrder = firstView.order();
                 const secondViewOrder = secondView.order();
-                if (firstViewOrder && secondViewOrder) {
+                if (firstViewOrder !== undefined && secondViewOrder !== undefined) {
                     return firstViewOrder - secondViewOrder;
                 }
                 return 0;
@@ -339,7 +339,7 @@ export class _ExpandableContainerWidget extends VBox {
     constructor(view) {
         super(true);
         this.element.classList.add('flex-none');
-        this.registerRequiredCSS('ui/legacy/viewContainers.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/viewContainers.css');
         this._titleElement = document.createElement('div');
         this._titleElement.classList.add('expandable-view-title');
         ARIAUtils.markAsButton(this._titleElement);

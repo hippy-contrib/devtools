@@ -23,6 +23,7 @@ export declare class ConsolePrompt extends UI.Widget.Widget {
     belowEditorElement(): Element;
     _onTextChanged(): void;
     _requestPreview(): Promise<void>;
+    wasShown(): void;
     willHide(): void;
     history(): ConsoleHistoryManager;
     clearAutocomplete(): void;

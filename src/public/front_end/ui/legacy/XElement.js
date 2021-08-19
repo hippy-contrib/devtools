@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import * as ComponentHelpers from '../components/helpers/helpers.js';
 /* eslint-disable rulesdir/no_underscored_properties */
+// eslint-disable-next-line rulesdir/check_component_naming
 export class XElement extends HTMLElement {
     static get observedAttributes() {
         return [

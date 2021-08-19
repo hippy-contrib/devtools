@@ -51,8 +51,8 @@ export declare class Cache {
     _model: ServiceWorkerCacheModel;
     securityOrigin: string;
     cacheName: string;
-    cacheId: string;
-    constructor(model: ServiceWorkerCacheModel, securityOrigin: string, cacheName: string, cacheId: string);
+    cacheId: Protocol.CacheStorage.CacheId;
+    constructor(model: ServiceWorkerCacheModel, securityOrigin: string, cacheName: string, cacheId: Protocol.CacheStorage.CacheId);
     equals(cache: Cache): boolean;
     toString(): string;
     requestCachedResponse(url: string, requestHeaders: NameValue[]): Promise<Protocol.CacheStorage.CachedResponse | null>;

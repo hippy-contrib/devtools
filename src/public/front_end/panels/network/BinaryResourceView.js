@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
-import * as Common from '../../core/common/common.js'; // eslint-disable-line no-unused-vars
+import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SourceFrame from '../../ui/legacy/components/source_frame/source_frame.js';
@@ -66,7 +66,7 @@ export class BinaryResourceView extends UI.Widget.VBox {
     _lastView;
     constructor(base64content, contentUrl, resourceType) {
         super();
-        this.registerRequiredCSS('panels/network/binaryResourceView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/network/binaryResourceView.css');
         this._binaryResourceViewFactory =
             new SourceFrame.BinaryResourceViewFactory.BinaryResourceViewFactory(base64content, contentUrl, resourceType);
         this._toolbar = new UI.Toolbar.Toolbar('binary-view-toolbar', this.element);

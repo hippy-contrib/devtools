@@ -7,10 +7,15 @@ import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
+import * as EmulationModel from '../../models/emulation/emulation.js';
+/* eslint-disable rulesdir/es_modules_import */
+import reportStyles from '../../third_party/lighthouse/report-assets/report.css.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as Emulation from '../emulation/emulation.js';
 import { Events, LighthouseController } from './LighthouseController.js';
+import lighthousePanelStyles from './lighthousePanel.css.js';
 import { ProtocolService } from './LighthouseProtocolService.js';
+import * as LighthouseReport from '../../third_party/lighthouse/report/report.js';
 import { LighthouseReportRenderer, LighthouseReportUIFeatures } from './LighthouseReportRenderer.js';
 import { Item, ReportSelector } from './LighthouseReportSelector.js';
 import { StartView } from './LighthouseStartView.js';
@@ -68,8 +73,6 @@ export class LighthousePanel extends UI.Panel.Panel {
     _isLHAttached;
     constructor() {
         super('lighthouse');
-        this.registerRequiredCSS('third_party/lighthouse/report-assets/report.css', { enableLegacyPatching: false });
-        this.registerRequiredCSS('panels/lighthouse/lighthousePanel.css', { enableLegacyPatching: false });
         this._protocolService = new ProtocolService();
         this._controller = new LighthouseController(this._protocolService);
         this._startView = new StartView(this._controller);
@@ -208,7 +211,7 @@ export class LighthousePanel extends UI.Panel.Panel {
             return;
         }
         const reportContainer = this._auditResultsElement.createChild('div', 'lh-vars lh-root lh-devtools');
-        const dom = new DOM(this._auditResultsElement.ownerDocument);
+        const dom = new LighthouseReport.DOM(this._auditResultsElement.ownerDocument);
         const renderer = new LighthouseReportRenderer(dom);
         const templatesHTML = Root.Runtime.cachedResources.get('third_party/lighthouse/report-assets/templates.html');
         if (!templatesHTML) {
@@ -246,7 +249,7 @@ export class LighthousePanel extends UI.Panel.Panel {
         if (!resourceTreeModel) {
             return;
         }
-        return resourceTreeModel.once(SDK.ResourceTreeModel.Events.Load);
+        await resourceTreeModel.once(SDK.ResourceTreeModel.Events.Load);
     }
     _buildReportUI(lighthouseResult, artifacts) {
         if (lighthouseResult === null) {
@@ -326,7 +329,7 @@ export class LighthousePanel extends UI.Panel.Panel {
      */
     async _setupEmulationAndProtocolConnection() {
         const flags = this._controller.getFlags();
-        const emulationModel = Emulation.DeviceModeModel.DeviceModeModel.instance();
+        const emulationModel = EmulationModel.DeviceModeModel.DeviceModeModel.instance();
         this._stateBefore = {
             emulation: {
                 enabled: emulationModel.enabledSetting().get(),
@@ -338,14 +341,14 @@ export class LighthousePanel extends UI.Panel.Panel {
         emulationModel.toolbarControlsEnabledSetting().set(false);
         if ('emulatedFormFactor' in flags && flags.emulatedFormFactor === 'desktop') {
             emulationModel.enabledSetting().set(false);
-            emulationModel.emulate(Emulation.DeviceModeModel.Type.None, null, null);
+            emulationModel.emulate(EmulationModel.DeviceModeModel.Type.None, null, null);
         }
         else if (flags.emulatedFormFactor === 'mobile') {
             emulationModel.enabledSetting().set(true);
             emulationModel.deviceOutlineSetting().set(true);
-            for (const device of Emulation.EmulatedDevices.EmulatedDevicesList.instance().standard()) {
+            for (const device of EmulationModel.EmulatedDevices.EmulatedDevicesList.instance().standard()) {
                 if (device.title === 'Moto G4') {
-                    emulationModel.emulate(Emulation.DeviceModeModel.Type.Device, device, device.modes[0], 1);
+                    emulationModel.emulate(EmulationModel.DeviceModeModel.Type.Device, device, device.modes[0], 1);
                 }
             }
         }
@@ -359,7 +362,7 @@ export class LighthousePanel extends UI.Panel.Panel {
         this._isLHAttached = false;
         await this._protocolService.detach();
         if (this._stateBefore) {
-            const emulationModel = Emulation.DeviceModeModel.DeviceModeModel.instance();
+            const emulationModel = EmulationModel.DeviceModeModel.DeviceModeModel.instance();
             emulationModel.enabledSetting().set(this._stateBefore.emulation.enabled);
             emulationModel.deviceOutlineSetting().set(this._stateBefore.emulation.outlineEnabled);
             emulationModel.toolbarControlsEnabledSetting().set(this._stateBefore.emulation.toolbarControlsEnabled);
@@ -378,6 +381,10 @@ export class LighthousePanel extends UI.Panel.Panel {
         // reload to reset the page state
         const inspectedURL = await this._controller.getInspectedURL();
         await resourceTreeModel.navigate(inspectedURL);
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([lighthousePanelStyles, reportStyles]);
     }
 }
 //# sourceMappingURL=LighthousePanel.js.map

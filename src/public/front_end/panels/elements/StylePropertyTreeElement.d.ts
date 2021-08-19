@@ -57,7 +57,7 @@ export declare class StylePropertyTreeElement extends UI.TreeOutline.TreeElement
     updateTitle(): void;
     _innerUpdateTitle(): void;
     _updateFontVariationSettingsWarning(): Promise<void>;
-    _mouseUp(event: Event): void;
+    _mouseUp(event: MouseEvent): void;
     _handleContextMenuEvent(context: Context, event: Event): void;
     _handleCopyContextMenuEvent(event: Event): void;
     _viewComputedValue(): Promise<void>;

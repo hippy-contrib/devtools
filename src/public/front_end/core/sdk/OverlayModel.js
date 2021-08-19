@@ -6,7 +6,7 @@ import * as Common from '../common/common.js';
 import * as i18n from '../i18n/i18n.js';
 import * as Root from '../root/root.js';
 import { DebuggerModel, Events as DebuggerModelEvents } from './DebuggerModel.js';
-import { DeferredDOMNode, DOMModel, Events as DOMModelEvents } from './DOMModel.js'; // eslint-disable-line no-unused-vars
+import { DeferredDOMNode, DOMModel, Events as DOMModelEvents } from './DOMModel.js';
 import { OverlayPersistentHighlighter } from './OverlayPersistentHighlighter.js';
 import { Capability } from './Target.js';
 import { SDKModel } from './SDKModel.js';
@@ -183,7 +183,7 @@ export class OverlayModel extends SDKModel {
         await this._overlayAgent.invoke_setShowViewportSizeOnResize({ show: this._showViewportSizeOnResize });
     }
     async suspendModel() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._registeredListeners);
+        Common.EventTarget.removeEventListeners(this._registeredListeners);
         await this._overlayAgent.invoke_disable();
     }
     async resumeModel() {
@@ -378,7 +378,7 @@ export class OverlayModel extends SDKModel {
         const showRulers = Common.Settings.Settings.instance().moduleSetting('showMetricsRulers').get();
         const colorFormat = Common.Settings.Settings.instance().moduleSetting('colorFormat').get();
         const highlightConfig = {
-            showInfo: mode === 'all',
+            showInfo: mode === 'all' || mode === 'container-outline',
             showRulers: showRulers,
             showStyles: showDetailedToolip,
             showAccessibilityInfo: showDetailedToolip,
@@ -564,6 +564,14 @@ export class OverlayModel extends SDKModel {
                 },
                 flexibilityArrow: {
                     color: Common.Color.PageHighlight.LayoutLine.toProtocolRGBA(),
+                },
+            };
+        }
+        if (mode === 'container-outline') {
+            highlightConfig.containerQueryContainerHighlightConfig = {
+                containerBorder: {
+                    color: Common.Color.PageHighlight.LayoutLine.toProtocolRGBA(),
+                    pattern: "dashed" /* Dashed */,
                 },
             };
         }

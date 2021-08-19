@@ -89,7 +89,7 @@ export declare class ScreencastView extends UI.Widget.VBox implements SDK.Overla
     _navigateToHistoryEntry(offset: number): void;
     _navigateReload(): void;
     _navigationUrlKeyUp(event: KeyboardEvent): void;
-    _requestNavigationHistoryEvent(_event: Common.EventTarget.EventTargetEvent): void;
+    _requestNavigationHistoryEvent(): void;
     _requestNavigationHistory(): Promise<void>;
     _focusNavigationBar(): boolean;
 }
@@ -107,8 +107,8 @@ export declare class ProgressTracker {
     _onMainFrameNavigated(): void;
     _onLoad(): void;
     _navigationProgressVisible(): boolean;
-    _onRequestStarted(event: Common.EventTarget.EventTargetEvent): void;
-    _onRequestFinished(event: Common.EventTarget.EventTargetEvent): void;
+    _onRequestStarted(event: Common.EventTarget.EventTargetEvent<SDK.NetworkManager.RequestStartedEvent>): void;
+    _onRequestFinished(event: Common.EventTarget.EventTargetEvent<SDK.NetworkRequest.NetworkRequest>): void;
     _updateProgress(progress: number): void;
     _displayProgress(progress: number): void;
 }

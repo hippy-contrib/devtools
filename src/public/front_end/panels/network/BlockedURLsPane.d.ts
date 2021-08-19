@@ -29,5 +29,5 @@ export declare class BlockedURLsPane extends UI.Widget.VBox implements UI.ListWi
     _blockedRequestsCount(url: string): number;
     _matches(pattern: string, url: string): boolean;
     reset(): void;
-    _onRequestFinished(event: Common.EventTarget.EventTargetEvent): void;
+    _onRequestFinished(event: Common.EventTarget.EventTargetEvent<SDK.NetworkRequest.NetworkRequest>): void;
 }

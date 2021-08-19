@@ -46,6 +46,12 @@ export function hasIssueOfCategory(obj, category) {
     return issuesAssociatedWith(issues, obj).some(issue => issue.getCategory() === category);
 }
 export async function reveal(obj, category) {
+    if (typeof obj === 'string') {
+        const issue = IssuesManager.instance().getIssueById(obj);
+        if (issue) {
+            return Common.Revealer.reveal(issue);
+        }
+    }
     const issues = Array.from(IssuesManager.instance().issues());
     const candidates = issuesAssociatedWith(issues, obj).filter(issue => !category || issue.getCategory() === category);
     if (candidates.length > 0) {

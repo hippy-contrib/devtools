@@ -97,4 +97,9 @@ export function findTitleFromMarkdownAst(markdownAst) {
     }
     return markdownAst[0].text;
 }
+export async function getIssueTitleFromMarkdownDescription(description) {
+    const rawMarkdown = await getMarkdownFileContent(description.file);
+    const markdownAst = Marked.Marked.lexer(rawMarkdown);
+    return findTitleFromMarkdownAst(markdownAst);
+}
 //# sourceMappingURL=MarkdownIssueDescription.js.map

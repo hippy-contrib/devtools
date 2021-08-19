@@ -84,7 +84,7 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
     _visibleWidth;
     _clipboardNodeData;
     _isXMLMimeType;
-    _suppressRevealAndSelect;
+    suppressRevealAndSelect = false;
     _previousHoveredElement;
     _treeElementBeingDragged;
     _dragOverTreeElement;
@@ -93,7 +93,7 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
         super();
         this.treeElementByNode = new WeakMap();
         const shadowContainer = document.createElement('div');
-        this._shadowRoot = UI.Utils.createShadowRootWithCoreStyles(shadowContainer, { cssFile: 'panels/elements/elementsTreeOutline.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        this._shadowRoot = UI.Utils.createShadowRootWithCoreStyles(shadowContainer, { cssFile: 'panels/elements/elementsTreeOutline.css', delegatesFocus: undefined });
         const outlineDisclosureElement = this._shadowRoot.createChild('div', 'elements-disclosure');
         this._element = this.element;
         this._element.classList.add('elements-tree-outline', 'source-code');
@@ -436,14 +436,8 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
         treeElement = this.createTreeElementFor(node.parentNode);
         return treeElement ? this._showChild(treeElement, node) : null;
     }
-    set suppressRevealAndSelect(x) {
-        if (this._suppressRevealAndSelect === x) {
-            return;
-        }
-        this._suppressRevealAndSelect = x;
-    }
     _revealAndSelectNode(node, omitFocus) {
-        if (this._suppressRevealAndSelect) {
+        if (this.suppressRevealAndSelect) {
             return;
         }
         if (!this._includeRootDOMNode && node === this.rootDOMNode && this.rootDOMNode) {
@@ -512,7 +506,7 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
             return;
         }
         this.setHoverEffect(element);
-        this._highlightTreeElement(element, !UI.KeyboardShortcut.KeyboardShortcut.eventHasCtrlOrMeta(event));
+        this._highlightTreeElement(element, !UI.KeyboardShortcut.KeyboardShortcut.eventHasEitherCtrlOrMeta(event));
     }
     _highlightTreeElement(element, showInfo) {
         if (element instanceof ElementsTreeElement) {
@@ -694,7 +688,7 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
         if (!treeElement) {
             return;
         }
-        if (UI.KeyboardShortcut.KeyboardShortcut.eventHasCtrlOrMeta(keyboardEvent) && node.parentNode) {
+        if (UI.KeyboardShortcut.KeyboardShortcut.eventHasCtrlEquivalentKey(keyboardEvent) && node.parentNode) {
             if (keyboardEvent.key === 'ArrowUp' && node.previousSibling) {
                 node.moveTo(node.parentNode, node.previousSibling, this.selectNodeAfterEdit.bind(this, treeElement.expanded));
                 keyboardEvent.consume(true);
@@ -871,12 +865,12 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
         }
     }
     _attributeModified(event) {
-        const node = event.data.node;
+        const { node } = event.data;
         this._addUpdateRecord(node).attributeModified(event.data.name);
         this._updateModifiedNodesSoon();
     }
     _attributeRemoved(event) {
-        const node = event.data.node;
+        const { node } = event.data;
         this._addUpdateRecord(node).attributeRemoved(event.data.name);
         this._updateModifiedNodesSoon();
     }
@@ -895,10 +889,9 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
         this._updateModifiedNodesSoon();
     }
     _nodeRemoved(event) {
-        const node = event.data.node;
-        const parentNode = event.data.parent;
+        const { node, parent } = event.data;
         this.resetClipboardIfNeeded(node);
-        this._addUpdateRecord(parentNode).nodeRemoved(node);
+        this._addUpdateRecord(parent).nodeRemoved(node);
         this._updateModifiedNodesSoon();
     }
     _childNodeCountUpdated(event) {

@@ -180,7 +180,7 @@ export const categorizePropertyName = (propertyName) => {
     if (categories.length > 0) {
         return categories;
     }
-    const shorthands = cssMetadata.shorthands(canonicalName);
+    const shorthands = cssMetadata.getShorthands(canonicalName);
     if (shorthands) {
         for (const shorthand of shorthands) {
             const shorthandCategories = matchCategoriesByPropertyName(shorthand);

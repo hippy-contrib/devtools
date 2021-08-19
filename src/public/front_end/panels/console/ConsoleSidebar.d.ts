@@ -14,6 +14,7 @@ export declare class ConsoleSidebar extends UI.Widget.VBox {
     onMessageAdded(viewMessage: ConsoleViewMessage): void;
     shouldBeVisible(viewMessage: ConsoleViewMessage): boolean;
     _selectionChanged(event: Common.EventTarget.EventTargetEvent): void;
+    wasShown(): void;
 }
 export declare const enum Events {
     FilterSelected = "FilterSelected"

@@ -13,11 +13,11 @@ export declare const enum IssueCode {
     AttributionUntrustworthyOrigin = "AttributionReportingIssue::AttributionUntrustworthyOrigin"
 }
 export declare class AttributionReportingIssue extends Issue<IssueCode> {
-    private issueDetails;
+    issueDetails: Readonly<Protocol.Audits.AttributionReportingIssueDetails>;
     constructor(issueDetails: Protocol.Audits.AttributionReportingIssueDetails, issuesModel: SDK.IssuesModel.IssuesModel);
     getCategory(): IssueCategory;
     getDescription(): MarkdownIssueDescription;
     primaryKey(): string;
     getKind(): IssueKind;
-    static fromInspectorIssue(issuesModel: SDK.IssuesModel.IssuesModel, inspectorDetails: Protocol.Audits.InspectorIssueDetails): AttributionReportingIssue[];
+    static fromInspectorIssue(issuesModel: SDK.IssuesModel.IssuesModel, inspectorIssue: Protocol.Audits.InspectorIssue): AttributionReportingIssue[];
 }

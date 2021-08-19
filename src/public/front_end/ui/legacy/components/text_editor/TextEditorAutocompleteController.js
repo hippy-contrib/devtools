@@ -53,7 +53,6 @@ export class TextEditorAutocompleteController {
         this._tooltipElement.classList.add('autocomplete-tooltip');
         const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(this._tooltipGlassPane.contentElement, {
             cssFile: 'ui/legacy/components/text_editor/autocompleteTooltip.css',
-            enableLegacyPatching: false,
             delegatesFocus: undefined,
         });
         shadowRoot.appendChild(this._tooltipElement);

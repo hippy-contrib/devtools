@@ -17,7 +17,7 @@ export interface CoreOrProtocolAxProperty {
 export declare class AccessibilityNode {
     _accessibilityModel: AccessibilityModel;
     _agent: ProtocolProxyApi.AccessibilityApi;
-    _id: string;
+    _id: Protocol.Accessibility.AXNodeId;
     _backendDOMNodeId: number | null;
     _deferredDOMNode: DeferredDOMNode | null;
     _ignored: boolean;
@@ -30,7 +30,7 @@ export declare class AccessibilityNode {
     _childIds: string[] | null;
     _parentNode: AccessibilityNode | null;
     constructor(accessibilityModel: AccessibilityModel, payload: Protocol.Accessibility.AXNode);
-    id(): string;
+    id(): Protocol.Accessibility.AXNodeId;
     accessibilityModel(): AccessibilityModel;
     ignored(): boolean;
     ignoredReasons(): Protocol.Accessibility.AXProperty[] | null;
@@ -50,7 +50,7 @@ export declare class AccessibilityNode {
     numChildren(): number;
     hasOnlyUnloadedChildren(): boolean;
 }
-export declare class AccessibilityModel extends SDKModel {
+export declare class AccessibilityModel extends SDKModel<void> {
     _agent: ProtocolProxyApi.AccessibilityApi;
     _axIdToAXNode: Map<string, AccessibilityNode>;
     _backendDOMNodeIdToAXNode: Map<any, any>;
@@ -60,7 +60,7 @@ export declare class AccessibilityModel extends SDKModel {
     suspendModel(): Promise<void>;
     requestPartialAXTree(node: DOMNode): Promise<void>;
     requestRootNode(depth?: number): Promise<AccessibilityNode | undefined>;
-    requestAXChildren(nodeId: string): Promise<AccessibilityNode[]>;
+    requestAXChildren(nodeId: Protocol.Accessibility.AXNodeId): Promise<AccessibilityNode[]>;
     /**
      *
      * @param {!DOMNode} node

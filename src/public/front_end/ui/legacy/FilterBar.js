@@ -36,7 +36,7 @@ import { Icon } from './Icon.js';
 import { KeyboardShortcut, Modifiers } from './KeyboardShortcut.js';
 import { bindCheckbox } from './SettingsUI.js';
 import { Events, TextPrompt } from './TextPrompt.js';
-import { ToolbarSettingToggle } from './Toolbar.js'; // eslint-disable-line no-unused-vars
+import { ToolbarSettingToggle } from './Toolbar.js';
 import { Tooltip } from './Tooltip.js';
 import { CheckboxLabel, createTextChild } from './UIUtils.js';
 import { HBox } from './Widget.js';
@@ -58,6 +58,10 @@ const UIStrings = {
     *@description Text for everything
     */
     allStrings: 'All',
+    /**
+     * @description Hover text for button to clear the filter that is applied
+     */
+    clearFilter: 'Clear input',
 };
 const str_ = i18n.i18n.registerUIStrings('ui/legacy/FilterBar.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -70,7 +74,7 @@ export class FilterBar extends HBox {
     _showingWidget;
     constructor(name, visibleByDefault) {
         super();
-        this.registerRequiredCSS('ui/legacy/filter.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/filter.css');
         this._enabled = true;
         this.element.classList.add('filter-bar');
         this._stateSetting =
@@ -86,7 +90,7 @@ export class FilterBar extends HBox {
     addFilter(filter) {
         this._filters.push(filter);
         this.element.appendChild(filter.element());
-        filter.addEventListener(FilterUI.Events.FilterChanged, this._filterChanged, this);
+        filter.addEventListener("FilterChanged" /* FilterChanged */, this._filterChanged, this);
         this._updateFilterButton();
     }
     setEnabled(enabled) {
@@ -103,7 +107,7 @@ export class FilterBar extends HBox {
     }
     _filterChanged(_event) {
         this._updateFilterButton();
-        this.dispatchEventToListeners(FilterBar.Events.Changed);
+        this.dispatchEventToListeners("Changed" /* Changed */);
     }
     wasShown() {
         super.wasShown();
@@ -151,23 +155,6 @@ export class FilterBar extends HBox {
         return this._alwaysShowFilters || (this._stateSetting.get() && this._enabled);
     }
 }
-(function (FilterBar) {
-    // TODO(crbug.com/1167717): Make this a const enum again
-    // eslint-disable-next-line rulesdir/const_enum
-    let Events;
-    (function (Events) {
-        Events["Changed"] = "Changed";
-    })(Events = FilterBar.Events || (FilterBar.Events = {}));
-})(FilterBar || (FilterBar = {}));
-export var FilterUI;
-(function (FilterUI) {
-    // TODO(crbug.com/1167717): Make this a const enum again
-    // eslint-disable-next-line rulesdir/const_enum
-    let Events;
-    (function (Events) {
-        Events["FilterChanged"] = "FilterChanged";
-    })(Events = FilterUI.Events || (FilterUI.Events = {}));
-})(FilterUI || (FilterUI = {}));
 export class TextFilterUI extends Common.ObjectWrapper.ObjectWrapper {
     _filterElement;
     _filterInputElement;
@@ -188,7 +175,8 @@ export class TextFilterUI extends Common.ObjectWrapper.ObjectWrapper {
         this._prompt.addEventListener(Events.TextChanged, this._valueChanged.bind(this));
         this._suggestionProvider = null;
         const clearButton = container.createChild('div', 'filter-input-clear-button');
-        clearButton.appendChild(Icon.create('mediumicon-gray-cross-hover', 'filter-cancel-button'));
+        Tooltip.install(clearButton, i18nString(UIStrings.clearFilter));
+        clearButton.appendChild(Icon.create('mediumicon-gray-cross-active', 'filter-cancel-button'));
         clearButton.addEventListener('click', () => {
             this.clear();
             this.focus();
@@ -222,7 +210,7 @@ export class TextFilterUI extends Common.ObjectWrapper.ObjectWrapper {
         this._suggestionProvider = suggestionProvider;
     }
     _valueChanged() {
-        this.dispatchEventToListeners(FilterUI.Events.FilterChanged, null);
+        this.dispatchEventToListeners("FilterChanged" /* FilterChanged */, null);
         this._updateEmptyStyles();
     }
     _updateEmptyStyles() {
@@ -299,7 +287,7 @@ export class NamedBitSetFilterUI extends Common.ObjectWrapper.ObjectWrapper {
             element.classList.toggle('selected', active);
             ARIAUtils.setSelected(element, active);
         }
-        this.dispatchEventToListeners(FilterUI.Events.FilterChanged, null);
+        this.dispatchEventToListeners("FilterChanged" /* FilterChanged */, null);
     }
     _addBit(name, label, title) {
         const typeFilterElement = this._filtersElement.createChild('span', name);
@@ -428,7 +416,7 @@ export class CheckboxFilterUI extends Common.ObjectWrapper.ObjectWrapper {
         return this._label;
     }
     _fireUpdated() {
-        this.dispatchEventToListeners(FilterUI.Events.FilterChanged, null);
+        this.dispatchEventToListeners("FilterChanged" /* FilterChanged */, null);
     }
     setColor(backgroundColor, borderColor) {
         this._label.backgroundColor = backgroundColor;

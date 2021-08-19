@@ -33,7 +33,7 @@ import * as Common from '../common/common.js';
 import * as i18n from '../i18n/i18n.js';
 import * as Platform from '../platform/platform.js';
 import { CompilerSourceMappingContentProvider } from './CompilerSourceMappingContentProvider.js';
-import { PageResourceLoader } from './PageResourceLoader.js'; // eslint-disable-line no-unused-vars
+import { PageResourceLoader } from './PageResourceLoader.js';
 const UIStrings = {
     /**
     *@description Error message when failing to load a source map text via the network
@@ -95,16 +95,6 @@ export class SourceMapEntry {
             return entry1.lineNumber - entry2.lineNumber;
         }
         return entry1.columnNumber - entry2.columnNumber;
-    }
-}
-export class EditResult {
-    map;
-    compiledEdits;
-    newSources;
-    constructor(map, compiledEdits, newSources) {
-        this.map = map;
-        this.compiledEdits = compiledEdits;
-        this.newSources = newSources;
     }
 }
 const base64Digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';

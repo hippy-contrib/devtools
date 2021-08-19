@@ -35,6 +35,7 @@ import * as UI from '../../ui/legacy/legacy.js';
 import { RequestHTMLView } from './RequestHTMLView.js';
 import { RequestResponseView } from './RequestResponseView.js';
 import { SignedExchangeInfoView } from './SignedExchangeInfoView.js';
+import { WebBundleInfoView } from './components/WebBundleInfoView.js';
 const UIStrings = {
     /**
     *@description Text in Request Preview View of the Network panel
@@ -65,7 +66,7 @@ export class RequestPreviewView extends RequestResponseView {
     async _htmlPreview() {
         const contentData = await this.request.contentData();
         if (contentData.error) {
-            return new UI.EmptyWidget.EmptyWidget(i18nString(UIStrings.failedToLoadResponseData));
+            return new UI.EmptyWidget.EmptyWidget(i18nString(UIStrings.failedToLoadResponseData) + ': ' + contentData.error);
         }
         const allowlist = new Set(['text/html', 'text/plain', 'application/xhtml+xml']);
         if (!allowlist.has(this.request.mimeType)) {
@@ -83,6 +84,9 @@ export class RequestPreviewView extends RequestResponseView {
     async createPreview() {
         if (this.request.signedExchangeInfo()) {
             return new SignedExchangeInfoView(this.request);
+        }
+        if (this.request.webBundleInfo()) {
+            return new WebBundleInfoView(this.request);
         }
         const htmlErrorPreview = await this._htmlPreview();
         if (htmlErrorPreview) {

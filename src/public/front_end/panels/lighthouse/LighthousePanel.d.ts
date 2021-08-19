@@ -3,7 +3,7 @@ import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { Events, LighthouseController } from './LighthouseController.js';
 import { ProtocolService } from './LighthouseProtocolService.js';
-import type * as ReportRenderer from './LighthouseReporterTypes.js';
+import type { ReportJSON, RunnerResultArtifacts } from './LighthouseReporterTypes.js';
 import { ReportSelector } from './LighthouseReportSelector.js';
 import { StartView } from './LighthouseStartView.js';
 import { StatusView } from './LighthouseStatusView.js';
@@ -14,7 +14,7 @@ export declare class LighthousePanel extends UI.Panel.Panel {
     _statusView: StatusView;
     _warningText: null;
     _unauditableExplanation: null;
-    _cachedRenderedReports: Map<ReportRenderer.ReportJSON, HTMLElement>;
+    _cachedRenderedReports: Map<ReportJSON, HTMLElement>;
     _dropTarget: UI.DropTarget.DropTarget;
     _auditResultsElement: HTMLElement;
     _clearButton: UI.Toolbar.ToolbarButton;
@@ -51,9 +51,9 @@ export declare class LighthousePanel extends UI.Panel.Panel {
     _renderStatusView(inspectedURL: string): void;
     _beforePrint(): void;
     _afterPrint(): void;
-    _renderReport(lighthouseResult: ReportRenderer.ReportJSON, artifacts?: ReportRenderer.RunnerResultArtifacts): void;
+    _renderReport(lighthouseResult: ReportJSON, artifacts?: RunnerResultArtifacts): void;
     _waitForMainTargetLoad(): Promise<void>;
-    _buildReportUI(lighthouseResult: ReportRenderer.ReportJSON, artifacts?: ReportRenderer.RunnerResultArtifacts): void;
+    _buildReportUI(lighthouseResult: ReportJSON, artifacts?: RunnerResultArtifacts): void;
     _handleDrop(dataTransfer: DataTransfer): void;
     _loadedFromFile(report: string): void;
     _startLighthouse(_event: Common.EventTarget.EventTargetEvent): Promise<void>;
@@ -67,4 +67,5 @@ export declare class LighthousePanel extends UI.Panel.Panel {
      */
     _setupEmulationAndProtocolConnection(): Promise<void>;
     _resetEmulationAndProtocolConnection(): Promise<void>;
+    wasShown(): void;
 }

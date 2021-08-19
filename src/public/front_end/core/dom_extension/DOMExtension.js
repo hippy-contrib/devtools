@@ -249,18 +249,14 @@ self.createElement = function (tagName, customElementType) {
 self.createTextNode = function (data) {
     return document.createTextNode(data);
 };
-Document.prototype.createElementWithClass = function (elementName, className, customElementType) {
-    const element = this.createElement(elementName, { is: customElementType });
-    if (className) {
-        element.className = className;
-    }
-    return element;
-};
 self.createDocumentFragment = function () {
     return document.createDocumentFragment();
 };
 Element.prototype.createChild = function (elementName, className, customElementType) {
-    const element = this.ownerDocument.createElementWithClass(elementName, className, customElementType);
+    const element = document.createElement(elementName, { is: customElementType });
+    if (className) {
+        element.className = className;
+    }
     this.appendChild(element);
     return element;
 };

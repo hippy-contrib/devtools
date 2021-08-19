@@ -1,3 +1,4 @@
+import * as I18n from '../../third_party/i18n/i18n.js';
 import * as Platform from '../platform/platform.js';
 import { DevToolsLocale } from './DevToolsLocale.js';
 import type * as i18nTypes from './i18nTypes.js';
@@ -10,6 +11,10 @@ import type * as i18nTypes from './i18nTypes.js';
  * If `locale` isn't provided, the default is used.
  */
 export declare function lookupClosestSupportedDevToolsLocale(locale: string): string;
+/**
+ * Returns a list of all supported DevTools locales, including pseudo locales.
+ */
+export declare function getAllSupportedDevToolsLocales(): string[];
 /**
  * Fetches the locale data of the specified locale.
  * Callers have to ensure that `locale` is an officilly supported locale.
@@ -24,19 +29,21 @@ export declare function fetchAndRegisterLocaleData(locale: Intl.UnicodeBCP47Loca
  * strings are lazily localized when they are used. This is used for instance in the
  * meta files used to register module extensions.
  */
-export declare function getLazilyComputedLocalizedString(str_: (id: string, values: Object) => Platform.UIString.LocalizedString, id: string, values?: Object): () => Platform.UIString.LocalizedString;
+export declare function getLazilyComputedLocalizedString(registeredStrings: I18n.LocalizedStringSet.RegisteredFileStrings, id: string, values?: i18nTypes.Values): () => Platform.UIString.LocalizedString;
 /**
  * Retrieve the localized string.
  */
-export declare function getLocalizedString(str_: (id: string, values: Object) => Platform.UIString.LocalizedString, id: string, values?: Object): Platform.UIString.LocalizedString;
+export declare function getLocalizedString(registeredStrings: I18n.LocalizedStringSet.RegisteredFileStrings, id: string, values?: i18nTypes.Values): Platform.UIString.LocalizedString;
 /**
  * Register a file's UIStrings with i18n, return function to generate the string ids.
  */
-export declare function registerUIStrings(path: string, stringStructure: Object): (id: string, values: Object) => Platform.UIString.LocalizedString;
+export declare function registerUIStrings(path: string, stringStructure: {
+    [key: string]: string;
+}): I18n.LocalizedStringSet.RegisteredFileStrings;
 /**
  * Returns a span element that may contains other DOM element as placeholders
  */
-export declare function getFormatLocalizedString(str_: (id: string, values: Object) => Platform.UIString.LocalizedString, stringId: string, placeholders: Record<string, Object>): Element;
+export declare function getFormatLocalizedString(registeredStrings: I18n.LocalizedStringSet.RegisteredFileStrings, stringId: string, placeholders: Record<string, Object>): Element;
 export declare function formatLocalized(formattedString: string, args: Array<Object>): Element;
 export declare function serializeUIString(string: string, values?: Record<string, Object>): string;
 export declare function deserializeUIString(serializedMessage: string): i18nTypes.SerializedMessage;
@@ -59,6 +66,3 @@ export declare function lockedLazyString(str: string): () => Platform.UIString.L
  * representation is written in English.
  */
 export declare function getLocalizedLanguageRegion(localeString: Intl.UnicodeBCP47LocaleIdentifier, devtoolsLocale: DevToolsLocale): Platform.UIString.LocalizedString;
-export declare const preciseMillisToString: (ms: number, precision?: number | undefined) => string;
-export declare const millisToString: (ms: number, higherResolution?: boolean | undefined) => string;
-export declare const secondsToString: (seconds: number, higherResolution?: boolean | undefined) => string;

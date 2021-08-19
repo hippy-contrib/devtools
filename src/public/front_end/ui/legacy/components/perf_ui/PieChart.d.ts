@@ -12,6 +12,7 @@ export interface PieChartData {
     slices: Slice[];
 }
 export declare class PieChart extends HTMLElement {
+    static readonly litTagName: import("../../../lit-html/static.js").Static;
     private readonly shadow;
     private chartName;
     private size;
@@ -23,6 +24,7 @@ export declare class PieChart extends HTMLElement {
     private sliceSelected;
     private readonly innerR;
     private lastAngle;
+    connectedCallback(): void;
     set data(data: PieChartData);
     private render;
     private onSliceClicked;

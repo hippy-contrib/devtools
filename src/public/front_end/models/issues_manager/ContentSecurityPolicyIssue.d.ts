@@ -4,7 +4,7 @@ import { Issue, IssueCategory, IssueKind } from './Issue.js';
 import type { MarkdownIssueDescription } from './MarkdownIssueDescription.js';
 export declare class ContentSecurityPolicyIssue extends Issue {
     private issueDetails;
-    constructor(issueDetails: Protocol.Audits.ContentSecurityPolicyIssueDetails, issuesModel: SDK.IssuesModel.IssuesModel);
+    constructor(issueDetails: Protocol.Audits.ContentSecurityPolicyIssueDetails, issuesModel: SDK.IssuesModel.IssuesModel, issueId?: Protocol.Audits.IssueId);
     getCategory(): IssueCategory;
     primaryKey(): string;
     getDescription(): MarkdownIssueDescription | null;

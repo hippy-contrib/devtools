@@ -45,8 +45,6 @@ const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 export class CPUProfilerModel extends SDKModel {
     _isRecording;
     _nextAnonymousConsoleProfileNumber;
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _anonymousConsoleProfileIdToTitle;
     _profilerAgent;
     _preciseCoverageDeltaUpdateCallback;
@@ -73,7 +71,8 @@ export class CPUProfilerModel extends SDKModel {
             title = i18nString(UIStrings.profileD, { PH1: this._nextAnonymousConsoleProfileNumber++ });
             this._anonymousConsoleProfileIdToTitle.set(id, title);
         }
-        this._dispatchProfileEvent(Events.ConsoleProfileStarted, id, location, title);
+        const eventData = this.createEventDataFrom(id, location, title);
+        this.dispatchEventToListeners(Events.ConsoleProfileStarted, eventData);
     }
     consoleProfileFinished({ id, location, profile, title }) {
         if (!title) {
@@ -82,26 +81,26 @@ export class CPUProfilerModel extends SDKModel {
         }
         // Make sure ProfilesPanel is initialized and CPUProfileType is created.
         Root.Runtime.Runtime.instance().loadModulePromise('profiler').then(() => {
-            this._dispatchProfileEvent(Events.ConsoleProfileFinished, id, location, title, profile);
+            const eventData = {
+                ...this.createEventDataFrom(id, location, title),
+                cpuProfile: profile,
+            };
+            this.dispatchEventToListeners(Events.ConsoleProfileFinished, eventData);
         });
     }
-    _dispatchProfileEvent(eventName, id, scriptLocation, title, cpuProfile) {
+    createEventDataFrom(id, scriptLocation, title) {
         const debuggerLocation = Location.fromPayload(this._debuggerModel, scriptLocation);
         const globalId = this.target().id() + '.' + id;
-        const data = {
+        return {
             id: globalId,
             scriptLocation: debuggerLocation,
-            cpuProfile: cpuProfile,
-            title: title,
+            title: title || '',
             cpuProfilerModel: this,
         };
-        this.dispatchEventToListeners(eventName, data);
     }
     isRecordingProfile() {
         return this._isRecording;
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     startRecording() {
         this._isRecording = true;
         const intervalUs = 100;
@@ -124,8 +123,6 @@ export class CPUProfilerModel extends SDKModel {
         const coverage = (r && r.result) || [];
         return { timestamp, coverage };
     }
-    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stopPreciseCoverage() {
         this._preciseCoverageDeltaUpdateCallback = null;
         return this._profilerAgent.invoke_stopPreciseCoverage();

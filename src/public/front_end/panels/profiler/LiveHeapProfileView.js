@@ -62,7 +62,7 @@ export class LiveHeapProfileView extends UI.Widget.VBox {
     constructor() {
         super(true);
         this._gridNodeByUrl = new Map();
-        this.registerRequiredCSS('panels/profiler/liveHeapProfile.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/profiler/liveHeapProfile.css');
         this._setting = Common.Settings.Settings.instance().moduleSetting('memoryLiveHeapProfile');
         const toolbar = new UI.Toolbar.Toolbar('live-heap-profile-toolbar', this.contentElement);
         this._toggleRecordAction =

@@ -151,12 +151,12 @@ export class IDBDatabaseView extends UI.Widget.VBox {
         super();
         this._model = model;
         const databaseName = database ? database.databaseId.name : i18nString(UIStrings.loading);
-        this.registerRequiredCSS('panels/application/indexedDBViews.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/application/indexedDBViews.css');
         this.contentElement.classList.add('indexed-db-container');
         // TODO(crbug.com/1156978): Replace UI.ReportView.ReportView with ReportView.ts web component.
         this._reportView = new UI.ReportView.ReportView(databaseName);
         this._reportView.show(this.contentElement);
-        this._reportView.registerRequiredCSS('panels/application/indexedDBViews.css', { enableLegacyPatching: false });
+        this._reportView.registerRequiredCSS('panels/application/indexedDBViews.css');
         this._reportView.element.classList.add('indexed-db-header');
         const bodySection = this._reportView.appendSection('');
         this._securityOriginElement = bodySection.appendField(i18nString(UIStrings.securityOrigin));
@@ -224,7 +224,7 @@ export class IDBDataView extends UI.View.SimpleView {
     _summaryBarElement;
     constructor(model, databaseId, objectStore, index, refreshObjectStoreCallback) {
         super(i18nString(UIStrings.idb));
-        this.registerRequiredCSS('panels/application/indexedDBViews.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/application/indexedDBViews.css');
         this._model = model;
         this._databaseId = databaseId;
         this._isIndex = Boolean(index);

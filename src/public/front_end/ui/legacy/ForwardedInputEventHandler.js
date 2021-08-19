@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as Host from '../../core/host/host.js';
-import { Context } from './Context.js'; // eslint-disable-line no-unused-vars
+import { Context } from './Context.js';
 import { KeyboardShortcut } from './KeyboardShortcut.js';
-import { ForwardedShortcut, ShortcutRegistry } from './ShortcutRegistry.js'; // eslint-disable-line no-unused-vars
+import { ForwardedShortcut, ShortcutRegistry } from './ShortcutRegistry.js';
 export class ForwardedInputEventHandler {
     constructor() {
         Host.InspectorFrontendHost.InspectorFrontendHostInstance.events.addEventListener(Host.InspectorFrontendHostAPI.Events.KeyEventUnhandled, this._onKeyEventUnhandled, this);

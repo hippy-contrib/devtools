@@ -34,7 +34,7 @@ import * as ARIAUtils from './ARIAUtils.js';
 import { Size } from './Geometry.js';
 import { AnchorBehavior, GlassPane } from './GlassPane.js';
 import { Icon } from './Icon.js';
-import { ListControl, ListMode } from './ListControl.js'; // eslint-disable-line no-unused-vars
+import { ListControl, ListMode } from './ListControl.js';
 import { ListModel } from './ListModel.js';
 import { measurePreferredSize } from './UIUtils.js';
 import { createShadowRootWithCoreStyles } from './utils/create-shadow-root-with-core-styles.js';
@@ -47,6 +47,11 @@ const UIStrings = {
     *@example {5} PH3
     */
     sSuggestionSOfS: '{PH1}, suggestion {PH2} of {PH3}',
+    /**
+    *@description Aria alert to confirm the suggestion when it is selected from the suggestion box
+    *@example {name} PH1
+    */
+    sSuggestionSSelected: '{PH1}, suggestion selected',
 };
 const str_ = i18n.i18n.registerUIStrings('ui/legacy/SuggestBox.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -77,7 +82,7 @@ export class SuggestBox {
         this._glassPane = new GlassPane();
         this._glassPane.setAnchorBehavior(AnchorBehavior.PreferBottom);
         this._glassPane.setOutsideClickCallback(this.hide.bind(this));
-        const shadowRoot = createShadowRootWithCoreStyles(this._glassPane.contentElement, { cssFile: 'ui/legacy/suggestBox.css', enableLegacyPatching: false, delegatesFocus: undefined });
+        const shadowRoot = createShadowRootWithCoreStyles(this._glassPane.contentElement, { cssFile: 'ui/legacy/suggestBox.css', delegatesFocus: undefined });
         shadowRoot.appendChild(this._element);
     }
     visible() {
@@ -134,13 +139,21 @@ export class SuggestBox {
     }
     _applySuggestion(isIntermediateSuggestion) {
         if (this._onlyCompletion) {
-            ARIAUtils.alert(i18nString(UIStrings.sSuggestionSOfS, { PH1: this._onlyCompletion.text, PH2: this._list.selectedIndex() + 1, PH3: this._items.length }));
+            isIntermediateSuggestion ?
+                ARIAUtils.alert(i18nString(UIStrings.sSuggestionSOfS, { PH1: this._onlyCompletion.text, PH2: this._list.selectedIndex() + 1, PH3: this._items.length })) :
+                ARIAUtils.alert(i18nString(UIStrings.sSuggestionSSelected, { PH1: this._onlyCompletion.text }));
             this._suggestBoxDelegate.applySuggestion(this._onlyCompletion, isIntermediateSuggestion);
             return true;
         }
         const suggestion = this._list.selectedItem();
         if (suggestion && suggestion.text) {
-            ARIAUtils.alert(i18nString(UIStrings.sSuggestionSOfS, { PH1: suggestion.title || suggestion.text, PH2: this._list.selectedIndex() + 1, PH3: this._items.length }));
+            isIntermediateSuggestion ?
+                ARIAUtils.alert(i18nString(UIStrings.sSuggestionSOfS, {
+                    PH1: suggestion.title || suggestion.text,
+                    PH2: this._list.selectedIndex() + 1,
+                    PH3: this._items.length,
+                })) :
+                ARIAUtils.alert(i18nString(UIStrings.sSuggestionSSelected, { PH1: suggestion.title || suggestion.text }));
         }
         this._suggestBoxDelegate.applySuggestion(suggestion, isIntermediateSuggestion);
         return this.visible() && Boolean(suggestion);

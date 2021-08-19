@@ -12,14 +12,14 @@ import * as TimelineModel from '../../models/timeline_model/timeline_model.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { CountersGraph } from './CountersGraph.js';
-import { Events as PerformanceModelEvents } from './PerformanceModel.js'; // eslint-disable-line no-unused-vars
+import { Events as PerformanceModelEvents } from './PerformanceModel.js';
 import { TimelineDetailsView } from './TimelineDetailsView.js';
 import { TimelineRegExp } from './TimelineFilters.js';
 import { Events as TimelineFlameChartDataProviderEvents, TimelineFlameChartDataProvider } from './TimelineFlameChartDataProvider.js';
 import { TimelineFlameChartNetworkDataProvider } from './TimelineFlameChartNetworkDataProvider.js';
-import { TimelineSelection } from './TimelinePanel.js'; // eslint-disable-line no-unused-vars
+import { TimelineSelection } from './TimelinePanel.js';
 import { AggregatedTimelineTreeView } from './TimelineTreeView.js';
-import { TimelineUIUtils } from './TimelineUIUtils.js'; // eslint-disable-line no-unused-vars
+import { TimelineUIUtils } from './TimelineUIUtils.js';
 import { WebVitalsIntegrator } from './WebVitalsTimelineUtils.js';
 const UIStrings = {
     /**
@@ -261,7 +261,7 @@ export class TimelineFlameChartView extends UI.Widget.VBox {
         if (model === this._model) {
             return;
         }
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         this._model = model;
         this._selectedTrack = null;
         this._mainDataProvider.setModel(this._model);
@@ -488,7 +488,7 @@ export class TimelineFlameChartMarker {
         if (this._style.lowPriority) {
             return null;
         }
-        const startTime = i18n.i18n.millisToString(this._startOffset);
+        const startTime = i18n.TimeUtilities.millisToString(this._startOffset);
         return i18nString(UIStrings.sAtS, { PH1: this._style.title, PH2: startTime });
     }
     draw(context, x, height, pixelsPerMillisecond) {

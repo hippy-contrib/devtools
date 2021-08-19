@@ -8,6 +8,7 @@ import * as IconButton from '../../../ui/components/icon_button/icon_button.js';
 import * as ReportView from '../../../ui/components/report_view/report_view.js';
 import * as UI from '../../../ui/legacy/legacy.js';
 import * as LitHtml from '../../../ui/lit-html/lit-html.js';
+import requestTrustTokensViewStyles from './RequestTrustTokensView.css.js';
 const UIStrings = {
     /**
     *@description Section heading in the Trust Token tab
@@ -104,11 +105,15 @@ export class RequestTrustTokensView extends UI.Widget.VBox {
     }
 }
 export class RequestTrustTokensReport extends HTMLElement {
+    static litTagName = LitHtml.literal `devtools-trust-token-report`;
     shadow = this.attachShadow({ mode: 'open' });
     trustTokenData;
     set data(data) {
         this.trustTokenData = data;
         this.render();
+    }
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [requestTrustTokensViewStyles];
     }
     render() {
         if (!this.trustTokenData) {
@@ -116,27 +121,7 @@ export class RequestTrustTokensReport extends HTMLElement {
         }
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
-        LitHtml.render(LitHtml.html `
-      <style>
-        .code {
-          font-family: var(--monospace-font-family);
-          font-size: var(--monospace-font-size);
-        }
-
-        .issuers-list {
-          display: flex;
-          flex-direction: column;
-          list-style-type: none;
-          padding: 0;
-          margin: 0;
-        }
-
-        .status-icon {
-          margin: 0 0.3em 2px 0;
-          vertical-align: middle;
-        }
-      </style>
-      <${ReportView.ReportView.Report.litTagName}>
+        LitHtml.render(LitHtml.html `<${ReportView.ReportView.Report.litTagName}>
         ${this.renderParameterSection()}
         ${this.renderResultSection()}
       </${ReportView.ReportView.Report.litTagName}>

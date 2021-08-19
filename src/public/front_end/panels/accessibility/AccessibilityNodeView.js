@@ -6,6 +6,7 @@ import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import accessibilityNodeStyles from './accessibilityNode.css.js';
 import { AXAttributes, AXNativeSourceTypes, AXSourceTypes } from './AccessibilityStrings.js';
 import { AccessibilitySubPane } from './AccessibilitySubPane.js';
 const UIStrings = {
@@ -123,7 +124,6 @@ export class AXNodeSubPane extends AccessibilitySubPane {
         this._treeOutline = this.createTreeOutline();
         this._ignoredReasonsTree = this.createTreeOutline();
         this.element.classList.add('accessibility-computed');
-        this.registerRequiredCSS('panels/accessibility/accessibilityNode.css', { enableLegacyPatching: false });
         this._treeOutline.setFocusable(true);
     }
     setAXNode(axNode) {
@@ -191,6 +191,10 @@ export class AXNodeSubPane extends AccessibilitySubPane {
     setNode(node) {
         super.setNode(node);
         this._axNode = null;
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([accessibilityNodeStyles]);
     }
 }
 export class AXNodePropertyTreeElement extends UI.TreeOutline.TreeElement {

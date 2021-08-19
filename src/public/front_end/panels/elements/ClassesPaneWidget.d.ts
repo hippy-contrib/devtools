@@ -13,7 +13,7 @@ export declare class ClassesPaneWidget extends UI.Widget.Widget {
     _splitTextIntoClasses(text: string): string[];
     _onKeyDown(event: KeyboardEvent): void;
     _onTextChanged(): void;
-    _onDOMMutated(event: Common.EventTarget.EventTargetEvent): void;
+    _onDOMMutated(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMNode>): void;
     _onSelectedNodeChanged(event: Common.EventTarget.EventTargetEvent): void;
     wasShown(): void;
     _update(): void;

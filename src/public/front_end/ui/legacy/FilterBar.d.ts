@@ -27,19 +27,15 @@ export declare class FilterBar extends HBox {
     setting(): Common.Settings.Setting<boolean>;
     visible(): boolean;
 }
-export declare namespace FilterBar {
-    enum Events {
-        Changed = "Changed"
-    }
+export declare const enum FilterBarEvents {
+    Changed = "Changed"
 }
 export interface FilterUI extends Common.EventTarget.EventTarget {
     isActive(): boolean;
     element(): Element;
 }
-export declare namespace FilterUI {
-    enum Events {
-        FilterChanged = "FilterChanged"
-    }
+export declare const enum FilterUIEvents {
+    FilterChanged = "FilterChanged"
 }
 export declare class TextFilterUI extends Common.ObjectWrapper.ObjectWrapper implements FilterUI {
     _filterElement: HTMLDivElement;

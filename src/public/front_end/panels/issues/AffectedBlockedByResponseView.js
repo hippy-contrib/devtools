@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
+import * as IssuesManager from '../../models/issues_manager/issues_manager.js';
+import * as Host from '../../core/host/host.js';
 import { AffectedResourcesView } from './AffectedResourcesView.js';
 const UIStrings = {
     /**
@@ -48,7 +50,11 @@ export class AffectedBlockedByResponseView extends AffectedResourcesView {
     appendDetail(details) {
         const element = document.createElement('tr');
         element.classList.add('affected-resource-row');
-        const requestCell = this.createRequestCell(details.request);
+        const requestCell = this.createRequestCell(details.request, {
+            additionalOnClickAction() {
+                Host.userMetrics.issuesPanelResourceOpened(IssuesManager.Issue.IssueCategory.CrossOriginEmbedderPolicy, "Request" /* Request */);
+            },
+        });
         element.appendChild(requestCell);
         if (details.parentFrame) {
             const frameUrl = this.createFrameCell(details.parentFrame.frameId, this.issue);

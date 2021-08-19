@@ -5,7 +5,7 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { SearchConfig } from './SearchConfig.js'; // eslint-disable-line no-unused-vars
+import { SearchConfig } from './SearchConfig.js';
 import { SearchResultsPane } from './SearchResultsPane.js';
 const UIStrings = {
     /**
@@ -101,7 +101,7 @@ export class SearchView extends UI.Widget.VBox {
     constructor(settingKey) {
         super(true);
         this.setMinimumSize(0, 40);
-        this.registerRequiredCSS('panels/search/searchView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/search/searchView.css');
         this._focusOnShow = false;
         this._isIndexing = false;
         this._searchId = 1;

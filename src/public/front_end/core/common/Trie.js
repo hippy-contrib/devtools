@@ -1,116 +1,111 @@
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-/* eslint-disable rulesdir/no_underscored_properties */
 export class Trie {
-    _size;
-    _root;
-    _edges;
-    _isWord;
-    _wordsInSubtree;
-    _freeNodes;
+    size;
+    root;
+    edges;
+    isWord;
+    wordsInSubtree;
+    freeNodes;
     constructor() {
-        this._root = 0;
+        this.root = 0;
         this.clear();
     }
     add(word) {
-        let node = this._root;
-        ++this._wordsInSubtree[this._root];
+        let node = this.root;
+        ++this.wordsInSubtree[this.root];
         for (let i = 0; i < word.length; ++i) {
             const edge = word[i];
-            let next = this._edges[node][edge];
+            let next = this.edges[node][edge];
             if (!next) {
-                if (this._freeNodes.length) {
-                    next = this._freeNodes.pop();
+                if (this.freeNodes.length) {
+                    next = this.freeNodes.pop();
                 }
                 else {
-                    next = this._size++;
-                    this._isWord.push(false);
-                    this._wordsInSubtree.push(0);
-                    // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    this._edges.push({ __proto__: null });
+                    next = this.size++;
+                    this.isWord.push(false);
+                    this.wordsInSubtree.push(0);
+                    this.edges.push(Object.create(null));
                 }
-                this._edges[node][edge] = next;
+                this.edges[node][edge] = next;
             }
-            ++this._wordsInSubtree[next];
+            ++this.wordsInSubtree[next];
             node = next;
         }
-        this._isWord[node] = true;
+        this.isWord[node] = true;
     }
     remove(word) {
         if (!this.has(word)) {
             return false;
         }
-        let node = this._root;
-        --this._wordsInSubtree[this._root];
+        let node = this.root;
+        --this.wordsInSubtree[this.root];
         for (let i = 0; i < word.length; ++i) {
             const edge = word[i];
-            const next = this._edges[node][edge];
-            if (!--this._wordsInSubtree[next]) {
-                delete this._edges[node][edge];
-                this._freeNodes.push(next);
+            const next = this.edges[node][edge];
+            if (!--this.wordsInSubtree[next]) {
+                delete this.edges[node][edge];
+                this.freeNodes.push(next);
             }
             node = next;
         }
-        this._isWord[node] = false;
+        this.isWord[node] = false;
         return true;
     }
     has(word) {
-        let node = this._root;
+        let node = this.root;
         for (let i = 0; i < word.length; ++i) {
-            node = this._edges[node][word[i]];
+            node = this.edges[node][word[i]];
             if (!node) {
                 return false;
             }
         }
-        return this._isWord[node];
+        return this.isWord[node];
     }
     words(prefix) {
         prefix = prefix || '';
-        let node = this._root;
+        let node = this.root;
         for (let i = 0; i < prefix.length; ++i) {
-            node = this._edges[node][prefix[i]];
+            node = this.edges[node][prefix[i]];
             if (!node) {
                 return [];
             }
         }
         const results = [];
-        this._dfs(node, prefix, results);
+        this.dfs(node, prefix, results);
         return results;
     }
-    _dfs(node, prefix, results) {
-        if (this._isWord[node]) {
+    dfs(node, prefix, results) {
+        if (this.isWord[node]) {
             results.push(prefix);
         }
-        const edges = this._edges[node];
+        const edges = this.edges[node];
         for (const edge in edges) {
-            this._dfs(edges[edge], prefix + edge, results);
+            this.dfs(edges[edge], prefix + edge, results);
         }
     }
     longestPrefix(word, fullWordOnly) {
-        let node = this._root;
+        let node = this.root;
         let wordIndex = 0;
         for (let i = 0; i < word.length; ++i) {
-            node = this._edges[node][word[i]];
+            node = this.edges[node][word[i]];
             if (!node) {
                 break;
             }
-            if (!fullWordOnly || this._isWord[node]) {
+            if (!fullWordOnly || this.isWord[node]) {
                 wordIndex = i + 1;
             }
         }
         return word.substring(0, wordIndex);
     }
     clear() {
-        this._size = 1;
-        this._root = 0;
-        // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this._edges = [{ __proto__: null }];
-        this._isWord = [false];
-        this._wordsInSubtree = [0];
-        this._freeNodes = [];
+        this.size = 1;
+        this.root = 0;
+        this.edges = [Object.create(null)];
+        this.isWord = [false];
+        this.wordsInSubtree = [0];
+        this.freeNodes = [];
     }
 }
 //# sourceMappingURL=Trie.js.map

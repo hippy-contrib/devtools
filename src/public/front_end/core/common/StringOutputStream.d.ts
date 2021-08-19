@@ -3,7 +3,7 @@ export interface OutputStream {
     close(): Promise<void>;
 }
 export declare class StringOutputStream implements OutputStream {
-    _data: string;
+    private dataInternal;
     constructor();
     write(chunk: string): Promise<void>;
     close(): Promise<void>;

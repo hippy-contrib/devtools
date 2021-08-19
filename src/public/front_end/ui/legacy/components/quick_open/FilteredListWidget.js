@@ -55,7 +55,7 @@ export class FilteredListWidget extends UI.Widget.VBox {
         const listener = this._onKeyDown.bind(this);
         this.contentElement.addEventListener('keydown', listener, true);
         UI.ARIAUtils.markAsCombobox(this.contentElement);
-        this.registerRequiredCSS('ui/legacy/components/quick_open/filteredListWidget.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/components/quick_open/filteredListWidget.css');
         this._promptElement = this.contentElement.createChild('div', 'filtered-list-widget-input');
         UI.ARIAUtils.setAccessibleName(this._promptElement, i18nString(UIStrings.quickOpenPrompt));
         this._promptElement.setAttribute('spellcheck', 'false');

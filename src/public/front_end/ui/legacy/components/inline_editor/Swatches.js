@@ -5,7 +5,7 @@
 import * as Common from '../../../../core/common/common.js';
 import * as TextUtils from '../../../../models/text_utils/text_utils.js';
 import * as UI from '../../legacy.js';
-import { ColorSwatch } from './ColorSwatch.js';
+import { ColorSwatch, FormatChangedEvent } from './ColorSwatch.js';
 export class BezierSwatch extends HTMLSpanElement {
     _iconElement;
     _textElement;
@@ -13,7 +13,6 @@ export class BezierSwatch extends HTMLSpanElement {
         super();
         const root = UI.Utils.createShadowRootWithCoreStyles(this, {
             cssFile: 'ui/legacy/components/inline_editor/bezierSwatch.css',
-            enableLegacyPatching: false,
             delegatesFocus: undefined,
         });
         this._iconElement = UI.Icon.Icon.create('smallicon-bezier', 'bezier-swatch-icon');
@@ -52,7 +51,6 @@ export class CSSShadowSwatch extends HTMLSpanElement {
         super();
         const root = UI.Utils.createShadowRootWithCoreStyles(this, {
             cssFile: 'ui/legacy/components/inline_editor/cssShadowSwatch.css',
-            enableLegacyPatching: false,
             delegatesFocus: undefined,
         });
         this._iconElement = UI.Icon.Icon.create('smallicon-shadow', 'shadow-swatch-icon');
@@ -81,9 +79,7 @@ export class CSSShadowSwatch extends HTMLSpanElement {
                 if (!this._colorSwatch) {
                     this._colorSwatch = new ColorSwatch();
                     const value = this._colorSwatch.createChild('span');
-                    this._colorSwatch.addEventListener('formatchanged', (event) => {
-                        // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    this._colorSwatch.addEventListener(FormatChangedEvent.eventName, (event) => {
                         value.textContent = event.data.text;
                     });
                 }

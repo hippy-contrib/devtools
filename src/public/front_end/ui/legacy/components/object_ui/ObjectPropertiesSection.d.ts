@@ -9,7 +9,7 @@ export declare class ObjectPropertiesSection extends UI.TreeOutline.TreeOutlineI
     _objectTreeElement: RootElement;
     titleElement: Element;
     _skipProto?: boolean;
-    constructor(object: SDK.RemoteObject.RemoteObject, title?: string | Element | null, linkifier?: Components.Linkifier.Linkifier, emptyPlaceholder?: string | null, ignoreHasOwnProperty?: boolean, extraProperties?: SDK.RemoteObject.RemoteObjectProperty[], showOverflow?: boolean);
+    constructor(object: SDK.RemoteObject.RemoteObject, title?: string | Element | null, linkifier?: Components.Linkifier.Linkifier, showOverflow?: boolean);
     static defaultObjectPresentation(object: SDK.RemoteObject.RemoteObject, linkifier?: Components.Linkifier.Linkifier, skipProto?: boolean, readOnly?: boolean): Element;
     static defaultObjectPropertiesSection(object: SDK.RemoteObject.RemoteObject, linkifier?: Components.Linkifier.Linkifier, skipProto?: boolean, readOnly?: boolean): ObjectPropertiesSection;
     static compareProperties(propertyA: SDK.RemoteObject.RemoteObjectProperty, propertyB: SDK.RemoteObject.RemoteObjectProperty): number;
@@ -34,14 +34,20 @@ export declare class ObjectPropertiesSectionsTreeOutline extends UI.TreeOutline.
     _editable: boolean;
     constructor(options?: TreeOutlineOptions | null);
 }
+export declare const enum ObjectPropertiesMode {
+    All = 0,
+    OwnOnly = 1,
+    OwnAndInternalAndInherited = 2
+}
 export declare class RootElement extends UI.TreeOutline.TreeElement {
     _object: SDK.RemoteObject.RemoteObject;
-    _extraProperties: SDK.RemoteObject.RemoteObjectProperty[];
-    _ignoreHasOwnProperty: boolean;
-    _emptyPlaceholder: string | null | undefined;
-    toggleOnClick: boolean;
     _linkifier: Components.Linkifier.Linkifier | undefined;
-    constructor(object: SDK.RemoteObject.RemoteObject, linkifier?: Components.Linkifier.Linkifier, emptyPlaceholder?: string | null, ignoreHasOwnProperty?: boolean, extraProperties?: SDK.RemoteObject.RemoteObjectProperty[]);
+    _emptyPlaceholder: string | null | undefined;
+    _propertiesMode: ObjectPropertiesMode;
+    _extraProperties: SDK.RemoteObject.RemoteObjectProperty[];
+    _targetObject: SDK.RemoteObject.RemoteObject | undefined;
+    toggleOnClick: boolean;
+    constructor(object: SDK.RemoteObject.RemoteObject, linkifier?: Components.Linkifier.Linkifier, emptyPlaceholder?: string | null, propertiesMode?: ObjectPropertiesMode, extraProperties?: SDK.RemoteObject.RemoteObjectProperty[], targetObject?: SDK.RemoteObject.RemoteObject);
     onexpand(): void;
     oncollapse(): void;
     ondblclick(_e: Event): boolean;
@@ -64,8 +70,8 @@ export declare class ObjectPropertyTreeElement extends UI.TreeOutline.TreeElemen
     propertyValue?: ObjectPropertyValue;
     expandedValueElement?: Element | null;
     constructor(property: SDK.RemoteObject.RemoteObjectProperty, linkifier?: Components.Linkifier.Linkifier);
-    static _populate(treeElement: UI.TreeOutline.TreeElement, value: SDK.RemoteObject.RemoteObject, skipProto: boolean, linkifier?: Components.Linkifier.Linkifier, emptyPlaceholder?: string | null, flattenProtoChain?: boolean, extraProperties?: SDK.RemoteObject.RemoteObjectProperty[], targetValue?: SDK.RemoteObject.RemoteObject): Promise<void>;
-    static populateWithProperties(treeNode: UI.TreeOutline.TreeElement, properties: SDK.RemoteObject.RemoteObjectProperty[], internalProperties: SDK.RemoteObject.RemoteObjectProperty[] | null, skipProto: boolean, value: SDK.RemoteObject.RemoteObject | null, linkifier?: Components.Linkifier.Linkifier, emptyPlaceholder?: string | null): void;
+    static _populate(treeElement: UI.TreeOutline.TreeElement, value: SDK.RemoteObject.RemoteObject, skipProto: boolean, linkifier?: Components.Linkifier.Linkifier, emptyPlaceholder?: string | null, propertiesMode?: ObjectPropertiesMode, extraProperties?: SDK.RemoteObject.RemoteObjectProperty[], targetValue?: SDK.RemoteObject.RemoteObject): Promise<void>;
+    static populateWithProperties(treeNode: UI.TreeOutline.TreeElement, properties: SDK.RemoteObject.RemoteObjectProperty[], internalProperties: SDK.RemoteObject.RemoteObjectProperty[] | null, skipProto: boolean, value: SDK.RemoteObject.RemoteObject | null, linkifier?: Components.Linkifier.Linkifier, emptyPlaceholder?: string | null, skipGettersAndSetters?: boolean): void;
     static _appendEmptyPlaceholderIfNeeded(treeNode: UI.TreeOutline.TreeElement, emptyPlaceholder?: string | null): void;
     static createRemoteObjectAccessorPropertySpan(object: SDK.RemoteObject.RemoteObject | null, propertyPath: string[], callback: (arg0: SDK.RemoteObject.CallFunctionResult) => void): HTMLElement;
     setSearchRegex(regex: RegExp, additionalCssClassName?: string): boolean;

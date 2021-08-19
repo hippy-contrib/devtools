@@ -42,11 +42,12 @@ import * as SDK from '../../core/sdk/sdk.js';
 import * as Bindings from '../../models/bindings/bindings.js';
 import * as Logs from '../../models/logs/logs.js';
 import * as Workspace from '../../models/workspace/workspace.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { Tabs as NetworkItemViewTabs } from './NetworkItemView.js';
+import { imageNameForResourceType } from './utils/utils.js';
 const UIStrings = {
     /**
     *@description Text in Network Data Grid Node of the Network panel
@@ -122,6 +123,14 @@ const UIStrings = {
     */
     pendingq: '(pending)',
     /**
+    * @description Status text in the Network panel that indicates a network request state is not known.
+    */
+    unknown: '(unknown)',
+    /**
+    * @description Tooltip providing details on why the request has unknown status.
+    */
+    unknownExplanation: 'The request status cannot be shown here because the page that issued it unloaded while the request was in flight. You can use chrome://net-export to capture a network log and see all request details.',
+    /**
     * @description Text in Network Data Grid Node of the Network panel. Noun, short for a 'HTTP server
     * push'.
     */
@@ -174,6 +183,11 @@ const UIStrings = {
     */
     servedFromSignedHttpExchange: 'Served from Signed HTTP Exchange, resource size: {PH1}',
     /**
+    *@description Cell title in Network Data Grid Node of the Network panel. Indicates that the response came from preloaded web bundle. See https://web.dev/web-bundles/
+    *@example {4 B} PH1
+    */
+    servedFromWebBundle: 'Served from Web Bundle, resource size: {PH1}',
+    /**
     *@description Text of a DOM element in Network Data Grid Node of the Network panel
     */
     prefetchCache: '(prefetch cache)',
@@ -199,6 +213,19 @@ const UIStrings = {
     *@description Text describing the depth of a top level node in the network datagrid
     */
     level: 'level 1',
+    /**
+    *@description Text in Network Data Grid Node of the Network panel
+    */
+    webBundleError: 'Web Bundle error',
+    /**
+    *@description Alternative text for the web bundle inner request icon in Network Data Grid Node of the Network panel
+    * Indicates that the response came from preloaded web bundle. See https://web.dev/web-bundles/
+    */
+    webBundleInnerRequest: 'Served from Web Bundle',
+    /**
+    *@description Text in Network Data Grid Node of the Network panel
+    */
+    webBundle: '(Web Bundle)',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/network/NetworkDataGridNode.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -210,9 +237,6 @@ export var Events;
     Events["RequestActivated"] = "RequestActivated";
 })(Events || (Events = {}));
 export class NetworkLogViewInterface {
-    static HTTPRequestsFilter(request) {
-        throw new Error('not implemented');
-    }
     async onLoadFromFile(file) {
     }
     setRecording(recording) {
@@ -267,12 +291,6 @@ export class NetworkLogViewInterface {
     selectRequest(request) {
     }
     removeAllNodeHighlights() {
-    }
-    static getDCLEventColor() {
-        throw new Error('not implemented');
-    }
-    static getLoadEventColor() {
-        throw new Error('not implemented');
     }
     modelAdded(model) {
     }
@@ -892,9 +910,23 @@ export class NetworkRequestNode extends NetworkNode {
         Host.InspectorFrontendHost.InspectorFrontendHostInstance.openInNewTab(this._request.url());
     }
     _isFailed() {
+        if (this._request.failed && !this._request.statusCode) {
+            return true;
+        }
+        if (this._request.statusCode >= 400) {
+            return true;
+        }
         const signedExchangeInfo = this._request.signedExchangeInfo();
-        return (this._request.failed && !this._request.statusCode) || (this._request.statusCode >= 400) ||
-            (signedExchangeInfo !== null && Boolean(signedExchangeInfo.errors));
+        if (signedExchangeInfo !== null && Boolean(signedExchangeInfo.errors)) {
+            return true;
+        }
+        if (this._request.webBundleInfo()?.errorMessage || this._request.webBundleInnerRequestInfo()?.errorMessage) {
+            return true;
+        }
+        if (this._request.corsErrorStatus()) {
+            return true;
+        }
+        return false;
     }
     _renderPrimaryCell(cell, columnId, text) {
         const columnIndex = this.dataGrid.indexOfVisibleColumn(columnId);
@@ -916,18 +948,35 @@ export class NetworkRequestNode extends NetworkNode {
                 previewImage.alt = this._request.resourceType().title();
                 this._request.populateImageSource(previewImage);
                 iconElement = document.createElement('div');
-                iconElement.classList.add('icon');
+                iconElement.classList.add('image');
                 iconElement.appendChild(previewImage);
             }
             else {
                 iconElement = document.createElement('img');
-                iconElement.classList.add('icon');
                 iconElement.alt = this._request.resourceType().title();
+                iconElement.src =
+                    new URL(`../../Images/${imageNameForResourceType(this._request.resourceType())}.svg`, import.meta.url)
+                        .toString();
             }
-            iconElement.classList.add(this._request.resourceType().name());
+            iconElement.classList.add('icon');
             cell.appendChild(iconElement);
         }
         if (columnId === 'name') {
+            const webBundleInnerRequestInfo = this._request.webBundleInnerRequestInfo();
+            if (webBundleInnerRequestInfo) {
+                const secondIconElement = document.createElement('img');
+                secondIconElement.classList.add('icon');
+                secondIconElement.alt = i18nString(UIStrings.webBundleInnerRequest);
+                secondIconElement.src = 'Images/ic_file_webbundle_inner_request.svg';
+                new URL('../../Images/ic_file_webbundle_inner_request.svg', import.meta.url).toString();
+                const networkManager = SDK.NetworkManager.NetworkManager.forRequest(this._request);
+                if (webBundleInnerRequestInfo.bundleRequestId && networkManager) {
+                    cell.appendChild(Components.Linkifier.Linkifier.linkifyRevealable(new NetworkForward.NetworkRequestId.NetworkRequestId(webBundleInnerRequestInfo.bundleRequestId, networkManager), secondIconElement));
+                }
+                else {
+                    cell.appendChild(secondIconElement);
+                }
+            }
             const name = Platform.StringUtilities.trimMiddle(this._request.name(), 100);
             const networkManager = SDK.NetworkManager.NetworkManager.forRequest(this._request);
             UI.UIUtils.createTextChild(cell, networkManager ? networkManager.target().decorateLabel(name) : name);
@@ -942,7 +991,11 @@ export class NetworkRequestNode extends NetworkNode {
     _renderStatusCell(cell) {
         cell.classList.toggle('network-dim-cell', !this._isFailed() && (this._request.cached() || !this._request.statusCode));
         const corsErrorStatus = this._request.corsErrorStatus();
-        if (this._request.failed && !this._request.canceled && !this._request.wasBlocked() && !corsErrorStatus) {
+        const webBundleErrorMessage = this._request.webBundleInfo()?.errorMessage || this._request.webBundleInnerRequestInfo()?.errorMessage;
+        if (webBundleErrorMessage) {
+            this._setTextAndTitle(cell, i18nString(UIStrings.webBundleError), webBundleErrorMessage);
+        }
+        else if (this._request.failed && !this._request.canceled && !this._request.wasBlocked() && !corsErrorStatus) {
             const failText = i18nString(UIStrings.failed);
             if (this._request.localizedFailDescription) {
                 UI.UIUtils.createTextChild(cell, failText);
@@ -953,15 +1006,15 @@ export class NetworkRequestNode extends NetworkNode {
                 this._setTextAndTitle(cell, failText);
             }
         }
-        else if (this._request.statusCode) {
+        else if (this._request.statusCode && this._request.statusCode >= 400) {
             UI.UIUtils.createTextChild(cell, String(this._request.statusCode));
             this._appendSubtitle(cell, this._request.statusText);
             UI.Tooltip.Tooltip.install(cell, this._request.statusCode + ' ' + this._request.statusText);
         }
-        else if (this._request.parsedURL.isDataURL()) {
+        else if (!this._request.statusCode && this._request.parsedURL.isDataURL()) {
             this._setTextAndTitle(cell, i18nString(UIStrings.data));
         }
-        else if (this._request.canceled) {
+        else if (!this._request.statusCode && this._request.canceled) {
             this._setTextAndTitle(cell, i18nString(UIStrings.canceled));
         }
         else if (this._request.wasBlocked()) {
@@ -1016,7 +1069,7 @@ export class NetworkRequestNode extends NetworkNode {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     this.parentView().dispatchEventToListeners(Events.RequestActivated, {
                         showPanel: true,
-                        tab: NetworkItemViewTabs.Headers,
+                        tab: NetworkForward.UIRequestLocation.UIRequestTabs.Headers,
                     });
                 });
             }
@@ -1027,8 +1080,16 @@ export class NetworkRequestNode extends NetworkNode {
         else if (corsErrorStatus) {
             this._setTextAndTitle(cell, i18nString(UIStrings.corsError), i18nString(UIStrings.crossoriginResourceSharingErrorS, { PH1: corsErrorStatus.corsError }));
         }
+        else if (this._request.statusCode) {
+            UI.UIUtils.createTextChild(cell, String(this._request.statusCode));
+            this._appendSubtitle(cell, this._request.statusText);
+            UI.Tooltip.Tooltip.install(cell, this._request.statusCode + ' ' + this._request.statusText);
+        }
         else if (this._request.finished) {
             this._setTextAndTitle(cell, i18nString(UIStrings.finished));
+        }
+        else if (this._request.preserved) {
+            this._setTextAndTitle(cell, i18nString(UIStrings.unknown), i18nString(UIStrings.unknownExplanation));
         }
         else {
             this._setTextAndTitle(cell, i18nString(UIStrings.pendingq));
@@ -1136,6 +1197,11 @@ export class NetworkRequestNode extends NetworkNode {
             UI.Tooltip.Tooltip.install(cell, i18nString(UIStrings.servedFromSignedHttpExchange, { PH1: resourceSize }));
             cell.classList.add('network-dim-cell');
         }
+        else if (this._request.webBundleInnerRequestInfo()) {
+            UI.UIUtils.createTextChild(cell, i18nString(UIStrings.webBundle));
+            UI.Tooltip.Tooltip.install(cell, i18nString(UIStrings.servedFromWebBundle, { PH1: resourceSize }));
+            cell.classList.add('network-dim-cell');
+        }
         else if (this._request.fromPrefetchCache()) {
             UI.UIUtils.createTextChild(cell, i18nString(UIStrings.prefetchCache));
             UI.Tooltip.Tooltip.install(cell, i18nString(UIStrings.servedFromPrefetchCacheResource, { PH1: resourceSize }));
@@ -1155,8 +1221,11 @@ export class NetworkRequestNode extends NetworkNode {
     }
     _renderTimeCell(cell) {
         if (this._request.duration > 0) {
-            this._setTextAndTitle(cell, i18n.i18n.secondsToString(this._request.duration));
-            this._appendSubtitle(cell, i18n.i18n.secondsToString(this._request.latency));
+            this._setTextAndTitle(cell, i18n.TimeUtilities.secondsToString(this._request.duration));
+            this._appendSubtitle(cell, i18n.TimeUtilities.secondsToString(this._request.latency));
+        }
+        else if (this._request.preserved) {
+            this._setTextAndTitle(cell, i18nString(UIStrings.unknown), i18nString(UIStrings.unknownExplanation));
         }
         else {
             cell.classList.add('network-dim-cell');

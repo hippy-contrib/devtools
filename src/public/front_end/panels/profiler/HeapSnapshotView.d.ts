@@ -152,9 +152,9 @@ export declare class HeapSnapshotProfileType extends ProfileType implements SDK.
     setCustomContentEnabled(enable: boolean): void;
     createProfileLoadedFromFile(title: string): ProfileHeader;
     _takeHeapSnapshot(): Promise<void>;
-    _addHeapSnapshotChunk(event: Common.EventTarget.EventTargetEvent): void;
-    _reportHeapSnapshotProgress(event: Common.EventTarget.EventTargetEvent): void;
-    _resetProfiles(event: Common.EventTarget.EventTargetEvent): void;
+    _addHeapSnapshotChunk(event: Common.EventTarget.EventTargetEvent<string>): void;
+    _reportHeapSnapshotProgress(event: Common.EventTarget.EventTargetEvent<SDK.HeapProfilerModel.HeapSnapshotProgress>): void;
+    _resetProfiles(event: Common.EventTarget.EventTargetEvent<SDK.HeapProfilerModel.HeapProfilerModel>): void;
     _snapshotReceived(profile: ProfileHeader): void;
     static readonly TypeId: string;
     static readonly SnapshotReceived = "SnapshotReceived";
@@ -167,8 +167,8 @@ export declare class TrackingHeapSnapshotProfileType extends HeapSnapshotProfile
     constructor();
     modelAdded(heapProfilerModel: SDK.HeapProfilerModel.HeapProfilerModel): void;
     modelRemoved(heapProfilerModel: SDK.HeapProfilerModel.HeapProfilerModel): void;
-    _heapStatsUpdate(event: Common.EventTarget.EventTargetEvent): void;
-    _lastSeenObjectId(event: Common.EventTarget.EventTargetEvent): void;
+    _heapStatsUpdate(event: Common.EventTarget.EventTargetEvent<SDK.HeapProfilerModel.HeapStatsUpdateSamples>): void;
+    _lastSeenObjectId(event: Common.EventTarget.EventTargetEvent<SDK.HeapProfilerModel.LastSeenObjectId>): void;
     hasTemporaryView(): boolean;
     get buttonTooltip(): Common.UIString.LocalizedString;
     isInstantProfile(): boolean;
@@ -176,6 +176,7 @@ export declare class TrackingHeapSnapshotProfileType extends HeapSnapshotProfile
     _startRecordingProfile(): void;
     customContent(): Element | null;
     setCustomContentEnabled(enable: boolean): void;
+    recordAllocationStacksSetting(): Common.Settings.Setting<boolean>;
     _addNewProfile(): SDK.HeapProfilerModel.HeapProfilerModel | null;
     _stopRecordingProfile(): Promise<void>;
     _toggleRecording(): boolean;

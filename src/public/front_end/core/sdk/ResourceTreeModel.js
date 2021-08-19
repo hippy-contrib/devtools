@@ -30,8 +30,8 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../common/common.js';
 import * as i18n from '../i18n/i18n.js';
-import { DOMModel } from './DOMModel.js'; // eslint-disable-line no-unused-vars
-import { Events as NetworkManagerEvents, NetworkManager } from './NetworkManager.js'; // eslint-disable-line no-unused-vars
+import { DOMModel } from './DOMModel.js';
+import { Events as NetworkManagerEvents, NetworkManager } from './NetworkManager.js';
 import { Resource } from './Resource.js';
 import { ExecutionContext, RuntimeModel } from './RuntimeModel.js';
 import { Capability } from './Target.js';
@@ -173,11 +173,11 @@ export class ResourceTreeModel extends SDKModel {
                 return;
             }
         }
+        this.dispatchEventToListeners(Events.FrameWillNavigate, frame);
+        frame._navigate(framePayload);
         if (type) {
             frame.backForwardCacheDetails.restoredFromCache = type === "BackForwardCacheRestore" /* BackForwardCacheRestore */;
         }
-        this.dispatchEventToListeners(Events.FrameWillNavigate, frame);
-        frame._navigate(framePayload);
         this.dispatchEventToListeners(Events.FrameNavigated, frame);
         if (frame.isMainFrame()) {
             this.processPendingBackForwardCacheNotUsedEvents(frame);
@@ -425,7 +425,7 @@ export class ResourceTreeModel extends SDKModel {
     }
     onBackForwardCacheNotUsed(event) {
         if (this.mainFrame && this.mainFrame.id === event.frameId && this.mainFrame.loaderId === event.loaderId) {
-            this.mainFrame.backForwardCacheDetails.restoredFromCache = false;
+            this.mainFrame.setBackForwardCacheDetails(event);
             this.dispatchEventToListeners(Events.BackForwardCacheDetailsUpdated, this.mainFrame);
         }
         else {
@@ -438,7 +438,7 @@ export class ResourceTreeModel extends SDKModel {
         }
         for (const event of this.pendingBackForwardCacheNotUsedEvents) {
             if (frame.id === event.frameId && frame.loaderId === event.loaderId) {
-                frame.backForwardCacheDetails.restoredFromCache = false;
+                frame.setBackForwardCacheDetails(event);
                 this.pendingBackForwardCacheNotUsedEvents.delete(event);
                 // No need to dispatch the `BackForwardCacheDetailsUpdated` event here,
                 // as this method call is followed by a `MainFrameNavigated` event.
@@ -481,15 +481,16 @@ export class ResourceTreeFrame {
     _securityOrigin;
     _mimeType;
     _unreachableUrl;
-    _adFrameType;
+    _adFrameStatus;
     _secureContextType;
     _crossOriginIsolatedContextType;
     _gatedAPIFeatures;
+    originTrials;
     creationStackTrace;
     creationStackTraceTarget;
     _childFrames;
     _resourcesMap;
-    backForwardCacheDetails = { restoredFromCache: undefined };
+    backForwardCacheDetails = { restoredFromCache: undefined, explanations: [] };
     constructor(model, parentFrame, frameId, payload, creationStackTrace) {
         this._model = model;
         this._sameTargetParentFrame = parentFrame;
@@ -502,10 +503,11 @@ export class ResourceTreeFrame {
         this._securityOrigin = payload && payload.securityOrigin;
         this._mimeType = payload && payload.mimeType;
         this._unreachableUrl = (payload && payload.unreachableUrl) || '';
-        this._adFrameType = (payload && payload.adFrameType) || "none" /* None */;
+        this._adFrameStatus = payload?.adFrameStatus;
         this._secureContextType = payload && payload.secureContextType;
         this._crossOriginIsolatedContextType = payload && payload.crossOriginIsolatedContextType;
         this._gatedAPIFeatures = payload && payload.gatedAPIFeatures;
+        this.originTrials = (payload && payload.originTrials) || null;
         this.creationStackTrace = creationStackTrace;
         this.creationStackTraceTarget = null;
         this._childFrames = new Set();
@@ -529,6 +531,9 @@ export class ResourceTreeFrame {
     getGatedAPIFeatures() {
         return this._gatedAPIFeatures;
     }
+    getOriginTrials() {
+        return this.originTrials;
+    }
     getCreationStackTraceData() {
         return {
             creationStackTrace: this.creationStackTrace,
@@ -543,10 +548,12 @@ export class ResourceTreeFrame {
         this._securityOrigin = framePayload.securityOrigin;
         this._mimeType = framePayload.mimeType;
         this._unreachableUrl = framePayload.unreachableUrl || '';
-        this._adFrameType = framePayload.adFrameType || "none" /* None */;
+        this._adFrameStatus = framePayload?.adFrameStatus;
         this._secureContextType = framePayload.secureContextType;
         this._crossOriginIsolatedContextType = framePayload.crossOriginIsolatedContextType;
         this._gatedAPIFeatures = framePayload.gatedAPIFeatures;
+        this.backForwardCacheDetails = { restoredFromCache: undefined, explanations: [] };
+        this.originTrials = framePayload.originTrials || null;
         const mainResource = this._resourcesMap.get(this._url);
         this._resourcesMap.clear();
         this._removeChildFrames();
@@ -579,7 +586,10 @@ export class ResourceTreeFrame {
         return this._loaderId;
     }
     adFrameType() {
-        return this._adFrameType;
+        return this._adFrameStatus?.adFrameType || "none" /* None */;
+    }
+    adFrameStatus() {
+        return this._adFrameStatus;
     }
     get childFrames() {
         return [...this._childFrames];
@@ -763,6 +773,10 @@ export class ResourceTreeFrame {
         this.creationStackTrace = creationStackTraceData.creationStackTrace;
         this.creationStackTraceTarget = creationStackTraceData.creationStackTraceTarget;
     }
+    setBackForwardCacheDetails(event) {
+        this.backForwardCacheDetails.restoredFromCache = false;
+        this.backForwardCacheDetails.explanations = event.notRestoredExplanations;
+    }
 }
 export class PageDispatcher {
     _resourceTreeModel;
@@ -806,7 +820,7 @@ export class PageDispatcher {
     navigatedWithinDocument({}) {
     }
     frameResized() {
-        this._resourceTreeModel.dispatchEventToListeners(Events.FrameResized, null);
+        this._resourceTreeModel.dispatchEventToListeners(Events.FrameResized);
     }
     javascriptDialogOpening({ hasBrowserHandler }) {
         if (!hasBrowserHandler) {

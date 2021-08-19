@@ -5,6 +5,7 @@ import * as Common from '../../core/common/common.js';
 import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Workspace from '../../models/workspace/workspace.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as i18n from '../../core/i18n/i18n.js';
 const UIStrings = {
@@ -336,12 +337,34 @@ Common.Revealer.registerRevealer({
 });
 Common.Revealer.registerRevealer({
     contextTypes() {
-        return maybeRetrieveContextTypes(Network => [Network.NetworkSearchScope.UIRequestLocation]);
+        return [NetworkForward.UIRequestLocation.UIRequestLocation];
     },
     async loadRevealer() {
         const Network = await loadNetworkModule();
         return Network.NetworkPanel.RequestLocationRevealer.instance();
     },
     destination: undefined,
+});
+Common.Revealer.registerRevealer({
+    contextTypes() {
+        return [NetworkForward.NetworkRequestId.NetworkRequestId];
+    },
+    destination: Common.Revealer.RevealerDestination.NETWORK_PANEL,
+    async loadRevealer() {
+        const Network = await loadNetworkModule();
+        return Network.NetworkPanel.RequestIdRevealer.instance();
+    },
+});
+Common.Revealer.registerRevealer({
+    contextTypes() {
+        return [
+            NetworkForward.UIFilter.UIRequestFilter,
+        ];
+    },
+    destination: Common.Revealer.RevealerDestination.NETWORK_PANEL,
+    async loadRevealer() {
+        const Network = await loadNetworkModule();
+        return Network.NetworkPanel.NetworkLogWithFilterRevealer.instance();
+    },
 });
 //# sourceMappingURL=network-meta.js.map

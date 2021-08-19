@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import * as Platform from '../../core/platform/platform.js';
 import * as ARIAUtils from './ARIAUtils.js';
-import { Events as ListModelEvents } from './ListModel.js'; // eslint-disable-line no-unused-vars
+import { Events as ListModelEvents } from './ListModel.js';
 import { measurePreferredSize } from './UIUtils.js';
 // TODO(crbug.com/1167717): Make this a const enum again
 // eslint-disable-next-line rulesdir/const_enum

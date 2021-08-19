@@ -165,15 +165,15 @@ const UIStrings = {
 const str_ = i18n.i18n.registerUIStrings('core/common/ResourceType.ts', UIStrings);
 const i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(undefined, str_);
 export class ResourceType {
-    _name;
-    _title;
-    _category;
-    _isTextType;
+    nameInternal;
+    titleInternal;
+    categoryInternal;
+    isTextTypeInternal;
     constructor(name, title, category, isTextType) {
-        this._name = name;
-        this._title = title;
-        this._category = category;
-        this._isTextType = isTextType;
+        this.nameInternal = name;
+        this.titleInternal = title;
+        this.categoryInternal = category;
+        this.isTextTypeInternal = isTextType;
     }
     static fromMimeType(mimeType) {
         if (!mimeType) {
@@ -215,7 +215,7 @@ export class ResourceType {
         return null;
     }
     static fromURL(url) {
-        return _resourceTypeByExtension.get(ParsedURL.extractExtension(url)) || null;
+        return resourceTypeByExtension.get(ParsedURL.extractExtension(url)) || null;
     }
     static fromName(name) {
         for (const resourceTypeId in resourceTypes) {
@@ -228,50 +228,50 @@ export class ResourceType {
     }
     static mimeFromURL(url) {
         const name = ParsedURL.extractName(url);
-        if (_mimeTypeByName.has(name)) {
-            return _mimeTypeByName.get(name);
+        if (mimeTypeByName.has(name)) {
+            return mimeTypeByName.get(name);
         }
         const ext = ParsedURL.extractExtension(url).toLowerCase();
-        return _mimeTypeByExtension.get(ext);
+        return mimeTypeByExtension.get(ext);
     }
     static mimeFromExtension(ext) {
-        return _mimeTypeByExtension.get(ext);
+        return mimeTypeByExtension.get(ext);
     }
     name() {
-        return this._name;
+        return this.nameInternal;
     }
     title() {
-        return this._title();
+        return this.titleInternal();
     }
     category() {
-        return this._category;
+        return this.categoryInternal;
     }
     isTextType() {
-        return this._isTextType;
+        return this.isTextTypeInternal;
     }
     isScript() {
-        return this._name === 'script' || this._name === 'sm-script';
+        return this.nameInternal === 'script' || this.nameInternal === 'sm-script';
     }
     hasScripts() {
         return this.isScript() || this.isDocument();
     }
     isStyleSheet() {
-        return this._name === 'stylesheet' || this._name === 'sm-stylesheet';
+        return this.nameInternal === 'stylesheet' || this.nameInternal === 'sm-stylesheet';
     }
     isDocument() {
-        return this._name === 'document';
+        return this.nameInternal === 'document';
     }
     isDocumentOrScriptOrStyleSheet() {
         return this.isDocument() || this.isScript() || this.isStyleSheet();
     }
     isImage() {
-        return this._name === 'image';
+        return this.nameInternal === 'image';
     }
     isFromSourceMap() {
-        return this._name.startsWith('sm-');
+        return this.nameInternal.startsWith('sm-');
     }
     toString() {
-        return this._name;
+        return this.nameInternal;
     }
     canonicalMimeType() {
         if (this.isDocument()) {
@@ -338,16 +338,12 @@ export const resourceTypes = {
     SourceMapStyleSheet: new ResourceType('sm-stylesheet', i18nLazyString(UIStrings.stylesheet), resourceCategories.Stylesheet, true),
     WebBundle: new ResourceType('webbundle', i18nLazyString(UIStrings.webbundle), resourceCategories.Other, false),
 };
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const _mimeTypeByName = new Map([
+const mimeTypeByName = new Map([
     // CoffeeScript
     ['Cakefile', 'text/x-coffeescript'],
 ]);
 // clang-format off
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const _resourceTypeByExtension = new Map([
+export const resourceTypeByExtension = new Map([
     ['js', resourceTypes.Script],
     ['mjs', resourceTypes.Script],
     ['css', resourceTypes.Stylesheet],
@@ -373,9 +369,7 @@ export const _resourceTypeByExtension = new Map([
     ['wasm', resourceTypes.Wasm],
 ]);
 // clang-format on
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const _mimeTypeByExtension = new Map([
+export const mimeTypeByExtension = new Map([
     // Web extensions
     ['js', 'text/javascript'],
     ['mjs', 'text/javascript'],

@@ -8,6 +8,7 @@ import type * as Protocol from '../../generated/protocol.js';
  */
 export declare class AggregatedIssue extends IssuesManager.Issue.Issue {
     private affectedCookies;
+    private affectedRawCookieLines;
     private affectedRequests;
     private affectedLocations;
     private heavyAdIssues;
@@ -20,12 +21,17 @@ export declare class AggregatedIssue extends IssuesManager.Issue.Issue {
     private sharedArrayBufferIssues;
     private trustedWebActivityIssues;
     private quirksModeIssues;
-    private representative;
+    private attributionReportingIssues;
+    private wasmCrossOriginModuleSharingIssues;
+    private representative?;
     private aggregatedIssuesCount;
-    constructor(code: string);
     primaryKey(): string;
     getBlockedByResponseDetails(): Iterable<Protocol.Audits.BlockedByResponseIssueDetails>;
     cookies(): Iterable<Protocol.Audits.AffectedCookie>;
+    getRawCookieLines(): Iterable<{
+        rawCookieLine: string;
+        hasRequest: boolean;
+    }>;
     sources(): Iterable<Protocol.Audits.SourceCodeLocation>;
     cookiesWithRequestIndicator(): Iterable<{
         cookie: Protocol.Audits.AffectedCookie;
@@ -40,6 +46,8 @@ export declare class AggregatedIssue extends IssuesManager.Issue.Issue {
     requests(): Iterable<Protocol.Audits.AffectedRequest>;
     getSharedArrayBufferIssues(): Iterable<IssuesManager.SharedArrayBufferIssue.SharedArrayBufferIssue>;
     getQuirksModeIssues(): Iterable<IssuesManager.QuirksModeIssue.QuirksModeIssue>;
+    getAttributionReportingIssues(): ReadonlySet<IssuesManager.AttributionReportingIssue.AttributionReportingIssue>;
+    getWasmCrossOriginModuleSharingIssue(): ReadonlySet<IssuesManager.WasmCrossOriginModuleSharingIssue.WasmCrossOriginModuleSharingIssue>;
     getDescription(): IssuesManager.MarkdownIssueDescription.MarkdownIssueDescription | null;
     getCategory(): IssuesManager.Issue.IssueCategory;
     getAggregatedIssuesCount(): number;
@@ -51,17 +59,26 @@ export declare class AggregatedIssue extends IssuesManager.Issue.Issue {
     addInstance(issue: IssuesManager.Issue.Issue): void;
     getKind(): IssuesManager.Issue.IssueKind;
 }
-export declare class IssueAggregator extends Common.ObjectWrapper.ObjectWrapper {
-    private aggregatedIssuesByCode;
-    private issuesManager;
+export declare class IssueAggregator extends Common.ObjectWrapper.ObjectWrapper<EventTypes> {
+    private readonly issuesManager;
+    private readonly aggregatedIssuesByCode;
+    private readonly hiddenAggregatedIssuesByCode;
     constructor(issuesManager: IssuesManager.IssuesManager.IssuesManager);
     private onIssueAdded;
     private onFullUpdateRequired;
     private aggregateIssue;
+    private aggregateIssueByStatus;
     aggregatedIssues(): Iterable<AggregatedIssue>;
+    aggregatedIssueCodes(): Set<string>;
+    aggregatedIssueCategories(): Set<IssuesManager.Issue.IssueCategory>;
     numberOfAggregatedIssues(): number;
+    numberOfHiddenAggregatedIssues(): number;
 }
 export declare const enum Events {
     AggregatedIssueUpdated = "AggregatedIssueUpdated",
     FullUpdateRequired = "FullUpdateRequired"
 }
+export declare type EventTypes = {
+    [Events.AggregatedIssueUpdated]: AggregatedIssue;
+    [Events.FullUpdateRequired]: void;
+};

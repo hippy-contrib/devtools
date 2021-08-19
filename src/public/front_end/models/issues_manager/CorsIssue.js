@@ -84,8 +84,8 @@ function getIssueCode(details) {
 }
 export class CorsIssue extends Issue {
     issueDetails;
-    constructor(issueDetails, issuesModel) {
-        super(getIssueCode(issueDetails), issuesModel);
+    constructor(issueDetails, issuesModel, issueId) {
+        super(getIssueCode(issueDetails), issuesModel, issueId);
         this.issueDetails = issueDetails;
     }
     getCategory() {
@@ -222,7 +222,7 @@ export class CorsIssue extends Issue {
             console.warn('Cors issue without details received.');
             return [];
         }
-        return [new CorsIssue(corsIssueDetails, issuesModel)];
+        return [new CorsIssue(corsIssueDetails, issuesModel, inspectorIssue.issueId)];
     }
 }
 //# sourceMappingURL=CorsIssue.js.map

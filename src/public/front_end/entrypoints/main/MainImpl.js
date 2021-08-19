@@ -43,14 +43,12 @@ import * as Extensions from '../../models/extensions/extensions.js';
 import * as IssuesManager from '../../models/issues_manager/issues_manager.js';
 import * as Logs from '../../models/logs/logs.js';
 import * as Persistence from '../../models/persistence/persistence.js';
-import * as Recorder from '../../models/recorder/recorder.js';
 import * as Workspace from '../../models/workspace/workspace.js';
 import * as Snippets from '../../panels/snippets/snippets.js';
 import * as Timeline from '../../panels/timeline/timeline.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import * as ThemeSupport from '../../ui/legacy/theme_support/theme_support.js';
 import { ExecutionContextSelector } from './ExecutionContextSelector.js';
 const UIStrings = {
     /**
@@ -207,22 +205,20 @@ export class MainImpl {
         // TODO(crbug.com/1161439): remove 'blackboxJSFramesOnTimeline', keep 'ignoreListJSFramesOnTimeline'
         Root.Runtime.experiments.register('blackboxJSFramesOnTimeline', 'Ignore List for JavaScript frames on Timeline', true);
         Root.Runtime.experiments.register('ignoreListJSFramesOnTimeline', 'Ignore List for JavaScript frames on Timeline', true);
-        Root.Runtime.experiments.register('cssOverview', 'CSS Overview');
+        Root.Runtime.experiments.register('cssOverview', 'CSS Overview', undefined, 'https://developer.chrome.com/blog/new-in-devtools-87/#css-overview');
         Root.Runtime.experiments.register('emptySourceMapAutoStepping', 'Empty sourcemap auto-stepping');
         Root.Runtime.experiments.register('inputEventsOnTimelineOverview', 'Input events on Timeline overview', true);
         Root.Runtime.experiments.register('liveHeapProfile', 'Live heap profile', true);
-        Root.Runtime.experiments.register('protocolMonitor', 'Protocol Monitor');
+        Root.Runtime.experiments.register('protocolMonitor', 'Protocol Monitor', undefined, 'https://developer.chrome.com/blog/new-in-devtools-92/#protocol-monitor');
         Root.Runtime.experiments.register('developerResourcesView', 'Show developer resources view');
-        Root.Runtime.experiments.register('cspViolationsView', 'Show CSP Violations view');
+        Root.Runtime.experiments.register('cspViolationsView', 'Show CSP Violations view', undefined, 'https://developer.chrome.com/blog/new-in-devtools-89/#csp');
         Root.Runtime.experiments.register('recordCoverageWithPerformanceTracing', 'Record coverage while performance tracing');
         Root.Runtime.experiments.register('samplingHeapProfilerTimeline', 'Sampling heap profiler timeline', true);
         Root.Runtime.experiments.register('showOptionToNotTreatGlobalObjectsAsRoots', 'Show option to take heap snapshot where globals are not treated as root');
         Root.Runtime.experiments.register('sourceDiff', 'Source diff');
-        Root.Runtime.experiments.register('sourceOrderViewer', 'Source order viewer');
-        Root.Runtime.experiments.register('spotlight', 'Spotlight', true);
+        Root.Runtime.experiments.register('sourceOrderViewer', 'Source order viewer', undefined, 'https://developer.chrome.com/blog/new-in-devtools-92/#source-order');
         Root.Runtime.experiments.register('webauthnPane', 'WebAuthn Pane');
-        Root.Runtime.experiments.register('keyboardShortcutEditor', 'Enable keyboard shortcut editor', true);
-        Root.Runtime.experiments.register('recorder', 'Recorder');
+        Root.Runtime.experiments.register('keyboardShortcutEditor', 'Enable keyboard shortcut editor', true, 'https://developer.chrome.com/blog/new-in-devtools-88/#keyboard-shortcuts');
         // Back-forward cache
         Root.Runtime.experiments.register('bfcacheDebugging', 'Enable back-forward cache debugging support');
         // Timeline
@@ -232,25 +228,28 @@ export class MainImpl {
         Root.Runtime.experiments.register('timelineV8RuntimeCallStats', 'Timeline: V8 Runtime Call Stats on Timeline', true);
         Root.Runtime.experiments.register('timelineWebGL', 'Timeline: WebGL-based flamechart');
         Root.Runtime.experiments.register('timelineReplayEvent', 'Timeline: Replay input events', true);
-        Root.Runtime.experiments.register('wasmDWARFDebugging', 'WebAssembly Debugging: Enable DWARF support');
+        Root.Runtime.experiments.register('wasmDWARFDebugging', 'WebAssembly Debugging: Enable DWARF support', undefined, 'https://developer.chrome.com/blog/wasm-debugging-2020/');
         // Dual-screen
-        Root.Runtime.experiments.register('dualScreenSupport', 'Emulation: Support dual screen mode');
+        Root.Runtime.experiments.register('dualScreenSupport', 'Emulation: Support dual screen mode', undefined, 'https://developer.chrome.com/blog/new-in-devtools-89#dual-screen');
         Root.Runtime.experiments.setEnabled('dualScreenSupport', true);
         // Advanced Perceptual Contrast Algorithm.
-        Root.Runtime.experiments.register('APCA', 'Enable new Advanced Perceptual Contrast Algorithm (APCA) replacing previous contrast ratio and AA/AAA guidelines');
+        Root.Runtime.experiments.register('APCA', 'Enable new Advanced Perceptual Contrast Algorithm (APCA) replacing previous contrast ratio and AA/AAA guidelines', undefined, 'https://developer.chrome.com/blog/new-in-devtools-89/#apca');
         // Full Accessibility Tree
-        Root.Runtime.experiments.register('fullAccessibilityTree', 'Enable full accessibility tree view in the Elements panel');
+        Root.Runtime.experiments.register('fullAccessibilityTree', 'Enable full accessibility tree view in the Elements panel', undefined, 'https://developer.chrome.com/blog/new-in-devtools-90/#accesibility-tree');
         // Font Editor
-        Root.Runtime.experiments.register('fontEditor', 'Enable new Font Editor tool within the Styles Pane.');
+        Root.Runtime.experiments.register('fontEditor', 'Enable new Font Editor tool within the Styles Pane.', undefined, 'https://developer.chrome.com/blog/new-in-devtools-89/#font');
         // Contrast issues reported via the Issues panel.
-        Root.Runtime.experiments.register('contrastIssues', 'Enable automatic contrast issue reporting via the Issues panel');
+        Root.Runtime.experiments.register('contrastIssues', 'Enable automatic contrast issue reporting via the Issues panel', undefined, 'https://developer.chrome.com/blog/new-in-devtools-90/#low-contrast');
         // New cookie features.
         Root.Runtime.experiments.register('experimentalCookieFeatures', 'Enable experimental cookie features');
-        Root.Runtime.experiments.enableExperimentsByDefault([
-            'sourceOrderViewer',
-        ]);
+        // Hide Issues Feature.
+        Root.Runtime.experiments.register('hideIssuesFeature', 'Enable experimental hide issues menu');
         // Localized DevTools, hide "locale selector" setting behind an experiment.
         Root.Runtime.experiments.register(Root.Runtime.ExperimentName.LOCALIZED_DEVTOOLS, 'Enable localized DevTools');
+        Root.Runtime.experiments.enableExperimentsByDefault([
+            Root.Runtime.ExperimentName.LOCALIZED_DEVTOOLS,
+            'sourceOrderViewer',
+        ]);
         Root.Runtime.experiments.cleanUpStaleExperiments();
         const enabledExperiments = Root.Runtime.Runtime.queryParam('enabledExperiments');
         if (enabledExperiments) {
@@ -303,7 +302,6 @@ export class MainImpl {
         self.UI.inspectorView = UI.InspectorView.InspectorView.instance();
         UI.ContextMenu.ContextMenu.initialize();
         UI.ContextMenu.ContextMenu.installHandler(document);
-        UI.Tooltip.Tooltip.installHandler(document);
         // These instances need to be created early so they don't miss any events about requests/issues/etc.
         Logs.NetworkLog.NetworkLog.instance();
         SDK.FrameManager.FrameManager.instance();
@@ -312,6 +310,7 @@ export class MainImpl {
             forceNew: true,
             ensureFirst: true,
             showThirdPartyIssuesSetting: IssuesManager.Issue.getShowThirdPartyIssuesSetting(),
+            hideIssueSetting: IssuesManager.IssuesManager.getHideIssueByCodeSetting(),
         });
         IssuesManager.ContrastCheckTrigger.ContrastCheckTrigger.instance();
         // @ts-ignore layout test global
@@ -361,11 +360,6 @@ export class MainImpl {
         Persistence.IsolatedFileSystemManager.IsolatedFileSystemManager.instance().addPlatformFileSystem(
         // @ts-ignore https://github.com/microsoft/TypeScript/issues/41397
         'snippet://', new Snippets.ScriptSnippetFileSystem.SnippetFileSystem());
-        if (Root.Runtime.experiments.isEnabled('recorder')) {
-            Persistence.IsolatedFileSystemManager.IsolatedFileSystemManager.instance().addPlatformFileSystem(
-            // @ts-ignore https://github.com/microsoft/TypeScript/issues/41397
-            'recording://', new Recorder.RecordingFileSystem.RecordingFileSystem());
-        }
         // @ts-ignore layout test global
         self.Persistence.persistence = Persistence.Persistence.PersistenceImpl.instance({
             forceNew: true,
@@ -438,7 +432,10 @@ export class MainImpl {
     _lateInitialization() {
         MainImpl.time('Main._lateInitialization');
         Extensions.ExtensionServer.ExtensionServer.instance().initializeExtensions();
-        const promises = Common.Runnable.lateInitializationRunnables().map(runnableInstance => runnableInstance().run());
+        const promises = Common.Runnable.lateInitializationRunnables().map(async (lateInitializationLoader) => {
+            const runnable = await lateInitializationLoader();
+            return runnable.run();
+        });
         if (Root.Runtime.experiments.isEnabled('liveHeapProfile')) {
             const setting = 'memoryLiveHeapProfile';
             if (Common.Settings.Settings.instance().moduleSetting(setting).get()) {
@@ -620,9 +617,7 @@ export class MainMenuItem {
             UI.Tooltip.Tooltip.install(titleElement, i18nString(UIStrings.placementOfDevtoolsRelativeToThe, { PH1: toggleDockSideShorcuts[0].title() }));
             dockItemElement.appendChild(titleElement);
             const dockItemToolbar = new UI.Toolbar.Toolbar('', dockItemElement);
-            if (Host.Platform.isMac() && !ThemeSupport.ThemeSupport.instance().hasTheme()) {
-                dockItemToolbar.makeBlueOnHover();
-            }
+            dockItemToolbar.makeBlueOnHover();
             const undock = new UI.Toolbar.ToolbarToggle(i18nString(UIStrings.undockIntoSeparateWindow), 'largeicon-undock');
             const bottom = new UI.Toolbar.ToolbarToggle(i18nString(UIStrings.dockToBottom), 'largeicon-dock-to-bottom');
             const right = new UI.Toolbar.ToolbarToggle(i18nString(UIStrings.dockToRight), 'largeicon-dock-to-right');
@@ -743,8 +738,6 @@ export class PauseListener {
         Common.Revealer.reveal(debuggerPausedDetails);
     }
 }
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function sendOverProtocol(method, params) {
     return new Promise((resolve, reject) => {
         const sendRawMessage = ProtocolClient.InspectorBackend.test.sendRawMessage;

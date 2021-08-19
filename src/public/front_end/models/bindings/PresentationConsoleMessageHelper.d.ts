@@ -20,7 +20,7 @@ export declare class PresentationConsoleMessageHelper {
     _rawLocation(message: SDK.ConsoleModel.ConsoleMessage): SDK.DebuggerModel.Location | null;
     _addConsoleMessageToScript(message: SDK.ConsoleModel.ConsoleMessage, rawLocation: SDK.DebuggerModel.Location): void;
     _addPendingConsoleMessage(message: SDK.ConsoleModel.ConsoleMessage): void;
-    _parsedScriptSource(event: Common.EventTarget.EventTargetEvent): void;
+    _parsedScriptSource(event: Common.EventTarget.EventTargetEvent<SDK.Script.Script>): void;
     _consoleCleared(): void;
     _debuggerReset(): void;
 }

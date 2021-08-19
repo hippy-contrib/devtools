@@ -1,6 +1,7 @@
 import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Extensions from '../../models/extensions/extensions.js';
+import type * as Adorners from '../../ui/components/adorners/adorners.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { AccessibilityTreeView } from './AccessibilityTreeView.js';
 import * as ElementsComponents from './components/components.js';
@@ -32,8 +33,8 @@ export declare class ElementsPanel extends UI.Panel.Panel implements UI.Searchab
     _pendingNodeReveal: boolean;
     _adornerManager: ElementsComponents.AdornerManager.AdornerManager;
     _adornerSettingsPane: ElementsComponents.AdornerSettingsPane.AdornerSettingsPane | null;
-    _adornersByName: Map<string, Set<ElementsComponents.Adorner.Adorner>>;
-    _accessibilityTreeButton?: HTMLButtonElement;
+    _adornersByName: Map<string, Set<Adorners.Adorner.Adorner>>;
+    accessibilityTreeButton?: HTMLButtonElement;
     domTreeButton?: HTMLButtonElement;
     _selectedNodeOnReset?: SDK.DOMModel.DOMNode;
     _hasNonDefaultSelectedNode?: boolean;
@@ -62,7 +63,7 @@ export declare class ElementsPanel extends UI.Panel.Panel implements UI.Searchab
     willHide(): void;
     onResize(): void;
     _selectedNodeChanged(event: Common.EventTarget.EventTargetEvent): void;
-    _documentUpdatedEvent(event: Common.EventTarget.EventTargetEvent): void;
+    _documentUpdatedEvent(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMModel>): void;
     _documentUpdated(domModel: SDK.DOMModel.DOMModel): void;
     _lastSelectedNodeSelectedForTest(): void;
     _setDefaultSelectedNode(node: SDK.DOMModel.DOMNode | null): void;
@@ -80,7 +81,7 @@ export declare class ElementsPanel extends UI.Panel.Panel implements UI.Searchab
     selectedDOMNode(): SDK.DOMModel.DOMNode | null;
     selectDOMNode(node: SDK.DOMModel.DOMNode, focus?: boolean): void;
     _updateBreadcrumbIfNeeded(event: Common.EventTarget.EventTargetEvent): void;
-    _crumbNodeSelected(event: Common.EventTarget.EventTargetEvent): void;
+    _crumbNodeSelected(event: ElementsComponents.ElementsBreadcrumbs.NodeSelectedEvent): void;
     _treeOutlineForNode(node: SDK.DOMModel.DOMNode | null): ElementsTreeOutline | null;
     _treeElementForNode(node: SDK.DOMModel.DOMNode): ElementsTreeElement | null;
     _leaveUserAgentShadowDOM(node: SDK.DOMModel.DOMNode): SDK.DOMModel.DOMNode;
@@ -97,8 +98,8 @@ export declare class ElementsPanel extends UI.Panel.Panel implements UI.Searchab
     _trackedCSSPropertiesUpdated(event: Common.EventTarget.EventTargetEvent): void;
     showAdornerSettingsPane(): void;
     isAdornerEnabled(adornerText: string): boolean;
-    registerAdorner(adorner: ElementsComponents.Adorner.Adorner): void;
-    deregisterAdorner(adorner: ElementsComponents.Adorner.Adorner): void;
+    registerAdorner(adorner: Adorners.Adorner.Adorner): void;
+    deregisterAdorner(adorner: Adorners.Adorner.Adorner): void;
     static _firstInspectElementCompletedForTest: () => void;
     static _firstInspectElementNodeNameForTest: string;
 }

@@ -24,7 +24,7 @@ export declare class Action extends Common.ObjectWrapper.ObjectWrapper {
     toggled(): boolean;
     setToggled(toggled: boolean): void;
     options(): undefined | Array<ExtensionOption>;
-    contextTypes(): undefined | Array<unknown>;
+    contextTypes(): undefined | Array<Function>;
     canInstantiate(): boolean;
     bindings(): Array<Binding> | undefined;
     experiment(): string | undefined;
@@ -65,7 +65,6 @@ export declare const ActionCategory: {
     BACKGROUND_SERVICES: string;
     SETTINGS: string;
     DEBUGGER: string;
-    RECORDER: string;
     SOURCES: string;
 };
 declare type ActionCategory = typeof ActionCategory[keyof typeof ActionCategory];
@@ -205,7 +204,7 @@ export interface ActionRegistration {
      * });
      * ```
      */
-    contextTypes?: () => Array<unknown>;
+    contextTypes?: () => Array<Function>;
     /**
      * The descriptions for each of the two states in which a toggleable action can be.
      */

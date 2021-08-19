@@ -4,10 +4,12 @@ export interface ComputedStylePropertyData {
     onNavigateToSource: (event?: Event) => void;
 }
 export declare class ComputedStyleProperty extends HTMLElement {
+    static readonly litTagName: import("../../../ui/lit-html/static.js").Static;
     private readonly shadow;
     private inherited;
     private traceable;
     private onNavigateToSource;
+    connectedCallback(): void;
     set data(data: ComputedStylePropertyData);
     private render;
 }

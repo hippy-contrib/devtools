@@ -25,7 +25,7 @@ export declare class Runtime {
     static _experimentsSetting(): {
         [x: string]: boolean;
     };
-    static _assert(value: any, message: string): void;
+    static _assert(value: boolean | undefined, message: string): void;
     static setPlatform(platform: string): void;
     static platform(): string;
     static isDescriptorEnabled(descriptor: {
@@ -79,7 +79,7 @@ export declare class ExperimentsSupport {
     allConfigurableExperiments(): Experiment[];
     enabledExperiments(): Experiment[];
     _setExperimentsSetting(value: Object): void;
-    register(experimentName: string, experimentTitle: string, unstable?: boolean): void;
+    register(experimentName: string, experimentTitle: string, unstable?: boolean, docLink?: string): void;
     isEnabled(experimentName: string): boolean;
     setEnabled(experimentName: string, enabled: boolean): void;
     enableExperimentsTransiently(experimentNames: string[]): void;
@@ -94,8 +94,9 @@ export declare class Experiment {
     name: string;
     title: string;
     unstable: boolean;
+    docLink?: string;
     _experiments: ExperimentsSupport;
-    constructor(experiments: ExperimentsSupport, name: string, title: string, unstable: boolean);
+    constructor(experiments: ExperimentsSupport, name: string, title: string, unstable: boolean, docLink: string);
     isEnabled(): boolean;
     setEnabled(enabled: boolean): void;
 }
@@ -115,7 +116,6 @@ export declare enum ExperimentName {
     ALL = "*",
     PROTOCOL_MONITOR = "protocolMonitor",
     WEBAUTHN_PANE = "webauthnPane",
-    RECORDER = "recorder",
     LOCALIZED_DEVTOOLS = "localizedDevTools"
 }
 export declare enum ConditionName {

@@ -14,7 +14,7 @@ export interface DataGridControllerData {
     contextMenus?: DataGridContextMenusConfiguration;
 }
 export declare class DataGridController extends HTMLElement {
-    static litTagName: import("../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../lit-html/static.js").Static;
     private readonly shadow;
     private hasRenderedAtLeastOnce;
     private columns;
@@ -30,6 +30,7 @@ export declare class DataGridController extends HTMLElement {
     private originalRows;
     private sortState;
     private filters;
+    connectedCallback(): void;
     get data(): DataGridControllerData;
     set data(data: DataGridControllerData);
     private testRowWithFilter;

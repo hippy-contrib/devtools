@@ -16,10 +16,25 @@ export declare enum IssueCategory {
     Other = "Other"
 }
 export declare enum IssueKind {
-    BreakingChange = "BreakingChange",
+    /**
+     * Something is not working in the page right now. Issues of this kind need
+     * usually be fixed right away. They usually indicate that a Web API is being
+     * used in a wrong way, or that a network request was misconfigured.
+     */
     PageError = "PageError",
+    /**
+     * The page is using a Web API or relying on browser behavior that is going
+     * to change in the future. If possible, the message associated with issues
+     * of this kind should include a time when the behavior is going to change.
+     */
+    BreakingChange = "BreakingChange",
+    /**
+     * Anything that can be improved about the page, but isn't urgent and doesn't
+     * impair functionality in a major way.
+     */
     Improvement = "Improvement"
 }
+export declare function getIssueKindDescription(issueKind: IssueKind): Common.UIString.LocalizedString;
 /**
  * Union two issue kinds for issue aggregation. The idea is to show the most
  * important kind on aggregated issues that union issues of different kinds.
@@ -27,17 +42,19 @@ export declare enum IssueKind {
 export declare function unionIssueKind(a: IssueKind, b: IssueKind): IssueKind;
 export declare function getShowThirdPartyIssuesSetting(): Common.Settings.Setting<boolean>;
 export interface AffectedElement {
-    backendNodeId: number;
+    backendNodeId: Protocol.DOM.BackendNodeId;
     nodeName: string;
     target: SDK.Target.Target | null;
 }
-export declare abstract class Issue<IssueCode extends string = string> extends Common.ObjectWrapper.ObjectWrapper {
+export declare abstract class Issue<IssueCode extends string = string> {
     private issueCode;
     private issuesModel;
+    protected issueId: string | undefined;
+    private hidden;
     constructor(code: IssueCode | {
         code: IssueCode;
         umaCode: string;
-    }, issuesModel?: SDK.IssuesModel.IssuesModel | null);
+    }, issuesModel?: SDK.IssuesModel.IssuesModel | null, issueId?: string);
     code(): IssueCode;
     abstract primaryKey(): string;
     abstract getDescription(): MarkdownIssueDescription | null;
@@ -45,6 +62,7 @@ export declare abstract class Issue<IssueCode extends string = string> extends C
     abstract getKind(): IssueKind;
     getBlockedByResponseDetails(): Iterable<Protocol.Audits.BlockedByResponseIssueDetails>;
     cookies(): Iterable<Protocol.Audits.AffectedCookie>;
+    rawCookieLines(): Iterable<string>;
     elements(): Iterable<AffectedElement>;
     requests(): Iterable<Protocol.Audits.AffectedRequest>;
     sources(): Iterable<Protocol.Audits.SourceCodeLocation>;
@@ -54,6 +72,9 @@ export declare abstract class Issue<IssueCode extends string = string> extends C
      */
     model(): SDK.IssuesModel.IssuesModel | null;
     isCausedByThirdParty(): boolean;
+    getIssueId(): string | undefined;
+    isHidden(): boolean;
+    setHidden(hidden: boolean): void;
 }
 export declare function toZeroBasedLocation(location: Protocol.Audits.SourceCodeLocation | undefined): {
     url: string;

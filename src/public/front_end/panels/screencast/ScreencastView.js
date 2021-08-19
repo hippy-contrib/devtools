@@ -34,6 +34,7 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { InputModel } from './InputModel.js';
+import screencastViewStyles from './screencastView.css.js';
 const UIStrings = {
     /**
     *@description Accessible alt text for the screencast canvas rendering of the debug target webpage
@@ -118,7 +119,6 @@ export class ScreencastView extends UI.Widget.VBox {
         this._networkManager = screenCaptureModel.target().model(SDK.NetworkManager.NetworkManager);
         this._inputModel = screenCaptureModel.target().model(InputModel);
         this.setMinimumSize(150, 150);
-        this.registerRequiredCSS('panels/screencast/screencastView.css', { enableLegacyPatching: false });
         this._shortcuts = {};
         this._scrollOffsetX = 0;
         this._scrollOffsetY = 0;
@@ -170,6 +170,7 @@ export class ScreencastView extends UI.Widget.VBox {
     }
     wasShown() {
         this._startCasting();
+        this.registerCSSFiles([screencastViewStyles]);
     }
     willHide() {
         this._stopCasting();
@@ -622,7 +623,7 @@ export class ScreencastView extends UI.Widget.VBox {
         }
         this._canvasElement.focus();
     }
-    _requestNavigationHistoryEvent(_event) {
+    _requestNavigationHistoryEvent() {
         this._requestNavigationHistory();
     }
     async _requestNavigationHistory() {

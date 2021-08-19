@@ -42,9 +42,9 @@ export class ParsedURL {
     fragment;
     folderPathComponents;
     lastPathComponent;
-    _blobInnerScheme;
-    _displayName;
-    _dataURLDisplayName;
+    blobInnerScheme;
+    displayNameInternal;
+    dataURLDisplayNameInternal;
     constructor(url) {
         this.isValid = false;
         this.url = url;
@@ -63,7 +63,7 @@ export class ParsedURL {
         if (match) {
             this.isValid = true;
             if (isBlobUrl) {
-                this._blobInnerScheme = match[2].toLowerCase();
+                this.blobInnerScheme = match[2].toLowerCase();
                 this.scheme = 'blob';
             }
             else {
@@ -289,8 +289,8 @@ export class ParsedURL {
         return !(/^[A-Za-z][A-Za-z0-9+.-]*:/.test(url));
     }
     get displayName() {
-        if (this._displayName) {
-            return this._displayName;
+        if (this.displayNameInternal) {
+            return this.displayNameInternal;
         }
         if (this.isDataURL()) {
             return this.dataURLDisplayName();
@@ -301,24 +301,24 @@ export class ParsedURL {
         if (this.isAboutBlank()) {
             return this.url;
         }
-        this._displayName = this.lastPathComponent;
-        if (!this._displayName) {
-            this._displayName = (this.host || '') + '/';
+        this.displayNameInternal = this.lastPathComponent;
+        if (!this.displayNameInternal) {
+            this.displayNameInternal = (this.host || '') + '/';
         }
-        if (this._displayName === '/') {
-            this._displayName = this.url;
+        if (this.displayNameInternal === '/') {
+            this.displayNameInternal = this.url;
         }
-        return this._displayName;
+        return this.displayNameInternal;
     }
     dataURLDisplayName() {
-        if (this._dataURLDisplayName) {
-            return this._dataURLDisplayName;
+        if (this.dataURLDisplayNameInternal) {
+            return this.dataURLDisplayNameInternal;
         }
         if (!this.isDataURL()) {
             return '';
         }
-        this._dataURLDisplayName = Platform.StringUtilities.trimEndWithMaxLength(this.url, 20);
-        return this._dataURLDisplayName;
+        this.dataURLDisplayNameInternal = Platform.StringUtilities.trimEndWithMaxLength(this.url, 20);
+        return this.dataURLDisplayNameInternal;
     }
     isAboutBlank() {
         return this.url === 'about:blank';
@@ -345,7 +345,7 @@ export class ParsedURL {
         if (this.isDataURL()) {
             return 'data:';
         }
-        const scheme = this.isBlobURL() ? this._blobInnerScheme : this.scheme;
+        const scheme = this.isBlobURL() ? this.blobInnerScheme : this.scheme;
         return scheme + '://' + this.domain();
     }
     urlWithoutScheme() {

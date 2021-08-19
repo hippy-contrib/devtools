@@ -8,16 +8,22 @@ import { SDKModel } from './SDKModel.js';
  * We chose this approach here because the lifetime of the Model is tied to the target, but DevTools
  * wants to preserve issues for targets (e.g. iframes) that are already gone as well.
  */
-export declare class IssuesModel extends SDKModel implements ProtocolProxyApi.AuditsDispatcher {
+export declare class IssuesModel extends SDKModel<EventTypes> implements ProtocolProxyApi.AuditsDispatcher {
     private disposed;
     private enabled;
-    private auditsAgent;
     constructor(target: Target);
     private ensureEnabled;
     issueAdded(issueAddedEvent: Protocol.Audits.IssueAddedEvent): void;
     dispose(): void;
     getTargetIfNotDisposed(): Target | null;
 }
-export declare const Events: {
-    IssueAdded: symbol;
+export declare const enum Events {
+    IssueAdded = "IssueAdded"
+}
+export interface IssueAddedEvent {
+    issuesModel: IssuesModel;
+    inspectorIssue: Protocol.Audits.InspectorIssue;
+}
+export declare type EventTypes = {
+    [Events.IssueAdded]: IssueAddedEvent;
 };

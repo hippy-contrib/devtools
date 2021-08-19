@@ -64,7 +64,7 @@ export class ProfileFlameChartDataProvider {
         throw 'Not implemented.';
     }
     formatValue(value, precision) {
-        return i18n.i18n.preciseMillisToString(value, precision);
+        return i18n.TimeUtilities.preciseMillisToString(value, precision);
     }
     maxStackDepth() {
         return this._maxStackDepth;

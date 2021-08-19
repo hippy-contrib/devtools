@@ -5,7 +5,7 @@
 import * as i18n from '../../../../core/i18n/i18n.js';
 import * as Platform from '../../../../core/platform/platform.js';
 import * as UI from '../../legacy.js';
-import { CSSLength } from './CSSShadowModel.js'; // eslint-disable-line no-unused-vars
+import { CSSLength } from './CSSShadowModel.js';
 const UIStrings = {
     /**
     *@description Text that refers to some types
@@ -54,7 +54,7 @@ export class CSSShadowEditor extends UI.Widget.VBox {
     _changedElement;
     constructor() {
         super(true);
-        this.registerRequiredCSS('ui/legacy/components/inline_editor/cssShadowEditor.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/components/inline_editor/cssShadowEditor.css');
         this.contentElement.tabIndex = 0;
         this.setDefaultFocusedElement(this.contentElement);
         this._typeField = this.contentElement.createChild('div', 'shadow-editor-field shadow-editor-flex-field');
@@ -306,7 +306,7 @@ export class CSSShadowEditor extends UI.Widget.VBox {
             if (!event.altKey) {
                 this._model.setOffsetX(new CSSLength(newX, this._model.offsetX().unit || defaultUnit));
             }
-            if (!UI.KeyboardShortcut.KeyboardShortcut.eventHasCtrlOrMeta(event)) {
+            if (!UI.KeyboardShortcut.KeyboardShortcut.eventHasCtrlEquivalentKey(event)) {
                 this._model.setOffsetY(new CSSLength(newY, this._model.offsetY().unit || defaultUnit));
             }
         }

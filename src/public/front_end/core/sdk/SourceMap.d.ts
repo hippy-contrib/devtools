@@ -44,12 +44,6 @@ export declare class SourceMapEntry {
     constructor(lineNumber: number, columnNumber: number, sourceURL?: string, sourceLineNumber?: number, sourceColumnNumber?: number, name?: string);
     static compare(entry1: SourceMapEntry, entry2: SourceMapEntry): number;
 }
-export declare class EditResult {
-    map: SourceMap;
-    compiledEdits: TextUtils.TextRange.SourceEdit[];
-    newSources: Map<string, string>;
-    constructor(map: SourceMap, compiledEdits: TextUtils.TextRange.SourceEdit[], newSources: Map<string, string>);
-}
 export declare class TextSourceMap implements SourceMap {
     _initiator: PageResourceLoadInitiator;
     _json: SourceMapV3 | null;

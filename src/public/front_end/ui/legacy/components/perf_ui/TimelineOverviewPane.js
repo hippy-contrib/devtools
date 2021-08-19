@@ -263,7 +263,7 @@ export class TimelineOverviewCalculator {
                 }
             }
         }
-        return i18n.i18n.preciseMillisToString(value - this.zeroTime(), precision);
+        return i18n.TimeUtilities.preciseMillisToString(value - this.zeroTime(), precision);
     }
     maximumBoundary() {
         return this._maximumBoundary;
@@ -345,7 +345,6 @@ export class OverviewInfo {
         this._element = UI.Utils
             .createShadowRootWithCoreStyles(this._glassPane.contentElement, {
             cssFile: 'ui/legacy/components/perf_ui/timelineOverviewInfo.css',
-            enableLegacyPatching: false,
             delegatesFocus: undefined,
         })
             .createChild('div', 'overview-info');

@@ -1,9 +1,9 @@
 // Copyright (c) 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import { DeferredDOMNode } from './DOMModel.js'; // eslint-disable-line no-unused-vars
+import { DeferredDOMNode } from './DOMModel.js';
 import { Capability } from './Target.js';
-import { SDKModel } from './SDKModel.js'; // eslint-disable-line no-unused-vars
+import { SDKModel } from './SDKModel.js';
 // TODO(crbug.com/1167717): Make this a const enum again
 // eslint-disable-next-line rulesdir/const_enum
 export var CoreAxPropertyName;
@@ -140,7 +140,7 @@ export class AccessibilityNode {
         if (!this._childIds || !this._childIds.length) {
             return false;
         }
-        return !this._childIds.some(id => this._accessibilityModel.axNodeForId(id) !== null);
+        return this._childIds.every(id => this._accessibilityModel.axNodeForId(id) === null);
     }
 }
 export class AccessibilityModel extends SDKModel {

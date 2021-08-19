@@ -34,15 +34,14 @@ import * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
 const UIStrings = {
     /**
-    *@description Text in Network Log
-    */
+     * @description When DevTools doesn't know the URL that initiated a network request, we
+     * show this phrase instead. 'unknown' would also work in this context.
+     */
     anonymous: '<anonymous>',
 };
 const str_ = i18n.i18n.registerUIStrings('models/logs/NetworkLog.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
-// TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-// eslint-disable-next-line @typescript-eslint/naming-convention
-let _instance;
+let networkLogInstance;
 export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
     _requests;
     _sentNetworkRequests;
@@ -77,10 +76,10 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         this._unresolvedPreflightRequests = new Map();
     }
     static instance() {
-        if (!_instance) {
-            _instance = new NetworkLog();
+        if (!networkLogInstance) {
+            networkLogInstance = new NetworkLog();
         }
-        return _instance;
+        return networkLogInstance;
     }
     modelAdded(networkManager) {
         const eventListeners = [];
@@ -103,7 +102,7 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         this._removeNetworkManagerListeners(networkManager);
     }
     _removeNetworkManagerListeners(networkManager) {
-        Common.EventTarget.EventTarget.removeEventListeners(this._modelListeners.get(networkManager) || []);
+        Common.EventTarget.removeEventListeners(this._modelListeners.get(networkManager) || []);
     }
     setIsRecording(enabled) {
         if (this._isRecording === enabled) {
@@ -334,16 +333,14 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         }
         requestsToAdd.push(...serviceWorkerRequestsToAdd);
         for (const request of requestsToAdd) {
-            // TODO: Use optional chaining here once closure is gone.
-            if (currentPageLoad) {
-                currentPageLoad.bindRequest(request);
-            }
+            currentPageLoad?.bindRequest(request);
             oldRequestsSet.delete(request);
             this._addRequest(request);
         }
         if (preserveLog) {
             for (const request of oldRequestsSet) {
                 this._addRequest(request);
+                request.preserved = true;
             }
         }
         if (currentPageLoad) {
@@ -405,9 +402,9 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
     _onRequestStarted(event) {
-        const request = event.data.request;
-        if (event.data.originalRequest) {
-            this._sentNetworkRequests.push(event.data.originalRequest);
+        const { request, originalRequest } = event.data;
+        if (originalRequest) {
+            this._sentNetworkRequests.push(originalRequest);
         }
         this._requestsSet.add(request);
         const manager = SDK.NetworkManager.NetworkManager.forRequest(request);
@@ -429,8 +426,7 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         this.dispatchEventToListeners(Events.RequestUpdated, request);
     }
     _onRequestRedirect(event) {
-        const request = event.data;
-        this._initiatorData.delete(request);
+        this._initiatorData.delete(event.data);
     }
     _onDOMContentLoaded(resourceTreeModel, event) {
         const networkManager = resourceTreeModel.target().model(SDK.NetworkManager.NetworkManager);
@@ -462,9 +458,9 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         this.dispatchEventToListeners(Events.Reset, { clearIfPreserved });
     }
     _networkMessageGenerated(networkManager, event) {
-        const message = event.data;
-        const consoleMessage = new SDK.ConsoleModel.ConsoleMessage(networkManager.target().model(SDK.RuntimeModel.RuntimeModel), "network" /* Network */, message.warning ? "warning" /* Warning */ : "info" /* Info */, message.message);
-        this.associateConsoleMessageWithRequest(consoleMessage, message.requestId);
+        const { message, warning, requestId } = event.data;
+        const consoleMessage = new SDK.ConsoleModel.ConsoleMessage(networkManager.target().model(SDK.RuntimeModel.RuntimeModel), "network" /* Network */, warning ? "warning" /* Warning */ : "info" /* Info */, message);
+        this.associateConsoleMessageWithRequest(consoleMessage, requestId);
         SDK.ConsoleModel.ConsoleModel.instance().addMessage(consoleMessage);
     }
     associateConsoleMessageWithRequest(consoleMessage, requestId) {

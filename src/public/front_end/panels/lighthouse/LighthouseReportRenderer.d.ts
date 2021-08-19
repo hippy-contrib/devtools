@@ -1,15 +1,16 @@
-import type * as ReportRenderer from './LighthouseReporterTypes.js';
-export declare class LighthouseReportRenderer extends self.ReportRenderer {
-    constructor(dom: DOM);
-    static addViewTraceButton(el: Element, reportUIFeatures: ReportRenderer.ReportUIFeatures, artifacts?: ReportRenderer.RunnerResultArtifacts): void;
+import * as LighthouseReport from '../../third_party/lighthouse/report/report.js';
+import type { RunnerResultArtifacts } from './LighthouseReporterTypes.js';
+export declare class LighthouseReportRenderer extends LighthouseReport.ReportRenderer {
+    constructor(dom: LighthouseReport.DOM);
+    static addViewTraceButton(el: Element, reportUIFeatures: LighthouseReport.ReportUIFeatures, artifacts?: RunnerResultArtifacts): void;
     static linkifyNodeDetails(el: Element): Promise<void>;
     static linkifySourceLocationDetails(el: Element): Promise<void>;
     static handleDarkMode(el: Element): void;
 }
-export declare class LighthouseReportUIFeatures extends self.ReportUIFeatures {
+export declare class LighthouseReportUIFeatures extends LighthouseReport.ReportUIFeatures {
     _beforePrint: (() => void) | null;
     _afterPrint: (() => void) | null;
-    constructor(dom: DOM);
+    constructor(dom: LighthouseReport.DOM);
     setBeforePrint(beforePrint: (() => void) | null): void;
     setAfterPrint(afterPrint: (() => void) | null): void;
     /**

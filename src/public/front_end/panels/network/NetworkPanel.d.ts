@@ -1,11 +1,10 @@
 import * as Common from '../../core/common/common.js';
 import * as SDK from '../../core/sdk/sdk.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as Search from '../search/search.js';
-import type { Tabs as NetworkItemViewTabs } from './NetworkItemView.js';
 import { NetworkItemView } from './NetworkItemView.js';
-import type { FilterType } from './NetworkLogView.js';
 import { NetworkLogView } from './NetworkLogView.js';
 import { NetworkOverview } from './NetworkOverview.js';
 import type { NetworkTimeCalculator } from './NetworkTimeCalculator.js';
@@ -45,10 +44,10 @@ export declare class NetworkPanel extends UI.Panel.Panel implements UI.ContextMe
         forceNew: boolean | null;
     }): NetworkPanel;
     static revealAndFilter(filters: {
-        filterType: FilterType | null;
+        filterType: NetworkForward.UIFilter.FilterType | null;
         filterValue: string;
-    }[]): void;
-    static selectAndShowRequest(request: SDK.NetworkRequest.NetworkRequest, tab: NetworkItemViewTabs, options?: FilterOptions): Promise<void>;
+    }[]): Promise<void>;
+    static selectAndShowRequest(request: SDK.NetworkRequest.NetworkRequest, tab: NetworkForward.UIRequestLocation.UIRequestTabs, options?: NetworkForward.UIRequestLocation.FilterOptions): Promise<void>;
     static _instance(): NetworkPanel;
     throttlingSelectForTest(): UI.Toolbar.ToolbarComboBox;
     _onWindowChanged(event: Common.EventTarget.EventTargetEvent): void;
@@ -59,8 +58,8 @@ export declare class NetworkPanel extends UI.Panel.Panel implements UI.ContextMe
     _toggleRecord(toggled: boolean): void;
     _filmStripAvailable(filmStripModel: SDK.FilmStripModel.FilmStripModel | null): void;
     _onNetworkLogReset(event: Common.EventTarget.EventTargetEvent): void;
-    _willReloadPage(_event: Common.EventTarget.EventTargetEvent): void;
-    _load(_event: Common.EventTarget.EventTargetEvent): void;
+    _willReloadPage(): void;
+    _load(): void;
     _stopFilmStripRecording(): void;
     _toggleLargerRequests(): void;
     _toggleShowOverview(): void;
@@ -70,18 +69,19 @@ export declare class NetworkPanel extends UI.Panel.Panel implements UI.ContextMe
     wasShown(): void;
     willHide(): void;
     revealAndHighlightRequest(request: SDK.NetworkRequest.NetworkRequest): void;
-    selectAndActivateRequest(request: SDK.NetworkRequest.NetworkRequest, shownTab?: NetworkItemViewTabs, options?: FilterOptions): Promise<NetworkItemView | null>;
+    revealAndHighlightRequestWithId(request: NetworkForward.NetworkRequestId.NetworkRequestId): void;
+    selectAndActivateRequest(request: SDK.NetworkRequest.NetworkRequest, shownTab?: NetworkForward.UIRequestLocation.UIRequestTabs, options?: NetworkForward.UIRequestLocation.FilterOptions): Promise<NetworkItemView | null>;
     _handleFilterChanged(_event: Common.EventTarget.EventTargetEvent): void;
     _onRowSizeChanged(_event: Common.EventTarget.EventTargetEvent): void;
     _onRequestSelected(event: Common.EventTarget.EventTargetEvent): void;
     _onRequestActivated(event: {
         data: any;
     }): void;
-    _showRequestPanel(shownTab?: NetworkItemViewTabs, takeFocus?: boolean): void;
+    _showRequestPanel(shownTab?: NetworkForward.UIRequestLocation.UIRequestTabs, takeFocus?: boolean): void;
     _hideRequestPanel(): void;
     _updateNetworkItemView(): void;
     _clearNetworkItemView(): void;
-    _createNetworkItemView(initialTab?: NetworkItemViewTabs): NetworkItemView | undefined;
+    _createNetworkItemView(initialTab?: NetworkForward.UIRequestLocation.UIRequestTabs): NetworkItemView | undefined;
     _updateUI(): void;
     appendApplicableItems(this: NetworkPanel, event: Event, contextMenu: UI.ContextMenu.ContextMenu, target: Object): void;
     _onFilmFrameSelected(event: Common.EventTarget.EventTargetEvent): void;
@@ -101,6 +101,18 @@ export declare class RequestRevealer implements Common.Revealer.Revealer {
     static instance(opts?: {
         forceNew: boolean | null;
     }): RequestRevealer;
+    reveal(request: Object): Promise<void>;
+}
+export declare class RequestIdRevealer implements Common.Revealer.Revealer {
+    static instance(opts?: {
+        forceNew: boolean | null;
+    }): RequestIdRevealer;
+    reveal(requestId: Object): Promise<void>;
+}
+export declare class NetworkLogWithFilterRevealer implements Common.Revealer.Revealer {
+    static instance(opts?: {
+        forceNew: boolean | null;
+    }): NetworkLogWithFilterRevealer;
     reveal(request: Object): Promise<void>;
 }
 export declare class FilmStripRecorder implements SDK.TracingManager.TracingManagerClient {
@@ -138,7 +150,4 @@ export declare class SearchNetworkView extends Search.SearchView.SearchView {
     }): SearchNetworkView;
     static openSearch(query: string, searchImmediately?: boolean): Promise<Search.SearchView.SearchView>;
     createScope(): Search.SearchConfig.SearchScope;
-}
-export interface FilterOptions {
-    clearFilter: boolean;
 }

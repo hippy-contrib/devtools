@@ -24,15 +24,23 @@ export class LogManager {
     modelRemoved(logModel) {
         const eventListeners = modelToEventListeners.get(logModel);
         if (eventListeners) {
-            Common.EventTarget.EventTarget.removeEventListeners(eventListeners);
+            Common.EventTarget.removeEventListeners(eventListeners);
         }
     }
     logEntryAdded(event) {
-        const data = event.data;
-        const target = data.logModel.target();
-        const consoleMessage = new SDK.ConsoleModel.ConsoleMessage(target.model(SDK.RuntimeModel.RuntimeModel), data.entry.source, data.entry.level, data.entry.text, undefined, data.entry.url, data.entry.lineNumber, undefined, [data.entry.text, ...(data.entry.args || [])], data.entry.stackTrace, data.entry.timestamp, undefined, undefined, data.entry.workerId);
-        if (data.entry.networkRequestId) {
-            NetworkLog.instance().associateConsoleMessageWithRequest(consoleMessage, data.entry.networkRequestId);
+        const { logModel, entry } = event.data;
+        const target = logModel.target();
+        const details = {
+            url: entry.url,
+            line: entry.lineNumber,
+            parameters: [entry.text, ...(entry.args ?? [])],
+            stackTrace: entry.stackTrace,
+            timestamp: entry.timestamp,
+            workerId: entry.workerId,
+        };
+        const consoleMessage = new SDK.ConsoleModel.ConsoleMessage(target.model(SDK.RuntimeModel.RuntimeModel), entry.source, entry.level, entry.text, details);
+        if (entry.networkRequestId) {
+            NetworkLog.instance().associateConsoleMessageWithRequest(consoleMessage, entry.networkRequestId);
         }
         if (consoleMessage.source === "worker" /* Worker */) {
             const workerId = consoleMessage.workerId || '';

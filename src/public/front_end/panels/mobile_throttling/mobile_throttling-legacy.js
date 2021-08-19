@@ -13,7 +13,6 @@ MobileThrottling.NetworkPanelIndicator = MobileThrottlingModule.NetworkPanelIndi
 MobileThrottling.NetworkThrottlingSelector = MobileThrottlingModule.NetworkThrottlingSelector.NetworkThrottlingSelector;
 /** @constructor */
 MobileThrottling.ThrottlingManager = MobileThrottlingModule.ThrottlingManager.ThrottlingManager;
-MobileThrottling.ThrottlingManager.Events = MobileThrottlingModule.ThrottlingManager.Events;
 /** @constructor */
 MobileThrottling.ThrottlingManager.ActionDelegate = MobileThrottlingModule.ThrottlingManager.ActionDelegate;
 MobileThrottling.throttlingManager = MobileThrottlingModule.ThrottlingManager.throttlingManager;

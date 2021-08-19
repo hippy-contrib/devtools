@@ -11,6 +11,7 @@ export declare class AXNodeSubPane extends AccessibilitySubPane {
     constructor();
     setAXNode(axNode: SDK.AccessibilityModel.AccessibilityNode | null): void;
     setNode(node: SDK.DOMModel.DOMNode | null): void;
+    wasShown(): void;
 }
 export declare class AXNodePropertyTreeElement extends UI.TreeOutline.TreeElement {
     _axNode: SDK.AccessibilityModel.AccessibilityNode;

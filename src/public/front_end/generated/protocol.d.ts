@@ -15,13 +15,15 @@ declare namespace Protocol {
     /** Returns an error message if the request failed. */
     getError(): string|undefined;
   }
+  type OpaqueType<Tag extends string> = {protocolOpaqueTypeTag: Tag};
+  type OpaqueIdentifier<RepresentationType, Tag extends string> = RepresentationType&OpaqueType<Tag>;
 
   export namespace Accessibility {
 
     /**
      * Unique accessibility node identifier.
      */
-    export type AXNodeId = string;
+    export type AXNodeId = OpaqueIdentifier<string, 'Protocol.Accessibility.AXNodeId'>;
 
     /**
      * Enum of possible property types.
@@ -1041,6 +1043,13 @@ declare namespace Protocol {
       location?: SourceCodeLocation;
     }
 
+    export interface WasmCrossOriginModuleSharingIssueDetails {
+      wasmModuleUrl: string;
+      sourceOrigin: string;
+      targetOrigin: string;
+      isWarning: boolean;
+    }
+
     /**
      * A unique identifier for the type of issue. Each type may use one of the
      * optional fields in InspectorIssueDetails to convey more specific
@@ -1059,6 +1068,7 @@ declare namespace Protocol {
       AttributionReportingIssue = 'AttributionReportingIssue',
       QuirksModeIssue = 'QuirksModeIssue',
       NavigatorUserAgentIssue = 'NavigatorUserAgentIssue',
+      WasmCrossOriginModuleSharingIssue = 'WasmCrossOriginModuleSharingIssue',
     }
 
     /**
@@ -1079,7 +1089,14 @@ declare namespace Protocol {
       attributionReportingIssueDetails?: AttributionReportingIssueDetails;
       quirksModeIssueDetails?: QuirksModeIssueDetails;
       navigatorUserAgentIssueDetails?: NavigatorUserAgentIssueDetails;
+      wasmCrossOriginModuleSharingIssue?: WasmCrossOriginModuleSharingIssueDetails;
     }
+
+    /**
+     * A unique id for a DevTools inspector issue. Allows other entities (e.g.
+     * exceptions, CDP message, console messages, etc.) to reference an issue.
+     */
+    export type IssueId = string;
 
     /**
      * An inspector issue reported from the back-end.
@@ -1091,7 +1108,7 @@ declare namespace Protocol {
        * A unique id for this issue. May be omitted if no other entity (e.g.
        * exception, CDP message, etc.) is referencing this issue.
        */
-      issueId?: string;
+      issueId?: IssueId;
     }
 
     export const enum GetEncodedResponseRequestEncoding {
@@ -1754,7 +1771,9 @@ declare namespace Protocol {
        */
       frameId: Page.FrameId;
       /**
-       * Stylesheet resource URL.
+       * Stylesheet resource URL. Empty if this is a constructed stylesheet created using
+       * new CSSStyleSheet() (but non-empty if this is a constructed sylesheet imported
+       * as a CSS module script).
        */
       sourceURL: string;
       /**
@@ -1794,7 +1813,8 @@ declare namespace Protocol {
        */
       isMutable: boolean;
       /**
-       * Whether this stylesheet is a constructed stylesheet (created using new CSSStyleSheet()).
+       * True if this stylesheet is created through new CSSStyleSheet() or imported as a
+       * CSS module script.
        */
       isConstructed: boolean;
       /**
@@ -1845,6 +1865,11 @@ declare namespace Protocol {
        * starting with the innermost one, going outwards.
        */
       media?: CSSMedia[];
+      /**
+       * Container query list array (for rules involving container queries).
+       * The array enumerates container queries starting with the innermost one, going outwards.
+       */
+      containerQueries?: CSSContainerQuery[];
     }
 
     /**
@@ -2062,6 +2087,29 @@ declare namespace Protocol {
        * Computed length of media query expression (if applicable).
        */
       computedLength?: number;
+    }
+
+    /**
+     * CSS container query rule descriptor.
+     */
+    export interface CSSContainerQuery {
+      /**
+       * Container query text.
+       */
+      text: string;
+      /**
+       * The associated rule header range in the enclosing stylesheet (if
+       * available).
+       */
+      range?: SourceRange;
+      /**
+       * Identifier of the stylesheet containing this object (if exists).
+       */
+      styleSheetId?: StyleSheetId;
+      /**
+       * Optional name for the container.
+       */
+      name?: string;
     }
 
     /**
@@ -2420,6 +2468,19 @@ declare namespace Protocol {
       media: CSSMedia;
     }
 
+    export interface SetContainerQueryTextRequest {
+      styleSheetId: StyleSheetId;
+      range: SourceRange;
+      text: string;
+    }
+
+    export interface SetContainerQueryTextResponse extends ProtocolResponseWithError {
+      /**
+       * The resulting CSS container query rule after modification.
+       */
+      containerQuery: CSSContainerQuery;
+    }
+
     export interface SetRuleSelectorRequest {
       styleSheetId: StyleSheetId;
       range: SourceRange;
@@ -2519,7 +2580,7 @@ declare namespace Protocol {
     /**
      * Unique identifier of the Cache object.
      */
-    export type CacheId = string;
+    export type CacheId = OpaqueIdentifier<string, 'Protocol.CacheStorage.CacheId'>;
 
     /**
      * type of HTTP response cached
@@ -2753,13 +2814,13 @@ declare namespace Protocol {
     /**
      * Unique DOM node identifier.
      */
-    export type NodeId = integer;
+    export type NodeId = OpaqueIdentifier<integer, 'Protocol.DOM.NodeId'>;
 
     /**
      * Unique DOM node identifier used to reference a node that may not have been pushed to the
      * front-end.
      */
-    export type BackendNodeId = integer;
+    export type BackendNodeId = OpaqueIdentifier<integer, 'Protocol.DOM.BackendNodeId'>;
 
     /**
      * Backend node with a friendly name.
@@ -2790,6 +2851,7 @@ declare namespace Protocol {
       TargetText = 'target-text',
       SpellingError = 'spelling-error',
       GrammarError = 'grammar-error',
+      Highlight = 'highlight',
       FirstLineInherited = 'first-line-inherited',
       Scrollbar = 'scrollbar',
       ScrollbarThumb = 'scrollbar-thumb',
@@ -3708,6 +3770,18 @@ declare namespace Protocol {
       nodeId?: NodeId;
     }
 
+    export interface GetContainerForNodeRequest {
+      nodeId: NodeId;
+      containerName?: string;
+    }
+
+    export interface GetContainerForNodeResponse extends ProtocolResponseWithError {
+      /**
+       * The container node for the given node, or null if not found.
+       */
+      nodeId?: NodeId;
+    }
+
     /**
      * Fired when `Element`'s attribute is modified.
      */
@@ -4384,6 +4458,10 @@ declare namespace Protocol {
        * `Node`'s nodeType.
        */
       nodeType?: integer[];
+      /**
+       * Type of the shadow root the `Node` is in. String values are equal to the `ShadowRootType` enum.
+       */
+      shadowRootType?: RareStringData;
       /**
        * `Node`'s nodeName.
        */
@@ -5661,6 +5739,10 @@ declare namespace Protocol {
     export interface DragData {
       items: DragDataItem[];
       /**
+       * List of filenames that should be included when dropping
+       */
+      files?: string[];
+      /**
        * Bit field representing allowed drag operations. Copy = 1, Link = 2, Move = 16
        */
       dragOperationsMask: integer;
@@ -6615,7 +6697,7 @@ declare namespace Protocol {
     /**
      * Unique request identifier.
      */
-    export type RequestId = string;
+    export type RequestId = OpaqueIdentifier<string, 'Protocol.Network.RequestId'>;
 
     /**
      * Unique intercepted request identifier.
@@ -6866,6 +6948,11 @@ declare namespace Protocol {
        * passed by the developer (e.g. via "fetch") as understood by the backend.
        */
       trustTokenParams?: TrustTokenParams;
+      /**
+       * True if this resource request is considered to be the 'same site' as the
+       * request correspondinfg to the main frame.
+       */
+      isSameSite?: boolean;
     }
 
     /**
@@ -8128,17 +8215,6 @@ declare namespace Protocol {
       cookies: CookieParam[];
     }
 
-    export interface SetDataSizeLimitsForTestRequest {
-      /**
-       * Maximum total buffer size.
-       */
-      maxTotalSize: integer;
-      /**
-       * Maximum per-resource size.
-       */
-      maxResourceSize: integer;
-    }
-
     export interface SetExtraHTTPHeadersRequest {
       /**
        * Map with extra HTTP headers.
@@ -8726,6 +8802,11 @@ declare namespace Protocol {
        */
       resourceIPAddressSpace: IPAddressSpace;
       /**
+       * The status code of the response. This is useful in cases the request failed and no responseReceived
+       * event is triggered, which is the case for, e.g., CORS errors.
+       */
+      statusCode: integer;
+      /**
        * Raw response header text as it was received over the wire. The raw text may not always be
        * available, such as in the case of HTTP/2 or QUIC.
        */
@@ -9126,6 +9207,10 @@ declare namespace Protocol {
        * The contrast algorithm to use for the contrast ratio (default: aa).
        */
       contrastAlgorithm?: ContrastAlgorithm;
+      /**
+       * The container query container highlight configuration (default: all transparent).
+       */
+      containerQueryContainerHighlightConfig?: ContainerQueryContainerHighlightConfig;
     }
 
     export const enum ColorFormat {
@@ -9205,6 +9290,24 @@ declare namespace Protocol {
        * The content box highlight outline color (default: transparent).
        */
       outlineColor?: DOM.RGBA;
+    }
+
+    export interface ContainerQueryHighlightConfig {
+      /**
+       * A descriptor for the highlight appearance of container query containers.
+       */
+      containerQueryContainerHighlightConfig: ContainerQueryContainerHighlightConfig;
+      /**
+       * Identifier of the container node to highlight.
+       */
+      nodeId: DOM.NodeId;
+    }
+
+    export interface ContainerQueryContainerHighlightConfig {
+      /**
+       * The style of the container border
+       */
+      containerBorder?: LineStyle;
     }
 
     export const enum InspectMode {
@@ -9433,6 +9536,13 @@ declare namespace Protocol {
       scrollSnapHighlightConfigs: ScrollSnapHighlightConfig[];
     }
 
+    export interface SetShowContainerQueryOverlaysRequest {
+      /**
+       * An array of node identifiers and descriptors for the highlight appearance.
+       */
+      containerQueryHighlightConfigs: ContainerQueryHighlightConfig[];
+    }
+
     export interface SetShowPaintRectsRequest {
       /**
        * True for showing paint rectangles
@@ -9527,6 +9637,20 @@ declare namespace Protocol {
       Root = 'root',
     }
 
+    export const enum AdFrameExplanation {
+      ParentIsAd = 'ParentIsAd',
+      CreatedByAdScript = 'CreatedByAdScript',
+      MatchedBlockingRule = 'MatchedBlockingRule',
+    }
+
+    /**
+     * Indicates whether a frame has been identified as an ad and why.
+     */
+    export interface AdFrameStatus {
+      adFrameType: AdFrameType;
+      explanations?: AdFrameExplanation[];
+    }
+
     /**
      * Indicates whether the frame is a secure context and why it is the case.
      */
@@ -9572,6 +9696,7 @@ declare namespace Protocol {
       ChRtt = 'ch-rtt',
       ChUa = 'ch-ua',
       ChUaArch = 'ch-ua-arch',
+      ChUaBitness = 'ch-ua-bitness',
       ChUaPlatform = 'ch-ua-platform',
       ChUaModel = 'ch-ua-model',
       ChUaMobile = 'ch-ua-mobile',
@@ -9742,9 +9867,9 @@ declare namespace Protocol {
        */
       unreachableUrl?: string;
       /**
-       * Indicates whether this frame was tagged as an ad.
+       * Indicates whether this frame was tagged as an ad and why.
        */
-      adFrameType?: AdFrameType;
+      adFrameStatus?: AdFrameStatus;
       /**
        * Indicates whether the main document is a secure context and explains why that is the case.
        */
@@ -10169,6 +10294,126 @@ declare namespace Protocol {
       BackForwardCacheRestore = 'BackForwardCacheRestore',
     }
 
+    /**
+     * List of not restored reasons for back-forward cache.
+     */
+    export const enum BackForwardCacheNotRestoredReason {
+      NotMainFrame = 'NotMainFrame',
+      BackForwardCacheDisabled = 'BackForwardCacheDisabled',
+      RelatedActiveContentsExist = 'RelatedActiveContentsExist',
+      HTTPStatusNotOK = 'HTTPStatusNotOK',
+      SchemeNotHTTPOrHTTPS = 'SchemeNotHTTPOrHTTPS',
+      Loading = 'Loading',
+      WasGrantedMediaAccess = 'WasGrantedMediaAccess',
+      DisableForRenderFrameHostCalled = 'DisableForRenderFrameHostCalled',
+      DomainNotAllowed = 'DomainNotAllowed',
+      HTTPMethodNotGET = 'HTTPMethodNotGET',
+      SubframeIsNavigating = 'SubframeIsNavigating',
+      Timeout = 'Timeout',
+      CacheLimit = 'CacheLimit',
+      JavaScriptExecution = 'JavaScriptExecution',
+      RendererProcessKilled = 'RendererProcessKilled',
+      RendererProcessCrashed = 'RendererProcessCrashed',
+      GrantedMediaStreamAccess = 'GrantedMediaStreamAccess',
+      SchedulerTrackedFeatureUsed = 'SchedulerTrackedFeatureUsed',
+      ConflictingBrowsingInstance = 'ConflictingBrowsingInstance',
+      CacheFlushed = 'CacheFlushed',
+      ServiceWorkerVersionActivation = 'ServiceWorkerVersionActivation',
+      SessionRestored = 'SessionRestored',
+      ServiceWorkerPostMessage = 'ServiceWorkerPostMessage',
+      EnteredBackForwardCacheBeforeServiceWorkerHostAdded = 'EnteredBackForwardCacheBeforeServiceWorkerHostAdded',
+      RenderFrameHostReused_SameSite = 'RenderFrameHostReused_SameSite',
+      RenderFrameHostReused_CrossSite = 'RenderFrameHostReused_CrossSite',
+      ServiceWorkerClaim = 'ServiceWorkerClaim',
+      IgnoreEventAndEvict = 'IgnoreEventAndEvict',
+      HaveInnerContents = 'HaveInnerContents',
+      TimeoutPuttingInCache = 'TimeoutPuttingInCache',
+      BackForwardCacheDisabledByLowMemory = 'BackForwardCacheDisabledByLowMemory',
+      BackForwardCacheDisabledByCommandLine = 'BackForwardCacheDisabledByCommandLine',
+      NetworkRequestDatAPIpeDrainedAsBytesConsumer = 'NetworkRequestDatapipeDrainedAsBytesConsumer',
+      NetworkRequestRedirected = 'NetworkRequestRedirected',
+      NetworkRequestTimeout = 'NetworkRequestTimeout',
+      NetworkExceedsBufferLimit = 'NetworkExceedsBufferLimit',
+      NavigationCancelledWhileRestoring = 'NavigationCancelledWhileRestoring',
+      NotMostRecentNavigationEntry = 'NotMostRecentNavigationEntry',
+      BackForwardCacheDisabledForPrerender = 'BackForwardCacheDisabledForPrerender',
+      UserAgentOverrideDiffers = 'UserAgentOverrideDiffers',
+      ForegroundCacheLimit = 'ForegroundCacheLimit',
+      BrowsingInstanceNotSwapped = 'BrowsingInstanceNotSwapped',
+      BackForwardCacheDisabledForDelegate = 'BackForwardCacheDisabledForDelegate',
+      OptInUnloadHeaderNotPresent = 'OptInUnloadHeaderNotPresent',
+      UnloadHandlerExistsInSubFrame = 'UnloadHandlerExistsInSubFrame',
+      ServiceWorkerUnregistration = 'ServiceWorkerUnregistration',
+      CacheControlNoStore = 'CacheControlNoStore',
+      CacheControlNoStoreCookieModified = 'CacheControlNoStoreCookieModified',
+      CacheControlNoStoreHTTPOnlyCookieModified = 'CacheControlNoStoreHTTPOnlyCookieModified',
+      WebSocket = 'WebSocket',
+      WebRTC = 'WebRTC',
+      MainResourceHasCacheControlNoStore = 'MainResourceHasCacheControlNoStore',
+      MainResourceHasCacheControlNoCache = 'MainResourceHasCacheControlNoCache',
+      SubresourceHasCacheControlNoStore = 'SubresourceHasCacheControlNoStore',
+      SubresourceHasCacheControlNoCache = 'SubresourceHasCacheControlNoCache',
+      ContainsPlugins = 'ContainsPlugins',
+      DocumentLoaded = 'DocumentLoaded',
+      DedicatedWorkerOrWorklet = 'DedicatedWorkerOrWorklet',
+      OutstandingNetworkRequestOthers = 'OutstandingNetworkRequestOthers',
+      OutstandingIndexedDBTransaction = 'OutstandingIndexedDBTransaction',
+      RequestedNotificationsPermission = 'RequestedNotificationsPermission',
+      RequestedMIDIPermission = 'RequestedMIDIPermission',
+      RequestedAudioCapturePermission = 'RequestedAudioCapturePermission',
+      RequestedVideoCapturePermission = 'RequestedVideoCapturePermission',
+      RequestedBackForwardCacheBlockedSensors = 'RequestedBackForwardCacheBlockedSensors',
+      RequestedBackgroundWorkPermission = 'RequestedBackgroundWorkPermission',
+      BroadcastChannel = 'BroadcastChannel',
+      IndexedDBConnection = 'IndexedDBConnection',
+      WebXR = 'WebXR',
+      SharedWorker = 'SharedWorker',
+      WebLocks = 'WebLocks',
+      WebHID = 'WebHID',
+      WebShare = 'WebShare',
+      RequestedStorageAccessGrant = 'RequestedStorageAccessGrant',
+      WebNfc = 'WebNfc',
+      WebFileSystem = 'WebFileSystem',
+      OutstandingNetworkRequestFetch = 'OutstandingNetworkRequestFetch',
+      OutstandingNetworkRequestXHR = 'OutstandingNetworkRequestXHR',
+      AppBanner = 'AppBanner',
+      Printing = 'Printing',
+      WebDatabase = 'WebDatabase',
+      PictureInPicture = 'PictureInPicture',
+      Portal = 'Portal',
+      SpeechRecognizer = 'SpeechRecognizer',
+      IdleManager = 'IdleManager',
+      PaymentManager = 'PaymentManager',
+      SpeechSynthesis = 'SpeechSynthesis',
+      KeyboardLock = 'KeyboardLock',
+      WebOTPService = 'WebOTPService',
+      OutstandingNetworkRequestDirectSocket = 'OutstandingNetworkRequestDirectSocket',
+      IsolatedWorldScript = 'IsolatedWorldScript',
+      InjectedStyleSheet = 'InjectedStyleSheet',
+      MediaSessionImplOnServiceCreated = 'MediaSessionImplOnServiceCreated',
+      Unknown = 'Unknown',
+    }
+
+    /**
+     * Types of not restored reasons for back-forward cache.
+     */
+    export const enum BackForwardCacheNotRestoredReasonType {
+      SupportPending = 'SupportPending',
+      PageSupportNeeded = 'PageSupportNeeded',
+      Circumstantial = 'Circumstantial',
+    }
+
+    export interface BackForwardCacheNotRestoredExplanation {
+      /**
+       * Type of the reason
+       */
+      type: BackForwardCacheNotRestoredReasonType;
+      /**
+       * Not restored reason
+       */
+      reason: BackForwardCacheNotRestoredReason;
+    }
+
     export interface AddScriptToEvaluateOnLoadRequest {
       scriptSource: string;
     }
@@ -10205,6 +10450,7 @@ declare namespace Protocol {
     export const enum CaptureScreenshotRequestFormat {
       Jpeg = 'jpeg',
       Png = 'png',
+      Webp = 'webp',
     }
 
     export interface CaptureScreenshotRequest {
@@ -11128,6 +11374,10 @@ declare namespace Protocol {
        * The frame id of the associated frame.
        */
       frameId: FrameId;
+      /**
+       * Array of reasons why the page could not be cached. This must not be empty.
+       */
+      notRestoredExplanations: BackForwardCacheNotRestoredExplanation[];
     }
 
     export interface LoadEventFiredEvent {
@@ -12821,7 +13071,7 @@ declare namespace Protocol {
     /**
      * Unique request identifier.
      */
-    export type RequestId = string;
+    export type RequestId = OpaqueIdentifier<string, 'Protocol.Fetch.RequestId'>;
 
     /**
      * Stages of the request to handle. Request will intercept before the request is
@@ -15430,7 +15680,7 @@ declare namespace Protocol {
        */
       executionContextId?: ExecutionContextId;
       /**
-       * Dictionary with entries of meta deta that the client associated
+       * Dictionary with entries of meta data that the client associated
        * with this exception, such as information about associated network
        * requests, etc.
        */
@@ -15583,6 +15833,10 @@ declare namespace Protocol {
        * specified and objectId is, objectGroup will be inherited from object.
        */
       objectGroup?: string;
+      /**
+       * Whether to throw an exception if side effect cannot be ruled out during evaluation.
+       */
+      throwOnSideEffect?: boolean;
     }
 
     export interface CallFunctionOnResponse extends ProtocolResponseWithError {
@@ -16029,6 +16283,10 @@ declare namespace Protocol {
     export interface InspectRequestedEvent {
       object: RemoteObject;
       hints: any;
+      /**
+       * Identifier of the context where the call was made.
+       */
+      executionContextId?: ExecutionContextId;
     }
   }
 

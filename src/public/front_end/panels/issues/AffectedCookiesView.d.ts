@@ -10,3 +10,9 @@ export declare class AffectedCookiesView extends AffectedResourcesView {
     private appendAffectedCookie;
     update(): void;
 }
+export declare class AffectedRawCookieLinesView extends AffectedResourcesView {
+    private issue;
+    constructor(parent: IssueView, issue: AggregatedIssue);
+    protected getResourceNameWithCount(count: number): Platform.UIString.LocalizedString;
+    update(): void;
+}

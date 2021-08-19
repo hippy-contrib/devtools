@@ -19,6 +19,7 @@ export declare class Widget extends Common.ObjectWrapper.ObjectWrapper {
     _invalidationsSuspended: number;
     _defaultFocusedChild: Widget | null;
     _parentWidget: Widget | null;
+    _registeredCSSFiles: boolean;
     _defaultFocusedElement?: Element | null;
     _cachedConstraints?: Constraints;
     _constraints?: Constraints;
@@ -62,9 +63,8 @@ export declare class Widget extends Common.ObjectWrapper.ObjectWrapper {
     restoreScrollPositions(): void;
     doResize(): void;
     doLayout(): void;
-    registerRequiredCSS(cssFile: string, options: {
-        enableLegacyPatching: false;
-    }): void;
+    registerRequiredCSS(cssFile: string): void;
+    registerCSSFiles(cssFiles: CSSStyleSheet[]): void;
     printWidgetHierarchy(): void;
     _collectWidgetHierarchy(prefix: string, lines: string[]): void;
     setDefaultFocusedElement(element: Element | null): void;

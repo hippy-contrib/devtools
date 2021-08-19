@@ -88,20 +88,20 @@ export class FilteredUISourceCodeListProvider extends QuickOpen.FilteredListWidg
             multiplier = 5;
         }
         const fullDisplayName = uiSourceCode.fullDisplayName();
-        return score + multiplier * this._scorer.score(fullDisplayName, null);
+        return score + multiplier * this._scorer.calculateScore(fullDisplayName, null);
     }
     renderItem(itemIndex, query, titleElement, subtitleElement) {
         query = this.rewriteQuery(query);
         const uiSourceCode = this._uiSourceCodes[itemIndex];
         const fullDisplayName = uiSourceCode.fullDisplayName();
         const indexes = [];
-        new FilePathScoreFunction(query).score(fullDisplayName, indexes);
+        new FilePathScoreFunction(query).calculateScore(fullDisplayName, indexes);
         const fileNameIndex = fullDisplayName.lastIndexOf('/');
         titleElement.classList.add('monospace');
         subtitleElement.classList.add('monospace');
         titleElement.textContent = uiSourceCode.displayName() + (this._queryLineNumberAndColumnNumber || '');
         this._renderSubtitleElement(subtitleElement, fullDisplayName);
-        /** @type {!HTMLElement} */ UI.Tooltip.Tooltip.install((subtitleElement), fullDisplayName);
+        /** @type {!HTMLElement} */ UI.Tooltip.Tooltip.install(subtitleElement, fullDisplayName);
         const ranges = [];
         for (let i = 0; i < indexes.length; ++i) {
             ranges.push({ offset: indexes[i], length: 1 });
@@ -127,7 +127,7 @@ export class FilteredUISourceCodeListProvider extends QuickOpen.FilteredListWidg
         first.textContent = text.substring(0, splitPosition);
         const second = element.createChild('div', 'second-part');
         second.textContent = text.substring(splitPosition);
-        /** @type {!HTMLElement} */ UI.Tooltip.Tooltip.install((element), text);
+        /** @type {!HTMLElement} */ UI.Tooltip.Tooltip.install(element, text);
     }
     selectItem(itemIndex, promptValue) {
         const parsedExpression = promptValue.trim().match(/^([^:]*)(:\d+)?(:\d+)?$/);

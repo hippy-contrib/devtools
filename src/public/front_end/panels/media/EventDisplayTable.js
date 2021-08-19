@@ -6,6 +6,7 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as SourceFrame from '../../ui/legacy/components/source_frame/source_frame.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import eventDisplayTableStyles from './eventDisplayTable.css.js';
 const UIStrings = {
     /**
     *@description Text for timestamps of items
@@ -56,7 +57,6 @@ export class PlayerEventsView extends UI.Widget.VBox {
     constructor() {
         super();
         // Set up element styles.
-        this.registerRequiredCSS('panels/media/eventDisplayTable.css', { enableLegacyPatching: false });
         this.contentElement.classList.add('event-display-table-contents-table-container');
         this._dataGrid = this._createDataGrid([
             {
@@ -133,6 +133,10 @@ export class PlayerEventsView extends UI.Widget.VBox {
             weight: columnConfig.weight || 0,
             sort: DataGrid.DataGrid.Order.Ascending,
         };
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([eventDisplayTableStyles]);
     }
 }
 //# sourceMappingURL=EventDisplayTable.js.map

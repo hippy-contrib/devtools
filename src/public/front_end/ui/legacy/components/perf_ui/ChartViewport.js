@@ -41,7 +41,7 @@ export class ChartViewport extends UI.Widget.VBox {
     _cancelWindowTimesAnimation;
     constructor(delegate) {
         super();
-        this.registerRequiredCSS('ui/legacy/components/perf_ui/chartViewport.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('ui/legacy/components/perf_ui/chartViewport.css');
         this._delegate = delegate;
         this.viewportElement = this.contentElement.createChild('div', 'fill');
         this.viewportElement.addEventListener('mousemove', this._updateCursorPosition.bind(this), false);
@@ -247,7 +247,7 @@ export class ChartViewport extends UI.Widget.VBox {
         style.left = left + 'px';
         style.width = (right - left) + 'px';
         const timeSpan = rangeSelectionEnd - rangeSelectionStart;
-        this._selectedTimeSpanLabel.textContent = i18n.i18n.preciseMillisToString(timeSpan, 2);
+        this._selectedTimeSpanLabel.textContent = i18n.TimeUtilities.preciseMillisToString(timeSpan, 2);
     }
     _onScroll() {
         this._scrollTop = this._vScrollElement.scrollTop;

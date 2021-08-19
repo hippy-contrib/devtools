@@ -16,12 +16,20 @@ const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 const getStyleSheets = ComponentHelpers.GetStylesheet.getStyleSheets;
 export class FormatChangedEvent extends Event {
     data;
+    static eventName = 'formatchanged';
     constructor(format, text) {
-        super('formatchanged', {});
+        super(FormatChangedEvent.eventName, {});
         this.data = { format, text };
     }
 }
+export class ClickEvent extends Event {
+    static eventName = 'swatchclick';
+    constructor() {
+        super(ClickEvent.eventName, {});
+    }
+}
 export class ColorSwatch extends HTMLElement {
+    static litTagName = LitHtml.literal `devtools-color-swatch`;
     shadow = this.attachShadow({ mode: 'open' });
     tooltip = i18nString(UIStrings.shiftclickToChangeColorFormat);
     text = null;
@@ -30,7 +38,7 @@ export class ColorSwatch extends HTMLElement {
     constructor() {
         super();
         this.shadow.adoptedStyleSheets = [
-            ...getStyleSheets('ui/legacy/components/inline_editor/colorSwatch.css', { enableLegacyPatching: false }),
+            ...getStyleSheets('ui/legacy/components/inline_editor/colorSwatch.css'),
         ];
     }
     static isColorSwatch(element) {
@@ -103,7 +111,7 @@ export class ColorSwatch extends HTMLElement {
             this.toggleNextFormat();
             return;
         }
-        this.dispatchEvent(new Event('swatch-click'));
+        this.dispatchEvent(new ClickEvent());
     }
     consume(e) {
         e.stopPropagation();

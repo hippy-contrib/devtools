@@ -111,7 +111,10 @@ export declare class TimelinePanel extends UI.Panel.Panel implements Client, Tim
     _showRecordingStarted(): void;
     _cancelLoading(): void;
     _setMarkers(timelineModel: TimelineModel.TimelineModel.TimelineModelImpl): void;
-    _loadEventFired(event: Common.EventTarget.EventTargetEvent): Promise<void>;
+    _loadEventFired(event: Common.EventTarget.EventTargetEvent<{
+        resourceTreeModel: SDK.ResourceTreeModel.ResourceTreeModel;
+        loadTime: number;
+    }>): Promise<void>;
     _frameForSelection(selection: TimelineSelection): TimelineModel.TimelineFrameModel.TimelineFrame | null;
     _jumpToFrame(offset: number): true | undefined;
     select(selection: TimelineSelection | null): void;
@@ -189,6 +192,7 @@ export declare class StatusPane extends UI.Widget.VBox {
     startTimer(): void;
     _stopTimer(): void;
     _updateTimer(precise?: boolean): void;
+    _arrangeDialog(parent: Element): void;
 }
 export declare class LoadTimelineHandler implements Common.QueryParamHandler.QueryParamHandler {
     static instance(opts?: {

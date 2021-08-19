@@ -27,12 +27,18 @@ declare class ModelInfo {
     _cssModel: SDK.CSSModel.CSSModel;
     _eventListeners: Common.EventTarget.EventDescriptor[];
     constructor(workspace: Workspace.Workspace.WorkspaceImpl, resourceTreeModel: SDK.ResourceTreeModel.ResourceTreeModel);
-    _styleSheetChanged(event: Common.EventTarget.EventTargetEvent): Promise<void>;
+    _styleSheetChanged(event: Common.EventTarget.EventTargetEvent<{
+        styleSheetId: string;
+        edit?: SDK.CSSModel.Edit;
+    }>): Promise<void>;
     _acceptsResource(resource: SDK.Resource.Resource): boolean;
-    _resourceAdded(event: Common.EventTarget.EventTargetEvent): void;
+    _resourceAdded(event: Common.EventTarget.EventTargetEvent<SDK.Resource.Resource>): void;
     _removeFrameResources(frame: SDK.ResourceTreeModel.ResourceTreeFrame): void;
-    _frameWillNavigate(event: Common.EventTarget.EventTargetEvent): void;
-    _frameDetached(event: Common.EventTarget.EventTargetEvent): void;
+    _frameWillNavigate(event: Common.EventTarget.EventTargetEvent<SDK.ResourceTreeModel.ResourceTreeFrame>): void;
+    _frameDetached(event: Common.EventTarget.EventTargetEvent<{
+        frame: SDK.ResourceTreeModel.ResourceTreeFrame;
+        isSwap: boolean;
+    }>): void;
     _resetForTest(): void;
     dispose(): void;
 }

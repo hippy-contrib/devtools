@@ -71,7 +71,7 @@ export declare class AnimationEffect {
     fill(): string;
     node(): Promise<SDK.DOMModel.DOMNode | null>;
     deferredNode(): SDK.DOMModel.DeferredDOMNode;
-    backendNodeId(): number;
+    backendNodeId(): Protocol.DOM.BackendNodeId;
     keyframesRule(): KeyframesRule | null;
     easing(): string;
 }

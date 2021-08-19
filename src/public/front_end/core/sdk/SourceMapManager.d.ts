@@ -14,7 +14,7 @@ export declare class SourceMapManager<T extends FrameAssociated> extends Common.
     _sourceMapIdToClients: Platform.MapUtilities.Multimap<string, T>;
     constructor(target: Target);
     setEnabled(isEnabled: boolean): void;
-    _inspectedURLChanged(event: Common.EventTarget.EventTargetEvent): void;
+    _inspectedURLChanged(event: Common.EventTarget.EventTargetEvent<Target>): void;
     sourceMapForClient(client: T): SourceMap | null;
     clientsForSourceMap(sourceMap: SourceMap): T[];
     _getSourceMapId(sourceURL: string, sourceMapURL: string): string;

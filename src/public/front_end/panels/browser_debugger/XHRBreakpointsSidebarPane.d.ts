@@ -26,4 +26,5 @@ export declare class XHRBreakpointsSidebarPane extends UI.Widget.VBox implements
     flavorChanged(_object: Object | null): void;
     _update(): void;
     _restoreBreakpoints(): void;
+    wasShown(): void;
 }

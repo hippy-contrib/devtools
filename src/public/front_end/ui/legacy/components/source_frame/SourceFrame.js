@@ -34,7 +34,7 @@ import * as Platform from '../../../../core/platform/platform.js';
 import * as Formatter from '../../../../models/formatter/formatter.js';
 import * as TextUtils from '../../../../models/text_utils/text_utils.js';
 import * as UI from '../../legacy.js';
-import { Events, SourcesTextEditor } from './SourcesTextEditor.js'; // eslint-disable-line no-unused-vars
+import { Events, SourcesTextEditor } from './SourcesTextEditor.js';
 const UIStrings = {
     /**
     *@description Text for the source of something
@@ -190,8 +190,8 @@ export class SourceFrameImpl extends UI.View.SimpleView {
         let newSelection;
         if (this._pretty) {
             const formatInfo = await this._requestFormattedContent();
-            this._formattedMap = formatInfo.map;
-            this.setContent(formatInfo.content, null);
+            this._formattedMap = formatInfo.formattedMapping;
+            this.setContent(formatInfo.formattedContent, null);
             this._prettyCleanGeneration = this._textEditor.markClean();
             const start = this._rawToPrettyLocation(selection.startLine, selection.startColumn);
             const end = this._rawToPrettyLocation(selection.endLine, selection.endColumn);
@@ -380,13 +380,8 @@ export class SourceFrameImpl extends UI.View.SimpleView {
         if (this._formattedContentPromise) {
             return this._formattedContentPromise;
         }
-        let fulfill;
-        this._formattedContentPromise = new Promise(x => {
-            fulfill = x;
-        });
-        new Formatter.ScriptFormatter.ScriptFormatter(this._highlighterType, this._rawContent || '', async (content, map) => {
-            fulfill({ content, map });
-        });
+        this._formattedContentPromise =
+            Formatter.ScriptFormatter.formatScriptContent(this._highlighterType, this._rawContent || '');
         return this._formattedContentPromise;
     }
     revealPosition(line, column, shouldHighlight) {

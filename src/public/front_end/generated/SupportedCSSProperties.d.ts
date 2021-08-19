@@ -269,6 +269,12 @@ export const generatedPropertyValues: {
     'contain-intrinsic-size': {
         values: string[];
     };
+    'container-name': {
+        values: string[];
+    };
+    'container-type': {
+        values: string[];
+    };
     'content-visibility': {
         values: string[];
     };

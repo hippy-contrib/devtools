@@ -31,6 +31,7 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
+import * as NetworkForward from '../../panels/network/forward/forward.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as NetworkComponents from './components/components.js';
 import { EventSourceMessagesView } from './EventSourceMessagesView.js';
@@ -132,33 +133,33 @@ export class NetworkItemView extends UI.TabbedPane.TabbedPane {
         super();
         this._request = request;
         this.element.classList.add('network-item-view');
-        this._resourceViewTabSetting = Common.Settings.Settings.instance().createSetting('resourceViewTab', Tabs.Preview);
+        this._resourceViewTabSetting = Common.Settings.Settings.instance().createSetting('resourceViewTab', NetworkForward.UIRequestLocation.UIRequestTabs.Preview);
         this._headersView = new RequestHeadersView(request);
-        this.appendTab(Tabs.Headers, i18nString(UIStrings.headers), this._headersView, i18nString(UIStrings.headersAndRequestBody));
+        this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.Headers, i18nString(UIStrings.headers), this._headersView, i18nString(UIStrings.headersAndRequestBody));
         this.addEventListener(UI.TabbedPane.Events.TabSelected, this._tabSelected, this);
         if (request.resourceType() === Common.ResourceType.resourceTypes.WebSocket) {
             const frameView = new ResourceWebSocketFrameView(request);
-            this.appendTab(Tabs.WsFrames, i18nString(UIStrings.messages), frameView, i18nString(UIStrings.websocketMessages));
+            this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.WsFrames, i18nString(UIStrings.messages), frameView, i18nString(UIStrings.websocketMessages));
         }
         else if (request.mimeType === SDK.NetworkRequest.MIME_TYPE.EVENTSTREAM) {
-            this.appendTab(Tabs.EventSource, i18nString(UIStrings.eventstream), new EventSourceMessagesView(request));
+            this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.EventSource, i18nString(UIStrings.eventstream), new EventSourceMessagesView(request));
         }
         else {
             this._responseView = new RequestResponseView(request);
             const previewView = new RequestPreviewView(request);
-            this.appendTab(Tabs.Preview, i18nString(UIStrings.preview), previewView, i18nString(UIStrings.responsePreview));
+            this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.Preview, i18nString(UIStrings.preview), previewView, i18nString(UIStrings.responsePreview));
             const signedExchangeInfo = request.signedExchangeInfo();
             if (signedExchangeInfo && signedExchangeInfo.errors && signedExchangeInfo.errors.length) {
                 const icon = UI.Icon.Icon.create('smallicon-error');
                 UI.Tooltip.Tooltip.install(icon, i18nString(UIStrings.signedexchangeError));
-                this.setTabIcon(Tabs.Preview, icon);
+                this.setTabIcon(NetworkForward.UIRequestLocation.UIRequestTabs.Preview, icon);
             }
-            this.appendTab(Tabs.Response, i18nString(UIStrings.response), this._responseView, i18nString(UIStrings.rawResponseData));
+            this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.Response, i18nString(UIStrings.response), this._responseView, i18nString(UIStrings.rawResponseData));
         }
-        this.appendTab(Tabs.Initiator, i18nString(UIStrings.initiator), new RequestInitiatorView(request), i18nString(UIStrings.requestInitiatorCallStack));
-        this.appendTab(Tabs.Timing, i18nString(UIStrings.timing), new RequestTimingView(request, calculator), i18nString(UIStrings.requestAndResponseTimeline));
+        this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.Initiator, i18nString(UIStrings.initiator), new RequestInitiatorView(request), i18nString(UIStrings.requestInitiatorCallStack));
+        this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.Timing, i18nString(UIStrings.timing), new RequestTimingView(request, calculator), i18nString(UIStrings.requestAndResponseTimeline));
         if (request.trustTokenParams()) {
-            this.appendTab(Tabs.TrustTokens, i18nString(UIStrings.trustTokens), new NetworkComponents.RequestTrustTokensView.RequestTrustTokensView(request), i18nString(UIStrings.trustTokenOperationDetails));
+            this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.TrustTokens, i18nString(UIStrings.trustTokens), new NetworkComponents.RequestTrustTokensView.RequestTrustTokensView(request), i18nString(UIStrings.trustTokenOperationDetails));
         }
         this._cookiesView = null;
         this._initialTab = initialTab || this._resourceViewTabSetting.get();
@@ -191,14 +192,14 @@ export class NetworkItemView extends UI.TabbedPane.TabbedPane {
         console.assert(cookiesPresent || !this._cookiesView, 'Cookies were introduced in headers and then removed!');
         if (cookiesPresent && !this._cookiesView) {
             this._cookiesView = new RequestCookiesView(this._request);
-            this.appendTab(Tabs.Cookies, i18nString(UIStrings.cookies), this._cookiesView, i18nString(UIStrings.requestAndResponseCookies));
+            this.appendTab(NetworkForward.UIRequestLocation.UIRequestTabs.Cookies, i18nString(UIStrings.cookies), this._cookiesView, i18nString(UIStrings.requestAndResponseCookies));
         }
     }
     _maybeShowErrorIconInTrustTokenTabHeader() {
         const trustTokenResult = this._request.trustTokenOperationDoneEvent();
         if (trustTokenResult &&
             !NetworkComponents.RequestTrustTokensView.statusConsideredSuccess(trustTokenResult.status)) {
-            this.setTabIcon(Tabs.TrustTokens, UI.Icon.Icon.create('smallicon-error'));
+            this.setTabIcon(NetworkForward.UIRequestLocation.UIRequestTabs.TrustTokens, UI.Icon.Icon.create('smallicon-error'));
         }
     }
     _selectTab(tabId) {
@@ -216,28 +217,14 @@ export class NetworkItemView extends UI.TabbedPane.TabbedPane {
         return this._request;
     }
     async revealResponseBody(line) {
-        this._selectTab(Tabs.Response);
+        this._selectTab(NetworkForward.UIRequestLocation.UIRequestTabs.Response);
         if (this._responseView && typeof line === 'number') {
             await this._responseView.revealLine(line);
         }
     }
     revealHeader(section, header) {
-        this._selectTab(Tabs.Headers);
+        this._selectTab(NetworkForward.UIRequestLocation.UIRequestTabs.Headers);
         this._headersView.revealHeader(section, header);
     }
 }
-// TODO(crbug.com/1167717): Make this a const enum again
-// eslint-disable-next-line rulesdir/const_enum
-export var Tabs;
-(function (Tabs) {
-    Tabs["Cookies"] = "cookies";
-    Tabs["EventSource"] = "eventSource";
-    Tabs["Headers"] = "headers";
-    Tabs["Initiator"] = "initiator";
-    Tabs["Preview"] = "preview";
-    Tabs["Response"] = "response";
-    Tabs["Timing"] = "timing";
-    Tabs["TrustTokens"] = "trustTokens";
-    Tabs["WsFrames"] = "webSocketFrames";
-})(Tabs || (Tabs = {}));
 //# sourceMappingURL=NetworkItemView.js.map

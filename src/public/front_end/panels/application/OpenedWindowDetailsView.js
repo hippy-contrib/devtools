@@ -4,7 +4,7 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
-import * as SDK from '../../core/sdk/sdk.js'; // eslint-disable-line no-unused-vars
+import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
@@ -147,11 +147,11 @@ export class OpenedWindowDetailsView extends UI.ThrottledWidget.ThrottledWidget 
         super();
         this._targetInfo = targetInfo;
         this._isWindowClosed = isWindowClosed;
-        this.registerRequiredCSS('panels/application/frameDetailsReportView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/application/frameDetailsReportView.css');
         this.contentElement.classList.add('frame-details-container');
         // TODO(crbug.com/1156978): Replace UI.ReportView.ReportView with ReportView.ts web component.
         this._reportView = new UI.ReportView.ReportView(this.buildTitle());
-        this._reportView.registerRequiredCSS('panels/application/frameDetailsReportView.css', { enableLegacyPatching: false });
+        this._reportView.registerRequiredCSS('panels/application/frameDetailsReportView.css');
         this._reportView.show(this.contentElement);
         this._reportView.element.classList.add('frame-details-report-container');
         this._documentSection = this._reportView.appendSection(i18nString(UIStrings.document));
@@ -205,12 +205,12 @@ export class WorkerDetailsView extends UI.ThrottledWidget.ThrottledWidget {
     constructor(targetInfo) {
         super();
         this._targetInfo = targetInfo;
-        this.registerRequiredCSS('panels/application/frameDetailsReportView.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/application/frameDetailsReportView.css');
         this.contentElement.classList.add('frame-details-container');
         // TODO(crbug.com/1156978): Replace UI.ReportView.ReportView with ReportView.ts web component.
         this._reportView =
             new UI.ReportView.ReportView(this._targetInfo.title || this._targetInfo.url || i18nString(UIStrings.worker));
-        this._reportView.registerRequiredCSS('panels/application/frameDetailsReportView.css', { enableLegacyPatching: false });
+        this._reportView.registerRequiredCSS('panels/application/frameDetailsReportView.css');
         this._reportView.show(this.contentElement);
         this._reportView.element.classList.add('frame-details-report-container');
         this._documentSection = this._reportView.appendSection(i18nString(UIStrings.document));

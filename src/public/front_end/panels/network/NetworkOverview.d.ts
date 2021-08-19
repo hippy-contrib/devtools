@@ -21,8 +21,11 @@ export declare class NetworkOverview extends PerfUI.TimelineOverviewPane.Timelin
     setFilmStripModel(filmStripModel: SDK.FilmStripModel.FilmStripModel | null): void;
     selectFilmStripFrame(time: number): void;
     clearFilmStripFrame(): void;
-    _loadEventFired(event: Common.EventTarget.EventTargetEvent): void;
-    _domContentLoadedEventFired(event: Common.EventTarget.EventTargetEvent): void;
+    _loadEventFired(event: Common.EventTarget.EventTargetEvent<{
+        resourceTreeModel: SDK.ResourceTreeModel.ResourceTreeModel;
+        loadTime: number;
+    }>): void;
+    _domContentLoadedEventFired(event: Common.EventTarget.EventTargetEvent<number>): void;
     _bandId(connectionId: string): number;
     updateRequest(request: SDK.NetworkRequest.NetworkRequest): void;
     wasShown(): void;

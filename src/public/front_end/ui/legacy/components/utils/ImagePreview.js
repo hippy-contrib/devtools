@@ -85,7 +85,7 @@ export class ImagePreview {
         }
         function buildContent() {
             const container = document.createElement('table');
-            UI.Utils.appendStyle(container, 'ui/legacy/components/utils/imagePreview.css', { enableLegacyPatching: false });
+            UI.Utils.appendStyle(container, 'ui/legacy/components/utils/imagePreview.css');
             container.className = 'image-preview-container';
             const imageRow = container.createChild('tr').createChild('td', 'image-container');
             imageRow.colSpan = 2;

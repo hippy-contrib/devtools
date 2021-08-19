@@ -56,7 +56,7 @@ export declare class NetworkWaterfallColumn extends UI.Widget.VBox {
     _timeToPosition(time: number): number;
     _didDrawForTest(): void;
     _draw(): void;
-    _drawLayers(context: CanvasRenderingContext2D): void;
+    _drawLayers(context: CanvasRenderingContext2D, useTimingBars: boolean): void;
     _drawEventDividers(context: CanvasRenderingContext2D): void;
     _getBarHeight(type?: RequestTimeRangeNames): number;
     _getSimplifiedBarRange(request: SDK.NetworkRequest.NetworkRequest, borderOffset: number): {

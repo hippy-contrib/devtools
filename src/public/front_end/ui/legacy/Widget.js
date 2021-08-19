@@ -29,6 +29,7 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../../core/common/common.js';
 import * as DOMExtension from '../../core/dom_extension/dom_extension.js';
+import * as Helpers from '../components/helpers/helpers.js';
 import { Constraints, Size } from './Geometry.js';
 import { appendStyle } from './utils/append-style.js';
 import { createShadowRootWithCoreStyles } from './utils/create-shadow-root-with-core-styles.js';
@@ -58,6 +59,7 @@ export class Widget extends Common.ObjectWrapper.ObjectWrapper {
     _invalidationsSuspended;
     _defaultFocusedChild;
     _parentWidget;
+    _registeredCSSFiles;
     _defaultFocusedElement;
     _cachedConstraints;
     _constraints;
@@ -73,7 +75,6 @@ export class Widget extends Common.ObjectWrapper.ObjectWrapper {
             this.element.classList.add('flex-auto');
             this._shadowRoot = createShadowRootWithCoreStyles(this.element, {
                 cssFile: undefined,
-                enableLegacyPatching: false,
                 delegatesFocus,
             });
             this._shadowRoot.appendChild(this.contentElement);
@@ -92,6 +93,7 @@ export class Widget extends Common.ObjectWrapper.ObjectWrapper {
         this._invalidationsSuspended = 0;
         this._defaultFocusedChild = null;
         this._parentWidget = null;
+        this._registeredCSSFiles = false;
     }
     static _incrementWidgetCounter(parentElement, childElement) {
         const count = (childElement.__widgetCounter || 0) + (childElement.__widget ? 1 : 0);
@@ -406,13 +408,24 @@ export class Widget extends Common.ObjectWrapper.ObjectWrapper {
         this._notify(this.onLayout);
         this.doResize();
     }
-    registerRequiredCSS(cssFile, options) {
+    registerRequiredCSS(cssFile) {
         if (this._isWebComponent) {
-            appendStyle(this._shadowRoot, cssFile, options);
+            appendStyle(this._shadowRoot, cssFile);
         }
         else {
-            appendStyle(this.element, cssFile, options);
+            appendStyle(this.element, cssFile);
         }
+    }
+    registerCSSFiles(cssFiles) {
+        let root;
+        if (this._isWebComponent && this._shadowRoot !== undefined) {
+            root = this._shadowRoot;
+        }
+        else {
+            root = Helpers.GetRootNode.getRootNode(this.contentElement);
+        }
+        root.adoptedStyleSheets = root.adoptedStyleSheets.concat(cssFiles);
+        this._registeredCSSFiles = true;
     }
     printWidgetHierarchy() {
         const lines = [];

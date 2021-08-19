@@ -1,8 +1,8 @@
 // Copyright 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import { getRegisteredActionExtensions } from './ActionRegistration.js'; // eslint-disable-line no-unused-vars
-import { Context } from './Context.js'; // eslint-disable-line no-unused-vars
+import { getRegisteredActionExtensions } from './ActionRegistration.js';
+import { Context } from './Context.js';
 let actionRegistryInstance;
 export class ActionRegistry {
     _actionsById;

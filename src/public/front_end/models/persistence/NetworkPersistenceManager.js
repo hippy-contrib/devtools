@@ -95,7 +95,7 @@ export class NetworkPersistenceManager extends Common.ObjectWrapper.ObjectWrappe
             await this._updateActiveProject();
         }
         else {
-            Common.EventTarget.EventTarget.removeEventListeners(this._eventDescriptors);
+            Common.EventTarget.removeEventListeners(this._eventDescriptors);
             await this._updateActiveProject();
         }
     }

@@ -8,9 +8,12 @@ export declare class ApplicationCacheModel extends SDK.SDKModel.SDKModel {
     _manifestURLsByFrame: Map<string, string>;
     _onLine: boolean;
     constructor(target: SDK.Target.Target);
-    _frameNavigatedCallback(event: Common.EventTarget.EventTargetEvent): void;
-    _frameNavigated(event: Common.EventTarget.EventTargetEvent): Promise<void>;
-    _frameDetached(event: Common.EventTarget.EventTargetEvent): void;
+    _frameNavigatedCallback(event: Common.EventTarget.EventTargetEvent<SDK.ResourceTreeModel.ResourceTreeFrame>): void;
+    _frameNavigated(event: Common.EventTarget.EventTargetEvent<SDK.ResourceTreeModel.ResourceTreeFrame>): Promise<void>;
+    _frameDetached(event: Common.EventTarget.EventTargetEvent<{
+        frame: SDK.ResourceTreeModel.ResourceTreeFrame;
+        isSwap: boolean;
+    }>): void;
     reset(): void;
     _mainFrameNavigated(): Promise<void>;
     _frameManifestUpdated(frameId: string, manifestURL: string, status: number): void;

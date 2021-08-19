@@ -551,24 +551,15 @@ export class HeapSnapshot {
         this._locationFieldCount = locationFields.length;
         this.nodeCount = this.nodes.length / this._nodeFieldCount;
         this._edgeCount = this.containmentEdges.length / this._edgeFieldsCount;
-        // 深堆大小
         this._retainedSizes = new Float64Array(this.nodeCount);
-        // 第一个 edge 的索引
         this._firstEdgeIndexes = new Uint32Array(this.nodeCount + 1);
-        // 持有节点
         this._retainingNodes = new Uint32Array(this._edgeCount);
-        // 持有边
         this._retainingEdges = new Uint32Array(this._edgeCount);
-        // 首个持有者索引
         this._firstRetainerIndex = new Uint32Array(this.nodeCount + 1);
-        // 距根节点的距离
         this._nodeDistances = new Int32Array(this.nodeCount);
-        // 支配点
         this._firstDominatedNodeIndex = new Uint32Array(this.nodeCount + 1);
-        //
         this._dominatedNodes = new Uint32Array(this.nodeCount - 1);
         this._progress.updateStatus('Building edge indexes…');
-        // 初始化 _firstEdgeIndexes
         this._buildEdgeIndexes();
         this._progress.updateStatus('Building retainers…');
         this._buildRetainers();
@@ -754,7 +745,7 @@ export class HeapSnapshot {
         const filter = this._createFilter(nodeFilter);
         // @ts-ignore key is added in _createFilter
         const key = filter ? filter.key : 'allObjects';
-        return this.aggregates(false, key, filter);
+        return this.getAggregatesByClassName(false, key, filter);
     }
     _createNodeIdFilter(minNodeId, maxNodeId) {
         function nodeIdFilter(node) {
@@ -780,7 +771,7 @@ export class HeapSnapshot {
         }
         return traceIdFilter;
     }
-    aggregates(sortedIndexes, key, filter) {
+    getAggregatesByClassName(sortedIndexes, key, filter) {
         const aggregates = this._buildAggregates(filter);
         let aggregatesByClassName;
         if (key && this._aggregates[key]) {
@@ -819,7 +810,7 @@ export class HeapSnapshot {
         if (this._aggregatesForDiff) {
             return this._aggregatesForDiff;
         }
-        const aggregatesByClassName = this.aggregates(true, 'allObjects');
+        const aggregatesByClassName = this.getAggregatesByClassName(true, 'allObjects');
         this._aggregatesForDiff = {};
         const node = this.createNode();
         for (const className in aggregatesByClassName) {
@@ -1530,7 +1521,7 @@ export class HeapSnapshot {
             return snapshotDiff;
         }
         snapshotDiff = {};
-        const aggregates = this.aggregates(true, 'allObjects');
+        const aggregates = this.getAggregatesByClassName(true, 'allObjects');
         for (const className in baseSnapshotAggregates) {
             const baseAggregate = baseSnapshotAggregates[className];
             const diff = this._calculateDiffForClass(baseAggregate, aggregates[className]);

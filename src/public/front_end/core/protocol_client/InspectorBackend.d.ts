@@ -1,35 +1,64 @@
 import type * as ProtocolProxyApi from '../../generated/protocol-proxy-api.js';
-export declare const ProtocolError: unique symbol;
-export declare type ProtocolError = string;
+import * as Protocol from '../../generated/protocol.js';
 export declare const DevToolsStubErrorCode = -32015;
+declare type MessageParams = {
+    [x: string]: any;
+};
+declare type ProtocolDomainName = ProtocolProxyApi.ProtocolDomainName;
+export interface MessageError {
+    code: number;
+    message: string;
+    data?: string | null;
+}
 export declare type Message = {
     sessionId?: string;
     url?: string;
     id?: number;
-    error?: Object | null;
+    error?: MessageError | null;
     result?: Object | null;
-    method?: string;
-    params?: Array<string>;
+    method?: QualifiedName;
+    params?: MessageParams | null;
 };
+interface EventMessage extends Message {
+    method: QualifiedName;
+    params?: MessageParams | null;
+}
+/** A qualified name, e.g. Domain.method */
+export declare type QualifiedName = string & {
+    qualifiedEventNameTag: string | undefined;
+};
+/** A qualified name, e.g. method */
+export declare type UnqualifiedName = string & {
+    unqualifiedEventNameTag: string | undefined;
+};
+export declare const splitQualifiedName: (string: QualifiedName) => [string, UnqualifiedName];
+export declare const qualifyName: (domain: string, name: UnqualifiedName) => QualifiedName;
+declare type EventParameterNames = Map<QualifiedName, string[]>;
+declare type ReadonlyEventParameterNames = ReadonlyMap<QualifiedName, string[]>;
+interface CommandParameter {
+    name: string;
+    type: string;
+    optional: boolean;
+}
+declare type Callback = (error: MessageError | null, arg1: Object | null) => void;
+interface CallbackWithDebugInfo {
+    callback: Callback;
+    method: string;
+}
 export declare class InspectorBackend {
-    _agentPrototypes: Map<string, _AgentPrototype>;
-    _dispatcherPrototypes: Map<string, _DispatcherPrototype>;
-    _initialized: boolean;
-    constructor();
+    _agentPrototypes: Map<ProtocolDomainName, _AgentPrototype>;
+    private initialized;
+    private eventParameterNamesForDomain;
+    private getOrCreateEventParameterNamesForDomain;
+    getOrCreateEventParameterNamesForDomainForTesting(domain: ProtocolDomainName): EventParameterNames;
+    getEventParamterNames(): ReadonlyMap<ProtocolDomainName, ReadonlyEventParameterNames>;
     static reportProtocolError(error: string, messageObject: Object): void;
     static reportProtocolWarning(error: string, messageObject: Object): void;
     isInitialized(): boolean;
-    _addAgentGetterMethodToProtocolTargetPrototype(domain: string): void;
-    _agentPrototype(domain: string): _AgentPrototype;
-    _dispatcherPrototype(domain: string): _DispatcherPrototype;
-    registerCommand(method: string, signature: {
-        name: string;
-        type: string;
-        optional: boolean;
-    }[], replyArgs: string[]): void;
-    registerEnum(type: string, values: Object): void;
-    registerEvent(eventName: string, params: Object): void;
-    wrapClientCallback<T, S>(clientCallback: (arg0: (T | undefined)) => void, errorPrefix: string, constructor?: (new (arg1: S) => T), defaultValue?: T): (arg0: string | null, arg1: S) => void;
+    _agentPrototype(domain: ProtocolDomainName): _AgentPrototype;
+    registerCommand(method: QualifiedName, parameters: CommandParameter[], replyArgs: string[]): void;
+    registerEnum(type: QualifiedName, values: Object): void;
+    registerEvent(eventName: QualifiedName, params: string[]): void;
 }
 export declare class Connection {
     _onMessage: ((arg0: Object) => void) | null;
@@ -57,7 +86,7 @@ export declare const test: {
      * Sends a raw message over main connection.
      * ProtocolClient.test.sendRawMessage('Page.enable', {}, console.log)
      */
-    sendRawMessage: ((arg0: string, arg1: Object | null, arg2: SendRawMessageCallback) => void) | null;
+    sendRawMessage: ((method: QualifiedName, args: Object | null, arg2: SendRawMessageCallback) => void) | null;
     /**
      * Set to true to not log any errors.
      */
@@ -82,10 +111,9 @@ export declare class SessionRouter {
     _lastMessageId: number;
     _pendingResponsesCount: number;
     _pendingLongPollingMessageIds: Set<number>;
-    _domainToLogger: Map<any, any>;
     _sessions: Map<string, {
         target: TargetBase;
-        callbacks: Map<number, _CallbackWithDebugInfo>;
+        callbacks: Map<number, CallbackWithDebugInfo>;
         proxyConnection: ((Connection | undefined) | null);
     }>;
     _pendingScripts: (() => void)[];
@@ -95,36 +123,37 @@ export declare class SessionRouter {
     _getTargetBySessionId(sessionId: string): TargetBase | null;
     _nextMessageId(): number;
     connection(): Connection;
-    sendMessage(sessionId: string, domain: string, method: string, params: Object | null, callback: _Callback): void;
-    _sendRawMessageForTesting(method: string, params: Object | null, callback: ((...arg0: any[]) => void) | null): void;
+    sendMessage(sessionId: string, domain: string, method: QualifiedName, params: Object | null, callback: Callback): void;
+    _sendRawMessageForTesting(method: QualifiedName, params: Object | null, callback: Callback | null): void;
     _onMessage(message: string | Object): void;
     _hasOutstandingNonLongPollingRequests(): boolean;
     _deprecatedRunAfterPendingDispatches(script?: (() => void)): void;
     _executeAfterPendingDispatches(): void;
-    static dispatchConnectionError(callback: _Callback, method: string): void;
-    static dispatchUnregisterSessionError({ callback, method }: _CallbackWithDebugInfo): void;
+    static dispatchConnectionError(callback: Callback, method: string): void;
+    static dispatchUnregisterSessionError({ callback, method }: CallbackWithDebugInfo): void;
 }
 export declare class TargetBase {
     _needsNodeJSPatching: boolean;
     _sessionId: string;
     _router: SessionRouter | null;
-    _agents: {
-        [x: string]: _AgentPrototype;
-    };
-    _dispatchers: {
-        [x: string]: _DispatcherPrototype;
-    };
+    private agents;
+    private dispatchers;
     constructor(needsNodeJSPatching: boolean, parentTarget: TargetBase | null, sessionId: string, connection: Connection | null);
-    registerDispatcher(domain: string, dispatcher: Object): void;
-    unregisterDispatcher(domain: string, dispatcher: Object): void;
+    dispatch(eventMessage: EventMessage): void;
     dispose(_reason: string): void;
     isDisposed(): boolean;
     markAsNodeJSForTest(): void;
     router(): SessionRouter | null;
+    /**
+     * Make sure that `Domain` is only ever instantiated with one protocol domain
+     * name, because if `Domain` allows multiple domains, the type is unsound.
+     */
+    private getAgent;
     accessibilityAgent(): ProtocolProxyApi.AccessibilityApi;
     animationAgent(): ProtocolProxyApi.AnimationApi;
     applicationCacheAgent(): ProtocolProxyApi.ApplicationCacheApi;
     auditsAgent(): ProtocolProxyApi.AuditsApi;
+    browserAgent(): ProtocolProxyApi.BrowserApi;
     backgroundServiceAgent(): ProtocolProxyApi.BackgroundServiceApi;
     cacheStorageAgent(): ProtocolProxyApi.CacheStorageApi;
     cssAgent(): ProtocolProxyApi.CSSApi;
@@ -158,33 +187,52 @@ export declare class TargetBase {
     tracingAgent(): ProtocolProxyApi.TracingApi;
     webAudioAgent(): ProtocolProxyApi.WebAudioApi;
     webAuthnAgent(): ProtocolProxyApi.WebAuthnApi;
-    registerAnimationDispatcher(_dispatcher: ProtocolProxyApi.AnimationDispatcher): void;
-    registerApplicationCacheDispatcher(_dispatcher: ProtocolProxyApi.ApplicationCacheDispatcher): void;
-    registerAuditsDispatcher(_dispatcher: ProtocolProxyApi.AuditsDispatcher): void;
-    registerCSSDispatcher(_dispatcher: ProtocolProxyApi.CSSDispatcher): void;
-    registerDatabaseDispatcher(_dispatcher: ProtocolProxyApi.DatabaseDispatcher): void;
-    registerBackgroundServiceDispatcher(_dispatcher: ProtocolProxyApi.BackgroundServiceDispatcher): void;
-    registerDebuggerDispatcher(_dispatcher: ProtocolProxyApi.DebuggerDispatcher): void;
-    unregisterDebuggerDispatcher(_dispatcher: ProtocolProxyApi.DebuggerDispatcher): void;
-    registerDOMDispatcher(_dispatcher: ProtocolProxyApi.DOMDispatcher): void;
-    registerDOMStorageDispatcher(_dispatcher: ProtocolProxyApi.DOMStorageDispatcher): void;
-    registerHeapProfilerDispatcher(_dispatcher: ProtocolProxyApi.HeapProfilerDispatcher): void;
-    registerInspectorDispatcher(_dispatcher: ProtocolProxyApi.InspectorDispatcher): void;
-    registerLayerTreeDispatcher(_dispatcher: ProtocolProxyApi.LayerTreeDispatcher): void;
-    registerLogDispatcher(_dispatcher: ProtocolProxyApi.LogDispatcher): void;
-    registerMediaDispatcher(_dispatcher: ProtocolProxyApi.MediaDispatcher): void;
-    registerNetworkDispatcher(_dispatcher: ProtocolProxyApi.NetworkDispatcher): void;
-    registerOverlayDispatcher(_dispatcher: ProtocolProxyApi.OverlayDispatcher): void;
-    registerPageDispatcher(_dispatcher: ProtocolProxyApi.PageDispatcher): void;
-    registerProfilerDispatcher(_dispatcher: ProtocolProxyApi.ProfilerDispatcher): void;
-    registerRuntimeDispatcher(_dispatcher: ProtocolProxyApi.RuntimeDispatcher): void;
-    registerSecurityDispatcher(_dispatcher: ProtocolProxyApi.SecurityDispatcher): void;
-    registerServiceWorkerDispatcher(_dispatcher: ProtocolProxyApi.ServiceWorkerDispatcher): void;
-    registerStorageDispatcher(_dispatcher: ProtocolProxyApi.StorageDispatcher): void;
-    registerTargetDispatcher(_dispatcher: ProtocolProxyApi.TargetDispatcher): void;
-    registerTracingDispatcher(_dispatcher: ProtocolProxyApi.TracingDispatcher): void;
-    registerWebAudioDispatcher(_dispatcher: ProtocolProxyApi.WebAudioDispatcher): void;
+    /**
+     * Make sure that `Domain` is only ever instantiated with one protocol domain
+     * name, because if `Domain` allows multiple domains, the type is unsound.
+     */
+    private registerDispatcher;
+    /**
+     * Make sure that `Domain` is only ever instantiated with one protocol domain
+     * name, because if `Domain` allows multiple domains, the type is unsound.
+     */
+    private unregisterDispatcher;
+    registerAnimationDispatcher(dispatcher: ProtocolProxyApi.AnimationDispatcher): void;
+    registerApplicationCacheDispatcher(dispatcher: ProtocolProxyApi.ApplicationCacheDispatcher): void;
+    registerAuditsDispatcher(dispatcher: ProtocolProxyApi.AuditsDispatcher): void;
+    registerCSSDispatcher(dispatcher: ProtocolProxyApi.CSSDispatcher): void;
+    registerDatabaseDispatcher(dispatcher: ProtocolProxyApi.DatabaseDispatcher): void;
+    registerBackgroundServiceDispatcher(dispatcher: ProtocolProxyApi.BackgroundServiceDispatcher): void;
+    registerDebuggerDispatcher(dispatcher: ProtocolProxyApi.DebuggerDispatcher): void;
+    unregisterDebuggerDispatcher(dispatcher: ProtocolProxyApi.DebuggerDispatcher): void;
+    registerDOMDispatcher(dispatcher: ProtocolProxyApi.DOMDispatcher): void;
+    registerDOMStorageDispatcher(dispatcher: ProtocolProxyApi.DOMStorageDispatcher): void;
+    registerHeapProfilerDispatcher(dispatcher: ProtocolProxyApi.HeapProfilerDispatcher): void;
+    registerInspectorDispatcher(dispatcher: ProtocolProxyApi.InspectorDispatcher): void;
+    registerLayerTreeDispatcher(dispatcher: ProtocolProxyApi.LayerTreeDispatcher): void;
+    registerLogDispatcher(dispatcher: ProtocolProxyApi.LogDispatcher): void;
+    registerMediaDispatcher(dispatcher: ProtocolProxyApi.MediaDispatcher): void;
+    registerNetworkDispatcher(dispatcher: ProtocolProxyApi.NetworkDispatcher): void;
+    registerOverlayDispatcher(dispatcher: ProtocolProxyApi.OverlayDispatcher): void;
+    registerPageDispatcher(dispatcher: ProtocolProxyApi.PageDispatcher): void;
+    registerProfilerDispatcher(dispatcher: ProtocolProxyApi.ProfilerDispatcher): void;
+    registerRuntimeDispatcher(dispatcher: ProtocolProxyApi.RuntimeDispatcher): void;
+    registerSecurityDispatcher(dispatcher: ProtocolProxyApi.SecurityDispatcher): void;
+    registerServiceWorkerDispatcher(dispatcher: ProtocolProxyApi.ServiceWorkerDispatcher): void;
+    registerStorageDispatcher(dispatcher: ProtocolProxyApi.StorageDispatcher): void;
+    registerTargetDispatcher(dispatcher: ProtocolProxyApi.TargetDispatcher): void;
+    registerTracingDispatcher(dispatcher: ProtocolProxyApi.TracingDispatcher): void;
+    registerWebAudioDispatcher(dispatcher: ProtocolProxyApi.WebAudioDispatcher): void;
 }
+/**
+ * This is a class that serves as the prototype for a domains agents (every target
+ * has it's own set of agents). The InspectorBackend keeps an instance of this class
+ * per domain, and each TargetBase creates its agents (via Object.create) and installs
+ * this instance as prototype.
+ *
+ * The reasons this is done is so that on the prototypes we can install the implementations
+ * of the invoke_enable, etc. methods that the front-end uses.
+ */
 declare class _AgentPrototype {
     _replyArgs: {
         [x: string]: string[];
@@ -192,43 +240,10 @@ declare class _AgentPrototype {
     _domain: string;
     _target: TargetBase;
     constructor(domain: string);
-    registerCommand(methodName: string, signature: {
-        name: string;
-        type: string;
-        optional: boolean;
-    }[], replyArgs: string[]): void;
-    _prepareParameters(method: string, signature: {
-        name: string;
-        type: string;
-        optional: boolean;
-    }[], args: any[], errorCallback: (arg0: string) => void): Object | null;
-    _sendMessageToBackendPromise(method: string, signature: {
-        name: string;
-        type: string;
-        optional: boolean;
-    }[], args: any[]): Promise<any>;
-    _invoke(method: string, request: Object | null): Promise<Object>;
-}
-declare class _DispatcherPrototype {
-    _eventArgs: {
-        [x: string]: any;
-    };
-    _dispatchers: any[];
-    constructor();
-    registerEvent(eventName: string, params: Object): void;
-    addDomainDispatcher(dispatcher: Object): void;
-    removeDomainDispatcher(dispatcher: Object): void;
-    dispatch(functionName: string, messageObject: {
-        method: string;
-        params: ({
-            [x: string]: any;
-        } | undefined) | null;
-    }): void;
-}
-export declare type _Callback = (arg0: Object | null, arg1: Object | null) => void;
-export interface _CallbackWithDebugInfo {
-    callback: (arg0: Object | null, arg1: Object | null) => void;
-    method: string;
+    registerCommand(methodName: UnqualifiedName, parameters: CommandParameter[], replyArgs: string[]): void;
+    _prepareParameters(method: string, parameters: CommandParameter[], args: unknown[], errorCallback: (arg0: string) => void): Object | null;
+    _sendMessageToBackendPromise(method: QualifiedName, parameters: CommandParameter[], args: unknown[]): Promise<unknown>;
+    _invoke(method: QualifiedName, request: Object | null): Promise<Protocol.ProtocolResponseWithError>;
 }
 export declare const inspectorBackend: InspectorBackend;
 export {};

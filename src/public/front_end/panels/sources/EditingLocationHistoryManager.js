@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /* eslint-disable rulesdir/no_underscored_properties */
-import * as Common from '../../core/common/common.js'; // eslint-disable-line no-unused-vars
-import * as Workspace from '../../models/workspace/workspace.js'; // eslint-disable-line no-unused-vars
+import * as Common from '../../core/common/common.js';
+import * as Workspace from '../../models/workspace/workspace.js';
 import * as SourceFrame from '../../ui/legacy/components/source_frame/source_frame.js';
 export class EditingLocationHistoryManager {
     _sourcesView;

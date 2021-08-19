@@ -21,9 +21,7 @@ export declare class ThemeSupport {
      * Note: this is a duplicate of the function in ui/utils. It exists here
      * so there is no circular dependency between ui/utils and theme_support.
      */
-    _appendStyle(node: Node, cssFile: string, options?: {
-        enableLegacyPatching: false;
-    }): void;
+    _appendStyle(node: Node, cssFile: string): void;
     injectCustomStyleSheets(element: Element | ShadowRoot): void;
     isForcedColorsMode(): boolean;
     addCustomStylesheet(sheetText: string): void;

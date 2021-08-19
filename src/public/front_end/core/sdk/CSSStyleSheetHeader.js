@@ -50,8 +50,6 @@ export class CSSStyleSheetHeader {
         this.disabled = payload.disabled;
         this.isInline = payload.isInline;
         this.isMutable = payload.isMutable;
-        // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.isConstructed = payload.isConstructed;
         this.startLine = payload.startLine;
         this.startColumn = payload.startColumn;
@@ -86,6 +84,9 @@ export class CSSStyleSheetHeader {
     }
     isAnonymousInlineStyleSheet() {
         return !this.resourceURL() && !this._cssModel.sourceMapManager().sourceMapForClient(this);
+    }
+    isConstructedByNew() {
+        return this.isConstructed && this.sourceURL.length === 0;
     }
     resourceURL() {
         return this.isViaInspector() ? this._viaInspectorResourceURL() : this.sourceURL;

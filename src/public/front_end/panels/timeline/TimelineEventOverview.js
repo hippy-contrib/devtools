@@ -34,7 +34,7 @@ import * as TimelineModel from '../../models/timeline_model/timeline_model.js';
 import * as PerfUI from '../../ui/legacy/components/perf_ui/perf_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as Coverage from '../coverage/coverage.js';
-import { TimelineUIUtils } from './TimelineUIUtils.js'; // eslint-disable-line no-unused-vars
+import { TimelineUIUtils } from './TimelineUIUtils.js';
 const UIStrings = {
     /**
     *@description Short for Network. Label for the network requests section of the Performance panel.
@@ -662,7 +662,7 @@ export class TimelineEventOverviewCoverage extends TimelineEventOverview {
         const totalByTimestamp = new Map();
         for (const urlInfo of this._coverageModel.entries()) {
             for (const info of urlInfo.entries()) {
-                total += info.size();
+                total += info.getSize();
                 for (const [stamp, used] of info.usedByTimestamp()) {
                     total_used += used;
                     let uniqueTimestamps = totalByTimestamp.get(stamp);
@@ -691,7 +691,7 @@ export class TimelineEventOverviewCoverage extends TimelineEventOverview {
                     continue;
                 }
                 seen.add(info);
-                sumTotal += info.size();
+                sumTotal += info.getSize();
             }
             sumUsed += usedByTimestamp.get(stamp) || 0;
             coverageByTimestamp.set(stamp, sumUsed / sumTotal);
@@ -717,7 +717,7 @@ export class TimelineEventOverviewCoverage extends TimelineEventOverview {
         ctx.moveTo(-lineWidth, heightBeyondView);
         ctx.lineTo(-lineWidth, height - yOffset);
         let previous = null;
-        for (const stamp of this._coverageModel.coverageUpdateTimes()) {
+        for (const stamp of this._coverageModel.getCoverageUpdateTimes()) {
             const coverage = coverageByTimestamp.get(stamp) || previous;
             previous = coverage;
             if (!coverage) {
@@ -742,7 +742,7 @@ export class TimelineEventOverviewCoverage extends TimelineEventOverview {
         ctx.strokeStyle = blue;
         ctx.stroke();
         previous = null;
-        for (const stamp of this._coverageModel.coverageUpdateTimes()) {
+        for (const stamp of this._coverageModel.getCoverageUpdateTimes()) {
             const coverage = coverageByTimestamp.get(stamp) || previous;
             previous = coverage;
             if (!coverage) {

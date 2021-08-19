@@ -1,9 +1,9 @@
 export declare class Color {
-    _hsla: number[] | undefined;
-    _rgba: number[];
-    _originalText: string | null;
-    _originalTextIsValid: boolean;
-    _format: Format;
+    private hslaInternal;
+    private rgbaInternal;
+    private originalText;
+    private readonly originalTextIsValid;
+    private formatInternal;
     constructor(rgba: number[], format: Format, originalText?: string);
     static parse(text: string): Color | null;
     static fromRGBA(rgba: number[]): Color;
@@ -69,9 +69,7 @@ export declare enum Format {
     HSL = "hsl",
     HSLA = "hsla"
 }
-export declare const Nicknames: {
-    [x: string]: number[];
-};
+export declare const Nicknames: Map<string, number[]>;
 export declare const PageHighlight: {
     Content: Color;
     ContentLight: Color;
@@ -97,27 +95,11 @@ export declare const SourceOrderHighlight: {
     ChildOutline: Color;
 };
 export declare class Generator {
-    _hueSpace: number | {
-        min: number;
-        max: number;
-        count: (number | undefined);
-    };
-    _satSpace: number | {
-        min: number;
-        max: number;
-        count: (number | undefined);
-    };
-    _lightnessSpace: number | {
-        min: number;
-        max: number;
-        count: (number | undefined);
-    };
-    _alphaSpace: number | {
-        min: number;
-        max: number;
-        count: (number | undefined);
-    };
-    _colors: Map<string, string>;
+    private readonly hueSpace;
+    private readonly satSpace;
+    private readonly lightnessSpace;
+    private readonly alphaSpace;
+    private readonly colors;
     constructor(hueSpace?: number | {
         min: number;
         max: number;

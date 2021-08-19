@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/sensors"},"files":["../../../../../../chrome-devtools/front_end/panels/sensors/sensors.ts"],"references":[{"path":"./css_files-tsconfig.json"},{"path":"./sensors-tsconfig.json"}]}

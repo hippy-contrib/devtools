@@ -53,5 +53,6 @@ export declare class PlayerMessagesView extends UI.Widget.VBox {
         data: string;
     }): void;
     addMessage(message: Protocol.Media.PlayerMessage): void;
+    wasShown(): void;
 }
 export {};

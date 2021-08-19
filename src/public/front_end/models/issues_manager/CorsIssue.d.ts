@@ -22,7 +22,7 @@ export declare enum IssueCode {
 }
 export declare class CorsIssue extends Issue<IssueCode> {
     private issueDetails;
-    constructor(issueDetails: Protocol.Audits.CorsIssueDetails, issuesModel: SDK.IssuesModel.IssuesModel);
+    constructor(issueDetails: Protocol.Audits.CorsIssueDetails, issuesModel: SDK.IssuesModel.IssuesModel, issueId: string | undefined);
     getCategory(): IssueCategory;
     details(): Protocol.Audits.CorsIssueDetails;
     getDescription(): MarkdownIssueDescription | null;

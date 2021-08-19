@@ -28,7 +28,7 @@ export class JavaScriptREPL {
     static preprocessExpression(text) {
         return JavaScriptREPL.wrapObjectLiteral(text);
     }
-    static async evaluateAndBuildPreview(text, throwOnSideEffect, timeout, allowErrors, objectGroup) {
+    static async evaluateAndBuildPreview(text, throwOnSideEffect, replMode, timeout, allowErrors, objectGroup) {
         const executionContext = UI.Context.Context.instance().flavor(SDK.RuntimeModel.ExecutionContext);
         const isTextLong = text.length > maxLengthForEvaluation;
         if (!text || !executionContext || (throwOnSideEffect && isTextLong)) {
@@ -43,7 +43,7 @@ export class JavaScriptREPL {
             timeout: timeout,
             objectGroup: objectGroup,
             disableBreaks: true,
-            replMode: true,
+            replMode: replMode,
             silent: undefined,
             returnByValue: undefined,
             allowUnsafeEvalBlockedByCSP: undefined,

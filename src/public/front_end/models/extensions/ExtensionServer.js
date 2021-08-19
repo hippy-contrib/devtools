@@ -27,14 +27,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-// @ts-nocheck
-// TODO(crbug.com/1011811): Enable TypeScript compiler checks
 // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/naming-convention,rulesdir/no_underscored_properties */
+/* eslint-disable @typescript-eslint/naming-convention,rulesdir/no_underscored_properties */
 import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
 import * as Platform from '../../core/platform/platform.js';
-import * as Root from '../../core/root/root.js'; // eslint-disable-line no-unused-vars
+import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Logs from '../../models/logs/logs.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
@@ -44,9 +42,9 @@ import * as Bindings from '../bindings/bindings.js';
 import * as HAR from '../har/har.js';
 import * as Workspace from '../workspace/workspace.js';
 import { ExtensionButton, ExtensionPanel, ExtensionSidebarPane } from './ExtensionPanel.js';
-import { ExtensionTraceProvider } from './ExtensionTraceProvider.js'; // eslint-disable-line no-unused-vars
+import { ExtensionTraceProvider } from './ExtensionTraceProvider.js';
 import { LanguageExtensionEndpoint } from './LanguageExtensionEndpoint.js';
-const extensionOriginSymbol = Symbol('extensionOrigin');
+const extensionOrigins = new WeakMap();
 const kAllowedOrigins = [
     'chrome://newtab',
     'chrome://new-tab-page',
@@ -60,6 +58,7 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
     _subscriptionStopHandlers;
     _extraHeaders;
     _requests;
+    _requestIds;
     _lastRequestId;
     _registeredExtensions;
     _status;
@@ -67,17 +66,18 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
     _traceProviders;
     _traceSessions;
     _extensionsEnabled;
-    _languageExtensionRequests;
     _inspectedTabId;
+    _extensionAPITestHook;
     constructor() {
         super();
-        this._clientObjects = {};
-        this._handlers = {};
+        this._clientObjects = new Map();
+        this._handlers = new Map();
         this._subscribers = new Map();
-        this._subscriptionStartHandlers = {};
-        this._subscriptionStopHandlers = {};
+        this._subscriptionStartHandlers = new Map();
+        this._subscriptionStopHandlers = new Map();
         this._extraHeaders = new Map();
-        this._requests = {};
+        this._requests = new Map();
+        this._requestIds = new Map();
         this._lastRequestId = 0;
         this._registeredExtensions = new Map();
         this._status = new ExtensionStatus();
@@ -86,39 +86,37 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         this._traceSessions = new Map();
         // TODO(caseq): properly unload extensions when we disable them.
         this._extensionsEnabled = true;
-        const commands = Extensions.extensionAPI.Commands;
-        this._registerHandler(commands.AddRequestHeaders, this._onAddRequestHeaders.bind(this));
-        this._registerHandler(commands.AddTraceProvider, this._onAddTraceProvider.bind(this));
-        this._registerHandler(commands.ApplyStyleSheet, this._onApplyStyleSheet.bind(this));
-        this._registerHandler(commands.CompleteTraceSession, this._onCompleteTraceSession.bind(this));
-        this._registerHandler(commands.CreatePanel, this._onCreatePanel.bind(this));
-        this._registerHandler(commands.CreateSidebarPane, this._onCreateSidebarPane.bind(this));
-        this._registerHandler(commands.CreateToolbarButton, this._onCreateToolbarButton.bind(this));
-        this._registerHandler(commands.EvaluateOnInspectedPage, this._onEvaluateOnInspectedPage.bind(this));
-        this._registerHandler(commands.ForwardKeyboardEvent, this._onForwardKeyboardEvent.bind(this));
-        this._registerHandler(commands.GetHAR, this._onGetHAR.bind(this));
-        this._registerHandler(commands.GetPageResources, this._onGetPageResources.bind(this));
-        this._registerHandler(commands.GetRequestContent, this._onGetRequestContent.bind(this));
-        this._registerHandler(commands.GetResourceContent, this._onGetResourceContent.bind(this));
-        this._registerHandler(commands.Reload, this._onReload.bind(this));
-        this._registerHandler(commands.SetOpenResourceHandler, this._onSetOpenResourceHandler.bind(this));
-        this._registerHandler(commands.SetResourceContent, this._onSetResourceContent.bind(this));
-        this._registerHandler(commands.SetSidebarHeight, this._onSetSidebarHeight.bind(this));
-        this._registerHandler(commands.SetSidebarContent, this._onSetSidebarContent.bind(this));
-        this._registerHandler(commands.SetSidebarPage, this._onSetSidebarPage.bind(this));
-        this._registerHandler(commands.ShowPanel, this._onShowPanel.bind(this));
-        this._registerHandler(commands.Subscribe, this._onSubscribe.bind(this));
-        this._registerHandler(commands.OpenResource, this._onOpenResource.bind(this));
-        this._registerHandler(commands.Unsubscribe, this._onUnsubscribe.bind(this));
-        this._registerHandler(commands.UpdateButton, this._onUpdateButton.bind(this));
-        this._registerHandler(commands.RegisterLanguageExtensionPlugin, this._registerLanguageExtensionEndpoint.bind(this));
+        this._registerHandler("addRequestHeaders" /* AddRequestHeaders */, this._onAddRequestHeaders.bind(this));
+        this._registerHandler("addTraceProvider" /* AddTraceProvider */, this._onAddTraceProvider.bind(this));
+        this._registerHandler("applyStyleSheet" /* ApplyStyleSheet */, this._onApplyStyleSheet.bind(this));
+        this._registerHandler("completeTra.eSession" /* CompleteTraceSession */, this._onCompleteTraceSession.bind(this));
+        this._registerHandler("createPanel" /* CreatePanel */, this._onCreatePanel.bind(this));
+        this._registerHandler("createSidebarPane" /* CreateSidebarPane */, this._onCreateSidebarPane.bind(this));
+        this._registerHandler("createToolbarButton" /* CreateToolbarButton */, this._onCreateToolbarButton.bind(this));
+        this._registerHandler("evaluateOnInspectedPage" /* EvaluateOnInspectedPage */, this._onEvaluateOnInspectedPage.bind(this));
+        this._registerHandler("_forwardKeyboardEvent" /* ForwardKeyboardEvent */, this._onForwardKeyboardEvent.bind(this));
+        this._registerHandler("getHAR" /* GetHAR */, this._onGetHAR.bind(this));
+        this._registerHandler("getPageResources" /* GetPageResources */, this._onGetPageResources.bind(this));
+        this._registerHandler("getRequestContent" /* GetRequestContent */, this._onGetRequestContent.bind(this));
+        this._registerHandler("getResourceContent" /* GetResourceContent */, this._onGetResourceContent.bind(this));
+        this._registerHandler("Reload" /* Reload */, this._onReload.bind(this));
+        this._registerHandler("setOpenResourceHandler" /* SetOpenResourceHandler */, this._onSetOpenResourceHandler.bind(this));
+        this._registerHandler("setResourceContent" /* SetResourceContent */, this._onSetResourceContent.bind(this));
+        this._registerHandler("setSidebarHeight" /* SetSidebarHeight */, this._onSetSidebarHeight.bind(this));
+        this._registerHandler("setSidebarContent" /* SetSidebarContent */, this._onSetSidebarContent.bind(this));
+        this._registerHandler("setSidebarPage" /* SetSidebarPage */, this._onSetSidebarPage.bind(this));
+        this._registerHandler("showPanel" /* ShowPanel */, this._onShowPanel.bind(this));
+        this._registerHandler("subscribe" /* Subscribe */, this._onSubscribe.bind(this));
+        this._registerHandler("openResource" /* OpenResource */, this._onOpenResource.bind(this));
+        this._registerHandler("unsubscribe" /* Unsubscribe */, this._onUnsubscribe.bind(this));
+        this._registerHandler("updateButton" /* UpdateButton */, this._onUpdateButton.bind(this));
+        this._registerHandler("registerLanguageExtensionPlugin" /* RegisterLanguageExtensionPlugin */, this._registerLanguageExtensionEndpoint.bind(this));
         window.addEventListener('message', this._onWindowMessage.bind(this), false); // Only for main window.
         const existingTabId = window.DevToolsAPI && window.DevToolsAPI.getInspectedTabId && window.DevToolsAPI.getInspectedTabId();
         if (existingTabId) {
             this._setInspectedTabId({ data: existingTabId });
         }
         Host.InspectorFrontendHost.InspectorFrontendHostInstance.events.addEventListener(Host.InspectorFrontendHostAPI.Events.SetInspectedTabId, this._setInspectedTabId, this);
-        this._languageExtensionRequests = new Map();
         this._initExtensions();
     }
     static instance(opts = { forceNew: null }) {
@@ -135,18 +133,21 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         return Boolean(this._registeredExtensions.size);
     }
     notifySearchAction(panelId, action, searchString) {
-        this._postNotification(Extensions.extensionAPI.Events.PanelSearch + panelId, action, searchString);
+        this._postNotification("panel-search-" /* PanelSearch */ + panelId, action, searchString);
     }
     notifyViewShown(identifier, frameIndex) {
-        this._postNotification(Extensions.extensionAPI.Events.ViewShown + identifier, frameIndex);
+        this._postNotification("view-shown-" /* ViewShown */ + identifier, frameIndex);
     }
     notifyViewHidden(identifier) {
-        this._postNotification(Extensions.extensionAPI.Events.ViewHidden + identifier);
+        this._postNotification("view-hidden," /* ViewHidden */ + identifier);
     }
     notifyButtonClicked(identifier) {
-        this._postNotification(Extensions.extensionAPI.Events.ButtonClicked + identifier);
+        this._postNotification("button-clicked-" /* ButtonClicked */ + identifier);
     }
     _registerLanguageExtensionEndpoint(message, _shared_port) {
+        if (message.command !== "registerLanguageExtensionPlugin" /* RegisterLanguageExtensionPlugin */) {
+            return this._status.E_BADARG('command', `expected ${"subscribe" /* Subscribe */}`);
+        }
         const { pluginManager } = Bindings.DebuggerWorkspaceBinding.DebuggerWorkspaceBinding.instance();
         if (!pluginManager) {
             return this._status.E_FAILED('WebAssembly DWARF support needs to be enabled to use this extension');
@@ -165,9 +166,9 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         if (event.data !== SDK.TargetManager.TargetManager.instance().mainTarget()) {
             return;
         }
-        this._requests = {};
+        this._requests = new Map();
         const url = event.data.inspectedURL();
-        this._postNotification(Extensions.extensionAPI.Events.InspectedURLChanged, url);
+        this._postNotification("inspected-url-changed" /* InspectedURLChanged */, url);
     }
     startTraceRecording(providerId, sessionId, session) {
         this._traceSessions.set(sessionId, session);
@@ -179,7 +180,7 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
     hasSubscribers(type) {
         return this._subscribers.has(type);
     }
-    _postNotification(type, _vararg) {
+    _postNotification(type, ..._vararg) {
         if (!this._extensionsEnabled) {
             return;
         }
@@ -193,18 +194,26 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
     _onSubscribe(message, port) {
+        if (message.command !== "subscribe" /* Subscribe */) {
+            return this._status.E_BADARG('command', `expected ${"subscribe" /* Subscribe */}`);
+        }
         const subscribers = this._subscribers.get(message.type);
         if (subscribers) {
             subscribers.add(port);
         }
         else {
             this._subscribers.set(message.type, new Set([port]));
-            if (this._subscriptionStartHandlers[message.type]) {
-                this._subscriptionStartHandlers[message.type]();
+            const handler = this._subscriptionStartHandlers.get(message.type);
+            if (handler) {
+                handler();
             }
         }
+        return undefined;
     }
     _onUnsubscribe(message, port) {
+        if (message.command !== "unsubscribe" /* Unsubscribe */) {
+            return this._status.E_BADARG('command', `expected ${"unsubscribe" /* Unsubscribe */}`);
+        }
         const subscribers = this._subscribers.get(message.type);
         if (!subscribers) {
             return;
@@ -212,12 +221,17 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         subscribers.delete(port);
         if (!subscribers.size) {
             this._subscribers.delete(message.type);
-            if (this._subscriptionStopHandlers[message.type]) {
-                this._subscriptionStopHandlers[message.type]();
+            const handler = this._subscriptionStopHandlers.get(message.type);
+            if (handler) {
+                handler();
             }
         }
+        return undefined;
     }
     _onAddRequestHeaders(message) {
+        if (message.command !== "addRequestHeaders" /* AddRequestHeaders */) {
+            return this._status.E_BADARG('command', `expected ${"addRequestHeaders" /* AddRequestHeaders */}`);
+        }
         const id = message.extensionId;
         if (typeof id !== 'string') {
             return this._status.E_BADARGTYPE('extensionId', typeof id, 'string');
@@ -232,19 +246,23 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         }
         const allHeaders = {};
         for (const headers of this._extraHeaders.values()) {
-            for (const name of headers.keys()) {
-                if (name !== '__proto__' && typeof headers.get(name) === 'string') {
-                    allHeaders[name] = headers.get(name);
+            for (const [name, value] of headers) {
+                if (name !== '__proto__' && typeof value === 'string') {
+                    allHeaders[name] = value;
                 }
             }
         }
         SDK.NetworkManager.MultitargetNetworkManager.instance().setExtraHTTPHeaders(allHeaders);
+        return undefined;
     }
     _onApplyStyleSheet(message) {
+        if (message.command !== "applyStyleSheet" /* ApplyStyleSheet */) {
+            return this._status.E_BADARG('command', `expected ${"applyStyleSheet" /* ApplyStyleSheet */}`);
+        }
         if (!Root.Runtime.experiments.isEnabled('applyCustomStylesheet')) {
             return;
         }
-        const styleSheet = createElement('style');
+        const styleSheet = document.createElement('style');
         styleSheet.textContent = message.styleSheet;
         document.head.appendChild(styleSheet);
         ThemeSupport.ThemeSupport.instance().addCustomStylesheet(message.styleSheet);
@@ -254,37 +272,55 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
                 ThemeSupport.ThemeSupport.instance().injectCustomStyleSheets(node);
             }
         }
+        return undefined;
+    }
+    getExtensionOrigin(port) {
+        const origin = extensionOrigins.get(port);
+        if (!origin) {
+            throw new Error('Received a message from an unregistered extension');
+        }
+        return origin;
     }
     _onCreatePanel(message, port) {
+        if (message.command !== "createPanel" /* CreatePanel */) {
+            return this._status.E_BADARG('command', `expected ${"createPanel" /* CreatePanel */}`);
+        }
         const id = message.id;
         // The ids are generated on the client API side and must be unique, so the check below
         // shouldn't be hit unless someone is bypassing the API.
-        if (id in this._clientObjects || UI.InspectorView.InspectorView.instance().hasPanel(id)) {
+        if (this._clientObjects.has(id) || UI.InspectorView.InspectorView.instance().hasPanel(id)) {
             return this._status.E_EXISTS(id);
         }
-        const page = this._expandResourcePath(port[extensionOriginSymbol], message.page);
-        let persistentId = port[extensionOriginSymbol] + message.title;
+        const page = this._expandResourcePath(this.getExtensionOrigin(port), message.page);
+        let persistentId = this.getExtensionOrigin(port) + message.title;
         persistentId = persistentId.replace(/\s/g, '');
         const panelView = new ExtensionServerPanelView(persistentId, message.title, new ExtensionPanel(this, persistentId, id, page));
-        this._clientObjects[id] = panelView;
+        this._clientObjects.set(id, panelView);
         UI.InspectorView.InspectorView.instance().addPanel(panelView);
         return this._status.OK();
     }
     _onShowPanel(message) {
+        if (message.command !== "showPanel" /* ShowPanel */) {
+            return this._status.E_BADARG('command', `expected ${"showPanel" /* ShowPanel */}`);
+        }
         let panelViewId = message.id;
-        const panelView = this._clientObjects[message.id];
+        const panelView = this._clientObjects.get(message.id);
         if (panelView && panelView instanceof ExtensionServerPanelView) {
             panelViewId = panelView.viewId();
         }
         UI.InspectorView.InspectorView.instance().showPanel(panelViewId);
+        return undefined;
     }
     _onCreateToolbarButton(message, port) {
-        const panelView = this._clientObjects[message.panel];
+        if (message.command !== "createToolbarButton" /* CreateToolbarButton */) {
+            return this._status.E_BADARG('command', `expected ${"createToolbarButton" /* CreateToolbarButton */}`);
+        }
+        const panelView = this._clientObjects.get(message.panel);
         if (!panelView || !(panelView instanceof ExtensionServerPanelView)) {
             return this._status.E_NOTFOUND(message.panel);
         }
-        const button = new ExtensionButton(this, message.id, this._expandResourcePath(port[extensionOriginSymbol], message.icon), message.tooltip, message.disabled);
-        this._clientObjects[message.id] = button;
+        const button = new ExtensionButton(this, message.id, this._expandResourcePath(this.getExtensionOrigin(port), message.icon), message.tooltip, message.disabled);
+        this._clientObjects.set(message.id, button);
         panelView.widget().then(appendButton);
         function appendButton(panel) {
             panel.addToolbarItem(button.toolbarButton());
@@ -292,29 +328,36 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         return this._status.OK();
     }
     _onUpdateButton(message, port) {
-        const button = this._clientObjects[message.id];
+        if (message.command !== "updateButton" /* UpdateButton */) {
+            return this._status.E_BADARG('command', `expected ${"updateButton" /* UpdateButton */}`);
+        }
+        const button = this._clientObjects.get(message.id);
         if (!button || !(button instanceof ExtensionButton)) {
             return this._status.E_NOTFOUND(message.id);
         }
-        button.update(this._expandResourcePath(port[extensionOriginSymbol], message.icon), message.tooltip, message.disabled);
+        button.update(message.icon && this._expandResourcePath(this.getExtensionOrigin(port), message.icon), message.tooltip, message.disabled);
         return this._status.OK();
     }
     _onCompleteTraceSession(message) {
+        if (message.command !== "completeTra.eSession" /* CompleteTraceSession */) {
+            return this._status.E_BADARG('command', `expected ${"completeTra.eSession" /* CompleteTraceSession */}`);
+        }
         const session = this._traceSessions.get(message.id);
         if (!session) {
             return this._status.E_NOTFOUND(message.id);
         }
         this._traceSessions.delete(message.id);
         session.complete(message.url, message.timeOffset);
+        return undefined;
     }
     _onCreateSidebarPane(message) {
-        if (message.panel !== 'elements' && message.panel !== 'sources') {
-            return this._status.E_NOTFOUND(message.panel);
+        if (message.command !== "createSidebarPane" /* CreateSidebarPane */) {
+            return this._status.E_BADARG('command', `expected ${"createSidebarPane" /* CreateSidebarPane */}`);
         }
         const id = message.id;
         const sidebar = new ExtensionSidebarPane(this, message.panel, message.title, id);
         this._sidebarPanes.push(sidebar);
-        this._clientObjects[id] = sidebar;
+        this._clientObjects.set(id, sidebar);
         this.dispatchEventToListeners(Events.SidebarPaneAdded, sidebar);
         return this._status.OK();
     }
@@ -322,35 +365,51 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         return this._sidebarPanes;
     }
     _onSetSidebarHeight(message) {
-        const sidebar = this._clientObjects[message.id];
-        if (!sidebar) {
+        if (message.command !== "setSidebarHeight" /* SetSidebarHeight */) {
+            return this._status.E_BADARG('command', `expected ${"setSidebarHeight" /* SetSidebarHeight */}`);
+        }
+        const sidebar = this._clientObjects.get(message.id);
+        if (!sidebar || !(sidebar instanceof ExtensionSidebarPane)) {
             return this._status.E_NOTFOUND(message.id);
         }
         sidebar.setHeight(message.height);
         return this._status.OK();
     }
     _onSetSidebarContent(message, port) {
-        const sidebar = this._clientObjects[message.id];
-        if (!sidebar) {
+        if (message.command !== "setSidebarContent" /* SetSidebarContent */) {
+            return this._status.E_BADARG('command', `expected ${"setSidebarContent" /* SetSidebarContent */}`);
+        }
+        const { requestId, id, rootTitle, expression, evaluateOptions, evaluateOnPage } = message;
+        const sidebar = this._clientObjects.get(id);
+        if (!sidebar || !(sidebar instanceof ExtensionSidebarPane)) {
             return this._status.E_NOTFOUND(message.id);
         }
         function callback(error) {
             const result = error ? this._status.E_FAILED(error) : this._status.OK();
-            this._dispatchCallback(message.requestId, port, result);
+            this._dispatchCallback(requestId, port, result);
         }
-        if (message.evaluateOnPage) {
-            return sidebar.setExpression(message.expression, message.rootTitle, message.evaluateOptions, port[extensionOriginSymbol], callback.bind(this));
+        if (evaluateOnPage) {
+            sidebar.setExpression(expression, rootTitle, evaluateOptions, this.getExtensionOrigin(port), callback.bind(this));
+            return undefined;
         }
         sidebar.setObject(message.expression, message.rootTitle, callback.bind(this));
+        return undefined;
     }
     _onSetSidebarPage(message, port) {
-        const sidebar = this._clientObjects[message.id];
-        if (!sidebar) {
+        if (message.command !== "setSidebarPage" /* SetSidebarPage */) {
+            return this._status.E_BADARG('command', `expected ${"setSidebarPage" /* SetSidebarPage */}`);
+        }
+        const sidebar = this._clientObjects.get(message.id);
+        if (!sidebar || !(sidebar instanceof ExtensionSidebarPane)) {
             return this._status.E_NOTFOUND(message.id);
         }
-        sidebar.setPage(this._expandResourcePath(port[extensionOriginSymbol], message.page));
+        sidebar.setPage(this._expandResourcePath(this.getExtensionOrigin(port), message.page));
+        return undefined;
     }
     _onOpenResource(message) {
+        if (message.command !== "openResource" /* OpenResource */) {
+            return this._status.E_BADARG('command', `expected ${"openResource" /* OpenResource */}`);
+        }
         const uiSourceCode = Workspace.Workspace.WorkspaceImpl.instance().uiSourceCodeForURL(message.url);
         if (uiSourceCode) {
             Common.Revealer.reveal(uiSourceCode.uiLocation(message.lineNumber, 0));
@@ -369,18 +428,29 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         return this._status.E_NOTFOUND(message.url);
     }
     _onSetOpenResourceHandler(message, port) {
-        const name = this._registeredExtensions.get(port[extensionOriginSymbol]).name;
+        if (message.command !== "setOpenResourceHandler" /* SetOpenResourceHandler */) {
+            return this._status.E_BADARG('command', `expected ${"setOpenResourceHandler" /* SetOpenResourceHandler */}`);
+        }
+        const extension = this._registeredExtensions.get(this.getExtensionOrigin(port));
+        if (!extension) {
+            throw new Error('Received a message from an unregistered extension');
+        }
+        const { name } = extension;
         if (message.handlerPresent) {
             Components.Linkifier.Linkifier.registerLinkHandler(name, this._handleOpenURL.bind(this, port));
         }
         else {
             Components.Linkifier.Linkifier.unregisterLinkHandler(name);
         }
+        return undefined;
     }
     _handleOpenURL(port, contentProvider, lineNumber) {
         port.postMessage({ command: 'open-resource', resource: this._makeResource(contentProvider), lineNumber: lineNumber + 1 });
     }
     _onReload(message) {
+        if (message.command !== "Reload" /* Reload */) {
+            return this._status.E_BADARG('command', `expected ${"Reload" /* Reload */}`);
+        }
         const options = (message.options || {});
         SDK.NetworkManager.MultitargetNetworkManager.instance().setUserAgentOverride(typeof options.userAgent === 'string' ? options.userAgent : '', null);
         let injectedScript;
@@ -391,10 +461,14 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         return this._status.OK();
     }
     _onEvaluateOnInspectedPage(message, port) {
+        if (message.command !== "evaluateOnInspectedPage" /* EvaluateOnInspectedPage */) {
+            return this._status.E_BADARG('command', `expected ${"evaluateOnInspectedPage" /* EvaluateOnInspectedPage */}`);
+        }
+        const { requestId, expression, evaluateOptions } = message;
         function callback(error, object, wasThrown) {
             let result;
             if (error || !object) {
-                result = this._status.E_PROTOCOLERROR(error.toString());
+                result = this._status.E_PROTOCOLERROR(error?.toString());
             }
             else if (wasThrown) {
                 result = { isException: true, value: object.description };
@@ -402,14 +476,18 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
             else {
                 result = { value: object.value };
             }
-            this._dispatchCallback(message.requestId, port, result);
+            this._dispatchCallback(requestId, port, result);
         }
-        return this.evaluate(message.expression, true, true, message.evaluateOptions, port[extensionOriginSymbol], callback.bind(this));
+        return this.evaluate(expression, true, true, evaluateOptions, this.getExtensionOrigin(port), callback.bind(this));
     }
-    async _onGetHAR() {
+    async _onGetHAR(message) {
+        if (message.command !== "getHAR" /* GetHAR */) {
+            return this._status.E_BADARG('command', `expected ${"getHAR" /* GetHAR */}`);
+        }
         const requests = Logs.NetworkLog.NetworkLog.instance().requests();
         const harLog = await HAR.Log.Log.build(requests);
         for (let i = 0; i < harLog.entries.length; ++i) {
+            // @ts-ignore
             harLog.entries[i]._requestId = this._requestId(requests[i]);
         }
         return harLog;
@@ -423,6 +501,7 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
             if (!resources.has(contentProvider.contentURL())) {
                 resources.set(contentProvider.contentURL(), this._makeResource(contentProvider));
             }
+            return false;
         }
         let uiSourceCodes = Workspace.Workspace.WorkspaceImpl.instance().uiSourceCodesForProjectType(Workspace.Workspace.projectTypes.Network);
         uiSourceCodes = uiSourceCodes.concat(Workspace.Workspace.WorkspaceImpl.instance().uiSourceCodesForProjectType(Workspace.Workspace.projectTypes.ContentScripts));
@@ -438,13 +517,20 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         this._dispatchCallback(message.requestId, port, { encoding: encoded ? 'base64' : '', content: content });
     }
     _onGetRequestContent(message, port) {
+        if (message.command !== "getRequestContent" /* GetRequestContent */) {
+            return this._status.E_BADARG('command', `expected ${"getRequestContent" /* GetRequestContent */}`);
+        }
         const request = this._requestById(message.id);
         if (!request) {
             return this._status.E_NOTFOUND(message.id);
         }
         this._getResourceContent(request, message, port);
+        return undefined;
     }
     _onGetResourceContent(message, port) {
+        if (message.command !== "getResourceContent" /* GetResourceContent */) {
+            return this._status.E_BADARG('command', `expected ${"getResourceContent" /* GetResourceContent */}`);
+        }
         const url = message.url;
         const contentProvider = Workspace.Workspace.WorkspaceImpl.instance().uiSourceCodeForURL(url) ||
             Bindings.ResourceUtils.resourceForURL(url);
@@ -452,13 +538,17 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
             return this._status.E_NOTFOUND(url);
         }
         this._getResourceContent(contentProvider, message, port);
+        return undefined;
     }
     _onSetResourceContent(message, port) {
+        if (message.command !== "setResourceContent" /* SetResourceContent */) {
+            return this._status.E_BADARG('command', `expected ${"setResourceContent" /* SetResourceContent */}`);
+        }
+        const { url, requestId, content, commit } = message;
         function callbackWrapper(error) {
             const response = error ? this._status.E_FAILED(error) : this._status.OK();
-            this._dispatchCallback(message.requestId, port, response);
+            this._dispatchCallback(requestId, port, response);
         }
-        const url = message.url;
         const uiSourceCode = Workspace.Workspace.WorkspaceImpl.instance().uiSourceCodeForURL(url);
         if (!uiSourceCode || !uiSourceCode.contentType().isDocumentOrScriptOrStyleSheet()) {
             const resource = SDK.ResourceTreeModel.ResourceTreeModel.resourceForURL(url);
@@ -467,32 +557,43 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
             }
             return this._status.E_NOTSUPPORTED('Resource is not editable');
         }
-        uiSourceCode.setWorkingCopy(message.content);
-        if (message.commit) {
+        uiSourceCode.setWorkingCopy(content);
+        if (commit) {
             uiSourceCode.commitWorkingCopy();
         }
         callbackWrapper.call(this, null);
+        return undefined;
     }
     _requestId(request) {
-        if (!request._extensionRequestId) {
-            request._extensionRequestId = ++this._lastRequestId;
-            this._requests[request._extensionRequestId] = request;
+        const requestId = this._requestIds.get(request);
+        if (requestId === undefined) {
+            const newId = ++this._lastRequestId;
+            this._requestIds.set(request, newId);
+            this._requests.set(newId, request);
+            return newId;
         }
-        return request._extensionRequestId;
+        return requestId;
     }
     _requestById(id) {
-        return this._requests[id];
+        return this._requests.get(id);
     }
     _onAddTraceProvider(message, port) {
-        const provider = new ExtensionTraceProvider(port[extensionOriginSymbol], message.id, message.categoryName, message.categoryTooltip);
-        this._clientObjects[message.id] = provider;
+        if (message.command !== "addTraceProvider" /* AddTraceProvider */) {
+            return this._status.E_BADARG('command', `expected ${"addTraceProvider" /* AddTraceProvider */}`);
+        }
+        const provider = new ExtensionTraceProvider(this.getExtensionOrigin(port), message.id, message.categoryName, message.categoryTooltip);
+        this._clientObjects.set(message.id, provider);
         this._traceProviders.push(provider);
         this.dispatchEventToListeners(Events.TraceProviderAdded, provider);
+        return undefined;
     }
     traceProviders() {
         return this._traceProviders;
     }
     _onForwardKeyboardEvent(message) {
+        if (message.command !== "_forwardKeyboardEvent" /* ForwardKeyboardEvent */) {
+            return this._status.E_BADARG('command', `expected ${"_forwardKeyboardEvent" /* ForwardKeyboardEvent */}`);
+        }
         message.entries.forEach(handleEventEntry);
         function handleEventEntry(entry) {
             // Fool around closure compiler -- it has its own notion of both KeyboardEvent constructor
@@ -507,6 +608,7 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
                 shiftKey: entry.shiftKey,
                 metaKey: entry.metaKey,
             });
+            // @ts-ignore
             event.__keyCode = keyCodeForEntry(entry);
             document.dispatchEvent(event);
         }
@@ -514,12 +616,13 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
             let keyCode = entry.keyCode;
             if (!keyCode) {
                 // This is required only for synthetic events (e.g. dispatched in tests).
-                if (entry.key === 'Escape') {
+                if (entry.key === Platform.KeyboardUtilities.ESCAPE_KEY) {
                     keyCode = 27;
                 }
             }
             return keyCode || 0;
         }
+        return undefined;
     }
     _dispatchCallback(requestId, port, result) {
         if (requestId) {
@@ -527,37 +630,36 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
     _initExtensions() {
-        this._registerAutosubscriptionHandler(Extensions.extensionAPI.Events.ResourceAdded, Workspace.Workspace.WorkspaceImpl.instance(), Workspace.Workspace.Events.UISourceCodeAdded, this._notifyResourceAdded);
-        this._registerAutosubscriptionTargetManagerHandler(Extensions.extensionAPI.Events.NetworkRequestFinished, SDK.NetworkManager.NetworkManager, SDK.NetworkManager.Events.RequestFinished, this._notifyRequestFinished);
+        this._registerAutosubscriptionHandler("resource-added" /* ResourceAdded */, Workspace.Workspace.WorkspaceImpl.instance(), Workspace.Workspace.Events.UISourceCodeAdded, this._notifyResourceAdded);
+        this._registerAutosubscriptionTargetManagerHandler("network-request-finished" /* NetworkRequestFinished */, SDK.NetworkManager.NetworkManager, SDK.NetworkManager.Events.RequestFinished, this._notifyRequestFinished);
         function onElementsSubscriptionStarted() {
             UI.Context.Context.instance().addFlavorChangeListener(SDK.DOMModel.DOMNode, this._notifyElementsSelectionChanged, this);
         }
         function onElementsSubscriptionStopped() {
             UI.Context.Context.instance().removeFlavorChangeListener(SDK.DOMModel.DOMNode, this._notifyElementsSelectionChanged, this);
         }
-        this._registerSubscriptionHandler(Extensions.extensionAPI.Events.PanelObjectSelected + 'elements', onElementsSubscriptionStarted.bind(this), onElementsSubscriptionStopped.bind(this));
+        this._registerSubscriptionHandler("panel-objectSelected-" /* PanelObjectSelected */ + 'elements', onElementsSubscriptionStarted.bind(this), onElementsSubscriptionStopped.bind(this));
         this._registerResourceContentCommittedHandler(this._notifyUISourceCodeContentCommitted);
         SDK.TargetManager.TargetManager.instance().addEventListener(SDK.TargetManager.Events.InspectedURLChanged, this._inspectedURLChanged, this);
     }
     _notifyResourceAdded(event) {
         const uiSourceCode = event.data;
-        this._postNotification(Extensions.extensionAPI.Events.ResourceAdded, this._makeResource(uiSourceCode));
+        this._postNotification("resource-added" /* ResourceAdded */, this._makeResource(uiSourceCode));
     }
     _notifyUISourceCodeContentCommitted(event) {
-        const uiSourceCode = event.data.uiSourceCode;
-        const content = event.data.content;
-        this._postNotification(Extensions.extensionAPI.Events.ResourceContentCommitted, this._makeResource(uiSourceCode), content);
+        const { uiSourceCode, content } = event.data;
+        this._postNotification("resource-content-committed" /* ResourceContentCommitted */, this._makeResource(uiSourceCode), content);
     }
     async _notifyRequestFinished(event) {
         const request = event.data;
         const entry = await HAR.Log.Entry.build(request);
-        this._postNotification(Extensions.extensionAPI.Events.NetworkRequestFinished, this._requestId(request), entry);
+        this._postNotification("network-request-finished" /* NetworkRequestFinished */, this._requestId(request), entry);
     }
     _notifyElementsSelectionChanged() {
-        this._postNotification(Extensions.extensionAPI.Events.PanelObjectSelected + 'elements');
+        this._postNotification("panel-objectSelected-" /* PanelObjectSelected */ + 'elements');
     }
     sourceSelectionChanged(url, range) {
-        this._postNotification(Extensions.extensionAPI.Events.PanelObjectSelected + 'sources', {
+        this._postNotification("panel-objectSelected-" /* PanelObjectSelected */ + 'sources', {
             startLine: range.startLine,
             startColumn: range.startColumn,
             endLine: range.endLine,
@@ -570,7 +672,7 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
     }
     _addExtension(extensionInfo) {
         const startPage = extensionInfo.startPage;
-        const inspectedURL = SDK.TargetManager.TargetManager.instance().mainTarget().inspectedURL();
+        const inspectedURL = SDK.TargetManager.TargetManager.instance().mainTarget()?.inspectedURL() ?? '';
         if (inspectedURL !== '' && !this._canInspectURL(inspectedURL)) {
             this._disableExtensions();
         }
@@ -582,12 +684,12 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
             const extensionOrigin = startPageURL.origin;
             if (!this._registeredExtensions.get(extensionOrigin)) {
                 // See ExtensionAPI.js for details.
-                const injectedAPI = self.buildExtensionAPIInjectedScript(extensionInfo, this._inspectedTabId, ThemeSupport.ThemeSupport.instance().themeName(), UI.ShortcutRegistry.ShortcutRegistry.instance().globalShortcutKeys(), ExtensionServer.instance()['_extensionAPITestHook']);
+                const injectedAPI = self.buildExtensionAPIInjectedScript(extensionInfo, this._inspectedTabId, ThemeSupport.ThemeSupport.instance().themeName(), UI.ShortcutRegistry.ShortcutRegistry.instance().globalShortcutKeys(), ExtensionServer.instance()._extensionAPITestHook);
                 Host.InspectorFrontendHost.InspectorFrontendHostInstance.setInjectedScriptForOrigin(extensionOrigin, injectedAPI);
                 const name = extensionInfo.name || `Extension ${extensionOrigin}`;
                 this._registeredExtensions.set(extensionOrigin, { name });
             }
-            const iframe = createElement('iframe');
+            const iframe = document.createElement('iframe');
             iframe.src = startPage;
             iframe.dataset.devtoolsExtension = extensionInfo.name;
             iframe.style.display = 'none';
@@ -606,7 +708,7 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
             }
             return;
         }
-        port[extensionOriginSymbol] = origin;
+        extensionOrigins.set(port, origin);
         port.addEventListener('message', this._onmessage.bind(this), false);
         port.start();
     }
@@ -618,29 +720,30 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
     async _onmessage(event) {
         const message = event.data;
         let result;
-        if (!(message.command in this._handlers)) {
+        const handler = this._handlers.get(message.command);
+        if (!handler) {
             result = this._status.E_NOTSUPPORTED(message.command);
         }
         else if (!this._extensionsEnabled) {
             result = this._status.E_FAILED('Permission denied');
         }
         else {
-            result = await this._handlers[message.command](message, event.target);
+            result = await handler(message, event.target);
         }
         if (result && message.requestId) {
             this._dispatchCallback(message.requestId, event.target, result);
         }
     }
     _registerHandler(command, callback) {
-        console.assert(command);
-        this._handlers[command] = callback;
+        console.assert(Boolean(command));
+        this._handlers.set(command, callback);
     }
     _registerSubscriptionHandler(eventTopic, onSubscribeFirst, onUnsubscribeLast) {
-        this._subscriptionStartHandlers[eventTopic] = onSubscribeFirst;
-        this._subscriptionStopHandlers[eventTopic] = onUnsubscribeLast;
+        this._subscriptionStartHandlers.set(eventTopic, onSubscribeFirst);
+        this._subscriptionStopHandlers.set(eventTopic, onUnsubscribeLast);
     }
     _registerAutosubscriptionHandler(eventTopic, eventTarget, frontendEventType, handler) {
-        this._registerSubscriptionHandler(eventTopic, eventTarget.addEventListener.bind(eventTarget, frontendEventType, handler, this), eventTarget.removeEventListener.bind(eventTarget, frontendEventType, handler, this));
+        this._registerSubscriptionHandler(eventTopic, () => eventTarget.addEventListener(frontendEventType, handler, this), eventTarget.removeEventListener.bind(eventTarget, frontendEventType, handler, this));
     }
     _registerAutosubscriptionTargetManagerHandler(eventTopic, modelClass, frontendEventType, handler) {
         this._registerSubscriptionHandler(eventTopic, SDK.TargetManager.TargetManager.instance().addModelListener.bind(SDK.TargetManager.TargetManager.instance(), modelClass, frontendEventType, handler, this), SDK.TargetManager.TargetManager.instance().removeModelListener.bind(SDK.TargetManager.TargetManager.instance(), modelClass, frontendEventType, handler, this));
@@ -654,12 +757,9 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
             Workspace.Workspace.WorkspaceImpl.instance().setHasResourceContentTrackingExtensions(false);
             Workspace.Workspace.WorkspaceImpl.instance().removeEventListener(Workspace.Workspace.Events.WorkingCopyCommittedByUser, handler, this);
         }
-        this._registerSubscriptionHandler(Extensions.extensionAPI.Events.ResourceContentCommitted, addFirstEventListener.bind(this), removeLastEventListener.bind(this));
+        this._registerSubscriptionHandler("resource-content-committed" /* ResourceContentCommitted */, addFirstEventListener.bind(this), removeLastEventListener.bind(this));
     }
     _expandResourcePath(extensionPath, resourcePath) {
-        if (!resourcePath) {
-            return;
-        }
         return extensionPath + this._normalizePath(resourcePath);
     }
     _normalizePath(path) {
@@ -685,7 +785,7 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
     evaluate(expression, exposeCommandLineAPI, returnByValue, options, securityOrigin, callback) {
         let context;
         function resolveURLToFrame(url) {
-            let found;
+            let found = null;
             function hasMatchingURL(frame) {
                 found = (frame.url === url) ? frame : null;
                 return found;
@@ -765,12 +865,13 @@ export class ExtensionServer extends Common.ObjectWrapper.ObjectWrapper {
         /* userGesture */ false, /* awaitPromise */ false)
             .then(onEvaluate);
         function onEvaluate(result) {
-            if (result.error) {
+            if ('error' in result) {
                 callback(result.error, null, false);
                 return;
             }
             callback(null, result.object || null, Boolean(result.exceptionDetails));
         }
+        return undefined;
     }
     _canInspectURL(url) {
         let parsedURL;
@@ -832,7 +933,7 @@ export class ExtensionStatus {
     constructor() {
         function makeStatus(code, description) {
             const details = Array.prototype.slice.call(arguments, 2);
-            const status = { code: code, description: description, details: details };
+            const status = { code, description, details };
             if (code !== 'OK') {
                 status.isError = true;
                 console.error('Extension server error: ' + Platform.StringUtilities.vsprintf(description, details));

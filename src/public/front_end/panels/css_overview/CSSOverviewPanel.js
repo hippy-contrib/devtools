@@ -1,6 +1,8 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+/* eslint-disable rulesdir/no_underscored_properties */
+import cssOverviewStyles from './cssOverview.css.js';
 import * as Host from '../../core/host/host.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
@@ -30,7 +32,6 @@ export class CSSOverviewPanel extends UI.Panel.Panel {
     _textColorContrastIssues;
     constructor() {
         super('css_overview');
-        this.registerRequiredCSS('panels/css_overview/cssOverview.css', { enableLegacyPatching: false });
         this.element.classList.add('css-overview-panel');
         const [model] = SDK.TargetManager.TargetManager.instance().models(CSSOverviewModel);
         this._model = model;
@@ -162,6 +163,10 @@ export class CSSOverviewPanel extends UI.Panel.Panel {
     }
     _overviewCompleted() {
         this._renderOverviewCompletedView();
+    }
+    wasShown() {
+        super.wasShown();
+        this.registerCSSFiles([cssOverviewStyles]);
     }
 }
 //# sourceMappingURL=CSSOverviewPanel.js.map

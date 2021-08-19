@@ -30,6 +30,7 @@ export declare class CSSStyleSheetHeader implements TextUtils.ContentProvider.Co
     setSourceMapURL(sourceMapURL?: string): void;
     cssModel(): CSSModel;
     isAnonymousInlineStyleSheet(): boolean;
+    isConstructedByNew(): boolean;
     resourceURL(): string;
     _viaInspectorResourceURL(): string;
     lineNumberInSource(lineNumberInStyleSheet: number): number;

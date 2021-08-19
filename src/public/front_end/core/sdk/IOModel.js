@@ -1,9 +1,8 @@
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-/* eslint-disable rulesdir/no_underscored_properties */
 import * as Common from '../common/common.js';
-import { RemoteObject } from './RemoteObject.js'; // eslint-disable-line no-unused-vars
+import { RemoteObject } from './RemoteObject.js';
 import { Capability } from './Target.js';
 import { SDKModel } from './SDKModel.js';
 export class IOModel extends SDKModel {

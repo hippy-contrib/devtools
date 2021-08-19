@@ -27,7 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* eslint-disable rulesdir/no_underscored_properties */
 import * as Platform from '../../core/platform/platform.js';
 export class TextRange {
     startLine;
@@ -197,22 +196,6 @@ export class SourceRange {
     constructor(offset, length) {
         this.offset = offset;
         this.length = length;
-    }
-}
-export class SourceEdit {
-    sourceURL;
-    oldRange;
-    newText;
-    constructor(sourceURL, oldRange, newText) {
-        this.sourceURL = sourceURL;
-        this.oldRange = oldRange;
-        this.newText = newText;
-    }
-    static comparator(edit1, edit2) {
-        return TextRange.comparator(edit1.oldRange, edit2.oldRange);
-    }
-    newRange() {
-        return TextRange.fromEdit(this.oldRange, this.newText);
     }
 }
 //# sourceMappingURL=TextRange.js.map

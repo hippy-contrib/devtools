@@ -4,6 +4,7 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import playerListViewStyles from './playerListView.css.js';
 const UIStrings = {
     /**
     *@description A right-click context menu entry which when clicked causes the menu entry for that player to be removed.
@@ -72,7 +73,6 @@ export class PlayerListView extends UI.Widget.VBox {
         // The parent tree for storing sections
         this._sidebarTree = new UI.TreeOutline.TreeOutlineInShadow();
         this.contentElement.appendChild(this._sidebarTree.element);
-        this._sidebarTree.registerRequiredCSS('panels/media/playerListView.css', { enableLegacyPatching: false });
         // Players active in this tab.
         this._playerList = this._addListSection(i18nString(UIStrings.players));
         this._playerList.listItemElement.classList.add('player-entry-header');
@@ -142,6 +142,10 @@ export class PlayerListView extends UI.Widget.VBox {
         else if (eventType === 'kWebMediaPlayerDestroyed') {
             this.setMediaElementPlayerIcon(playerID, 'smallicon-videoplayer-destroyed');
         }
+    }
+    wasShown() {
+        super.wasShown();
+        this._sidebarTree.registerCSSFiles([playerListViewStyles]);
     }
 }
 //# sourceMappingURL=PlayerListView.js.map

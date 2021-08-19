@@ -35,7 +35,7 @@ import * as SDK from '../../core/sdk/sdk.js';
 import * as Logs from '../../models/logs/logs.js';
 import * as ObjectUI from '../../ui/legacy/components/object_ui/object_ui.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import { Events } from './NetworkTimeCalculator.js'; // eslint-disable-line no-unused-vars
+import { Events } from './NetworkTimeCalculator.js';
 const UIStrings = {
     /**
     *@description Text used to label the time taken to receive an HTTP/2 Push message.
@@ -331,7 +331,7 @@ export class RequestTimingView extends UI.Widget.VBox {
     static createTimingTable(request, calculator) {
         const tableElement = document.createElement('table');
         tableElement.classList.add('network-timing-table');
-        UI.Utils.appendStyle(tableElement, 'panels/network/networkTimingTable.css', { enableLegacyPatching: false });
+        UI.Utils.appendStyle(tableElement, 'panels/network/networkTimingTable.css');
         const colgroup = tableElement.createChild('colgroup');
         colgroup.createChild('col', 'labels');
         colgroup.createChild('col', 'bars');
@@ -406,7 +406,7 @@ export class RequestTimingView extends UI.Widget.VBox {
             bar.textContent = '\u200B'; // Important for 0-time items to have 0 width.
             UI.ARIAUtils.setAccessibleName(row, i18nString(UIStrings.startedAtS, { PH1: calculator.formatValue(range.start, 2) }));
             const label = tr.createChild('td').createChild('div', 'network-timing-bar-title');
-            label.textContent = i18n.i18n.secondsToString(duration, true);
+            label.textContent = i18n.TimeUtilities.secondsToString(duration, true);
             if (range.name === 'serviceworker-respondwith') {
                 timingBarTitleEement.classList.add('network-fetch-timing-bar-clickable');
                 tableElement.createChild('tr', 'network-fetch-timing-bar-details');
@@ -415,7 +415,7 @@ export class RequestTimingView extends UI.Widget.VBox {
                 UI.ARIAUtils.setChecked(timingBarTitleEement, false);
             }
         }
-        if (!request.finished) {
+        if (!request.finished && !request.preserved) {
             const cell = tableElement.createChild('tr').createChild('td', 'caution');
             cell.colSpan = 3;
             UI.UIUtils.createTextChild(cell, i18nString(UIStrings.cautionRequestIsNotFinishedYet));
@@ -425,7 +425,7 @@ export class RequestTimingView extends UI.Widget.VBox {
         note.colSpan = 1;
         note.appendChild(UI.XLink.XLink.create('https://developer.chrome.com/docs/devtools/network/reference#timing-explanation', i18nString(UIStrings.explanation)));
         footer.createChild('td');
-        UI.UIUtils.createTextChild(footer.createChild('td'), i18n.i18n.secondsToString(totalDuration, true));
+        UI.UIUtils.createTextChild(footer.createChild('td'), i18n.TimeUtilities.secondsToString(totalDuration, true));
         const serverTimings = request.serverTimings;
         const lastTimingRightEdge = right === undefined ? 100 : right;
         const breakElement = tableElement.createChild('tr', 'network-timing-table-header').createChild('td');
@@ -451,7 +451,7 @@ export class RequestTimingView extends UI.Widget.VBox {
         function addTiming(serverTiming, right) {
             const colorGenerator = new Common.Color.Generator({ min: 0, max: 360, count: 36 }, { min: 50, max: 80, count: undefined }, 80);
             const isTotal = serverTiming.metric.toLowerCase() === 'total';
-            const tr = tableElement.createChild('tr', isTotal ? 'network-timing-footer' : '');
+            const tr = tableElement.createChild('tr', isTotal ? 'network-timing-footer' : 'server-timing-row');
             const metric = tr.createChild('td', 'network-timing-metric');
             const description = serverTiming.description || serverTiming.metric;
             UI.UIUtils.createTextChild(metric, description);
@@ -471,7 +471,7 @@ export class RequestTimingView extends UI.Widget.VBox {
                 }
             }
             const label = tr.createChild('td').createChild('div', 'network-timing-bar-title');
-            label.textContent = i18n.i18n.millisToString(serverTiming.value, true);
+            label.textContent = i18n.TimeUtilities.millisToString(serverTiming.value, true);
         }
         function createHeader(title) {
             const dataHeader = tableElement.createChild('tr', 'network-timing-table-header');
@@ -510,7 +510,8 @@ export class RequestTimingView extends UI.Widget.VBox {
             responseTreeElement.title = i18nString(UIStrings.responseReceived);
             detailsView.appendChild(responseTreeElement);
         }
-        const serviceWorkerResponseSource = document.createElementWithClass('div', 'network-fetch-details-treeitem');
+        const serviceWorkerResponseSource = document.createElement('div');
+        serviceWorkerResponseSource.classList.add('network-fetch-details-treeitem');
         let swResponseSourceString = i18nString(UIStrings.unknown);
         const swResponseSource = this._request.serviceWorkerResponseSource();
         if (swResponseSource) {
@@ -519,7 +520,8 @@ export class RequestTimingView extends UI.Widget.VBox {
         serviceWorkerResponseSource.textContent = i18nString(UIStrings.sourceOfResponseS, { PH1: swResponseSourceString });
         const responseSourceTreeElement = new UI.TreeOutline.TreeElement(serviceWorkerResponseSource);
         detailsView.appendChild(responseSourceTreeElement);
-        const cacheNameElement = document.createElementWithClass('div', 'network-fetch-details-treeitem');
+        const cacheNameElement = document.createElement('div');
+        cacheNameElement.classList.add('network-fetch-details-treeitem');
         const responseCacheStorageName = this._request.getResponseCacheStorageCacheName();
         if (responseCacheStorageName) {
             cacheNameElement.textContent = i18nString(UIStrings.cacheStorageCacheNameS, { PH1: responseCacheStorageName });
@@ -531,8 +533,9 @@ export class RequestTimingView extends UI.Widget.VBox {
         detailsView.appendChild(cacheNameTreeElement);
         const retrievalTime = this._request.getResponseRetrievalTime();
         if (retrievalTime) {
-            const responseTimeElement = document.createElementWithClass('div', 'network-fetch-details-treeitem');
-            responseTimeElement.textContent = i18nString(UIStrings.retrievalTimeS, { PH1: retrievalTime });
+            const responseTimeElement = document.createElement('div');
+            responseTimeElement.classList.add('network-fetch-details-treeitem');
+            responseTimeElement.textContent = i18nString(UIStrings.retrievalTimeS, { PH1: retrievalTime.toString() });
             const responseTimeTreeElement = new UI.TreeOutline.TreeElement(responseTimeElement);
             detailsView.appendChild(responseTimeTreeElement);
         }

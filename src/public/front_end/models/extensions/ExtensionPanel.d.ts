@@ -21,7 +21,7 @@ export declare class ExtensionButton {
     _id: string;
     _toolbarButton: UI.Toolbar.ToolbarButton;
     constructor(server: ExtensionServer, id: string, iconURL: string, tooltip?: string, disabled?: boolean);
-    update(iconURL: string, tooltip?: string, disabled?: boolean): void;
+    update(iconURL?: string, tooltip?: string, disabled?: boolean): void;
     toolbarButton(): UI.Toolbar.ToolbarButton;
 }
 export declare class ExtensionSidebarPane extends UI.View.SimpleView {
@@ -33,11 +33,11 @@ export declare class ExtensionSidebarPane extends UI.View.SimpleView {
     constructor(server: ExtensionServer, panelName: string, title: string, id: string);
     id(): string;
     panelName(): string;
-    setObject(object: Object, title: string, callback: (arg0?: (string | null) | undefined) => void): void;
-    setExpression(expression: string, title: string, evaluateOptions: Object, securityOrigin: string, callback: (arg0?: (string | null) | undefined) => void): void;
+    setObject(object: Object, title: string | undefined, callback: (arg0?: (string | null) | undefined) => void): void;
+    setExpression(expression: string, title: string | undefined, evaluateOptions: Object | undefined, securityOrigin: string, callback: (arg0?: (string | null) | undefined) => void): void;
     setPage(url: string): void;
     setHeight(height: string): void;
-    _onEvaluate(title: string, callback: (arg0?: (string | null) | undefined) => void, error: string | null, result: SDK.RemoteObject.RemoteObject | null, _wasThrown?: boolean): void;
+    _onEvaluate(title: string | undefined, callback: (arg0?: (string | null) | undefined) => void, error: string | null, result: SDK.RemoteObject.RemoteObject | null, _wasThrown?: boolean): void;
     _createObjectPropertiesView(): void;
-    _setObject(object: SDK.RemoteObject.RemoteObject, title: string, callback: (arg0?: (string | null) | undefined) => void): void;
+    _setObject(object: SDK.RemoteObject.RemoteObject, title: string | undefined, callback: (arg0?: (string | null) | undefined) => void): void;
 }

@@ -5,7 +5,7 @@ export interface CSSAngleEditorData {
     background: string;
 }
 export declare class CSSAngleEditor extends HTMLElement {
-    static litTagName: import("../../../lit-html/static.js").Static;
+    static readonly litTagName: import("../../../lit-html/static.js").Static;
     private readonly shadow;
     private angle;
     private onAngleUpdate?;

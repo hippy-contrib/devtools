@@ -32,11 +32,23 @@ import * as Host from '../host/host.js';
 import * as i18n from '../i18n/i18n.js';
 import * as Platform from '../platform/platform.js';
 import { Cookie } from './Cookie.js';
-import { Events as NetworkRequestEvents, NetworkRequest } from './NetworkRequest.js'; // eslint-disable-line no-unused-vars
+import { Events as NetworkRequestEvents, NetworkRequest } from './NetworkRequest.js';
 import { Capability } from './Target.js';
 import { SDKModel } from './SDKModel.js';
 import { TargetManager } from './TargetManager.js';
 const UIStrings = {
+    /**
+    *@description Explanation why no content is shown for WebSocket connection.
+    */
+    noContentForWebSocket: 'Content for WebSockets is currently not supported',
+    /**
+    *@description Explanation why no content is shown for redirect response.
+    */
+    noContentForRedirect: 'No content available because this request was redirected',
+    /**
+    *@description Explanation why no content is shown for preflight request.
+    */
+    noContentForPreflight: 'No content available for preflight request',
     /**
     *@description Text to indicate that network throttling is disabled
     */
@@ -123,52 +135,69 @@ export class NetworkManager extends SDKModel {
         return requestToManagerMap.get(request) || null;
     }
     static canReplayRequest(request) {
-        return Boolean(requestToManagerMap.get(request)) &&
+        return Boolean(requestToManagerMap.get(request)) && Boolean(request.backendRequestId()) && !request.isRedirect() &&
             request.resourceType() === Common.ResourceType.resourceTypes.XHR;
     }
     static replayRequest(request) {
         const manager = requestToManagerMap.get(request);
-        if (!manager) {
+        const requestId = request.backendRequestId();
+        if (!manager || !requestId || request.isRedirect()) {
             return;
         }
-        manager._networkAgent.invoke_replayXHR({ requestId: request.requestId() });
+        manager._networkAgent.invoke_replayXHR({ requestId });
     }
     static async searchInRequest(request, query, caseSensitive, isRegex) {
         const manager = NetworkManager.forRequest(request);
-        if (!manager) {
+        const requestId = request.backendRequestId();
+        if (!manager || !requestId || request.isRedirect()) {
             return [];
         }
-        const response = await manager._networkAgent.invoke_searchInResponseBody({ requestId: request.requestId(), query: query, caseSensitive: caseSensitive, isRegex: isRegex });
+        const response = await manager._networkAgent.invoke_searchInResponseBody({ requestId, query: query, caseSensitive: caseSensitive, isRegex: isRegex });
         return response.result || [];
     }
     static async requestContentData(request) {
         if (request.resourceType() === Common.ResourceType.resourceTypes.WebSocket) {
-            return { error: 'Content for WebSockets is currently not supported', content: null, encoded: false };
+            return { error: i18nString(UIStrings.noContentForWebSocket), content: null, encoded: false };
         }
         if (!request.finished) {
             await request.once(NetworkRequestEvents.FinishedLoading);
+        }
+        if (request.isRedirect()) {
+            return { error: i18nString(UIStrings.noContentForRedirect), content: null, encoded: false };
+        }
+        if (request.isPreflightRequest()) {
+            return { error: i18nString(UIStrings.noContentForPreflight), content: null, encoded: false };
         }
         const manager = NetworkManager.forRequest(request);
         if (!manager) {
             return { error: 'No network manager for request', content: null, encoded: false };
         }
-        const response = await manager._networkAgent.invoke_getResponseBody({ requestId: request.requestId() });
+        const requestId = request.backendRequestId();
+        if (!requestId) {
+            return { error: 'No backend request id for request', content: null, encoded: false };
+        }
+        const response = await manager._networkAgent.invoke_getResponseBody({ requestId });
         const error = response.getError() || null;
         return { error: error, content: error ? null : response.body, encoded: response.base64Encoded };
     }
     static async requestPostData(request) {
         const manager = NetworkManager.forRequest(request);
-        if (manager) {
-            try {
-                const { postData } = await manager._networkAgent.invoke_getRequestPostData({ requestId: request.backendRequestId() });
-                return postData;
-            }
-            catch (e) {
-                return e.message;
-            }
+        if (!manager) {
+            console.error('No network manager for request');
+            return null;
         }
-        console.error('No network manager for request');
-        return null;
+        const requestId = request.backendRequestId();
+        if (!requestId) {
+            console.error('No backend request id for request');
+            return null;
+        }
+        try {
+            const { postData } = await manager._networkAgent.invoke_getRequestPostData({ requestId });
+            return postData;
+        }
+        catch (e) {
+            return e.message;
+        }
     }
     static _connectionType(conditions) {
         if (!conditions.download && !conditions.upload) {
@@ -237,24 +266,28 @@ export var Events;
 })(Events || (Events = {}));
 export const NoThrottlingConditions = {
     title: i18nLazyString(UIStrings.noThrottling),
+    i18nTitleKey: UIStrings.noThrottling,
     download: -1,
     upload: -1,
     latency: 0,
 };
 export const OfflineConditions = {
     title: i18nLazyString(UIStrings.offline),
+    i18nTitleKey: UIStrings.offline,
     download: 0,
     upload: 0,
     latency: 0,
 };
 export const Slow3GConditions = {
     title: i18nLazyString(UIStrings.slowG),
+    i18nTitleKey: UIStrings.slowG,
     download: 500 * 1000 / 8 * .8,
     upload: 500 * 1000 / 8 * .8,
     latency: 400 * 5,
 };
 export const Fast3GConditions = {
     title: i18nLazyString(UIStrings.fastG),
+    i18nTitleKey: UIStrings.fastG,
     download: 1.6 * 1000 * 1000 / 8 * .9,
     upload: 750 * 1000 / 8 * .9,
     latency: 150 * 3.75,
@@ -298,6 +331,7 @@ export class NetworkDispatcher {
         networkRequest.setInitialPriority(request.initialPriority);
         networkRequest.mixedContentType = request.mixedContentType || "none" /* None */;
         networkRequest.setReferrerPolicy(request.referrerPolicy);
+        networkRequest.setIsSameSite(request.isSameSite || false);
     }
     _updateNetworkRequestWithResponse(networkRequest, response) {
         if (response.url && networkRequest.url() !== response.url) {
@@ -418,8 +452,8 @@ export class NetworkDispatcher {
             this._manager.dispatchEventToListeners(Events.RequestRedirected, networkRequest);
         }
         else {
-            networkRequest =
-                this._createNetworkRequest(requestId, frameId || '', loaderId, request.url, documentURL, initiator);
+            networkRequest = NetworkRequest.create(requestId, request.url, documentURL, frameId || '', loaderId, initiator);
+            requestToManagerMap.set(networkRequest, this._manager);
         }
         networkRequest.hasNetworkData = true;
         this._updateNetworkRequestWithRequest(networkRequest, request);
@@ -527,7 +561,7 @@ export class NetworkDispatcher {
         this._finishNetworkRequest(networkRequest, time, -1);
     }
     webSocketCreated({ requestId, url: requestURL, initiator }) {
-        const networkRequest = new NetworkRequest(requestId, requestURL, '', '', '', initiator || null);
+        const networkRequest = NetworkRequest.createForWebSocket(requestId, requestURL, initiator);
         requestToManagerMap.set(networkRequest, this._manager);
         networkRequest.setResourceType(Common.ResourceType.resourceTypes.WebSocket);
         this._startNetworkRequest(networkRequest, null);
@@ -624,7 +658,7 @@ export class NetworkDispatcher {
         };
         this._getExtraInfoBuilder(requestId).addRequestExtraInfo(extraRequestInfo);
     }
-    responseReceivedExtraInfo({ requestId, blockedCookies, headers, headersText, resourceIPAddressSpace }) {
+    responseReceivedExtraInfo({ requestId, blockedCookies, headers, headersText, resourceIPAddressSpace, statusCode }) {
         const extraResponseInfo = {
             blockedResponseCookies: blockedCookies.map(blockedCookie => {
                 return {
@@ -636,6 +670,7 @@ export class NetworkDispatcher {
             responseHeaders: this._headersMapToHeadersArray(headers),
             responseHeadersText: headersText,
             resourceIPAddressSpace,
+            statusCode,
         };
         this._getExtraInfoBuilder(requestId).addResponseExtraInfo(extraResponseInfo);
     }
@@ -661,7 +696,8 @@ export class NetworkDispatcher {
         }
         originalNetworkRequest.markAsRedirect(redirectCount);
         this._finishNetworkRequest(originalNetworkRequest, time, -1);
-        const newNetworkRequest = this._createNetworkRequest(requestId, originalNetworkRequest.frameId, originalNetworkRequest.loaderId, redirectURL, originalNetworkRequest.documentURL, originalNetworkRequest.initiator());
+        const newNetworkRequest = NetworkRequest.create(requestId, redirectURL, originalNetworkRequest.documentURL, originalNetworkRequest.frameId, originalNetworkRequest.loaderId, originalNetworkRequest.initiator());
+        requestToManagerMap.set(newNetworkRequest, this._manager);
         newNetworkRequest.setRedirectSource(originalNetworkRequest);
         originalNetworkRequest.setRedirectDestination(newNetworkRequest);
         return newNetworkRequest;
@@ -725,18 +761,13 @@ export class NetworkDispatcher {
             this._manager.dispatchEventToListeners(Events.MessageGenerated, { message: message, requestId: networkRequest.requestId(), warning: false });
         }
     }
-    _createNetworkRequest(requestId, frameId, loaderId, url, documentURL, initiator) {
-        const request = new NetworkRequest(requestId, url, documentURL, frameId, loaderId, initiator);
-        requestToManagerMap.set(request, this._manager);
-        return request;
-    }
     clearRequests() {
         this.requestsById.clear();
         this.requestsByURL.clear();
         this._requestIdToExtraInfoBuilder.clear();
     }
     webTransportCreated({ transportId, url: requestURL, timestamp: time, initiator }) {
-        const networkRequest = new NetworkRequest(transportId, requestURL, '', '', '', initiator || null);
+        const networkRequest = NetworkRequest.createForWebSocket(transportId, requestURL, initiator);
         networkRequest.hasNetworkData = true;
         requestToManagerMap.set(networkRequest, this._manager);
         networkRequest.setResourceType(Common.ResourceType.resourceTypes.WebTransport);
@@ -774,16 +805,45 @@ export class NetworkDispatcher {
         request.setTrustTokenOperationDoneEvent(event);
     }
     subresourceWebBundleMetadataReceived({ requestId, urls }) {
-        this._getExtraInfoBuilder(requestId).setWebBundleInfo({ resourceUrls: urls });
+        const extraInfoBuilder = this._getExtraInfoBuilder(requestId);
+        extraInfoBuilder.setWebBundleInfo({ resourceUrls: urls });
+        const finalRequest = extraInfoBuilder.finalRequest();
+        if (finalRequest) {
+            this._updateNetworkRequest(finalRequest);
+        }
     }
     subresourceWebBundleMetadataError({ requestId, errorMessage }) {
-        this._getExtraInfoBuilder(requestId).setWebBundleInfo({ errorMessage });
+        const extraInfoBuilder = this._getExtraInfoBuilder(requestId);
+        extraInfoBuilder.setWebBundleInfo({ errorMessage });
+        const finalRequest = extraInfoBuilder.finalRequest();
+        if (finalRequest) {
+            this._updateNetworkRequest(finalRequest);
+        }
     }
     subresourceWebBundleInnerResponseParsed({ innerRequestId, bundleRequestId }) {
-        this._getExtraInfoBuilder(innerRequestId).setWebBundleInnerRequestInfo({ bundleRequestId });
+        const extraInfoBuilder = this._getExtraInfoBuilder(innerRequestId);
+        extraInfoBuilder.setWebBundleInnerRequestInfo({ bundleRequestId });
+        const finalRequest = extraInfoBuilder.finalRequest();
+        if (finalRequest) {
+            this._updateNetworkRequest(finalRequest);
+        }
     }
     subresourceWebBundleInnerResponseError({ innerRequestId, errorMessage }) {
-        this._getExtraInfoBuilder(innerRequestId).setWebBundleInnerRequestInfo({ errorMessage });
+        const extraInfoBuilder = this._getExtraInfoBuilder(innerRequestId);
+        extraInfoBuilder.setWebBundleInnerRequestInfo({ errorMessage });
+        const finalRequest = extraInfoBuilder.finalRequest();
+        if (finalRequest) {
+            this._updateNetworkRequest(finalRequest);
+        }
+    }
+    /**
+     * @deprecated
+     * This method is only kept for usage in a web test.
+     */
+    _createNetworkRequest(requestId, frameId, loaderId, url, documentURL, initiator) {
+        const request = NetworkRequest.create(requestId, url, documentURL, frameId, loaderId, initiator);
+        requestToManagerMap.set(request, this._manager);
+        return request;
     }
 }
 let multiTargetNetworkManagerInstance;
@@ -858,9 +918,15 @@ export class MultitargetNetworkManager extends Common.ObjectWrapper.ObjectWrappe
         if (chromeVersion.length === 0) {
             return;
         }
+        const majorVersion = chromeVersion.split('.', 1)[0];
         for (const brand of userAgentMetadata.brands) {
             if (brand.version.includes('%s')) {
-                brand.version = Platform.StringUtilities.sprintf(brand.version, chromeVersion);
+                brand.version = Platform.StringUtilities.sprintf(brand.version, majorVersion);
+            }
+        }
+        if (userAgentMetadata.fullVersion) {
+            if (userAgentMetadata.fullVersion.includes('%s')) {
+                userAgentMetadata.fullVersion = Platform.StringUtilities.sprintf(userAgentMetadata.fullVersion, chromeVersion);
             }
         }
     }
@@ -1266,14 +1332,45 @@ class ExtraInfoBuilder {
             this._responseExtraInfos[index] = null;
         }
     }
+    finalRequest() {
+        if (!this._finished) {
+            return null;
+        }
+        return this._requests[this._requests.length - 1] || null;
+    }
     updateFinalRequest() {
         if (!this._finished) {
             return;
         }
-        const finalRequest = this._requests[this._requests.length - 1];
+        const finalRequest = this.finalRequest();
         finalRequest?.setWebBundleInfo(this.webBundleInfo);
         finalRequest?.setWebBundleInnerRequestInfo(this.webBundleInnerRequestInfo);
     }
 }
 SDKModel.register(NetworkManager, { capabilities: Capability.Network, autostart: true });
+export class ConditionsSerializer {
+    stringify(value) {
+        const conditions = value;
+        return JSON.stringify({
+            ...conditions,
+            title: typeof conditions.title === 'function' ? conditions.title() : conditions.title,
+        });
+    }
+    parse(serialized) {
+        const parsed = JSON.parse(serialized);
+        return {
+            ...parsed,
+            // eslint-disable-next-line rulesdir/l10n_i18nString_call_only_with_uistrings
+            title: parsed.i18nTitleKey ? i18nLazyString(parsed.i18nTitleKey) : parsed.title,
+        };
+    }
+}
+export function networkConditionsEqual(first, second) {
+    // Caution: titles might be different function instances, which produce
+    // the same value.
+    const firstTitle = typeof first.title === 'function' ? first.title() : first.title;
+    const secondTitle = typeof second.title === 'function' ? second.title() : second.title;
+    return second.download === first.download && second.upload === first.upload && second.latency === first.latency &&
+        secondTitle === firstTitle;
+}
 //# sourceMappingURL=NetworkManager.js.map

@@ -168,7 +168,7 @@ export class PopoverHelper {
     }
     _showPopover(document) {
         const popover = new GlassPane();
-        popover.registerRequiredCSS('ui/legacy/popover.css', { enableLegacyPatching: false });
+        popover.registerRequiredCSS('ui/legacy/popover.css');
         popover.setSizeBehavior(SizeBehavior.MeasureContent);
         popover.setMarginBehavior(MarginBehavior.Arrow);
         const request = this._scheduledRequest;

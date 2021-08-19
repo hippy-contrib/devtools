@@ -57,7 +57,8 @@ export declare class InspectorView extends VBox implements ViewLocationResolver 
     minimize(): void;
     restore(): void;
     displayReloadRequiredWarning(message: string): void;
-    _attachReloadRequiredInfobar(infobar: Infobar): void;
+    _createInfoBarDiv(): void;
+    _attachInfobar(infobar: Infobar): void;
 }
 export declare class ActionDelegate implements ActionDelegateInterface {
     static instance(opts?: {

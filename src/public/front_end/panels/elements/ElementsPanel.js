@@ -37,6 +37,7 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Extensions from '../../models/extensions/extensions.js';
+import * as IconButton from '../../ui/components/icon_button/icon_button.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { AccessibilityTreeView } from './AccessibilityTreeView.js';
@@ -116,20 +117,22 @@ const UIStrings = {
 };
 const str_ = i18n.i18n.registerUIStrings('panels/elements/ElementsPanel.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
-const legacyNodeToNewBreadcrumbsNode = (node) => {
-    return {
-        parentNode: node.parentNode ? legacyNodeToNewBreadcrumbsNode(node.parentNode) : null,
-        id: node.id,
-        nodeType: node.nodeType(),
-        pseudoType: node.pseudoType(),
-        shadowRootType: node.shadowRootType(),
-        nodeName: node.nodeName(),
-        nodeNameNicelyCased: node.nodeNameInCorrectCase(),
-        legacyDomNode: node,
-        highlightNode: () => node.highlight(),
-        clearHighlight: () => SDK.OverlayModel.OverlayModel.hideDOMNodeHighlight(),
-        getAttribute: node.getAttribute.bind(node),
-    };
+const createAccessibilityTreeToggleButton = (isActive) => {
+    const button = document.createElement('button');
+    if (isActive) {
+        button.classList.add('axtree-button', 'axtree-button-active');
+    }
+    else {
+        button.classList.add('axtree-button');
+    }
+    button.tabIndex = 0;
+    button.title =
+        isActive ? i18nString(UIStrings.switchToDomTreeView) : i18nString(UIStrings.switchToAccessibilityTreeView);
+    const icon = new IconButton.Icon.Icon();
+    const bgColor = isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+    icon.data = { iconName: 'accessibility-icon', color: bgColor, width: '16px', height: '16px' };
+    button.appendChild(icon);
+    return button;
 };
 let elementsPanelInstance;
 export class ElementsPanel extends UI.Panel.Panel {
@@ -151,7 +154,7 @@ export class ElementsPanel extends UI.Panel.Panel {
     _adornerManager;
     _adornerSettingsPane;
     _adornersByName;
-    _accessibilityTreeButton;
+    accessibilityTreeButton;
     domTreeButton;
     _selectedNodeOnReset;
     _hasNonDefaultSelectedNode;
@@ -162,7 +165,7 @@ export class ElementsPanel extends UI.Panel.Panel {
     _stylesViewToReveal;
     constructor() {
         super('elements');
-        this.registerRequiredCSS('panels/elements/elementsPanel.css', { enableLegacyPatching: false });
+        this.registerRequiredCSS('panels/elements/elementsPanel.css');
         this._splitWidget = new UI.SplitWidget.SplitWidget(true, true, 'elementsPanelSplitViewState', 325, 325);
         this._splitWidget.addEventListener(UI.SplitWidget.Events.SidebarSizeChanged, this._updateTreeOutlineVisibleWidth.bind(this));
         this._splitWidget.show(this.element);
@@ -192,7 +195,7 @@ export class ElementsPanel extends UI.Panel.Panel {
             this._accessibilityTreeView = new AccessibilityTreeView(this.domTreeButton);
         }
         this._breadcrumbs = new ElementsComponents.ElementsBreadcrumbs.ElementsBreadcrumbs();
-        this._breadcrumbs.addEventListener('breadcrumbsnodeselected', (event) => {
+        this._breadcrumbs.addEventListener('breadcrumbsnodeselected', event => {
             this._crumbNodeSelected(event);
         });
         crumbsContainer.appendChild(this._breadcrumbs);
@@ -220,13 +223,11 @@ export class ElementsPanel extends UI.Panel.Panel {
         this._adornersByName = new Map();
     }
     _initializeFullAccessibilityTreeView(stackElement) {
-        this._accessibilityTreeButton = document.createElement('button');
-        this._accessibilityTreeButton.textContent = i18nString(UIStrings.switchToAccessibilityTreeView);
-        this._accessibilityTreeButton.addEventListener('click', this._showAccessibilityTree.bind(this));
-        this.domTreeButton = document.createElement('button');
-        this.domTreeButton.textContent = i18nString(UIStrings.switchToDomTreeView);
+        this.accessibilityTreeButton = createAccessibilityTreeToggleButton(false);
+        this.accessibilityTreeButton.addEventListener('click', this._showAccessibilityTree.bind(this));
+        this.domTreeButton = createAccessibilityTreeToggleButton(true);
         this.domTreeButton.addEventListener('click', this._showDOMTree.bind(this));
-        stackElement.appendChild(this._accessibilityTreeButton);
+        stackElement.appendChild(this.accessibilityTreeButton);
     }
     _showAccessibilityTree() {
         if (this._accessibilityTreeView) {
@@ -263,8 +264,8 @@ export class ElementsPanel extends UI.Panel.Panel {
         const parentModel = domModel.parentModel();
         // Different frames will have different DOMModels, we only want to add the accessibility model
         // for the top level frame, as the accessibility tree does not yet support exploring IFrames.
-        if (!parentModel && this._accessibilityTreeView) {
-            this._accessibilityTreeView.setAccessibilityModel(domModel.target().model(SDK.AccessibilityModel.AccessibilityModel));
+        if (this._accessibilityTreeView) {
+            this._accessibilityTreeView.wireToDOMModel(domModel);
         }
         let treeOutline = parentModel ? ElementsTreeOutline.forDOMModel(parentModel) : null;
         if (!treeOutline) {
@@ -408,14 +409,14 @@ export class ElementsPanel extends UI.Panel.Panel {
             }
         }
         if (selectedNode) {
-            const activeNode = legacyNodeToNewBreadcrumbsNode(selectedNode);
+            const activeNode = ElementsComponents.Helper.legacyNodeToElementsComponentsNode(selectedNode);
             const crumbs = [activeNode];
             for (let current = selectedNode.parentNode; current; current = current.parentNode) {
-                crumbs.push(legacyNodeToNewBreadcrumbsNode(current));
+                crumbs.push(ElementsComponents.Helper.legacyNodeToElementsComponentsNode(current));
             }
             this._breadcrumbs.data = {
                 crumbs,
-                selectedNode: legacyNodeToNewBreadcrumbsNode(selectedNode),
+                selectedNode: ElementsComponents.Helper.legacyNodeToElementsComponentsNode(selectedNode),
             };
         }
         else {
@@ -669,13 +670,13 @@ export class ElementsPanel extends UI.Panel.Panel {
          * that we had before with the new nodes, and pass them into the breadcrumbs component.
          */
         // Get the current set of active crumbs
-        const activeNode = legacyNodeToNewBreadcrumbsNode(selectedNode);
+        const activeNode = ElementsComponents.Helper.legacyNodeToElementsComponentsNode(selectedNode);
         const existingCrumbs = [activeNode];
         for (let current = selectedNode.parentNode; current; current = current.parentNode) {
-            existingCrumbs.push(legacyNodeToNewBreadcrumbsNode(current));
+            existingCrumbs.push(ElementsComponents.Helper.legacyNodeToElementsComponentsNode(current));
         }
         /* Get the change nodes from the event & convert them to breadcrumb nodes */
-        const newNodes = nodes.map(legacyNodeToNewBreadcrumbsNode);
+        const newNodes = nodes.map(ElementsComponents.Helper.legacyNodeToElementsComponentsNode);
         const nodesThatHaveChangedMap = new Map();
         newNodes.forEach(crumb => nodesThatHaveChangedMap.set(crumb.id, crumb));
         /* Loop over our existing crumbs, and if any have an ID that matches an ID from the new nodes
@@ -691,8 +692,7 @@ export class ElementsPanel extends UI.Panel.Panel {
         };
     }
     _crumbNodeSelected(event) {
-        const node = event.data;
-        this.selectDOMNode(node, true);
+        this.selectDOMNode(event.data, true);
     }
     _treeOutlineForNode(node) {
         if (!node) {

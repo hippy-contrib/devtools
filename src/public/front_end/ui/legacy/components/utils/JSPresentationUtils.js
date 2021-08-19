@@ -167,7 +167,7 @@ export function buildStackTracePreviewContents(target, linkifier, options = {
     const element = document.createElement('span');
     element.classList.add('monospace');
     element.style.display = 'inline-block';
-    const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(element, { cssFile: 'ui/legacy/components/utils/jsUtils.css', enableLegacyPatching: false, delegatesFocus: undefined });
+    const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(element, { cssFile: 'ui/legacy/components/utils/jsUtils.css', delegatesFocus: undefined });
     const contentElement = shadowRoot.createChild('table', 'stack-preview-container');
     if (!stackTrace) {
         return { element, links: [] };

@@ -5,7 +5,7 @@
 import * as Common from '../../core/common/common.js';
 import * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
-import { LiveLocationWithPool } from './LiveLocation.js'; // eslint-disable-line no-unused-vars
+import { LiveLocationWithPool } from './LiveLocation.js';
 import { ResourceMapping } from './ResourceMapping.js';
 import { SASSSourceMapping } from './SASSSourceMapping.js';
 import { StylesSourceMapping } from './StylesSourceMapping.js';
@@ -31,6 +31,9 @@ export class CSSWorkspaceBinding {
             cssWorkspaceBindingInstance = new CSSWorkspaceBinding(targetManager, workspace);
         }
         return cssWorkspaceBindingInstance;
+    }
+    static removeInstance() {
+        cssWorkspaceBindingInstance = undefined;
     }
     _getCSSModelInfo(cssModel) {
         return this._modelToInfo.get(cssModel);
@@ -202,7 +205,7 @@ export class ModelInfo {
         return ResourceMapping.instance().uiLocationToCSSLocations(uiLocation);
     }
     _dispose() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
         this._stylesSourceMapping.dispose();
         this._sassSourceMapping.dispose();
     }

@@ -5,6 +5,7 @@ import * as LitHtml from '../../../ui/lit-html/lit-html.js';
 import * as ComponentHelpers from '../helpers/helpers.js';
 import { getRowEntryForColumnId } from './DataGridUtils.js';
 import { DataGrid } from './DataGrid.js';
+import dataGridControllerStyles from './dataGridController.css.js';
 export class DataGridController extends HTMLElement {
     static litTagName = LitHtml.literal `devtools-data-grid-controller`;
     shadow = this.attachShadow({ mode: 'open' });
@@ -22,6 +23,9 @@ export class DataGridController extends HTMLElement {
     originalRows = [];
     sortState = null;
     filters = [];
+    connectedCallback() {
+        this.shadow.adoptedStyleSheets = [dataGridControllerStyles];
+    }
     get data() {
         return {
             columns: this.originalColumns,
@@ -159,13 +163,6 @@ export class DataGridController extends HTMLElement {
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
         LitHtml.render(LitHtml.html `
-      <style>
-        :host {
-          display: block;
-          height: 100%;
-          overflow: hidden;
-        }
-      </style>
       <${DataGrid.litTagName} .data=${{
             columns: this.columns,
             rows: this.rows,

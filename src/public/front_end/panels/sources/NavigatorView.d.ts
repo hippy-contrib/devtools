@@ -91,7 +91,7 @@ export declare class NavigatorView extends UI.Widget.VBox implements SDK.TargetM
     _discardFrame(frame: SDK.ResourceTreeModel.ResourceTreeFrame): void;
     targetAdded(_target: SDK.Target.Target): void;
     targetRemoved(target: SDK.Target.Target): void;
-    _targetNameChanged(event: Common.EventTarget.EventTargetEvent): void;
+    _targetNameChanged(event: Common.EventTarget.EventTargetEvent<SDK.Target.Target>): void;
 }
 export declare class NavigatorFolderTreeElement extends UI.TreeOutline.TreeElement {
     _nodeType: string;

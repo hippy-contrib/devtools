@@ -9,6 +9,7 @@ import * as Workspace from '../../models/workspace/workspace.js';
 import * as WorkspaceDiff from '../../models/workspace_diff/workspace_diff.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as Snippets from '../snippets/snippets.js';
+import changesSidebarStyles from './changesSidebar.css.js';
 const UIStrings = {
     /**
     *@description Name of an item from source map
@@ -26,7 +27,6 @@ export class ChangesSidebar extends UI.Widget.Widget {
         super();
         this._treeoutline = new UI.TreeOutline.TreeOutlineInShadow();
         this._treeoutline.setFocusable(false);
-        this._treeoutline.registerRequiredCSS('panels/changes/changesSidebar.css', { enableLegacyPatching: false });
         this._treeoutline.setComparator((a, b) => Platform.StringUtilities.compare(a.titleAsText(), b.titleAsText()));
         this._treeoutline.addEventListener(UI.TreeOutline.Events.ElementSelected, this._selectionChanged, this);
         UI.ARIAUtils.markAsTablist(this._treeoutline.contentElement);
@@ -88,6 +88,10 @@ export class ChangesSidebar extends UI.Widget.Widget {
             treeElement.select(true);
         }
     }
+    wasShown() {
+        super.wasShown();
+        this._treeoutline.registerCSSFiles([changesSidebarStyles]);
+    }
 }
 export class UISourceCodeTreeElement extends UI.TreeOutline.TreeElement {
     uiSourceCode;
@@ -123,7 +127,7 @@ export class UISourceCodeTreeElement extends UI.TreeOutline.TreeElement {
         this.tooltip = tooltip;
     }
     dispose() {
-        Common.EventTarget.EventTarget.removeEventListeners(this._eventListeners);
+        Common.EventTarget.removeEventListeners(this._eventListeners);
     }
 }
 //# sourceMappingURL=ChangesSidebar.js.map

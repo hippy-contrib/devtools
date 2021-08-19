@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /* eslint-disable rulesdir/no_underscored_properties */
-import * as Common from '../../core/common/common.js'; // eslint-disable-line no-unused-vars
-import { ChunkedFileReader } from './FileUtils.js'; // eslint-disable-line no-unused-vars
+import * as Common from '../../core/common/common.js';
+import { ChunkedFileReader } from './FileUtils.js';
 export class TempFile {
     _lastBlob;
     constructor() {
