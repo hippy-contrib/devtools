@@ -530,8 +530,7 @@ export const DevtoolsExperiments = {
     'experimentalCookieFeatures': 45,
     'localizedDevTools': 46,
     'bfcacheDebugging': 47,
-    'hideIssuesFeature': 48,
-    '__lastValidEnumPosition': 48,
+    '__lastValidEnumPosition': 47,
 };
 export const IssueExpanded = {
     CrossOriginEmbedderPolicy: 0,

@@ -9,7 +9,7 @@ import { RuntimeModel } from './RuntimeModel.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
 import type { SDKModelObserver } from './TargetManager.js';
-export declare class DOMDebuggerModel extends SDKModel<EventTypes> {
+export declare class DOMDebuggerModel extends SDKModel {
     _agent: ProtocolProxyApi.DOMDebuggerApi;
     _runtimeModel: RuntimeModel;
     _domModel: DOMModel;
@@ -50,10 +50,7 @@ export declare class DOMDebuggerModel extends SDKModel<EventTypes> {
     _currentURL(): string;
     _documentUpdated(): Promise<void>;
     _removeDOMBreakpoints(filter: (arg0: DOMBreakpoint) => boolean): void;
-    _nodeRemoved(event: Common.EventTarget.EventTargetEvent<{
-        node: DOMNode;
-        parent: DOMNode;
-    }>): void;
+    _nodeRemoved(event: Common.EventTarget.EventTargetEvent): void;
     _saveDOMBreakpoints(): void;
 }
 export declare enum Events {
@@ -61,11 +58,6 @@ export declare enum Events {
     DOMBreakpointToggled = "DOMBreakpointToggled",
     DOMBreakpointsRemoved = "DOMBreakpointsRemoved"
 }
-export declare type EventTypes = {
-    [Events.DOMBreakpointAdded]: DOMBreakpoint;
-    [Events.DOMBreakpointToggled]: DOMBreakpoint;
-    [Events.DOMBreakpointsRemoved]: DOMBreakpoint[];
-};
 export declare class DOMBreakpoint {
     domDebuggerModel: DOMDebuggerModel;
     node: DOMNode;

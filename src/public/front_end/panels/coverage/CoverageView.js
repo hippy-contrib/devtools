@@ -10,7 +10,6 @@ import * as SDK from '../../core/sdk/sdk.js';
 import * as Bindings from '../../models/bindings/bindings.js';
 import * as SourceFrame from '../../ui/legacy/components/source_frame/source_frame.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import coverageViewStyles from './coverageView.css.js';
 import { CoverageDecorationManager, decoratorType } from './CoverageDecorationManager.js';
 import { CoverageListView } from './CoverageListView.js';
 import { CoverageModel, Events } from './CoverageModel.js';
@@ -119,6 +118,7 @@ export class CoverageView extends UI.Widget.VBox {
         this._model = null;
         this._decorationManager = null;
         this._resourceTreeModel = null;
+        this.registerRequiredCSS('panels/coverage/coverageView.css');
         const toolbarContainer = this.contentElement.createChild('div', 'coverage-toolbar-container');
         const toolbar = new UI.Toolbar.Toolbar('coverage-toolbar', toolbarContainer);
         toolbar.makeWrappable(true);
@@ -464,10 +464,6 @@ export class CoverageView extends UI.Widget.VBox {
         this._listView.selectByUrl(url);
     }
     static EXTENSION_BINDINGS_URL_PREFIX = 'extensions::';
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([coverageViewStyles]);
-    }
 }
 let actionDelegateInstance;
 export class ActionDelegate {

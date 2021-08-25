@@ -18,11 +18,11 @@ export declare class ResourceScriptMapping implements DebuggerSourceMapping {
     rawLocationToUILocation(rawLocation: SDK.DebuggerModel.Location): Workspace.UISourceCode.UILocation | null;
     uiLocationToRawLocations(uiSourceCode: Workspace.UISourceCode.UISourceCode, lineNumber: number, columnNumber: number): SDK.DebuggerModel.Location[];
     _acceptsScript(script: SDK.Script.Script): boolean;
-    _parsedScriptSource(event: Common.EventTarget.EventTargetEvent<SDK.Script.Script>): Promise<void>;
+    _parsedScriptSource(event: Common.EventTarget.EventTargetEvent): Promise<void>;
     scriptFile(uiSourceCode: Workspace.UISourceCode.UISourceCode): ResourceScriptFile | null;
     _removeScript(script: SDK.Script.Script): Promise<void>;
     _executionContextDestroyed(event: Common.EventTarget.EventTargetEvent<SDK.RuntimeModel.ExecutionContext>): void;
-    _globalObjectCleared(): void;
+    _globalObjectCleared(_event: Common.EventTarget.EventTargetEvent): void;
     resetForTest(): void;
     dispose(): void;
 }

@@ -148,4 +148,18 @@ export const calculateFirstFocusableCell = (options) => {
     const focusableColIndex = columns.findIndex(col => col.visible);
     return [focusableColIndex, focusableRowIndex];
 };
+export class ContextMenuColumnSortClickEvent extends Event {
+    data;
+    constructor(column) {
+        super('contextmenucolumnsortclick');
+        this.data = {
+            column,
+        };
+    }
+}
+export class ContextMenuHeaderResetClickEvent extends Event {
+    constructor() {
+        super('contextmenuheaderresetclick');
+    }
+}
 //# sourceMappingURL=DataGridUtils.js.map

@@ -26,5 +26,4 @@ export declare class PlayerEventsView extends UI.Widget.VBox {
     onEvent(event: PlayerEvent): void;
     _subtractFirstEventTime(event: PlayerEvent): PlayerEvent;
     static _convertToGridDescriptor(columnConfig: EventDisplayColumnConfig): DataGrid.DataGrid.ColumnDescriptor;
-    wasShown(): void;
 }

@@ -158,7 +158,8 @@ export class LinearMemoryInspectorController extends SDK.TargetManager.SDKModelO
         }
     }
     onGlobalObjectClear(event) {
-        this.modelRemoved(event.data.runtimeModel());
+        const debuggerModel = event.data;
+        this.modelRemoved(debuggerModel.runtimeModel());
     }
     viewClosed(event) {
         const bufferId = event.data;

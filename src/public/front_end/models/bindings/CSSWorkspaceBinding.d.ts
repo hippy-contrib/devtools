@@ -17,7 +17,6 @@ export declare class CSSWorkspaceBinding implements SDK.TargetManager.SDKModelOb
         targetManager: SDK.TargetManager.TargetManager | null;
         workspace: Workspace.Workspace.WorkspaceImpl | null;
     }): CSSWorkspaceBinding;
-    static removeInstance(): void;
     _getCSSModelInfo(cssModel: SDK.CSSModel.CSSModel): ModelInfo;
     modelAdded(cssModel: SDK.CSSModel.CSSModel): void;
     modelRemoved(cssModel: SDK.CSSModel.CSSModel): void;
@@ -51,8 +50,8 @@ export declare class ModelInfo {
     _createLiveLocation(rawLocation: SDK.CSSModel.CSSLocation, updateDelegate: (arg0: LiveLocationInterface) => Promise<void>, locationPool: LiveLocationPool): Promise<LiveLocation>;
     _disposeLocation(location: LiveLocation): void;
     _updateLocations(header: SDK.CSSStyleSheetHeader.CSSStyleSheetHeader): Promise<void[]>;
-    _styleSheetAdded(event: Common.EventTarget.EventTargetEvent<SDK.CSSStyleSheetHeader.CSSStyleSheetHeader>): Promise<void>;
-    _styleSheetRemoved(event: Common.EventTarget.EventTargetEvent<SDK.CSSStyleSheetHeader.CSSStyleSheetHeader>): Promise<void>;
+    _styleSheetAdded(event: Common.EventTarget.EventTargetEvent): Promise<void>;
+    _styleSheetRemoved(event: Common.EventTarget.EventTargetEvent): Promise<void>;
     _rawLocationToUILocation(rawLocation: SDK.CSSModel.CSSLocation): Workspace.UISourceCode.UILocation | null;
     _uiLocationToRawLocations(uiLocation: Workspace.UISourceCode.UILocation): SDK.CSSModel.CSSLocation[];
     _dispose(): void;

@@ -1,8 +1,10 @@
 import * as Common from '../../core/common/common.js';
-import * as EmulationModel from '../../models/emulation/emulation.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import { DeviceModeModel, Type } from './DeviceModeModel.js';
+import type { Mode } from './EmulatedDevices.js';
+import { EmulatedDevice, EmulatedDevicesList } from './EmulatedDevices.js';
 export declare class DeviceModeToolbar {
-    _model: EmulationModel.DeviceModeModel.DeviceModeModel;
+    _model: DeviceModeModel;
     _showMediaInspectorSetting: Common.Settings.Setting<boolean>;
     _showRulersSetting: Common.Settings.Setting<boolean>;
     _experimentDualScreenSupport: boolean;
@@ -10,9 +12,9 @@ export declare class DeviceModeToolbar {
     _showDeviceScaleFactorSetting: Common.Settings.Setting<boolean>;
     _showUserAgentTypeSetting: Common.Settings.Setting<boolean>;
     _autoAdjustScaleSetting: Common.Settings.Setting<boolean>;
-    _lastMode: Map<EmulationModel.EmulatedDevices.EmulatedDevice, EmulationModel.EmulatedDevices.Mode>;
+    _lastMode: Map<EmulatedDevice, Mode>;
     _element: HTMLDivElement;
-    _emulatedDevicesList: EmulationModel.EmulatedDevices.EmulatedDevicesList;
+    _emulatedDevicesList: EmulatedDevicesList;
     _persistenceSetting: Common.Settings.Setting<{
         device: string;
         orientation: string;
@@ -35,12 +37,12 @@ export declare class DeviceModeToolbar {
     _updateHeightInput?: ((arg0: string) => void);
     _heightItem?: UI.Toolbar.ToolbarItem;
     _throttlingConditionsItem?: UI.Toolbar.ToolbarMenuButton;
-    _cachedModelType?: EmulationModel.DeviceModeModel.Type;
+    _cachedModelType?: Type;
     _cachedScale?: number;
-    _cachedModelDevice?: EmulationModel.EmulatedDevices.EmulatedDevice | null;
-    _cachedModelMode?: EmulationModel.EmulatedDevices.Mode | null;
-    constructor(model: EmulationModel.DeviceModeModel.DeviceModeModel, showMediaInspectorSetting: Common.Settings.Setting<boolean>, showRulersSetting: Common.Settings.Setting<boolean>);
-    _recordDeviceChange(device: EmulationModel.EmulatedDevices.EmulatedDevice, oldDevice: EmulationModel.EmulatedDevices.EmulatedDevice | null): void;
+    _cachedModelDevice?: EmulatedDevice | null;
+    _cachedModelMode?: Mode | null;
+    constructor(model: DeviceModeModel, showMediaInspectorSetting: Common.Settings.Setting<boolean>, showRulersSetting: Common.Settings.Setting<boolean>);
+    _recordDeviceChange(device: EmulatedDevice, oldDevice: EmulatedDevice | null): void;
     _createEmptyToolbarElement(): Element;
     _fillLeftToolbar(toolbar: UI.Toolbar.Toolbar): void;
     _fillMainToolbar(toolbar: UI.Toolbar.Toolbar): void;
@@ -59,12 +61,12 @@ export declare class DeviceModeToolbar {
     _appendOptionsMenuItems(contextMenu: UI.ContextMenu.ContextMenu): void;
     _reset(): void;
     _wrapToolbarItem(element: Element): UI.Toolbar.ToolbarItem;
-    _emulateDevice(device: EmulationModel.EmulatedDevices.EmulatedDevice): void;
+    _emulateDevice(device: EmulatedDevice): void;
     _switchToResponsive(): void;
-    _filterDevices(devices: EmulationModel.EmulatedDevices.EmulatedDevice[]): EmulationModel.EmulatedDevices.EmulatedDevice[];
-    _standardDevices(): EmulationModel.EmulatedDevices.EmulatedDevice[];
-    _customDevices(): EmulationModel.EmulatedDevices.EmulatedDevice[];
-    _allDevices(): EmulationModel.EmulatedDevices.EmulatedDevice[];
+    _filterDevices(devices: EmulatedDevice[]): EmulatedDevice[];
+    _standardDevices(): EmulatedDevice[];
+    _customDevices(): EmulatedDevice[];
+    _allDevices(): EmulatedDevice[];
     _appendDeviceMenuItems(contextMenu: UI.ContextMenu.ContextMenu): void;
     _deviceListChanged(this: DeviceModeToolbar): void;
     _updateDeviceScaleFactorVisibility(): void;

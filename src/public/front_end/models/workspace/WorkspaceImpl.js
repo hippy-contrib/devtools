@@ -150,9 +150,6 @@ export class WorkspaceImpl extends Common.ObjectWrapper.ObjectWrapper {
         }
         return workspaceInstance;
     }
-    static removeInstance() {
-        workspaceInstance = undefined;
-    }
     uiSourceCode(projectId, url) {
         const project = this._projects.get(projectId);
         return project ? project.uiSourceCodeForURL(url) : null;

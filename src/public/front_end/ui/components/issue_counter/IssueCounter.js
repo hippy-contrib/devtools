@@ -9,6 +9,18 @@ import * as LitHtml from '../../lit-html/lit-html.js';
 import issueCounterStyles from './issueCounter.css.js';
 const UIStrings = {
     /**
+     *@description A description for a kind of issue we display in the issues tab.
+     */
+    pageErrorIssue: 'A page error issue: the page is not working correctly',
+    /**
+     *@description A description for a kind of issue we display in the issues tab.
+     */
+    breakingChangeIssue: 'A breaking change issue: the page may stop working in an upcoming version of Chrome',
+    /**
+     *@description A description for a kind of issue we display in the issues tab.
+     */
+    improvementIssue: 'An improvement issue: there is an opportunity to improve the page',
+    /**
     *@description Label for link to Issues tab, specifying how many issues there are.
     */
     pageErrors: '{issueCount, plural, =1 {# page error} other {# page errors}}',
@@ -39,6 +51,16 @@ function toIconGroup({ iconName, color, width, height }, sizeOverride) {
     }
     return { iconName, iconColor: color, iconWidth: width, iconHeight: height };
 }
+export function getIssueKindDescription(issueKind) {
+    switch (issueKind) {
+        case IssuesManager.Issue.IssueKind.PageError:
+            return i18nString(UIStrings.pageErrorIssue);
+        case IssuesManager.Issue.IssueKind.BreakingChange:
+            return i18nString(UIStrings.breakingChangeIssue);
+        case IssuesManager.Issue.IssueKind.Improvement:
+            return i18nString(UIStrings.improvementIssue);
+    }
+}
 // @ts-ignore Remove this comment once Intl.ListFormat is in type defs.
 const listFormat = new Intl.ListFormat(navigator.language, { type: 'unit', style: 'short' });
 export function getIssueCountsEnumeration(issuesManager, omitEmpty = true) {
@@ -66,7 +88,6 @@ export class IssueCounter extends HTMLElement {
     issuesManager = undefined;
     accessibleName = undefined;
     throttlerTimeout;
-    compact = false;
     scheduleUpdate() {
         if (this.throttler) {
             this.throttler.schedule(async () => this.render());
@@ -85,7 +106,6 @@ export class IssueCounter extends HTMLElement {
         this.displayMode = data.displayMode ?? "OmitEmpty" /* OmitEmpty */;
         this.accessibleName = data.accessibleName;
         this.throttlerTimeout = data.throttlerTimeout;
-        this.compact = Boolean(data.compact);
         if (this.issuesManager !== data.issuesManager) {
             this.issuesManager?.removeEventListener("IssuesCountUpdated" /* IssuesCountUpdated */, this.scheduleUpdate, this);
             this.issuesManager = data.issuesManager;
@@ -102,13 +122,12 @@ export class IssueCounter extends HTMLElement {
     get data() {
         return {
             clickHandler: this.clickHandler,
-            leadingText: this.leadingText,
             tooltipCallback: this.tooltipCallback,
+            leadingText: this.leadingText,
             displayMode: this.displayMode,
+            issuesManager: this.issuesManager,
             accessibleName: this.accessibleName,
             throttlerTimeout: this.throttlerTimeout,
-            compact: this.compact,
-            issuesManager: this.issuesManager,
         };
     }
     render() {
@@ -155,7 +174,6 @@ export class IssueCounter extends HTMLElement {
             clickHandler: this.clickHandler,
             leadingText: this.leadingText,
             accessibleName: this.accessibleName,
-            compact: this.compact,
         };
         LitHtml.render(LitHtml.html `
         <icon-button .data=${data} .accessibleName="${this.accessibleName}"></icon-button>

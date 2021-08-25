@@ -15,5 +15,5 @@ container?.insertBefore(component, picker);
 picker?.addEventListener('input', e => {
     component.renderColor(e.target.value);
 });
-component.addEventListener(InlineEditor.ColorSwatch.ClickEvent.eventName, () => picker?.click());
+component.addEventListener('swatch-click', () => picker?.click());
 //# sourceMappingURL=change-color.js.map

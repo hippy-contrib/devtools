@@ -28,19 +28,19 @@ export class LogManager {
         }
     }
     logEntryAdded(event) {
-        const { logModel, entry } = event.data;
-        const target = logModel.target();
+        const data = event.data;
+        const target = data.logModel.target();
         const details = {
-            url: entry.url,
-            line: entry.lineNumber,
-            parameters: [entry.text, ...(entry.args ?? [])],
-            stackTrace: entry.stackTrace,
-            timestamp: entry.timestamp,
-            workerId: entry.workerId,
+            url: data.entry.url,
+            line: data.entry.lineNumber,
+            parameters: [data.entry.text, ...(data.entry.args ?? [])],
+            stackTrace: data.entry.stackTrace,
+            timestamp: data.entry.timestamp,
+            workerId: data.entry.workerId,
         };
-        const consoleMessage = new SDK.ConsoleModel.ConsoleMessage(target.model(SDK.RuntimeModel.RuntimeModel), entry.source, entry.level, entry.text, details);
-        if (entry.networkRequestId) {
-            NetworkLog.instance().associateConsoleMessageWithRequest(consoleMessage, entry.networkRequestId);
+        const consoleMessage = new SDK.ConsoleModel.ConsoleMessage(target.model(SDK.RuntimeModel.RuntimeModel), data.entry.source, data.entry.level, data.entry.text, details);
+        if (data.entry.networkRequestId) {
+            NetworkLog.instance().associateConsoleMessageWithRequest(consoleMessage, data.entry.networkRequestId);
         }
         if (consoleMessage.source === "worker" /* Worker */) {
             const workerId = consoleMessage.workerId || '';

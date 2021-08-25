@@ -94,6 +94,26 @@ export declare class Size {
     heightToMax(size: number | Size): Size;
     addHeight(size: number | Size): Size;
 }
+export declare class Insets {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    constructor(left: number, top: number, right: number, bottom: number);
+    isEqual(insets: Insets | null): boolean;
+}
+export declare class Rect {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    constructor(left: number, top: number, width: number, height: number);
+    isEqual(rect: Rect | null): boolean;
+    scale(scale: number): Rect;
+    size(): Size;
+    relativeTo(origin: Rect): Rect;
+    rebaseTo(origin: Rect): Rect;
+}
 export declare class Constraints {
     minimum: Size;
     preferred: Size;

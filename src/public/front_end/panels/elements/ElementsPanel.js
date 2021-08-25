@@ -264,8 +264,8 @@ export class ElementsPanel extends UI.Panel.Panel {
         const parentModel = domModel.parentModel();
         // Different frames will have different DOMModels, we only want to add the accessibility model
         // for the top level frame, as the accessibility tree does not yet support exploring IFrames.
-        if (this._accessibilityTreeView) {
-            this._accessibilityTreeView.wireToDOMModel(domModel);
+        if (!parentModel && this._accessibilityTreeView) {
+            this._accessibilityTreeView.setAccessibilityModel(domModel.target().model(SDK.AccessibilityModel.AccessibilityModel));
         }
         let treeOutline = parentModel ? ElementsTreeOutline.forDOMModel(parentModel) : null;
         if (!treeOutline) {

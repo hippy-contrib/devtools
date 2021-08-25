@@ -1,7 +1,7 @@
 import { RemoteObject } from './RemoteObject.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
-export declare class IOModel extends SDKModel<void> {
+export declare class IOModel extends SDKModel {
     constructor(target: Target);
     /**
      * @throws {!Error}

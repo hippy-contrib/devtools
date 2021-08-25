@@ -32,9 +32,6 @@ export class CSSWorkspaceBinding {
         }
         return cssWorkspaceBindingInstance;
     }
-    static removeInstance() {
-        cssWorkspaceBindingInstance = undefined;
-    }
     _getCSSModelInfo(cssModel) {
         return this._modelToInfo.get(cssModel);
     }

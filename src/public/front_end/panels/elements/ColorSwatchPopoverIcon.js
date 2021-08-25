@@ -104,7 +104,7 @@ export class ColorSwatchPopoverIcon {
         this._treeElement = treeElement;
         this._swatchPopoverHelper = swatchPopoverHelper;
         this._swatch = swatch;
-        this._swatch.addEventListener(InlineEditor.ColorSwatch.ClickEvent.eventName, this._iconClick.bind(this));
+        this._swatch.addEventListener('swatch-click', this._iconClick.bind(this));
         this._contrastInfo = null;
         this._boundSpectrumChanged = this._spectrumChanged.bind(this);
         this._boundOnScroll = this._onScroll.bind(this);

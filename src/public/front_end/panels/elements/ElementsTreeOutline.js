@@ -865,12 +865,12 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
         }
     }
     _attributeModified(event) {
-        const { node } = event.data;
+        const node = event.data.node;
         this._addUpdateRecord(node).attributeModified(event.data.name);
         this._updateModifiedNodesSoon();
     }
     _attributeRemoved(event) {
-        const { node } = event.data;
+        const node = event.data.node;
         this._addUpdateRecord(node).attributeRemoved(event.data.name);
         this._updateModifiedNodesSoon();
     }
@@ -889,9 +889,10 @@ export class ElementsTreeOutline extends UI.TreeOutline.TreeOutline {
         this._updateModifiedNodesSoon();
     }
     _nodeRemoved(event) {
-        const { node, parent } = event.data;
+        const node = event.data.node;
+        const parentNode = event.data.parent;
         this.resetClipboardIfNeeded(node);
-        this._addUpdateRecord(parent).nodeRemoved(node);
+        this._addUpdateRecord(parentNode).nodeRemoved(node);
         this._updateModifiedNodesSoon();
     }
     _childNodeCountUpdated(event) {

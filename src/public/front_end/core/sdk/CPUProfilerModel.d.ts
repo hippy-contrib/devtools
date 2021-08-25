@@ -4,7 +4,7 @@ import { DebuggerModel, Location } from './DebuggerModel.js';
 import type { RuntimeModel } from './RuntimeModel.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
-export declare class CPUProfilerModel extends SDKModel<EventTypes> implements ProtocolProxyApi.ProfilerDispatcher {
+export declare class CPUProfilerModel extends SDKModel implements ProtocolProxyApi.ProfilerDispatcher {
     _isRecording: boolean;
     _nextAnonymousConsoleProfileNumber: number;
     _anonymousConsoleProfileIdToTitle: Map<string, string>;
@@ -16,7 +16,7 @@ export declare class CPUProfilerModel extends SDKModel<EventTypes> implements Pr
     debuggerModel(): DebuggerModel;
     consoleProfileStarted({ id, location, title }: Protocol.Profiler.ConsoleProfileStartedEvent): void;
     consoleProfileFinished({ id, location, profile, title }: Protocol.Profiler.ConsoleProfileFinishedEvent): void;
-    private createEventDataFrom;
+    _dispatchProfileEvent(eventName: Events, id: string, scriptLocation: Protocol.Debugger.Location, title?: string, cpuProfile?: Protocol.Profiler.Profile): void;
     isRecordingProfile(): boolean;
     startRecording(): Promise<unknown>;
     stopRecording(): Promise<Protocol.Profiler.Profile | null>;
@@ -32,16 +32,10 @@ export declare enum Events {
     ConsoleProfileStarted = "ConsoleProfileStarted",
     ConsoleProfileFinished = "ConsoleProfileFinished"
 }
-export declare type EventTypes = {
-    [Events.ConsoleProfileStarted]: EventData;
-    [Events.ConsoleProfileFinished]: ProfileFinishedData;
-};
 export interface EventData {
     id: string;
     scriptLocation: Location;
     title: string;
+    cpuProfile?: Protocol.Profiler.Profile;
     cpuProfilerModel: CPUProfilerModel;
-}
-export interface ProfileFinishedData extends EventData {
-    cpuProfile: Protocol.Profiler.Profile;
 }

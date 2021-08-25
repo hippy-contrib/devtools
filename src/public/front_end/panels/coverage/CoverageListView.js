@@ -10,7 +10,6 @@ import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as Workspace from '../../models/workspace/workspace.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import coverageListViewStyles from './coverageListView.css.js';
 const UIStrings = {
     /**
     *@description Text that appears on a button for the css resource type filter.
@@ -126,6 +125,7 @@ export class CoverageListView extends UI.Widget.VBox {
         this._nodeForCoverageInfo = new Map();
         this._isVisibleFilter = isVisibleFilter;
         this._highlightRegExp = null;
+        this.registerRequiredCSS('panels/coverage/coverageListView.css');
         const columns = [
             { id: 'url', title: i18nString(UIStrings.url), width: '250px', fixedWidth: false, sortable: true },
             { id: 'type', title: i18nString(UIStrings.type), width: '45px', fixedWidth: true, sortable: true },
@@ -260,10 +260,6 @@ export class CoverageListView extends UI.Widget.VBox {
             return;
         }
         this._dataGrid.sortNodes(sortFunction, !this._dataGrid.isSortOrderAscending());
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([coverageListViewStyles]);
     }
 }
 let percentageFormatter = null;

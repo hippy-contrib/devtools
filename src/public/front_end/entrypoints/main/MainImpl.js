@@ -242,14 +242,11 @@ export class MainImpl {
         Root.Runtime.experiments.register('contrastIssues', 'Enable automatic contrast issue reporting via the Issues panel', undefined, 'https://developer.chrome.com/blog/new-in-devtools-90/#low-contrast');
         // New cookie features.
         Root.Runtime.experiments.register('experimentalCookieFeatures', 'Enable experimental cookie features');
-        // Hide Issues Feature.
-        Root.Runtime.experiments.register('hideIssuesFeature', 'Enable experimental hide issues menu');
-        // Localized DevTools, hide "locale selector" setting behind an experiment.
-        Root.Runtime.experiments.register(Root.Runtime.ExperimentName.LOCALIZED_DEVTOOLS, 'Enable localized DevTools');
         Root.Runtime.experiments.enableExperimentsByDefault([
-            Root.Runtime.ExperimentName.LOCALIZED_DEVTOOLS,
             'sourceOrderViewer',
         ]);
+        // Localized DevTools, hide "locale selector" setting behind an experiment.
+        Root.Runtime.experiments.register(Root.Runtime.ExperimentName.LOCALIZED_DEVTOOLS, 'Enable localized DevTools');
         Root.Runtime.experiments.cleanUpStaleExperiments();
         const enabledExperiments = Root.Runtime.Runtime.queryParam('enabledExperiments');
         if (enabledExperiments) {
@@ -310,7 +307,6 @@ export class MainImpl {
             forceNew: true,
             ensureFirst: true,
             showThirdPartyIssuesSetting: IssuesManager.Issue.getShowThirdPartyIssuesSetting(),
-            hideIssueSetting: IssuesManager.IssuesManager.getHideIssueByCodeSetting(),
         });
         IssuesManager.ContrastCheckTrigger.ContrastCheckTrigger.instance();
         // @ts-ignore layout test global

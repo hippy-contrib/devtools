@@ -8,10 +8,9 @@ import * as LitHtml from '../../lit-html/lit-html.js';
 import * as ComponentHelpers from '../helpers/helpers.js';
 import * as Coordinator from '../render_coordinator/render_coordinator.js';
 import dataGridStyles from './dataGrid.css.js';
-import { BodyCellFocusedEvent, ColumnHeaderClickEvent, ContextMenuHeaderResetClickEvent } from './DataGridEvents.js';
 const coordinator = Coordinator.RenderCoordinator.RenderCoordinator.instance();
 import { addColumnVisibilityCheckboxes, addSortableColumnItems } from './DataGridContextMenuUtils.js';
-import { calculateColumnWidthPercentageFromWeighting, calculateFirstFocusableCell, getRowEntryForColumnId, handleArrowKeyNavigation, renderCellValue } from './DataGridUtils.js';
+import { calculateColumnWidthPercentageFromWeighting, calculateFirstFocusableCell, ContextMenuHeaderResetClickEvent, getRowEntryForColumnId, handleArrowKeyNavigation, renderCellValue } from './DataGridUtils.js';
 import * as i18n from '../../../core/i18n/i18n.js';
 const UIStrings = {
     /**
@@ -29,6 +28,45 @@ const UIStrings = {
 };
 const str_ = i18n.i18n.registerUIStrings('ui/components/data_grid/DataGrid.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
+export class ColumnHeaderClickEvent extends Event {
+    data;
+    constructor(column, columnIndex) {
+        super('columnheaderclick');
+        this.data = {
+            column,
+            columnIndex,
+        };
+    }
+}
+export class NewUserFilterTextEvent extends Event {
+    data;
+    constructor(filterText) {
+        super('newuserfiltertext', {
+            composed: true,
+        });
+        this.data = {
+            filterText,
+        };
+    }
+}
+export class BodyCellFocusedEvent extends Event {
+    /**
+     * Although the DataGrid cares only about the focused cell, and has no concept
+     * of a focused row, many components that render a data grid want to know what
+     * row is active, so on the cell focused event we also send the row that the
+     * cell is part of.
+     */
+    data;
+    constructor(cell, row) {
+        super('cellfocused', {
+            composed: true,
+        });
+        this.data = {
+            cell,
+            row,
+        };
+    }
+}
 const KEYS_TREATED_AS_CLICKS = new Set([' ', 'Enter']);
 const ROW_HEIGHT_PIXELS = 18;
 const PADDING_ROWS_COUNT = 10;

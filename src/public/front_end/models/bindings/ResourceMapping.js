@@ -166,7 +166,7 @@ class ModelInfo {
         if (!binding) {
             return;
         }
-        await binding._styleSheetChanged(header, event.data.edit || null);
+        await binding._styleSheetChanged(header, event.data.edit);
     }
     _acceptsResource(resource) {
         const resourceType = resource.resourceType();
@@ -226,10 +226,12 @@ class ModelInfo {
         }
     }
     _frameWillNavigate(event) {
-        this._removeFrameResources(event.data);
+        const frame = event.data;
+        this._removeFrameResources(frame);
     }
     _frameDetached(event) {
-        this._removeFrameResources(event.data.frame);
+        const frame = event.data.frame;
+        this._removeFrameResources(frame);
     }
     _resetForTest() {
         for (const binding of this._bindings.values()) {

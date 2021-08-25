@@ -1,7 +1,7 @@
 // Copyright 2018 The Lighthouse Authors. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-import * as IntlMessageFormat from '../intl-messageformat/intl-messageformat.js';
+import i18nBundle from './i18n-bundle.js';
 const EMPTY_VALUES_OBJECT = {};
 /**
  * This class is usually created at module instantiation time and
@@ -79,7 +79,7 @@ export class LocalizedStringSet {
         // The requested string might not yet have been collected into en-US.json or
         // been translated yet. Fall back to the original TypeScript UIStrings message.
         const messageToTranslate = localeMessage ? localeMessage.message : message;
-        return new IntlMessageFormat.IntlMessageFormat(messageToTranslate, this.localeForFormatter, undefined, { ignoreTag: true });
+        return new i18nBundle.MessageFormat(messageToTranslate, this.localeForFormatter);
     }
     getSimpleLocalizedString(message) {
         const cachedSimpleString = this.cachedSimpleStrings.get(message);

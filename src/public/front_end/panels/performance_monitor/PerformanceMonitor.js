@@ -9,7 +9,6 @@ import * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as ThemeSupport from '../../ui/legacy/theme_support/theme_support.js';
-import performanceMonitorStyles from './performanceMonitor.css.js';
 const UIStrings = {
     /**
     *@description Aria accessible name in Performance Monitor of the Performance monitor tab
@@ -72,6 +71,7 @@ export class PerformanceMonitorImpl extends UI.Widget.HBox {
     _pollTimer;
     constructor() {
         super(true);
+        this.registerRequiredCSS('panels/performance_monitor/performanceMonitor.css');
         this.contentElement.classList.add('perfmon-pane');
         this._metricsBuffer = [];
         /** @const */
@@ -104,7 +104,6 @@ export class PerformanceMonitorImpl extends UI.Widget.HBox {
         if (!this._model) {
             return;
         }
-        this.registerCSSFiles([performanceMonitorStyles]);
         SDK.TargetManager.TargetManager.instance().addEventListener(SDK.TargetManager.Events.SuspendStateChanged, this._suspendStateChanged, this);
         this._model.enable();
         this._suspendStateChanged();

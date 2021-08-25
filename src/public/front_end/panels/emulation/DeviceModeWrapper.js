@@ -4,7 +4,7 @@
 import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import * as EmulationModel from '../../models/emulation/emulation.js';
+import { DeviceModeModel } from './DeviceModeModel.js';
 import { DeviceModeView } from './DeviceModeView.js';
 let deviceModeWrapperInstance;
 export class DeviceModeWrapper extends UI.Widget.VBox {
@@ -17,7 +17,7 @@ export class DeviceModeWrapper extends UI.Widget.VBox {
         this._inspectedPagePlaceholder = inspectedPagePlaceholder;
         this._deviceModeView = null;
         this._toggleDeviceModeAction = UI.ActionRegistry.ActionRegistry.instance().action('emulation.toggle-device-mode');
-        const model = EmulationModel.DeviceModeModel.DeviceModeModel.instance();
+        const model = DeviceModeModel.instance();
         this._showDeviceModeSetting = model.enabledSetting();
         this._showDeviceModeSetting.setRequiresUserAction(Boolean(Root.Runtime.Runtime.queryParam('hasOtherClients')));
         this._showDeviceModeSetting.addChangeListener(this._update.bind(this, false));

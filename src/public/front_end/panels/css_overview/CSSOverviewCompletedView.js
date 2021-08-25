@@ -11,7 +11,6 @@ import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import cssOverviewCompletedViewStyles from './cssOverviewCompletedView.css.js';
 import { Events } from './CSSOverviewController.js';
 import { CSSOverviewSidebarPanel } from './CSSOverviewSidebarPanel.js';
 const UIStrings = {
@@ -191,6 +190,7 @@ export class CSSOverviewCompletedView extends UI.Panel.PanelWithSidebar {
     _fragment;
     constructor(controller, target) {
         super('css_overview_completed_view');
+        this.registerRequiredCSS('panels/css_overview/cssOverviewCompletedView.css');
         this._controller = controller;
         this._formatter = new Intl.NumberFormat('en-US');
         this._mainContainer = new UI.SplitWidget.SplitWidget(true, true);
@@ -203,6 +203,7 @@ export class CSSOverviewCompletedView extends UI.Panel.PanelWithSidebar {
             }
         });
         // Dupe the styles into the main container because of the shadow root will prevent outer styles.
+        this._mainContainer.registerRequiredCSS('panels/css_overview/cssOverviewCompletedView.css');
         this._mainContainer.setMainWidget(this._resultsContainer);
         this._mainContainer.setSidebarWidget(this._elementContainer);
         this._mainContainer.setVertical(false);
@@ -236,8 +237,6 @@ export class CSSOverviewCompletedView extends UI.Panel.PanelWithSidebar {
     }
     wasShown() {
         super.wasShown();
-        this._mainContainer.registerCSSFiles([cssOverviewCompletedViewStyles]);
-        this.registerCSSFiles([cssOverviewCompletedViewStyles]);
         // TODO(paullewis): update the links in the panels in case source has been .
     }
     _sideBarItemSelected(event) {

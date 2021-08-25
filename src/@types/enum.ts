@@ -20,7 +20,7 @@ export const TunnelEvent = {
   AddDevice: 'tunnel_add_device',
   RemoveDevice: 'tunnel_remove_device',
   AppConnect: 'tunnel_app_connect',
-  appDisconnect: 'tunnel_app_disconnect',
+  AppDisconnect: 'tunnel_app_disconnect',
   ReceiveData: 'tunnel_recv_data',
 };
 

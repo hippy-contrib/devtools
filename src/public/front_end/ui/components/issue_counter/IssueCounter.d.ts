@@ -1,6 +1,8 @@
+import * as Common from '../../../core/common/common.js';
 import * as IssuesManager from '../../../models/issues_manager/issues_manager.js';
 import type * as IconButton from '../icon_button/icon_button.js';
 export declare function getIssueKindIconData(issueKind: IssuesManager.Issue.IssueKind): IconButton.Icon.IconWithName;
+export declare function getIssueKindDescription(issueKind: IssuesManager.Issue.IssueKind): Common.UIString.LocalizedString;
 export declare const enum DisplayMode {
     OmitEmpty = "OmitEmpty",
     ShowAlways = "ShowAlways",
@@ -14,7 +16,6 @@ export interface IssueCounterData {
     issuesManager: IssuesManager.IssuesManager.IssuesManager;
     throttlerTimeout?: number;
     accessibleName?: string;
-    compact?: boolean;
 }
 export declare function getIssueCountsEnumeration(issuesManager: IssuesManager.IssuesManager.IssuesManager, omitEmpty?: boolean): string;
 export declare class IssueCounter extends HTMLElement {
@@ -29,7 +30,6 @@ export declare class IssueCounter extends HTMLElement {
     private issuesManager;
     private accessibleName;
     private throttlerTimeout;
-    private compact;
     scheduleUpdate(): void;
     connectedCallback(): void;
     set data(data: IssueCounterData);

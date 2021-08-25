@@ -173,7 +173,9 @@ export class ThrottlingManager {
                     conditions.description === ThrottlingPresets.getCustomConditions().description) {
                     continue;
                 }
-                contextMenu.defaultSection().appendCheckboxItem(conditions.title, selector.optionSelected.bind(selector, conditions), selectedIndex === index);
+                contextMenu.defaultSection().appendCheckboxItem(
+                // eslint-disable-next-line rulesdir/l10n_i18nString_call_only_with_uistrings
+                i18nString(conditions.title), selector.optionSelected.bind(selector, conditions), selectedIndex === index);
             }
         }
         function populate(groups) {

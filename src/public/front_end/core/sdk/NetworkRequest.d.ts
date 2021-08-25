@@ -376,7 +376,6 @@ export interface ExtraResponseInfo {
     responseHeaders: NameValue[];
     responseHeadersText?: string;
     resourceIPAddressSpace: Protocol.Network.IPAddressSpace;
-    statusCode: number | undefined;
 }
 export interface WebBundleInfo {
     resourceUrls?: string[];

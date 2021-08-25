@@ -190,8 +190,8 @@ export class SourceFrameImpl extends UI.View.SimpleView {
         let newSelection;
         if (this._pretty) {
             const formatInfo = await this._requestFormattedContent();
-            this._formattedMap = formatInfo.formattedMapping;
-            this.setContent(formatInfo.formattedContent, null);
+            this._formattedMap = formatInfo.mapping;
+            this.setContent(formatInfo.content, null);
             this._prettyCleanGeneration = this._textEditor.markClean();
             const start = this._rawToPrettyLocation(selection.startLine, selection.startColumn);
             const end = this._rawToPrettyLocation(selection.endLine, selection.endColumn);

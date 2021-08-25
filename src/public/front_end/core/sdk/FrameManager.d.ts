@@ -26,12 +26,9 @@ export declare class FrameManager extends Common.ObjectWrapper.ObjectWrapper<Eve
     modelAdded(resourceTreeModel: ResourceTreeModel): void;
     modelRemoved(resourceTreeModel: ResourceTreeModel): void;
     _frameAdded(event: Common.EventTarget.EventTargetEvent<ResourceTreeFrame>): void;
-    _frameDetached(event: Common.EventTarget.EventTargetEvent<{
-        frame: ResourceTreeFrame;
-        isSwap: boolean;
-    }>): void;
+    _frameDetached(event: Common.EventTarget.EventTargetEvent): void;
     _frameNavigated(event: Common.EventTarget.EventTargetEvent): void;
-    _resourceAdded(event: Common.EventTarget.EventTargetEvent<Resource>): void;
+    _resourceAdded(event: Common.EventTarget.EventTargetEvent): void;
     _decreaseOrRemoveFrame(frameId: string): void;
     /**
      * Looks for the top frame in `_frames` and sets `_topFrame` accordingly.

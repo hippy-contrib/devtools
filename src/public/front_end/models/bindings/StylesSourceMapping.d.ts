@@ -13,12 +13,9 @@ export declare class StylesSourceMapping implements SourceMapping {
     rawLocationToUILocation(rawLocation: SDK.CSSModel.CSSLocation): Workspace.UISourceCode.UILocation | null;
     uiLocationToRawLocations(uiLocation: Workspace.UISourceCode.UILocation): SDK.CSSModel.CSSLocation[];
     _acceptsHeader(header: SDK.CSSStyleSheetHeader.CSSStyleSheetHeader): boolean;
-    _styleSheetAdded(event: Common.EventTarget.EventTargetEvent<SDK.CSSStyleSheetHeader.CSSStyleSheetHeader>): void;
-    _styleSheetRemoved(event: Common.EventTarget.EventTargetEvent<SDK.CSSStyleSheetHeader.CSSStyleSheetHeader>): void;
-    _styleSheetChanged(event: Common.EventTarget.EventTargetEvent<{
-        styleSheetId: string;
-        edit?: SDK.CSSModel.Edit;
-    }>): void;
+    _styleSheetAdded(event: Common.EventTarget.EventTargetEvent): void;
+    _styleSheetRemoved(event: Common.EventTarget.EventTargetEvent): void;
+    _styleSheetChanged(event: Common.EventTarget.EventTargetEvent): void;
     dispose(): void;
 }
 export declare class StyleFile implements TextUtils.ContentProvider.ContentProvider {

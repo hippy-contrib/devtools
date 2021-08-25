@@ -37,5 +37,4 @@ export declare class CSSOverviewPanel extends UI.Panel.Panel {
     _getStyleValue(styles: Protocol.CSS.CSSComputedStyleProperty[], name: string): string | undefined;
     _cancelOverview(): void;
     _overviewCompleted(): void;
-    wasShown(): void;
 }

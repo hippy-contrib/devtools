@@ -813,9 +813,11 @@ export var Events;
     Events["DebuggerPaused"] = "DebuggerPaused";
     Events["DebuggerResumed"] = "DebuggerResumed";
     Events["ParsedScriptSource"] = "ParsedScriptSource";
+    Events["FailedToParseScriptSource"] = "FailedToParseScriptSource";
     Events["DiscardedAnonymousScriptSource"] = "DiscardedAnonymousScriptSource";
     Events["GlobalObjectCleared"] = "GlobalObjectCleared";
     Events["CallFrameSelected"] = "CallFrameSelected";
+    Events["ConsoleCommandEvaluatedInSelectedCallFrame"] = "ConsoleCommandEvaluatedInSelectedCallFrame";
     Events["DebuggerIsReadyToPause"] = "DebuggerIsReadyToPause";
 })(Events || (Events = {}));
 class DebuggerDispatcher {

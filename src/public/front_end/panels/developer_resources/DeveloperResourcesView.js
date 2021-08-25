@@ -7,7 +7,6 @@ import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { DeveloperResourcesListView } from './DeveloperResourcesListView.js';
-import developerResourcesViewStyles from './developerResourcesView.css.js';
 const UIStrings = {
     /**
     *@description Placeholder for a search field in a toolbar
@@ -51,6 +50,7 @@ export class DeveloperResourcesView extends UI.Widget.VBox {
     _loader;
     constructor() {
         super(true);
+        this.registerRequiredCSS('panels/developer_resources/developerResourcesView.css');
         const toolbarContainer = this.contentElement.createChild('div', 'developer-resource-view-toolbar-container');
         const toolbar = new UI.Toolbar.Toolbar('developer-resource-view-toolbar', toolbarContainer);
         this._textFilterRegExp = null;
@@ -111,10 +111,6 @@ export class DeveloperResourcesView extends UI.Widget.VBox {
         this._textFilterRegExp = text ? createPlainTextSearchRegex(text, 'i') : null;
         this._listView.updateFilterAndHighlight(this._textFilterRegExp);
         this._updateStats();
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([developerResourcesViewStyles]);
     }
 }
 //# sourceMappingURL=DeveloperResourcesView.js.map

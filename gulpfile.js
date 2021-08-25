@@ -23,4 +23,4 @@ gulp.task('clean', () => {
   return gulp.src('dist', { read: false }).pipe(clean({ allowEmpty: true }));
 });
 
-gulp.task('default', gulp.series(['clean', 'mkdir', gulp.parallel(['compile', 'copy-resource'])]));
+gulp.task('default', gulp.series(['clean', 'mkdir', 'compile', 'copy-resource']));

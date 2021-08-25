@@ -58,8 +58,8 @@ export declare class NetworkPanel extends UI.Panel.Panel implements UI.ContextMe
     _toggleRecord(toggled: boolean): void;
     _filmStripAvailable(filmStripModel: SDK.FilmStripModel.FilmStripModel | null): void;
     _onNetworkLogReset(event: Common.EventTarget.EventTargetEvent): void;
-    _willReloadPage(): void;
-    _load(): void;
+    _willReloadPage(_event: Common.EventTarget.EventTargetEvent): void;
+    _load(_event: Common.EventTarget.EventTargetEvent): void;
     _stopFilmStripRecording(): void;
     _toggleLargerRequests(): void;
     _toggleShowOverview(): void;

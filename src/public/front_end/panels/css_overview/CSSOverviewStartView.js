@@ -4,7 +4,6 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import cssOverviewStartViewStyles from './cssOverviewStartView.css.js';
 import { Events } from './CSSOverviewController.js';
 const UIStrings = {
     /**
@@ -22,6 +21,7 @@ export class CSSOverviewStartView extends UI.Widget.Widget {
     _controller;
     constructor(controller) {
         super();
+        this.registerRequiredCSS('panels/css_overview/cssOverviewStartView.css');
         this._controller = controller;
         this._render();
     }
@@ -36,10 +36,6 @@ export class CSSOverviewStartView extends UI.Widget.Widget {
   `;
         this.contentElement.appendChild(fragment.element());
         this.contentElement.style.overflow = 'auto';
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([cssOverviewStartViewStyles]);
     }
 }
 //# sourceMappingURL=CSSOverviewStartView.js.map

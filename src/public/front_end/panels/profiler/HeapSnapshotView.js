@@ -1102,16 +1102,17 @@ export class HeapSnapshotProfileType extends ProfileType {
         if (!profile) {
             return;
         }
-        profile.transferChunk(event.data);
+        const chunk = event.data;
+        profile.transferChunk(chunk);
     }
     _reportHeapSnapshotProgress(event) {
         const profile = this.profileBeingRecorded();
         if (!profile) {
             return;
         }
-        const { done, total, finished } = event.data;
-        profile.updateStatus(i18nString(UIStrings.percentagePlaceholder, { PH1: ((done / total) * 100).toFixed(0) }), true);
-        if (finished) {
+        const data = event.data;
+        profile.updateStatus(i18nString(UIStrings.percentagePlaceholder, { PH1: ((data.done / data.total) * 100).toFixed(0) }), true);
+        if (data.finished) {
             profile._prepareToLoad();
         }
     }
@@ -1176,15 +1177,15 @@ export class TrackingHeapSnapshotProfileType extends HeapSnapshotProfileType {
         if (!profileSamples) {
             return;
         }
-        const { lastSeenObjectId, timestamp } = event.data;
+        const data = event.data;
         const currentIndex = Math.max(profileSamples.ids.length, profileSamples.max.length - 1);
-        profileSamples.ids[currentIndex] = lastSeenObjectId;
+        profileSamples.ids[currentIndex] = data.lastSeenObjectId;
         if (!profileSamples.max[currentIndex]) {
             profileSamples.max[currentIndex] = 0;
             profileSamples.sizes[currentIndex] = 0;
         }
-        profileSamples.timestamps[currentIndex] = timestamp;
-        if (profileSamples.totalTime < timestamp - profileSamples.timestamps[0]) {
+        profileSamples.timestamps[currentIndex] = data.timestamp;
+        if (profileSamples.totalTime < data.timestamp - profileSamples.timestamps[0]) {
             profileSamples.totalTime *= 2;
         }
         this.dispatchEventToListeners(TrackingHeapSnapshotProfileType.HeapStatsUpdate, this._profileSamples);

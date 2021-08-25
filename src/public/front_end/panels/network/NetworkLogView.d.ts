@@ -69,7 +69,6 @@ export declare class NetworkLogView extends UI.Widget.VBox implements SDK.Target
     static _interceptedByServiceWorkerFilter(request: SDK.NetworkRequest.NetworkRequest): boolean;
     static _initiatedByServiceWorkerFilter(request: SDK.NetworkRequest.NetworkRequest): boolean;
     static _requestResponseHeaderFilter(value: string, request: SDK.NetworkRequest.NetworkRequest): boolean;
-    static _requestResponseHeaderSetCookieFilter(value: string, request: SDK.NetworkRequest.NetworkRequest): boolean;
     static _requestMethodFilter(value: string, request: SDK.NetworkRequest.NetworkRequest): boolean;
     static _requestPriorityFilter(value: string, request: SDK.NetworkRequest.NetworkRequest): boolean;
     static _requestMimeTypeFilter(value: string, request: SDK.NetworkRequest.NetworkRequest): boolean;
@@ -127,11 +126,8 @@ export declare class NetworkLogView extends UI.Widget.VBox implements SDK.Target
     timeCalculator(): NetworkTimeCalculator;
     calculator(): NetworkTimeCalculator;
     setCalculator(x: NetworkTimeCalculator): void;
-    _loadEventFired(event: Common.EventTarget.EventTargetEvent<{
-        resourceTreeModel: SDK.ResourceTreeModel.ResourceTreeModel;
-        loadTime: number;
-    }>): void;
-    _domContentLoadedEventFired(event: Common.EventTarget.EventTargetEvent<number>): void;
+    _loadEventFired(event: Common.EventTarget.EventTargetEvent): void;
+    _domContentLoadedEventFired(event: Common.EventTarget.EventTargetEvent): void;
     wasShown(): void;
     willHide(): void;
     onResize(): void;

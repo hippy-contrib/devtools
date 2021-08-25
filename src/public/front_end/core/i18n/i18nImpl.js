@@ -79,20 +79,22 @@ export function registerUIStrings(path, stringStructure) {
  */
 export function getFormatLocalizedString(registeredStrings, stringId, placeholders) {
     const formatter = registeredStrings.getLocalizedStringSetFor(DevToolsLocale.instance().locale).getMessageFormatterFor(stringId);
-    const icuElements = formatter.getAst();
+    // We use wrong types temporarly where the version of intl-messageformat in third_party
+    // differs from the version part of i18n-bundle.
+    // TODO(crbug.com/1231873): Fix the usage of getAst() once all versions are aligned.
+    // @ts-ignore
+    const icuElements = formatter.getAst().elements;
     const args = [];
     let formattedString = '';
     for (const element of icuElements) {
-        if (element.type === /* argumentElement */ 1) {
-            const placeholderValue = placeholders[element.value];
+        if (element.type === 'argumentElement') {
+            const placeholderValue = placeholders[element.id];
             if (placeholderValue) {
                 args.push(placeholderValue);
                 element.value = '%s'; // convert the {PH} back to %s to use Platform.UIString
             }
         }
-        if ('value' in element) {
-            formattedString += element.value;
-        }
+        formattedString += element.value;
     }
     return formatLocalized(formattedString, args);
 }

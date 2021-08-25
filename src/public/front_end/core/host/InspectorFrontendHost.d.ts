@@ -2,7 +2,7 @@ import * as Common from '../common/common.js';
 import type { CanShowSurveyResult, ContextMenuDescriptor, EnumeratedHistogram, ExtensionDescriptor, InspectorFrontendHostAPI, LoadNetworkResourceResult, ShowSurveyResult } from './InspectorFrontendHostAPI.js';
 export declare class InspectorFrontendHostStub implements InspectorFrontendHostAPI {
     _urlsBeingSaved: Map<string, string[]>;
-    events: Common.EventTarget.EventTarget<any>;
+    events: Common.EventTarget.EventTarget<unknown>;
     _windowVisible?: boolean;
     constructor();
     platform(): string;

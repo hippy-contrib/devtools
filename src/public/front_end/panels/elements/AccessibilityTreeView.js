@@ -54,39 +54,27 @@ export class AccessibilityTreeView extends UI.Widget.VBox {
         if (this.selectedTreeNode) {
             this.accessibilityTreeComponent.expandToAndSelectTreeNode(this.selectedTreeNode);
         }
-        else {
-            // FIXME(jobay): enable once we have a stable way of expanding across reloads
-            // this.accessibilityTreeComponent.expandRecursively(2);
-            this.selectedTreeNode = this.treeData[0];
-        }
     }
     setAccessibilityModel(model) {
         this.accessibilityModel = model;
+        this.refreshAccessibilityTree();
     }
-    wireToDOMModel(domModel) {
-        domModel.addEventListener(SDK.DOMModel.Events.DocumentUpdated, this.documentUpdated, this);
-    }
-    unwireFromDOMModel(domModel) {
-        domModel.removeEventListener(SDK.DOMModel.Events.DocumentUpdated, this.documentUpdated, this);
-    }
-    documentUpdated(event) {
-        const domModel = event.data;
-        const axModel = domModel.target().model(SDK.AccessibilityModel.AccessibilityModel);
-        if (domModel.existingDocument() && !domModel.parentModel() && axModel) {
-            this.refreshAccessibilityTree(axModel);
+    async refreshAccessibilityTree() {
+        if (!this.accessibilityModel) {
+            return;
         }
-    }
-    async refreshAccessibilityTree(accessibilityModel) {
-        const root = await accessibilityModel.requestRootNode();
+        const root = await this.accessibilityModel.requestRootNode();
         if (!root) {
             return;
         }
         this.rootAXNode = root;
         this.treeData = [AccessibilityTreeUtils.sdkNodeToAXTreeNode(this.rootAXNode)];
         this.accessibilityTreeComponent.data = {
-            defaultRenderer: AccessibilityTreeUtils.accessibilityNodeRenderer,
+            defaultRenderer: (node) => AccessibilityTreeUtils.accessibilityNodeRenderer(node),
             tree: this.treeData,
         };
+        this.accessibilityTreeComponent.expandRecursively(2);
+        this.selectedTreeNode = this.treeData[0];
     }
     // Given a selected DOM node, asks the model to load the missing subtree from the root to the
     // selected node and then re-renders the tree.
@@ -112,7 +100,7 @@ export class AccessibilityTreeView extends UI.Widget.VBox {
             return;
         }
         this.accessibilityTreeComponent.data = {
-            defaultRenderer: AccessibilityTreeUtils.accessibilityNodeRenderer,
+            defaultRenderer: (node) => AccessibilityTreeUtils.accessibilityNodeRenderer(node),
             tree: this.treeData,
         };
         // These nodes require a special case, as they don't have an unignored node in the

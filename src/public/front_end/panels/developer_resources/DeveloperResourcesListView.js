@@ -9,7 +9,6 @@ import * as SDK from '../../core/sdk/sdk.js';
 import * as TextUtils from '../../models/text_utils/text_utils.js';
 import * as DataGrid from '../../ui/legacy/components/data_grid/data_grid.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import developerResourcesListViewStyles from './developerResourcesListView.css.js';
 const UIStrings = {
     /**
     *@description Text for the status of something
@@ -73,6 +72,7 @@ export class DeveloperResourcesListView extends UI.Widget.VBox {
         this._nodeForItem = new Map();
         this._isVisibleFilter = isVisibleFilter;
         this._highlightRegExp = null;
+        this.registerRequiredCSS('panels/developer_resources/developerResourcesListView.css');
         const columns = [
             { id: 'status', title: i18nString(UIStrings.status), width: '60px', fixedWidth: true, sortable: true },
             { id: 'url', title: i18nString(UIStrings.url), width: '250px', fixedWidth: false, sortable: true },
@@ -178,10 +178,6 @@ export class DeveloperResourcesListView extends UI.Widget.VBox {
         if (sortFunction) {
             this._dataGrid.sortNodes(sortFunction, !this._dataGrid.isSortOrderAscending());
         }
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([developerResourcesListViewStyles]);
     }
 }
 class GridNode extends DataGrid.SortableDataGrid.SortableDataGridNode {

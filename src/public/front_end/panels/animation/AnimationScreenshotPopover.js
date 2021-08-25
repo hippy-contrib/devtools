@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as UI from '../../ui/legacy/legacy.js';
-import animationScreenshotPopoverStyles from './animationScreenshotPopover.css.js';
 export class AnimationScreenshotPopover extends UI.Widget.VBox {
     _frames;
     _rafId;
@@ -14,6 +13,7 @@ export class AnimationScreenshotPopover extends UI.Widget.VBox {
     constructor(images) {
         super(true);
         console.assert(images.length > 0);
+        this.registerRequiredCSS('panels/animation/animationScreenshotPopover.css');
         this.contentElement.classList.add('animation-screenshot-popover');
         this._frames = images;
         for (const image of images) {
@@ -27,7 +27,6 @@ export class AnimationScreenshotPopover extends UI.Widget.VBox {
     }
     wasShown() {
         this._rafId = this.contentElement.window().requestAnimationFrame(this._changeFrame.bind(this));
-        this.registerCSSFiles([animationScreenshotPopoverStyles]);
     }
     willHide() {
         this.contentElement.window().cancelAnimationFrame(this._rafId);

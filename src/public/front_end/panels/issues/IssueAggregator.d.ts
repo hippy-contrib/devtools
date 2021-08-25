@@ -8,7 +8,6 @@ import type * as Protocol from '../../generated/protocol.js';
  */
 export declare class AggregatedIssue extends IssuesManager.Issue.Issue {
     private affectedCookies;
-    private affectedRawCookieLines;
     private affectedRequests;
     private affectedLocations;
     private heavyAdIssues;
@@ -28,10 +27,6 @@ export declare class AggregatedIssue extends IssuesManager.Issue.Issue {
     primaryKey(): string;
     getBlockedByResponseDetails(): Iterable<Protocol.Audits.BlockedByResponseIssueDetails>;
     cookies(): Iterable<Protocol.Audits.AffectedCookie>;
-    getRawCookieLines(): Iterable<{
-        rawCookieLine: string;
-        hasRequest: boolean;
-    }>;
     sources(): Iterable<Protocol.Audits.SourceCodeLocation>;
     cookiesWithRequestIndicator(): Iterable<{
         cookie: Protocol.Audits.AffectedCookie;
@@ -62,17 +57,14 @@ export declare class AggregatedIssue extends IssuesManager.Issue.Issue {
 export declare class IssueAggregator extends Common.ObjectWrapper.ObjectWrapper<EventTypes> {
     private readonly issuesManager;
     private readonly aggregatedIssuesByCode;
-    private readonly hiddenAggregatedIssuesByCode;
     constructor(issuesManager: IssuesManager.IssuesManager.IssuesManager);
     private onIssueAdded;
     private onFullUpdateRequired;
     private aggregateIssue;
-    private aggregateIssueByStatus;
     aggregatedIssues(): Iterable<AggregatedIssue>;
     aggregatedIssueCodes(): Set<string>;
     aggregatedIssueCategories(): Set<IssuesManager.Issue.IssueCategory>;
     numberOfAggregatedIssues(): number;
-    numberOfHiddenAggregatedIssues(): number;
 }
 export declare const enum Events {
     AggregatedIssueUpdated = "AggregatedIssueUpdated",

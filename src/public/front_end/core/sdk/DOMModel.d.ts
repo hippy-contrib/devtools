@@ -165,7 +165,7 @@ export declare class DOMDocument extends DOMNode {
     baseURL: string;
     constructor(domModel: DOMModel, payload: Protocol.DOM.Node);
 }
-export declare class DOMModel extends SDKModel<EventTypes> {
+export declare class DOMModel extends SDKModel {
     _agent: ProtocolProxyApi.DOMApi;
     _idToDOMNode: {
         [x: number]: DOMNode;
@@ -241,27 +241,6 @@ export declare enum Events {
     DistributedNodesChanged = "DistributedNodesChanged",
     MarkersChanged = "MarkersChanged"
 }
-export declare type EventTypes = {
-    [Events.AttrModified]: {
-        node: DOMNode;
-        name: string;
-    };
-    [Events.AttrRemoved]: {
-        node: DOMNode;
-        name: string;
-    };
-    [Events.CharacterDataModified]: DOMNode;
-    [Events.DOMMutated]: DOMNode;
-    [Events.NodeInserted]: DOMNode;
-    [Events.NodeRemoved]: {
-        node: DOMNode;
-        parent: DOMNode;
-    };
-    [Events.DocumentUpdated]: DOMModel;
-    [Events.ChildNodeCountUpdated]: DOMNode;
-    [Events.DistributedNodesChanged]: DOMNode;
-    [Events.MarkersChanged]: DOMNode;
-};
 export declare class DOMModelUndoStack {
     _stack: DOMModel[];
     _index: number;

@@ -35,7 +35,12 @@ export class IwdpAppClient extends AppClient {
 
   protected registerMessageListener() {
     this.ws.on('message', (msg: string) => {
-      const msgObj = JSON.parse(msg);
+      let msgObj;
+      try {
+        msgObj = JSON.parse(msg);
+      } catch (e) {
+        console.error(`parse json error: ${msg}`);
+      }
       this.onMessage(msgObj);
       const requestPromise = this.requestPromiseMap.get(msgObj.id);
       if (requestPromise) {

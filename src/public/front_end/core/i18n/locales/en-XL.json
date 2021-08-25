@@ -404,15 +404,6 @@
   "core/sdk/NetworkManager.ts | fastG": {
     "message": "F̂áŝt́ 3Ĝ"
   },
-  "core/sdk/NetworkManager.ts | noContentForPreflight": {
-    "message": "N̂ó ĉón̂t́êńt̂ áv̂áîĺâb́l̂é f̂ór̂ ṕr̂éf̂ĺîǵĥt́ r̂éq̂úêśt̂"
-  },
-  "core/sdk/NetworkManager.ts | noContentForRedirect": {
-    "message": "N̂ó ĉón̂t́êńt̂ áv̂áîĺâb́l̂é b̂éĉáûśê t́ĥíŝ ŕêq́ûéŝt́ ŵáŝ ŕêd́îŕêćt̂éd̂"
-  },
-  "core/sdk/NetworkManager.ts | noContentForWebSocket": {
-    "message": "Ĉón̂t́êńt̂ f́ôŕ Ŵéb̂Śôćk̂ét̂ś îś ĉúr̂ŕêńt̂ĺŷ ńôt́ ŝúp̂ṕôŕt̂éd̂"
-  },
   "core/sdk/NetworkManager.ts | noThrottling": {
     "message": "N̂ó t̂h́r̂ót̂t́l̂ín̂ǵ"
   },
@@ -1235,42 +1226,6 @@
   "models/bindings/ResourceScriptMapping.ts | liveEditFailed": {
     "message": "LiveEdit f̂áîĺêd́: {PH1}"
   },
-  "models/emulation/DeviceModeModel.ts | devicePixelRatioMustBeANumberOr": {
-    "message": "D̂év̂íĉé p̂íx̂él̂ ŕât́îó m̂úŝt́ b̂é â ńûḿb̂ér̂ ór̂ b́l̂án̂ḱ."
-  },
-  "models/emulation/DeviceModeModel.ts | devicePixelRatioMustBeGreater": {
-    "message": "D̂év̂íĉé p̂íx̂él̂ ŕât́îó m̂úŝt́ b̂é ĝŕêát̂ér̂ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}."
-  },
-  "models/emulation/DeviceModeModel.ts | devicePixelRatioMustBeLessThanOr": {
-    "message": "D̂év̂íĉé p̂íx̂él̂ ŕât́îó m̂úŝt́ b̂é l̂éŝś t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}."
-  },
-  "models/emulation/DeviceModeModel.ts | heightMustBeANumber": {
-    "message": "Ĥéîǵĥt́ m̂úŝt́ b̂é â ńûḿb̂ér̂."
-  },
-  "models/emulation/DeviceModeModel.ts | heightMustBeGreaterThanOrEqualTo": {
-    "message": "Ĥéîǵĥt́ m̂úŝt́ b̂é ĝŕêát̂ér̂ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}."
-  },
-  "models/emulation/DeviceModeModel.ts | heightMustBeLessThanOrEqualToS": {
-    "message": "Ĥéîǵĥt́ m̂úŝt́ b̂é l̂éŝś t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}."
-  },
-  "models/emulation/DeviceModeModel.ts | widthMustBeANumber": {
-    "message": "Ŵíd̂t́ĥ ḿûśt̂ b́ê á n̂úm̂b́êŕ."
-  },
-  "models/emulation/DeviceModeModel.ts | widthMustBeGreaterThanOrEqualToS": {
-    "message": "Ŵíd̂t́ĥ ḿûśt̂ b́ê ǵr̂éât́êŕ t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}."
-  },
-  "models/emulation/DeviceModeModel.ts | widthMustBeLessThanOrEqualToS": {
-    "message": "Ŵíd̂t́ĥ ḿûśt̂ b́ê ĺêśŝ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}."
-  },
-  "models/emulation/EmulatedDevices.ts | laptopWithHiDPIScreen": {
-    "message": "L̂áp̂t́ôṕ ŵít̂h́ ĤíD̂ṔÎ śĉŕêén̂"
-  },
-  "models/emulation/EmulatedDevices.ts | laptopWithMDPIScreen": {
-    "message": "L̂áp̂t́ôṕ ŵít̂h́ M̂D́P̂Í ŝćr̂éêń"
-  },
-  "models/emulation/EmulatedDevices.ts | laptopWithTouch": {
-    "message": "L̂áp̂t́ôṕ ŵít̂h́ t̂óûćĥ"
-  },
   "models/har/Writer.ts | collectingContent": {
     "message": "Ĉól̂ĺêćt̂ín̂ǵ ĉón̂t́êńt̂…"
   },
@@ -1310,15 +1265,6 @@
   "models/issues_manager/HeavyAdIssue.ts | handlingHeavyAdInterventions": {
     "message": "Ĥán̂d́l̂ín̂ǵ Ĥéâv́ŷ Ád̂ Ín̂t́êŕv̂én̂t́îón̂ś"
   },
-  "models/issues_manager/Issue.ts | breakingChangeIssue": {
-    "message": "Â b́r̂éâḱîńĝ ćĥán̂ǵê íŝśûé: t̂h́ê ṕâǵê ḿâý ŝt́ôṕ ŵór̂ḱîńĝ ín̂ án̂ úp̂ćôḿîńĝ v́êŕŝíôń ôf́ Ĉh́r̂óm̂é"
-  },
-  "models/issues_manager/Issue.ts | improvementIssue": {
-    "message": "Âń îḿp̂ŕôv́êḿêńt̂ íŝśûé: t̂h́êŕê íŝ án̂ óp̂ṕôŕt̂ún̂ít̂ý t̂ó îḿp̂ŕôv́ê t́ĥé p̂áĝé"
-  },
-  "models/issues_manager/Issue.ts | pageErrorIssue": {
-    "message": "Â ṕâǵê ér̂ŕôŕ îśŝúê: t́ĥé p̂áĝé îś n̂ót̂ ẃôŕk̂ín̂ǵ ĉór̂ŕêćt̂ĺŷ"
-  },
   "models/issues_manager/LowTextContrastIssue.ts | colorAndContrastAccessibility": {
     "message": "Ĉól̂ór̂ án̂d́ ĉón̂t́r̂áŝt́ âćĉéŝśîb́îĺît́ŷ"
   },
@@ -1350,7 +1296,7 @@
     "message": "Ĉh́âńĝéŝ t́ô q́ûál̂ít̂ý ĉŕît́êŕîá f̂ór̂ ṔŴÁŝ úŝín̂ǵ T̂ŕûśt̂éd̂ Ẃêb́ Âćt̂ív̂ít̂ý"
   },
   "models/issues_manager/WasmCrossOriginModuleSharingIssue.ts | linkTitle": {
-    "message": "R̂éŝt́r̂íĉt́îńĝ Ẃâśm̂ ḿôd́ûĺê śĥár̂ín̂ǵ t̂ó ŝám̂é-ôŕîǵîń"
+    "message": "Ŵáŝḿ ĉŕôśŝ-ór̂íĝín̂ ḿôd́ûĺê śĥár̂ín̂ǵ d̂ép̂ŕêćât́îón̂"
   },
   "models/logs/logs-meta.ts | clear": {
     "message": "ĉĺêár̂"
@@ -4151,8 +4097,8 @@
   "panels/elements/ElementsTreeElement.ts | copyXpath": {
     "message": "Ĉóp̂ý X̂Ṕât́ĥ"
   },
-  "panels/elements/ElementsTreeElement.ts | cut": {
-    "message": "Ĉút̂"
+  "panels/elements/ElementsTreeElement.ts | cutElement": {
+    "message": "Ĉút̂ él̂ém̂én̂t́"
   },
   "panels/elements/ElementsTreeElement.ts | deleteElement": {
     "message": "D̂él̂ét̂é êĺêḿêńt̂"
@@ -4199,8 +4145,8 @@
   "panels/elements/ElementsTreeElement.ts | hideElement": {
     "message": "Ĥíd̂é êĺêḿêńt̂"
   },
-  "panels/elements/ElementsTreeElement.ts | paste": {
-    "message": "P̂áŝt́ê"
+  "panels/elements/ElementsTreeElement.ts | pasteElement": {
+    "message": "P̂áŝt́ê él̂ém̂én̂t́"
   },
   "panels/elements/ElementsTreeElement.ts | scrollIntoView": {
     "message": "Ŝćr̂ól̂ĺ îńt̂ó v̂íêẃ"
@@ -4457,6 +4403,33 @@
   "panels/emulation/components/UserAgentClientHintsForm.ts | version": {
     "message": "V̂ér̂śîón̂"
   },
+  "panels/emulation/DeviceModeModel.ts | devicePixelRatioMustBeANumberOr": {
+    "message": "D̂év̂íĉé p̂íx̂él̂ ŕât́îó m̂úŝt́ b̂é â ńûḿb̂ér̂ ór̂ b́l̂án̂ḱ."
+  },
+  "panels/emulation/DeviceModeModel.ts | devicePixelRatioMustBeGreater": {
+    "message": "D̂év̂íĉé p̂íx̂él̂ ŕât́îó m̂úŝt́ b̂é ĝŕêát̂ér̂ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}."
+  },
+  "panels/emulation/DeviceModeModel.ts | devicePixelRatioMustBeLessThanOr": {
+    "message": "D̂év̂íĉé p̂íx̂él̂ ŕât́îó m̂úŝt́ b̂é l̂éŝś t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}."
+  },
+  "panels/emulation/DeviceModeModel.ts | heightMustBeANumber": {
+    "message": "Ĥéîǵĥt́ m̂úŝt́ b̂é â ńûḿb̂ér̂."
+  },
+  "panels/emulation/DeviceModeModel.ts | heightMustBeGreaterThanOrEqualTo": {
+    "message": "Ĥéîǵĥt́ m̂úŝt́ b̂é ĝŕêát̂ér̂ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}."
+  },
+  "panels/emulation/DeviceModeModel.ts | heightMustBeLessThanOrEqualToS": {
+    "message": "Ĥéîǵĥt́ m̂úŝt́ b̂é l̂éŝś t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}."
+  },
+  "panels/emulation/DeviceModeModel.ts | widthMustBeANumber": {
+    "message": "Ŵíd̂t́ĥ ḿûśt̂ b́ê á n̂úm̂b́êŕ."
+  },
+  "panels/emulation/DeviceModeModel.ts | widthMustBeGreaterThanOrEqualToS": {
+    "message": "Ŵíd̂t́ĥ ḿûśt̂ b́ê ǵr̂éât́êŕ t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}."
+  },
+  "panels/emulation/DeviceModeModel.ts | widthMustBeLessThanOrEqualToS": {
+    "message": "Ŵíd̂t́ĥ ḿûśt̂ b́ê ĺêśŝ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}."
+  },
   "panels/emulation/DeviceModeToolbar.ts | addDevicePixelRatio": {
     "message": "Âd́d̂ d́êv́îćê ṕîx́êĺ r̂át̂íô"
   },
@@ -4477,9 +4450,6 @@
   },
   "panels/emulation/DeviceModeToolbar.ts | deviceType": {
     "message": "D̂év̂íĉé t̂ýp̂é"
-  },
-  "panels/emulation/DeviceModeToolbar.ts | dimensions": {
-    "message": "D̂ím̂én̂śîón̂ś"
   },
   "panels/emulation/DeviceModeToolbar.ts | edit": {
     "message": "Êd́ît́…"
@@ -4607,6 +4577,18 @@
   "panels/emulation/DevicesSettingsTab.ts | width": {
     "message": "Ŵíd̂t́ĥ"
   },
+  "panels/emulation/EmulatedDevices.ts | laptopWithHiDPIScreen": {
+    "message": "L̂áp̂t́ôṕ ŵít̂h́ ĤíD̂ṔÎ śĉŕêén̂"
+  },
+  "panels/emulation/EmulatedDevices.ts | laptopWithMDPIScreen": {
+    "message": "L̂áp̂t́ôṕ ŵít̂h́ M̂D́P̂Í ŝćr̂éêń"
+  },
+  "panels/emulation/EmulatedDevices.ts | laptopWithTouch": {
+    "message": "L̂áp̂t́ôṕ ŵít̂h́ t̂óûćĥ"
+  },
+  "panels/emulation/emulation-meta.ts | accelerometer": {
+    "message": "âćĉél̂ér̂óm̂ét̂ér̂"
+  },
   "panels/emulation/emulation-meta.ts | captureFullSizeScreenshot": {
     "message": "Ĉáp̂t́ûŕê f́ûĺl̂ śîźê śĉŕêén̂śĥót̂"
   },
@@ -4619,8 +4601,23 @@
   "panels/emulation/emulation-meta.ts | device": {
     "message": "d̂év̂íĉé"
   },
+  "panels/emulation/emulation-meta.ts | devicebased": {
+    "message": "D̂év̂íĉé-b̂áŝéd̂"
+  },
+  "panels/emulation/emulation-meta.ts | deviceOrientation": {
+    "message": "d̂év̂íĉé ôŕîén̂t́ât́îón̂"
+  },
   "panels/emulation/emulation-meta.ts | devices": {
     "message": "D̂év̂íĉéŝ"
+  },
+  "panels/emulation/emulation-meta.ts | emulateIdleDetectorState": {
+    "message": "Êḿûĺât́ê Íd̂ĺê D́êt́êćt̂ór̂ śt̂át̂é"
+  },
+  "panels/emulation/emulation-meta.ts | forceEnabled": {
+    "message": "F̂ór̂ćê én̂áb̂ĺêd́"
+  },
+  "panels/emulation/emulation-meta.ts | geolocation": {
+    "message": "ĝéôĺôćât́îón̂"
   },
   "panels/emulation/emulation-meta.ts | hideDeviceFrame": {
     "message": "Ĥíd̂é d̂év̂íĉé f̂ŕâḿê"
@@ -4631,11 +4628,29 @@
   "panels/emulation/emulation-meta.ts | hideRulers": {
     "message": "Ĥíd̂é r̂úl̂ér̂ś"
   },
+  "panels/emulation/emulation-meta.ts | locale": {
+    "message": "l̂óĉál̂é"
+  },
+  "panels/emulation/emulation-meta.ts | locales": {
+    "message": "l̂óĉál̂éŝ"
+  },
+  "panels/emulation/emulation-meta.ts | locations": {
+    "message": "L̂óĉát̂íôńŝ"
+  },
+  "panels/emulation/emulation-meta.ts | noIdleEmulation": {
+    "message": "N̂ó îd́l̂é êḿûĺât́îón̂"
+  },
+  "panels/emulation/emulation-meta.ts | sensors": {
+    "message": "Ŝén̂śôŕŝ"
+  },
   "panels/emulation/emulation-meta.ts | showDeviceFrame": {
     "message": "Ŝh́ôẃ d̂év̂íĉé f̂ŕâḿê"
   },
   "panels/emulation/emulation-meta.ts | showDevices": {
     "message": "Ŝh́ôẃ D̂év̂íĉéŝ"
+  },
+  "panels/emulation/emulation-meta.ts | showLocations": {
+    "message": "Ŝh́ôẃ L̂óĉát̂íôńŝ"
   },
   "panels/emulation/emulation-meta.ts | showMediaQueries": {
     "message": "Ŝh́ôẃ m̂éd̂íâ q́ûér̂íêś"
@@ -4643,11 +4658,188 @@
   "panels/emulation/emulation-meta.ts | showRulers": {
     "message": "Ŝh́ôẃ r̂úl̂ér̂ś"
   },
+  "panels/emulation/emulation-meta.ts | showSensors": {
+    "message": "Ŝh́ôẃ Ŝén̂śôŕŝ"
+  },
+  "panels/emulation/emulation-meta.ts | timezones": {
+    "message": "t̂ím̂éẑón̂éŝ"
+  },
   "panels/emulation/emulation-meta.ts | toggleDeviceToolbar": {
     "message": "T̂óĝǵl̂é d̂év̂íĉé t̂óôĺb̂ár̂"
   },
+  "panels/emulation/emulation-meta.ts | touch": {
+    "message": "T̂óûćĥ"
+  },
+  "panels/emulation/emulation-meta.ts | userActiveScreenLocked": {
+    "message": "Ûśêŕ âćt̂ív̂é, ŝćr̂éêń l̂óĉḱêd́"
+  },
+  "panels/emulation/emulation-meta.ts | userActiveScreenUnlocked": {
+    "message": "Ûśêŕ âćt̂ív̂é, ŝćr̂éêń ûńl̂óĉḱêd́"
+  },
+  "panels/emulation/emulation-meta.ts | userIdleScreenLocked": {
+    "message": "Ûśêŕ îd́l̂é, ŝćr̂éêń l̂óĉḱêd́"
+  },
+  "panels/emulation/emulation-meta.ts | userIdleScreenUnlocked": {
+    "message": "Ûśêŕ îd́l̂é, ŝćr̂éêń ûńl̂óĉḱêd́"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | addLocation": {
+    "message": "Âd́d̂ ĺôćât́îón̂..."
+  },
+  "panels/emulation/LocationsSettingsTab.ts | customLocations": {
+    "message": "Ĉúŝt́ôḿ l̂óĉát̂íôńŝ"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | lat": {
+    "message": "L̂át̂"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | latitude": {
+    "message": "L̂át̂ít̂úd̂é"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | latitudeMustBeANumber": {
+    "message": "L̂át̂ít̂úd̂é m̂úŝt́ b̂é â ńûḿb̂ér̂"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | latitudeMustBeGreaterThanOrEqual": {
+    "message": "L̂át̂ít̂úd̂é m̂úŝt́ b̂é ĝŕêát̂ér̂ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | latitudeMustBeLessThanOrEqualToS": {
+    "message": "L̂át̂ít̂úd̂é m̂úŝt́ b̂é l̂éŝś t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | locale": {
+    "message": "L̂óĉál̂é"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | localeMustContainAlphabetic": {
+    "message": "L̂óĉál̂é m̂úŝt́ ĉón̂t́âín̂ ál̂ṕĥáb̂ét̂íĉ ćĥár̂áĉt́êŕŝ"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | locationName": {
+    "message": "L̂óĉát̂íôń n̂ám̂é"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | locationNameCannotBeEmpty": {
+    "message": "L̂óĉát̂íôń n̂ám̂é ĉán̂ńôt́ b̂é êḿp̂t́ŷ"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | locationNameMustBeLessThanS": {
+    "message": "L̂óĉát̂íôń n̂ám̂é m̂úŝt́ b̂é l̂éŝś t̂h́âń {PH1} ĉh́âŕâćt̂ér̂ś"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | long": {
+    "message": "L̂ón̂ǵ"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | longitude": {
+    "message": "L̂ón̂ǵît́ûd́ê"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | longitudeMustBeANumber": {
+    "message": "L̂ón̂ǵît́ûd́ê ḿûśt̂ b́ê á n̂úm̂b́êŕ"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | longitudeMustBeGreaterThanOr": {
+    "message": "L̂ón̂ǵît́ûd́ê ḿûśt̂ b́ê ǵr̂éât́êŕ t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | longitudeMustBeLessThanOrEqualTo": {
+    "message": "L̂ón̂ǵît́ûd́ê ḿûśt̂ b́ê ĺêśŝ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | timezoneId": {
+    "message": "T̂ím̂éẑón̂é ÎD́"
+  },
+  "panels/emulation/LocationsSettingsTab.ts | timezoneIdMustContainAlphabetic": {
+    "message": "T̂ím̂éẑón̂é ÎD́ m̂úŝt́ ĉón̂t́âín̂ ál̂ṕĥáb̂ét̂íĉ ćĥár̂áĉt́êŕŝ"
+  },
   "panels/emulation/MediaQueryInspector.ts | revealInSourceCode": {
     "message": "R̂év̂éâĺ îń ŝóûŕĉé ĉód̂é"
+  },
+  "panels/emulation/SensorsView.ts | adjustWithMousewheelOrUpdownKeys": {
+    "message": "Âd́ĵúŝt́ ŵít̂h́ m̂óûśêẃĥéêĺ ôŕ ûṕ/d̂óŵń k̂éŷś. {PH1}: ±10, Ŝh́îf́t̂: ±1, Ál̂t́: ±0.01"
+  },
+  "panels/emulation/SensorsView.ts | alpha": {
+    "message": "α (âĺp̂h́â)"
+  },
+  "panels/emulation/SensorsView.ts | beta": {
+    "message": "β (b̂ét̂á)"
+  },
+  "panels/emulation/SensorsView.ts | customOrientation": {
+    "message": "Ĉúŝt́ôḿ ôŕîén̂t́ât́îón̂"
+  },
+  "panels/emulation/SensorsView.ts | deviceOrientationSetToAlphaSBeta": {
+    "message": "D̂év̂íĉé ôŕîén̂t́ât́îón̂ śêt́ t̂ó âĺp̂h́â: {PH1}, b́êt́â: {PH2}, ǵâḿm̂á: {PH3}"
+  },
+  "panels/emulation/SensorsView.ts | displayDown": {
+    "message": "D̂íŝṕl̂áŷ d́ôẃn̂"
+  },
+  "panels/emulation/SensorsView.ts | displayUp": {
+    "message": "D̂íŝṕl̂áŷ úp̂"
+  },
+  "panels/emulation/SensorsView.ts | enableOrientationToRotate": {
+    "message": "Êńâb́l̂é ôŕîén̂t́ât́îón̂ t́ô ŕôt́ât́ê"
+  },
+  "panels/emulation/SensorsView.ts | error": {
+    "message": "Êŕr̂ór̂"
+  },
+  "panels/emulation/SensorsView.ts | forcesSelectedIdleStateEmulation": {
+    "message": "F̂ór̂ćêś ŝél̂éĉt́êd́ îd́l̂é ŝt́ât́ê ém̂úl̂át̂íôń"
+  },
+  "panels/emulation/SensorsView.ts | forcesTouchInsteadOfClick": {
+    "message": "F̂ór̂ćêś t̂óûćĥ ín̂śt̂éâd́ ôf́ ĉĺîćk̂"
+  },
+  "panels/emulation/SensorsView.ts | gamma": {
+    "message": "γ (ĝám̂ḿâ)"
+  },
+  "panels/emulation/SensorsView.ts | landscapeLeft": {
+    "message": "L̂án̂d́ŝćâṕê ĺêf́t̂"
+  },
+  "panels/emulation/SensorsView.ts | landscapeRight": {
+    "message": "L̂án̂d́ŝćâṕê ŕîǵĥt́"
+  },
+  "panels/emulation/SensorsView.ts | latitude": {
+    "message": "L̂át̂ít̂úd̂é"
+  },
+  "panels/emulation/SensorsView.ts | locale": {
+    "message": "L̂óĉál̂é"
+  },
+  "panels/emulation/SensorsView.ts | location": {
+    "message": "L̂óĉát̂íôń"
+  },
+  "panels/emulation/SensorsView.ts | locationUnavailable": {
+    "message": "L̂óĉát̂íôń ûńâv́âíl̂áb̂ĺê"
+  },
+  "panels/emulation/SensorsView.ts | longitude": {
+    "message": "L̂ón̂ǵît́ûd́ê"
+  },
+  "panels/emulation/SensorsView.ts | manage": {
+    "message": "M̂án̂áĝé"
+  },
+  "panels/emulation/SensorsView.ts | manageTheListOfLocations": {
+    "message": "M̂án̂áĝé t̂h́ê ĺîśt̂ óf̂ ĺôćât́îón̂ś"
+  },
+  "panels/emulation/SensorsView.ts | noOverride": {
+    "message": "N̂ó ôv́êŕr̂íd̂é"
+  },
+  "panels/emulation/SensorsView.ts | off": {
+    "message": "Ôf́f̂"
+  },
+  "panels/emulation/SensorsView.ts | orientation": {
+    "message": "Ôŕîén̂t́ât́îón̂"
+  },
+  "panels/emulation/SensorsView.ts | other": {
+    "message": "Ôt́ĥér̂…"
+  },
+  "panels/emulation/SensorsView.ts | overrides": {
+    "message": "Ôv́êŕr̂íd̂éŝ"
+  },
+  "panels/emulation/SensorsView.ts | portrait": {
+    "message": "P̂ór̂t́r̂áît́"
+  },
+  "panels/emulation/SensorsView.ts | portraitUpsideDown": {
+    "message": "P̂ór̂t́r̂áît́ ûṕŝíd̂é d̂óŵń"
+  },
+  "panels/emulation/SensorsView.ts | presets": {
+    "message": "P̂ŕêśêt́ŝ"
+  },
+  "panels/emulation/SensorsView.ts | reset": {
+    "message": "R̂éŝét̂"
+  },
+  "panels/emulation/SensorsView.ts | resetDeviceOrientation": {
+    "message": "R̂éŝét̂ d́êv́îćê ór̂íêńt̂át̂íôń"
+  },
+  "panels/emulation/SensorsView.ts | shiftdragHorizontallyToRotate": {
+    "message": "Ŝh́îf́t̂+d́r̂áĝ h́ôŕîźôńt̂ál̂ĺŷ t́ô ŕôt́ât́ê ár̂óûńd̂ t́ĥé ŷ-áx̂íŝ"
+  },
+  "panels/emulation/SensorsView.ts | timezoneId": {
+    "message": "T̂ím̂éẑón̂é ÎD́"
   },
   "panels/event_listeners/EventListenersView.ts | deleteEventListener": {
     "message": "D̂él̂ét̂é êv́êńt̂ ĺîśt̂én̂ér̂"
@@ -4742,17 +4934,11 @@
   "panels/issues/AffectedCookiesView.ts | domain": {
     "message": "D̂óm̂áîń"
   },
-  "panels/issues/AffectedCookiesView.ts | filterSetCookieTitle": {
-    "message": "Ŝh́ôẃ n̂ét̂ẃôŕk̂ ŕêq́ûéŝt́ŝ t́ĥát̂ ín̂ćl̂úd̂é t̂h́îś Set-Cookie ĥéâd́êŕ îń t̂h́ê ńêt́ŵór̂ḱ p̂án̂él̂"
-  },
   "panels/issues/AffectedCookiesView.ts | name": {
     "message": "N̂ám̂é"
   },
   "panels/issues/AffectedCookiesView.ts | nCookies": {
     "message": "{n, plural, =1 {# ĉóôḱîé} other {# ĉóôḱîéŝ}}"
-  },
-  "panels/issues/AffectedCookiesView.ts | nRawCookieLines": {
-    "message": "{n, plural, =1 {1 R̂áŵ Set-Cookie h́êád̂ér̂} other {# Ŕâẃ Set-Cookie ĥéâd́êŕŝ}}"
   },
   "panels/issues/AffectedCookiesView.ts | path": {
     "message": "P̂át̂h́"
@@ -4922,12 +5108,6 @@
   "panels/issues/AttributionReportingIssueDetailsView.ts | untrustworthyOrigin": {
     "message": "Ûńt̂ŕûśt̂ẃôŕt̂h́ŷ ór̂íĝín̂"
   },
-  "panels/issues/components/HideIssuesMenu.ts | hideIssueByCode": {
-    "message": "Ĥíd̂é îśŝúêś l̂ík̂é t̂h́îś"
-  },
-  "panels/issues/components/HideIssuesMenu.ts | tooltipTitle": {
-    "message": "Ĥíd̂é îśŝúêś m̂én̂ú"
-  },
   "panels/issues/CorsIssueDetailsView.ts | allowCredentialsValueFromHeader": {
     "message": "Access-Control-Allow-Credentials Ĥéâd́êŕ V̂ál̂úê"
   },
@@ -5071,9 +5251,6 @@
   },
   "panels/issues/IssuesPane.ts | trustedWebActivity": {
     "message": "T̂ŕûśt̂éd̂ Ẃêb́ Âćt̂ív̂ít̂ý"
-  },
-  "panels/issues/IssuesPane.ts | unHideAllHiddenIssues": {
-    "message": "Ûńĥíd̂é âĺl̂ h́îd́d̂én̂ íŝśûéŝ"
   },
   "panels/issues/IssueView.ts | affectedResources": {
     "message": "Âf́f̂éĉt́êd́ R̂éŝóûŕĉéŝ"
@@ -8177,219 +8354,6 @@
   "panels/security/SecurityPanel.ts | yourPageRequestedNonsecure": {
     "message": "Ŷóûŕ p̂áĝé r̂éq̂úêśt̂éd̂ ńôń-ŝéĉúr̂é r̂éŝóûŕĉéŝ t́ĥát̂ ẃêŕê b́l̂óĉḱêd́."
   },
-  "panels/sensors/LocationsSettingsTab.ts | addLocation": {
-    "message": "Âd́d̂ ĺôćât́îón̂..."
-  },
-  "panels/sensors/LocationsSettingsTab.ts | customLocations": {
-    "message": "Ĉúŝt́ôḿ l̂óĉát̂íôńŝ"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | lat": {
-    "message": "L̂át̂"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | latitude": {
-    "message": "L̂át̂ít̂úd̂é"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | latitudeMustBeANumber": {
-    "message": "L̂át̂ít̂úd̂é m̂úŝt́ b̂é â ńûḿb̂ér̂"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | latitudeMustBeGreaterThanOrEqual": {
-    "message": "L̂át̂ít̂úd̂é m̂úŝt́ b̂é ĝŕêát̂ér̂ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | latitudeMustBeLessThanOrEqualToS": {
-    "message": "L̂át̂ít̂úd̂é m̂úŝt́ b̂é l̂éŝś t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | locale": {
-    "message": "L̂óĉál̂é"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | localeMustContainAlphabetic": {
-    "message": "L̂óĉál̂é m̂úŝt́ ĉón̂t́âín̂ ál̂ṕĥáb̂ét̂íĉ ćĥár̂áĉt́êŕŝ"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | locationName": {
-    "message": "L̂óĉát̂íôń n̂ám̂é"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | locationNameCannotBeEmpty": {
-    "message": "L̂óĉát̂íôń n̂ám̂é ĉán̂ńôt́ b̂é êḿp̂t́ŷ"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | locationNameMustBeLessThanS": {
-    "message": "L̂óĉát̂íôń n̂ám̂é m̂úŝt́ b̂é l̂éŝś t̂h́âń {PH1} ĉh́âŕâćt̂ér̂ś"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | long": {
-    "message": "L̂ón̂ǵ"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | longitude": {
-    "message": "L̂ón̂ǵît́ûd́ê"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | longitudeMustBeANumber": {
-    "message": "L̂ón̂ǵît́ûd́ê ḿûśt̂ b́ê á n̂úm̂b́êŕ"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | longitudeMustBeGreaterThanOr": {
-    "message": "L̂ón̂ǵît́ûd́ê ḿûśt̂ b́ê ǵr̂éât́êŕ t̂h́âń ôŕ êq́ûál̂ t́ô {PH1}"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | longitudeMustBeLessThanOrEqualTo": {
-    "message": "L̂ón̂ǵît́ûd́ê ḿûśt̂ b́ê ĺêśŝ t́ĥán̂ ór̂ éq̂úâĺ t̂ó {PH1}"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | timezoneId": {
-    "message": "T̂ím̂éẑón̂é ÎD́"
-  },
-  "panels/sensors/LocationsSettingsTab.ts | timezoneIdMustContainAlphabetic": {
-    "message": "T̂ím̂éẑón̂é ÎD́ m̂úŝt́ ĉón̂t́âín̂ ál̂ṕĥáb̂ét̂íĉ ćĥár̂áĉt́êŕŝ"
-  },
-  "panels/sensors/sensors-meta.ts | accelerometer": {
-    "message": "âćĉél̂ér̂óm̂ét̂ér̂"
-  },
-  "panels/sensors/sensors-meta.ts | devicebased": {
-    "message": "D̂év̂íĉé-b̂áŝéd̂"
-  },
-  "panels/sensors/sensors-meta.ts | deviceOrientation": {
-    "message": "d̂év̂íĉé ôŕîén̂t́ât́îón̂"
-  },
-  "panels/sensors/sensors-meta.ts | emulateIdleDetectorState": {
-    "message": "Êḿûĺât́ê Íd̂ĺê D́êt́êćt̂ór̂ śt̂át̂é"
-  },
-  "panels/sensors/sensors-meta.ts | forceEnabled": {
-    "message": "F̂ór̂ćê én̂áb̂ĺêd́"
-  },
-  "panels/sensors/sensors-meta.ts | geolocation": {
-    "message": "ĝéôĺôćât́îón̂"
-  },
-  "panels/sensors/sensors-meta.ts | locale": {
-    "message": "l̂óĉál̂é"
-  },
-  "panels/sensors/sensors-meta.ts | locales": {
-    "message": "l̂óĉál̂éŝ"
-  },
-  "panels/sensors/sensors-meta.ts | locations": {
-    "message": "L̂óĉát̂íôńŝ"
-  },
-  "panels/sensors/sensors-meta.ts | noIdleEmulation": {
-    "message": "N̂ó îd́l̂é êḿûĺât́îón̂"
-  },
-  "panels/sensors/sensors-meta.ts | sensors": {
-    "message": "Ŝén̂śôŕŝ"
-  },
-  "panels/sensors/sensors-meta.ts | showLocations": {
-    "message": "Ŝh́ôẃ L̂óĉát̂íôńŝ"
-  },
-  "panels/sensors/sensors-meta.ts | showSensors": {
-    "message": "Ŝh́ôẃ Ŝén̂śôŕŝ"
-  },
-  "panels/sensors/sensors-meta.ts | timezones": {
-    "message": "t̂ím̂éẑón̂éŝ"
-  },
-  "panels/sensors/sensors-meta.ts | touch": {
-    "message": "T̂óûćĥ"
-  },
-  "panels/sensors/sensors-meta.ts | userActiveScreenLocked": {
-    "message": "Ûśêŕ âćt̂ív̂é, ŝćr̂éêń l̂óĉḱêd́"
-  },
-  "panels/sensors/sensors-meta.ts | userActiveScreenUnlocked": {
-    "message": "Ûśêŕ âćt̂ív̂é, ŝćr̂éêń ûńl̂óĉḱêd́"
-  },
-  "panels/sensors/sensors-meta.ts | userIdleScreenLocked": {
-    "message": "Ûśêŕ îd́l̂é, ŝćr̂éêń l̂óĉḱêd́"
-  },
-  "panels/sensors/sensors-meta.ts | userIdleScreenUnlocked": {
-    "message": "Ûśêŕ îd́l̂é, ŝćr̂éêń ûńl̂óĉḱêd́"
-  },
-  "panels/sensors/SensorsView.ts | adjustWithMousewheelOrUpdownKeys": {
-    "message": "Âd́ĵúŝt́ ŵít̂h́ m̂óûśêẃĥéêĺ ôŕ ûṕ/d̂óŵń k̂éŷś. {PH1}: ±10, Ŝh́îf́t̂: ±1, Ál̂t́: ±0.01"
-  },
-  "panels/sensors/SensorsView.ts | alpha": {
-    "message": "α (âĺp̂h́â)"
-  },
-  "panels/sensors/SensorsView.ts | beta": {
-    "message": "β (b̂ét̂á)"
-  },
-  "panels/sensors/SensorsView.ts | customOrientation": {
-    "message": "Ĉúŝt́ôḿ ôŕîén̂t́ât́îón̂"
-  },
-  "panels/sensors/SensorsView.ts | deviceOrientationSetToAlphaSBeta": {
-    "message": "D̂év̂íĉé ôŕîén̂t́ât́îón̂ śêt́ t̂ó âĺp̂h́â: {PH1}, b́êt́â: {PH2}, ǵâḿm̂á: {PH3}"
-  },
-  "panels/sensors/SensorsView.ts | displayDown": {
-    "message": "D̂íŝṕl̂áŷ d́ôẃn̂"
-  },
-  "panels/sensors/SensorsView.ts | displayUp": {
-    "message": "D̂íŝṕl̂áŷ úp̂"
-  },
-  "panels/sensors/SensorsView.ts | enableOrientationToRotate": {
-    "message": "Êńâb́l̂é ôŕîén̂t́ât́îón̂ t́ô ŕôt́ât́ê"
-  },
-  "panels/sensors/SensorsView.ts | error": {
-    "message": "Êŕr̂ór̂"
-  },
-  "panels/sensors/SensorsView.ts | forcesSelectedIdleStateEmulation": {
-    "message": "F̂ór̂ćêś ŝél̂éĉt́êd́ îd́l̂é ŝt́ât́ê ém̂úl̂át̂íôń"
-  },
-  "panels/sensors/SensorsView.ts | forcesTouchInsteadOfClick": {
-    "message": "F̂ór̂ćêś t̂óûćĥ ín̂śt̂éâd́ ôf́ ĉĺîćk̂"
-  },
-  "panels/sensors/SensorsView.ts | gamma": {
-    "message": "γ (ĝám̂ḿâ)"
-  },
-  "panels/sensors/SensorsView.ts | landscapeLeft": {
-    "message": "L̂án̂d́ŝćâṕê ĺêf́t̂"
-  },
-  "panels/sensors/SensorsView.ts | landscapeRight": {
-    "message": "L̂án̂d́ŝćâṕê ŕîǵĥt́"
-  },
-  "panels/sensors/SensorsView.ts | latitude": {
-    "message": "L̂át̂ít̂úd̂é"
-  },
-  "panels/sensors/SensorsView.ts | locale": {
-    "message": "L̂óĉál̂é"
-  },
-  "panels/sensors/SensorsView.ts | location": {
-    "message": "L̂óĉát̂íôń"
-  },
-  "panels/sensors/SensorsView.ts | locationUnavailable": {
-    "message": "L̂óĉát̂íôń ûńâv́âíl̂áb̂ĺê"
-  },
-  "panels/sensors/SensorsView.ts | longitude": {
-    "message": "L̂ón̂ǵît́ûd́ê"
-  },
-  "panels/sensors/SensorsView.ts | manage": {
-    "message": "M̂án̂áĝé"
-  },
-  "panels/sensors/SensorsView.ts | manageTheListOfLocations": {
-    "message": "M̂án̂áĝé t̂h́ê ĺîśt̂ óf̂ ĺôćât́îón̂ś"
-  },
-  "panels/sensors/SensorsView.ts | noOverride": {
-    "message": "N̂ó ôv́êŕr̂íd̂é"
-  },
-  "panels/sensors/SensorsView.ts | off": {
-    "message": "Ôf́f̂"
-  },
-  "panels/sensors/SensorsView.ts | orientation": {
-    "message": "Ôŕîén̂t́ât́îón̂"
-  },
-  "panels/sensors/SensorsView.ts | other": {
-    "message": "Ôt́ĥér̂…"
-  },
-  "panels/sensors/SensorsView.ts | overrides": {
-    "message": "Ôv́êŕr̂íd̂éŝ"
-  },
-  "panels/sensors/SensorsView.ts | portrait": {
-    "message": "P̂ór̂t́r̂áît́"
-  },
-  "panels/sensors/SensorsView.ts | portraitUpsideDown": {
-    "message": "P̂ór̂t́r̂áît́ ûṕŝíd̂é d̂óŵń"
-  },
-  "panels/sensors/SensorsView.ts | presets": {
-    "message": "P̂ŕêśêt́ŝ"
-  },
-  "panels/sensors/SensorsView.ts | reset": {
-    "message": "R̂éŝét̂"
-  },
-  "panels/sensors/SensorsView.ts | resetDeviceOrientation": {
-    "message": "R̂éŝét̂ d́êv́îćê ór̂íêńt̂át̂íôń"
-  },
-  "panels/sensors/SensorsView.ts | shiftdragHorizontallyToRotate": {
-    "message": "Ŝh́îf́t̂+d́r̂áĝ h́ôŕîźôńt̂ál̂ĺŷ t́ô ŕôt́ât́ê ár̂óûńd̂ t́ĥé ŷ-áx̂íŝ"
-  },
-  "panels/sensors/SensorsView.ts | timezoneId": {
-    "message": "T̂ím̂éẑón̂é ÎD́"
-  },
   "panels/settings/FrameworkIgnoreListSettingsTab.ts | addFilenamePattern": {
     "message": "Âd́d̂ f́îĺêńâḿê ṕât́t̂ér̂ń"
   },
@@ -10805,8 +10769,17 @@
   "ui/components/data_grid/DataGrid.ts | sortBy": {
     "message": "Ŝór̂t́ B̂ý"
   },
+  "ui/components/issue_counter/IssueCounter.ts | breakingChangeIssue": {
+    "message": "Â b́r̂éâḱîńĝ ćĥán̂ǵê íŝśûé: t̂h́ê ṕâǵê ḿâý ŝt́ôṕ ŵór̂ḱîńĝ ín̂ án̂ úp̂ćôḿîńĝ v́êŕŝíôń ôf́ Ĉh́r̂óm̂é"
+  },
   "ui/components/issue_counter/IssueCounter.ts | breakingChanges": {
     "message": "{issueCount, plural, =1 {# b̂ŕêák̂ín̂ǵ ĉh́âńĝé} other {# b̂ŕêák̂ín̂ǵ ĉh́âńĝéŝ}}"
+  },
+  "ui/components/issue_counter/IssueCounter.ts | improvementIssue": {
+    "message": "Âń îḿp̂ŕôv́êḿêńt̂ íŝśûé: t̂h́êŕê íŝ án̂ óp̂ṕôŕt̂ún̂ít̂ý t̂ó îḿp̂ŕôv́ê t́ĥé p̂áĝé"
+  },
+  "ui/components/issue_counter/IssueCounter.ts | pageErrorIssue": {
+    "message": "Â ṕâǵê ér̂ŕôŕ îśŝúê: t́ĥé p̂áĝé îś n̂ót̂ ẃôŕk̂ín̂ǵ ĉór̂ŕêćt̂ĺŷ"
   },
   "ui/components/issue_counter/IssueCounter.ts | pageErrors": {
     "message": "{issueCount, plural, =1 {# p̂áĝé êŕr̂ór̂} other {# ṕâǵê ér̂ŕôŕŝ}}"
@@ -10818,7 +10791,7 @@
     "message": "Ĉĺîćk̂ t́ô śĥóŵ íŝśûé îń t̂h́ê íŝśûéŝ t́âb́"
   },
   "ui/components/issue_counter/IssueLinkIcon.ts | clickToShowIssueWithTitle": {
-    "message": "Ĉĺîćk̂ t́ô óp̂én̂ t́ĥé îśŝúê t́âb́ âńd̂ śĥóŵ íŝśûé: {title}"
+    "message": "Ĉĺîćk̂ t́ô óp̂én̂ t́ĥé îśŝúê t́âb́ âńd̂ śĥóŵ íŝśûé '{title}'"
   },
   "ui/components/issue_counter/IssueLinkIcon.ts | issueUnavailable": {
     "message": "Îśŝúê ún̂áv̂áîĺâb́l̂é ât́ t̂h́îś t̂ím̂é"
@@ -11518,9 +11491,6 @@
   },
   "ui/legacy/FilterBar.ts | allStrings": {
     "message": "Âĺl̂"
-  },
-  "ui/legacy/FilterBar.ts | clearFilter": {
-    "message": "Ĉĺêár̂ ín̂ṕût́"
   },
   "ui/legacy/FilterBar.ts | egSmalldUrlacomb": {
     "message": "ê.ǵ. /small[d]+/ url:a.com/b"

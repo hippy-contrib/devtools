@@ -1,5 +1,5 @@
 import type { LocalizedMessages, UIStrings } from './i18n-impl.js';
-import * as IntlMessageFormat from '../intl-messageformat/intl-messageformat.js';
+import type { IntlMessageFormat } from '../intl-messageformat/package/lib/index.js';
 /**
  * This class is usually created at module instantiation time and
  * holds the filename, the UIStrings object and a reference to
@@ -43,7 +43,7 @@ export declare class LocalizedStringSet {
     private readonly localeForFormatter;
     constructor(filename: string, stringStructure: UIStrings, locale: Intl.UnicodeBCP47LocaleIdentifier, localizedMessages: LocalizedMessages);
     getLocalizedString(message: string, values?: Values): string;
-    getMessageFormatterFor(message: string): IntlMessageFormat.IntlMessageFormat;
+    getMessageFormatterFor(message: string): IntlMessageFormat;
     private getSimpleLocalizedString;
     private getFormattedLocalizedString;
 }

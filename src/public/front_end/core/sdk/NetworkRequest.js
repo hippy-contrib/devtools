@@ -1149,9 +1149,6 @@ export class NetworkRequest extends Common.ObjectWrapper.ObjectWrapper {
             }
         }
         this._remoteAddressSpace = extraResponseInfo.resourceIPAddressSpace;
-        if (extraResponseInfo.statusCode) {
-            this.statusCode = extraResponseInfo.statusCode;
-        }
         this._hasExtraResponseInfo = true;
     }
     hasExtraResponseInfo() {

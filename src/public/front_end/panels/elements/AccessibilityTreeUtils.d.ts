@@ -1,4 +1,4 @@
-import * as SDK from '../../core/sdk/sdk.js';
+import type * as SDK from '../../core/sdk/sdk.js';
 import type * as TreeOutline from '../../ui/components/tree_outline/tree_outline.js';
 import * as LitHtml from '../../ui/lit-html/lit-html.js';
 export declare type AXTreeNodeData = SDK.AccessibilityModel.AccessibilityNode;

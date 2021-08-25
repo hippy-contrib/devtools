@@ -140,7 +140,7 @@ export class AccessibilityNode {
         if (!this._childIds || !this._childIds.length) {
             return false;
         }
-        return this._childIds.every(id => this._accessibilityModel.axNodeForId(id) === null);
+        return !this._childIds.some(id => this._accessibilityModel.axNodeForId(id) !== null);
     }
 }
 export class AccessibilityModel extends SDKModel {

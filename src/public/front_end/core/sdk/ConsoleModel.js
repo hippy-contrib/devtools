@@ -259,11 +259,11 @@ export class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
     _consoleProfileStarted(cpuProfilerModel, event) {
-        const { data } = event;
+        const data = event.data;
         this._addConsoleProfileMessage(cpuProfilerModel, "profile" /* Profile */, data.scriptLocation, i18nString(UIStrings.profileSStarted, { PH1: data.title }));
     }
     _consoleProfileFinished(cpuProfilerModel, event) {
-        const { data } = event;
+        const data = event.data;
         this._addConsoleProfileMessage(cpuProfilerModel, "profileEnd" /* ProfileEnd */, data.scriptLocation, i18nString(UIStrings.profileSFinished, { PH1: data.title }));
     }
     _addConsoleProfileMessage(cpuProfilerModel, type, scriptLocation, messageText) {

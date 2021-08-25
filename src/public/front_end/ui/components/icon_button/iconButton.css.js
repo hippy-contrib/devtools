@@ -44,10 +44,6 @@ styles.replaceSync(
   margin-left: 0.5ex;
 }
 
-.compact .icon-button-title {
-  display: none;
-}
-
 .status-icon {
   margin-left: 1ex;
 }

@@ -63,7 +63,7 @@ export declare class ElementsPanel extends UI.Panel.Panel implements UI.Searchab
     willHide(): void;
     onResize(): void;
     _selectedNodeChanged(event: Common.EventTarget.EventTargetEvent): void;
-    _documentUpdatedEvent(event: Common.EventTarget.EventTargetEvent<SDK.DOMModel.DOMModel>): void;
+    _documentUpdatedEvent(event: Common.EventTarget.EventTargetEvent): void;
     _documentUpdated(domModel: SDK.DOMModel.DOMModel): void;
     _lastSelectedNodeSelectedForTest(): void;
     _setDefaultSelectedNode(node: SDK.DOMModel.DOMNode | null): void;

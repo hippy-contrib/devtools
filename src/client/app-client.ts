@@ -86,30 +86,34 @@ export abstract class AppClient extends EventEmitter {
   }
 
   protected onMessage(msg: Adapter.CDP.Res) {
-    if ('id' in msg) {
-      const method = this.msgIdMethodMap.get(msg.id);
-      if (method) msg.method = method;
-      this.msgIdMethodMap.delete(msg.id);
-    }
+    try {
+      if ('id' in msg) {
+        const method = this.msgIdMethodMap.get(msg.id);
+        if (method) msg.method = method;
+        this.msgIdMethodMap.delete(msg.id);
+      }
 
-    const { method } = msg;
-    let middlewareList = this.middleWareManager.upwardMiddleWareListMap[method] || [];
-    if (!middlewareList) middlewareList = [];
-    if (!(middlewareList instanceof Array)) middlewareList = [middlewareList];
-    const fullMiddlewareList = [...middlewareList, defaultUpwardMiddleware];
-    compose(fullMiddlewareList)(this.makeContext(msg));
+      const { method } = msg;
+      let middlewareList = this.middleWareManager.upwardMiddleWareListMap[method] || [];
+      if (!middlewareList) middlewareList = [];
+      if (!(middlewareList instanceof Array)) middlewareList = [middlewareList];
+      const fullMiddlewareList = [...middlewareList, defaultUpwardMiddleware];
+      compose(fullMiddlewareList)(this.makeContext(msg));
+    } catch (e) {
+      console.error(`app client on message error: ${JSON.stringify(e)}`);
+    }
   }
 
   protected makeContext(msg: Adapter.CDP.Req | Adapter.CDP.Res) {
     return {
       ...this.urlParsedContext,
       msg,
-      sendToApp: (msg: Adapter.CDP.Req) => {
+      sendToApp: (msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> => {
         if (!msg.id) {
           msg.id = getRequestId();
         }
         downwardDebug('%j', msg);
-        this.sendToApp(msg);
+        return this.sendToApp(msg);
       },
       sendToDevtools: (msg: Adapter.CDP.Req) => {
         upwardDebug('%j', msg);

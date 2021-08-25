@@ -1,6 +1,6 @@
 {
   "name": "debug-server-next",
-  "version": "3.0.27",
+  "version": "3.0.31",
   "description": "Dev server for hippy-core.",
   "repository": "https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server",
   "homepage": "http://hippyjs.org",
@@ -12,6 +12,7 @@
   "scripts": {
     "start": "nodemon",
     "dev": "cross-env DEBUG=*,-↓↓↓,-↑↑↑,-koa-router TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts --entry=src/public/index.bundle",
+    "dev:gamecenter": "cross-env DEBUG=* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts --entry=src/public/game-center/index.bundle",
     "build": "npx gulp",
     "test": "npx jest",
     "lint": "npx eslint --fix --quiet --ext .js,.ts ./src"
@@ -34,7 +35,7 @@
   "types": "dist/@types/index.d.ts",
   "dependencies": {
     "color-normalize": "^1.5.2",
-    "debug": "^4.1.1",
+    "debug": "^4.3.2",
     "find-up": "^4.1.0",
     "kill-port": "^1.6.1",
     "koa": "^2.13.1",

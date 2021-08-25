@@ -40,7 +40,12 @@ export class WsAppClient extends AppClient {
 
   protected registerMessageListener() {
     this.ws.on('message', (msg: string) => {
-      const msgObj: Adapter.CDP.Res = JSON.parse(msg);
+      let msgObj: Adapter.CDP.Res;
+      try {
+        msgObj = JSON.parse(msg);
+      } catch (e) {
+        console.error(`parse json error: ${msg}`);
+      }
       this.onMessage(msgObj);
 
       if ('id' in msgObj) {

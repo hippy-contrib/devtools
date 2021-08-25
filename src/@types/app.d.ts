@@ -11,7 +11,7 @@ declare namespace Application {
     startAdb: boolean;
     startIWDP: boolean;
     clearAddrInUse: boolean;
-    useTunnel: boolean;
+    startTunnel: boolean;
     env: string;
     publicPath?: string;
     cachePath?: string;

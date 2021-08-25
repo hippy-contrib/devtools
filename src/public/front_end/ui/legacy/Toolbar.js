@@ -62,7 +62,6 @@ export class Toolbar {
     _shadowRoot;
     _contentElement;
     _insertionPoint;
-    compactLayout = false;
     constructor(className, parentElement) {
         this._items = [];
         this.element = (parentElement ? parentElement.createChild('div') : document.createElement('div'));
@@ -73,18 +72,6 @@ export class Toolbar {
             createShadowRootWithCoreStyles(this.element, { cssFile: 'ui/legacy/toolbar.css', delegatesFocus: undefined });
         this._contentElement = this._shadowRoot.createChild('div', 'toolbar-shadow');
         this._insertionPoint = this._contentElement.createChild('slot');
-    }
-    hasCompactLayout() {
-        return this.compactLayout;
-    }
-    setCompactLayout(enable) {
-        if (this.compactLayout === enable) {
-            return;
-        }
-        this.compactLayout = enable;
-        for (const item of this._items) {
-            item.setCompactLayout(enable);
-        }
     }
     static createLongPressActionButton(action, toggledOptions, untoggledOptions) {
         const button = Toolbar.createActionButton(action);
@@ -268,7 +255,6 @@ export class Toolbar {
     appendToolbarItem(item) {
         this._items.push(item);
         item.toolbar = this;
-        item.setCompactLayout(this.hasCompactLayout());
         if (!this._enabled) {
             item._applyEnabledState(false);
         }
@@ -362,8 +348,6 @@ const TOOLBAR_BUTTON_DEFAULT_OPTIONS = {
     showLabel: false,
     userActionCode: undefined,
 };
-// We need any here because Common.ObjectWrapper.ObjectWrapper is invariant in T.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class ToolbarItem extends Common.ObjectWrapper.ObjectWrapper {
     element;
     _visible;
@@ -403,6 +387,8 @@ export class ToolbarItem extends Common.ObjectWrapper.ObjectWrapper {
         //             kind of HTMLElement classes that have a disabled attribute.
         this.element.disabled = !enabled;
     }
+    /** x
+       */
     visible() {
         return this._visible;
     }
@@ -418,16 +404,6 @@ export class ToolbarItem extends Common.ObjectWrapper.ObjectWrapper {
     }
     setRightAligned(alignRight) {
         this.element.classList.toggle('toolbar-item-right-aligned', alignRight);
-    }
-    setCompactLayout(_enable) {
-    }
-}
-export class ToolbarItemWithCompactLayout extends ToolbarItem {
-    constructor(element) {
-        super(element);
-    }
-    setCompactLayout(enable) {
-        this.dispatchEventToListeners("CompactLayoutUpdated" /* CompactLayoutUpdated */, enable);
     }
 }
 export class ToolbarText extends ToolbarItem {
@@ -562,7 +538,7 @@ export class ToolbarInput extends ToolbarItem {
             this.element.style.flexShrink = String(shrinkFactor);
         }
         const clearButton = this.element.createChild('div', 'toolbar-input-clear-button');
-        clearButton.appendChild(Icon.create('mediumicon-gray-cross-active', 'search-cancel-button'));
+        clearButton.appendChild(Icon.create('mediumicon-gray-cross-hover', 'search-cancel-button'));
         clearButton.addEventListener('click', () => {
             this.setValue('', true);
             this._prompt.focus();

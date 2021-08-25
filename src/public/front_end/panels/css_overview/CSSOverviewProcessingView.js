@@ -4,7 +4,6 @@
 /* eslint-disable rulesdir/no_underscored_properties */
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import cssOverviewProcessingViewStyles from './cssOverviewProcessingView.css.js';
 import { Events } from './CSSOverviewController.js';
 const UIStrings = {
     /**
@@ -20,6 +19,7 @@ export class CSSOverviewProcessingView extends UI.Widget.Widget {
     fragment;
     constructor(controller) {
         super();
+        this.registerRequiredCSS('panels/css_overview/cssOverviewProcessingView.css');
         this._formatter = new Intl.NumberFormat('en-US');
         this._controller = controller;
         this._render();
@@ -35,10 +35,6 @@ export class CSSOverviewProcessingView extends UI.Widget.Widget {
     `;
         this.contentElement.appendChild(this.fragment.element());
         this.contentElement.style.overflow = 'auto';
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([cssOverviewProcessingViewStyles]);
     }
 }
 //# sourceMappingURL=CSSOverviewProcessingView.js.map

@@ -40,9 +40,6 @@ export class DebuggerWorkspaceBinding {
         }
         return debuggerWorkspaceBindingInstance;
     }
-    static removeInstance() {
-        debuggerWorkspaceBindingInstance = undefined;
-    }
     addSourceMapping(sourceMapping) {
         this._sourceMappings.push(sourceMapping);
     }
@@ -256,7 +253,8 @@ export class DebuggerWorkspaceBinding {
         return modelData._compilerMapping.sourceMapForScript(script);
     }
     _globalObjectCleared(event) {
-        this._reset(event.data);
+        const debuggerModel = event.data;
+        this._reset(debuggerModel);
     }
     _reset(debuggerModel) {
         const modelData = this._debuggerModelToData.get(debuggerModel);
@@ -289,7 +287,8 @@ export class DebuggerWorkspaceBinding {
         }
     }
     _debuggerResumed(event) {
-        this._reset(event.data);
+        const debuggerModel = event.data;
+        this._reset(debuggerModel);
     }
 }
 class ModelData {

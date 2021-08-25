@@ -113,7 +113,7 @@
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "7abd4bcd2cffd7cd13a2";
+/******/ 	var hotCurrentHash = "372541c9c939b44088a0";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -2004,7 +2004,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".Memory[data-v-770e66b4] {\n  background-color: #f3f4f7;\n  border-radius: 6px;\n  margin-top: 15px;\n  height: 100%;\n}\n.memoryElHeader[data-v-770e66b4] {\n  font-family: PingFangSC-Medium;\n  font-size: 14px;\n  color: #999;\n  text-align: center;\n  line-height: 35px;\n  flex: 0 0 35px;\n  margin-top: 7px;\n}\n.memoryMain[data-v-770e66b4] {\n  background-color: #fff;\n  border-bottom-left-radius: 6px;\n  border-bottom-right-radius: 6px;\n  padding-left: 10px;\n  padding-right: 10px;\n  width: 100%;\n  flex: 1;\n}\n.memoryPanel[data-v-770e66b4] {\n  display: flex;\n  flex-direction: column;\n  background-color: #fff;\n  border-radius: 6px;\n  margin-top: 15px;\n}\n.memoryTableAside.el-aside[data-v-770e66b4] {\n  width: 100px;\n  border-right: 2px solid #fff;\n}\n.memorySnapshopTable[data-v-770e66b4] {\n  background-color: transparent;\n}\n.memoryTable[data-v-770e66b4] {\n  background-color: #f3f4f7;\n}\n.memorySnapshopTable.el-table th[data-v-770e66b4],\n.memorySnapshopTable.el-table tr[data-v-770e66b4] {\n  background-color: transparent;\n}\n.memoryTable.el-table thead[data-v-770e66b4] {\n  background-color: transparent;\n}\n.memoryChartContainer[data-v-770e66b4] {\n  margin-top: 10px;\n  margin-left: 0px;\n  height: 300px;\n  width: 90vw;\n}\n.el-tabs__item[data-v-770e66b4]:hover {\n  color: #f56c6c;\n}\n.el-tabs__item.is-active[data-v-770e66b4] {\n  color: #f56c6c;\n}", ""]);
+exports.push([module.i, ".Memory[data-v-770e66b4] {\n  background-color: #f3f4f7;\n  border-radius: 6px;\n  height: 100%;\n}\n.memoryElHeader[data-v-770e66b4] {\n  font-family: PingFangSC-Medium;\n  font-size: 14px;\n  color: #999;\n  text-align: center;\n  line-height: 35px;\n  flex: 0 0 35px;\n  margin-top: 7px;\n}\n.memoryMain[data-v-770e66b4] {\n  background-color: #fff;\n  border-bottom-left-radius: 6px;\n  border-bottom-right-radius: 6px;\n  padding-left: 10px;\n  padding-right: 10px;\n  width: 100%;\n  flex: 1;\n}\n.memoryPanel[data-v-770e66b4] {\n  display: flex;\n  flex-direction: column;\n  background-color: #fff;\n  border-radius: 6px;\n}\n.memoryTableAside.el-aside[data-v-770e66b4] {\n  width: 100px;\n  border-right: 2px solid #fff;\n}\n.memorySnapshopTable[data-v-770e66b4] {\n  background-color: transparent;\n}\n.memoryTable[data-v-770e66b4] {\n  background-color: #f3f4f7;\n}\n.memorySnapshopTable.el-table th[data-v-770e66b4],\n.memorySnapshopTable.el-table tr[data-v-770e66b4] {\n  background-color: transparent;\n}\n.memoryTable.el-table thead[data-v-770e66b4] {\n  background-color: transparent;\n}\n.memoryChartContainer[data-v-770e66b4] {\n  margin-top: 10px;\n  margin-left: 0px;\n  height: 300px;\n  width: 90vw;\n}\n.el-tabs__item[data-v-770e66b4]:hover {\n  color: #f56c6c;\n}\n.el-tabs__item.is-active[data-v-770e66b4] {\n  color: #f56c6c;\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -2022,7 +2022,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "html,\nbody,\n#app {\n  height: 100%;\n}", ""]);
+exports.push([module.i, "html,\nbody,\n#app {\n  height: 100%;\n  margin: 0;\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -2839,13 +2839,13 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ 2:
 /*!**********************************************************************************************************************************************!*\
-  !*** multi (webpack)/hot/dev-server.js (webpack)-dev-server/client?http://10.45.18.74:8888&sockPath=/sockjs-node ./src/views/memory/main.ts ***!
+  !*** multi (webpack)/hot/dev-server.js (webpack)-dev-server/client?http://10.45.18.67:8888&sockPath=/sockjs-node ./src/views/memory/main.ts ***!
   \**********************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(/*! /Users/shenchaoran/Workspace/tencent/dynamic-framework/chrome-devtools-extensions/node_modules/webpack/hot/dev-server.js */"./node_modules/webpack/hot/dev-server.js");
-__webpack_require__(/*! /Users/shenchaoran/Workspace/tencent/dynamic-framework/chrome-devtools-extensions/node_modules/webpack-dev-server/client/index.js?http://10.45.18.74:8888&sockPath=/sockjs-node */"./node_modules/webpack-dev-server/client/index.js?http://10.45.18.74:8888&sockPath=/sockjs-node");
+__webpack_require__(/*! /Users/shenchaoran/Workspace/tencent/dynamic-framework/chrome-devtools-extensions/node_modules/webpack-dev-server/client/index.js?http://10.45.18.67:8888&sockPath=/sockjs-node */"./node_modules/webpack-dev-server/client/index.js?http://10.45.18.67:8888&sockPath=/sockjs-node");
 module.exports = __webpack_require__(/*! /Users/shenchaoran/Workspace/tencent/dynamic-framework/chrome-devtools-extensions/src/views/memory/main.ts */"./src/views/memory/main.ts");
 
 

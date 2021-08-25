@@ -10,7 +10,6 @@ export class IconButton extends HTMLElement {
     shadow = this.attachShadow({ mode: 'open' });
     clickHandler = undefined;
     groups = [];
-    compact = false;
     leadingText = '';
     trailingText = '';
     accessibleName;
@@ -20,7 +19,6 @@ export class IconButton extends HTMLElement {
         this.trailingText = data.trailingText ?? '';
         this.leadingText = data.leadingText ?? '';
         this.accessibleName = data.accessibleName;
-        this.compact = Boolean(data.compact);
         this.render();
     }
     get data() {
@@ -30,8 +28,16 @@ export class IconButton extends HTMLElement {
             clickHandler: this.clickHandler,
             leadingText: this.leadingText,
             trailingText: this.trailingText,
-            compact: this.compact,
         };
+    }
+    setTexts(texts) {
+        if (texts.length !== this.groups.length) {
+            throw new Error(`Wrong number of texts, expected ${this.groups.length} but got ${texts.length}`);
+        }
+        for (let i = 0; i < texts.length; ++i) {
+            this.groups[i].text = texts[i];
+        }
+        this.render();
     }
     connectedCallback() {
         this.shadow.adoptedStyleSheets = [iconButtonStyles];
@@ -46,23 +52,19 @@ export class IconButton extends HTMLElement {
         const buttonClasses = LitHtml.Directives.classMap({
             'icon-button': true,
             'with-click-handler': Boolean(this.clickHandler),
-            'compact': this.compact,
         });
-        const filteredGroups = this.groups.filter(counter => counter.text !== undefined)
-            .filter((_, index) => this.compact ? index === 0 : true);
         // Disabled until https://crbug.com/1079231 is fixed.
         // clang-format off
         LitHtml.render(LitHtml.html `
       <button class="${buttonClasses}" @click=${this.onClickHandler} aria-label="${LitHtml.Directives.ifDefined(this.accessibleName)}">
-      ${(!this.compact && this.leadingText) ? LitHtml.html `<span class="icon-button-title">${this.leadingText}</span>` : LitHtml.nothing}
-      ${filteredGroups.map(counter => LitHtml.html `
+      ${this.leadingText ? LitHtml.html `<span class="icon-button-title">${this.leadingText}</span>` : LitHtml.nothing}
+      ${this.groups.filter(counter => counter.text !== undefined).map(counter => LitHtml.html `
       <${Icon.litTagName} class="status-icon"
       .data=${{ iconName: counter.iconName, color: counter.iconColor || '', width: counter.iconWidth || '1.5ex', height: counter.iconHeight || '1.5ex' }}>
       </${Icon.litTagName}>
-      ${this.compact ? LitHtml.html `<!-- Force line-height for this element --><span>&#8203;</span>` : LitHtml.nothing}
       <span class="icon-button-title">${counter.text}</span>
       </button>`)}
-      ${(!this.compact && this.trailingText) ? LitHtml.html `<span class="icon-button-title">${this.trailingText}</span>` : LitHtml.nothing}
+      ${this.trailingText ? LitHtml.html `<span class="icon-button-title">${this.trailingText}</span>` : LitHtml.nothing}
     `, this.shadow, { host: this });
         // clang-format on
     }

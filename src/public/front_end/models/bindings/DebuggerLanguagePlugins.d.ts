@@ -60,7 +60,7 @@ export declare class DebuggerLanguagePluginManager implements SDK.TargetManager.
     _expandCallFrames(callFrames: SDK.DebuggerModel.CallFrame[]): Promise<SDK.DebuggerModel.CallFrame[]>;
     modelAdded(debuggerModel: SDK.DebuggerModel.DebuggerModel): void;
     modelRemoved(debuggerModel: SDK.DebuggerModel.DebuggerModel): void;
-    _globalObjectCleared(event: Common.EventTarget.EventTargetEvent<SDK.DebuggerModel.DebuggerModel>): void;
+    _globalObjectCleared(event: Common.EventTarget.EventTargetEvent): void;
     addPlugin(plugin: DebuggerLanguagePlugin): void;
     removePlugin(plugin: DebuggerLanguagePlugin): void;
     hasPluginForScript(script: SDK.Script.Script): boolean;
@@ -84,7 +84,7 @@ export declare class DebuggerLanguagePluginManager implements SDK.TargetManager.
     }[] | null>;
     uiLocationToRawLocations(uiSourceCode: Workspace.UISourceCode.UISourceCode, lineNumber: number, columnNumber?: number): Promise<SDK.DebuggerModel.Location[] | null>;
     scriptsForUISourceCode(uiSourceCode: Workspace.UISourceCode.UISourceCode): SDK.Script.Script[];
-    _parsedScriptSource(event: Common.EventTarget.EventTargetEvent<SDK.Script.Script>): void;
+    _parsedScriptSource(event: Common.EventTarget.EventTargetEvent): void;
     resolveScopeChain(callFrame: SDK.DebuggerModel.CallFrame): Promise<SourceScope[] | null>;
     getFunctionInfo(script: SDK.Script.Script, location: SDK.DebuggerModel.Location): Promise<{
         frames: Array<Chrome.DevTools.FunctionInfo>;

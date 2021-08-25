@@ -31,15 +31,15 @@ export declare class SecurityPanel extends UI.Panel.PanelWithSidebar implements 
     wasShown(): void;
     focus(): void;
     _setVisibleView(view: UI.Widget.VBox): void;
-    _onResponseReceived(event: Common.EventTarget.EventTargetEvent<SDK.NetworkManager.ResponseReceivedEvent>): void;
+    _onResponseReceived(event: Common.EventTarget.EventTargetEvent): void;
     _processRequest(request: SDK.NetworkRequest.NetworkRequest): void;
-    _onRequestFinished(event: Common.EventTarget.EventTargetEvent<SDK.NetworkRequest.NetworkRequest>): void;
+    _onRequestFinished(event: Common.EventTarget.EventTargetEvent): void;
     _updateFilterRequestCounts(request: SDK.NetworkRequest.NetworkRequest): void;
     filterRequestCount(filterKey: string): number;
     _securityStateMin(stateA: Protocol.Security.SecurityState, stateB: Protocol.Security.SecurityState): Protocol.Security.SecurityState;
     modelAdded(securityModel: SecurityModel): void;
     modelRemoved(securityModel: SecurityModel): void;
-    _onMainFrameNavigated(event: Common.EventTarget.EventTargetEvent<SDK.ResourceTreeModel.ResourceTreeFrame>): void;
+    _onMainFrameNavigated(event: Common.EventTarget.EventTargetEvent): void;
     _onInterstitialShown(): void;
     _onInterstitialHidden(): void;
 }

@@ -64,13 +64,16 @@ export declare class LinearMemoryInspector extends HTMLElement {
     private update;
     private setAddress;
 }
+export interface LinearMemoryInspectorEventMap extends HTMLElementEventMap {
+    'memoryrequest': MemoryRequestEvent;
+    'addresschanged': AddressChangedEvent;
+    'settingschanged': SettingsChangedEvent;
+}
+export interface LinearMemoryInspector extends HTMLElement {
+    addEventListener<K extends keyof LinearMemoryInspectorEventMap>(type: K, listener: (this: HTMLElement, ev: LinearMemoryInspectorEventMap[K]) => unknown, options?: boolean | AddEventListenerOptions): void;
+}
 declare global {
     interface HTMLElementTagNameMap {
         'devtools-linear-memory-inspector-inspector': LinearMemoryInspector;
-    }
-    interface HTMLElementEventMap {
-        'memoryrequest': MemoryRequestEvent;
-        'addresschanged': AddressChangedEvent;
-        'settingschanged': SettingsChangedEvent;
     }
 }

@@ -71,8 +71,7 @@ export class CPUProfilerModel extends SDKModel {
             title = i18nString(UIStrings.profileD, { PH1: this._nextAnonymousConsoleProfileNumber++ });
             this._anonymousConsoleProfileIdToTitle.set(id, title);
         }
-        const eventData = this.createEventDataFrom(id, location, title);
-        this.dispatchEventToListeners(Events.ConsoleProfileStarted, eventData);
+        this._dispatchProfileEvent(Events.ConsoleProfileStarted, id, location, title);
     }
     consoleProfileFinished({ id, location, profile, title }) {
         if (!title) {
@@ -81,22 +80,22 @@ export class CPUProfilerModel extends SDKModel {
         }
         // Make sure ProfilesPanel is initialized and CPUProfileType is created.
         Root.Runtime.Runtime.instance().loadModulePromise('profiler').then(() => {
-            const eventData = {
-                ...this.createEventDataFrom(id, location, title),
-                cpuProfile: profile,
-            };
-            this.dispatchEventToListeners(Events.ConsoleProfileFinished, eventData);
+            this._dispatchProfileEvent(Events.ConsoleProfileFinished, id, location, title, profile);
         });
     }
-    createEventDataFrom(id, scriptLocation, title) {
+    _dispatchProfileEvent(eventName, id, scriptLocation, title, cpuProfile) {
         const debuggerLocation = Location.fromPayload(this._debuggerModel, scriptLocation);
         const globalId = this.target().id() + '.' + id;
-        return {
+        const data = {
             id: globalId,
             scriptLocation: debuggerLocation,
-            title: title || '',
+            cpuProfile: cpuProfile,
+            title: title,
             cpuProfilerModel: this,
         };
+        // TODO(crbug.com/1228674): Use type-safe event dispatch and remove <any>.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.dispatchEventToListeners(eventName, data);
     }
     isRecordingProfile() {
         return this._isRecording;

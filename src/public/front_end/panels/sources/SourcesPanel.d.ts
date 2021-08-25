@@ -56,10 +56,10 @@ export declare class SourcesPanel extends UI.Panel.Panel implements UI.ContextMe
     _ensureSourcesViewVisible(): boolean;
     onResize(): void;
     searchableView(): UI.SearchableView.SearchableView;
-    _debuggerPaused(event: Common.EventTarget.EventTargetEvent<SDK.DebuggerModel.DebuggerModel>): void;
+    _debuggerPaused(event: Common.EventTarget.EventTargetEvent): void;
     _showDebuggerPausedDetails(details: SDK.DebuggerModel.DebuggerPausedDetails): void;
     _debuggerResumed(debuggerModel: SDK.DebuggerModel.DebuggerModel): void;
-    _debuggerWasEnabled(event: Common.EventTarget.EventTargetEvent<SDK.DebuggerModel.DebuggerModel>): void;
+    _debuggerWasEnabled(event: Common.EventTarget.EventTargetEvent): void;
     get visibleView(): UI.Widget.Widget | null;
     showUISourceCode(uiSourceCode: Workspace.UISourceCode.UISourceCode, lineNumber?: number, columnNumber?: number, omitFocus?: boolean): void;
     _showEditor(): void;

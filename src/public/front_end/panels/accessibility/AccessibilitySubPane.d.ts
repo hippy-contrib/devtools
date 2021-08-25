@@ -9,5 +9,4 @@ export declare class AccessibilitySubPane extends UI.View.SimpleView {
     setNode(node: SDK.DOMModel.DOMNode | null): void;
     createInfo(textContent: string, className?: string): Element;
     createTreeOutline(): UI.TreeOutline.TreeOutline;
-    wasShown(): void;
 }

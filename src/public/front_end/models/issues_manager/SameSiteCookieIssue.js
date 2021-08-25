@@ -136,12 +136,6 @@ export class SameSiteCookieIssue extends Issue {
         }
         return [];
     }
-    rawCookieLines() {
-        if (this.issueDetails.rawCookieLine) {
-            return [this.issueDetails.rawCookieLine];
-        }
-        return [];
-    }
     requests() {
         if (this.issueDetails.request) {
             return [this.issueDetails.request];

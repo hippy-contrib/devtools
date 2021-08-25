@@ -3,23 +3,6 @@
 // found in the LICENSE file.
 import * as Common from '../../core/common/common.js';
 import * as Host from '../../core/host/host.js';
-import * as i18n from '../../core/i18n/i18n.js';
-const UIStrings = {
-    /**
-     *@description A description for a kind of issue we display in the issues tab.
-     */
-    pageErrorIssue: 'A page error issue: the page is not working correctly',
-    /**
-     *@description A description for a kind of issue we display in the issues tab.
-     */
-    breakingChangeIssue: 'A breaking change issue: the page may stop working in an upcoming version of Chrome',
-    /**
-     *@description A description for a kind of issue we display in the issues tab.
-     */
-    improvementIssue: 'An improvement issue: there is an opportunity to improve the page',
-};
-const str_ = i18n.i18n.registerUIStrings('models/issues_manager/Issue.ts', UIStrings);
-const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 // eslint-disable-next-line rulesdir/const_enum
 export var IssueCategory;
 (function (IssueCategory) {
@@ -56,16 +39,6 @@ export var IssueKind;
      */
     IssueKind["Improvement"] = "Improvement";
 })(IssueKind || (IssueKind = {}));
-export function getIssueKindDescription(issueKind) {
-    switch (issueKind) {
-        case IssueKind.PageError:
-            return i18nString(UIStrings.pageErrorIssue);
-        case IssueKind.BreakingChange:
-            return i18nString(UIStrings.breakingChangeIssue);
-        case IssueKind.Improvement:
-            return i18nString(UIStrings.improvementIssue);
-    }
-}
 /**
  * Union two issue kinds for issue aggregation. The idea is to show the most
  * important kind on aggregated issues that union issues of different kinds.
@@ -86,13 +59,11 @@ export class Issue {
     issueCode;
     issuesModel;
     issueId = undefined;
-    hidden;
     constructor(code, issuesModel = null, issueId) {
         this.issueCode = typeof code === 'object' ? code.code : code;
         this.issuesModel = issuesModel;
         this.issueId = issueId;
         Host.userMetrics.issueCreated(typeof code === 'string' ? code : code.umaCode);
-        this.hidden = false;
     }
     code() {
         return this.issueCode;
@@ -101,9 +72,6 @@ export class Issue {
         return [];
     }
     cookies() {
-        return [];
-    }
-    rawCookieLines() {
         return [];
     }
     elements() {
@@ -134,12 +102,6 @@ export class Issue {
     }
     getIssueId() {
         return this.issueId;
-    }
-    isHidden() {
-        return this.hidden;
-    }
-    setHidden(hidden) {
-        this.hidden = hidden;
     }
 }
 export function toZeroBasedLocation(location) {

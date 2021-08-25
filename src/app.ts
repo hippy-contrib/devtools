@@ -13,7 +13,6 @@ import { DebugTargetManager, getChromeInspectRouter } from './router/chrome-insp
 import { SocketServer } from './socket-server';
 
 const debug = createDebug('server');
-createDebug.enable('server');
 
 export class Application {
   public static isServerReady = false;
@@ -32,7 +31,7 @@ export class Application {
       startAdb,
       startIWDP,
       clearAddrInUse,
-      useTunnel,
+      startTunnel: shouldStartTunnel,
       env,
       publicPath,
       cachePath,
@@ -56,7 +55,7 @@ export class Application {
 
       Application.server = app.listen(port, host, () => {
         debug('start debug server.');
-        if (useTunnel) startTunnel(argv);
+        if (shouldStartTunnel) startTunnel(argv);
         else if (startIWDP) startIosProxy(argv);
         if (startAdb) startAdbProxy(port);
 

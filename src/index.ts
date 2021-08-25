@@ -72,7 +72,7 @@ if (argv.version) {
 Application.startServer({
   ...argv,
   wsPath: '/debugger-proxy',
-  useTunnel: true,
+  startTunnel: true,
   startAdb: true,
   startIWDP: false,
 });

@@ -91,7 +91,8 @@ export class FrameManager extends Common.ObjectWrapper.ObjectWrapper {
         this.resolveAwaitedFrame(frame);
     }
     _frameDetached(event) {
-        const { frame, isSwap } = event.data;
+        const frame = event.data.frame;
+        const isSwap = event.data.isSwap;
         // Decrease the frame's count or remove it entirely from the map.
         this._decreaseOrRemoveFrame(frame.id);
         // If the transferring frame's detached event is received before its frame
@@ -117,7 +118,8 @@ export class FrameManager extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
     _resourceAdded(event) {
-        this.dispatchEventToListeners(Events.ResourceAdded, { resource: event.data });
+        const resource = event.data;
+        this.dispatchEventToListeners(Events.ResourceAdded, { resource });
     }
     _decreaseOrRemoveFrame(frameId) {
         const frameData = this._frames.get(frameId);

@@ -193,7 +193,7 @@ export class ResourceScriptMapping {
             this._removeScript(script);
         }
     }
-    _globalObjectCleared() {
+    _globalObjectCleared(_event) {
         const scripts = Array.from(this._acceptedScripts);
         for (const script of scripts) {
             this._removeScript(script);

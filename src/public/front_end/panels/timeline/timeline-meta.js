@@ -227,11 +227,11 @@ UI.ActionRegistration.registerActionExtension({
     bindings: [
         {
             platform: "windows,linux" /* WindowsLinux */,
-            shortcut: 'Ctrl+O',
+            shortcut: 'Ctrl+0',
         },
         {
             platform: "mac" /* Mac */,
-            shortcut: 'Meta+O',
+            shortcut: 'Meta+0',
         },
     ],
 });

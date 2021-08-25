@@ -41,9 +41,8 @@ export class WarningErrorCounter {
     constructor() {
         WarningErrorCounter._instanceForTest = this;
         const countersWrapper = document.createElement('div');
-        this._toolbarItem = new UI.Toolbar.ToolbarItemWithCompactLayout(countersWrapper);
+        this._toolbarItem = new UI.Toolbar.ToolbarItem(countersWrapper);
         this._toolbarItem.setVisible(false);
-        this._toolbarItem.addEventListener("CompactLayoutUpdated" /* CompactLayoutUpdated */, this.onSetCompactLayout, this);
         this._consoleCounter = new IconButton.IconButton.IconButton();
         countersWrapper.appendChild(this._consoleCounter);
         this._consoleCounter.data = {
@@ -67,13 +66,6 @@ export class WarningErrorCounter {
         SDK.ConsoleModel.ConsoleModel.instance().addEventListener(SDK.ConsoleModel.Events.MessageUpdated, this._update, this);
         issuesManager.addEventListener("IssuesCountUpdated" /* IssuesCountUpdated */, this._update, this);
         this._update();
-    }
-    onSetCompactLayout(event) {
-        this.setCompactLayout(event.data);
-    }
-    setCompactLayout(enable) {
-        this._consoleCounter.data = { ...this._consoleCounter.data, compact: enable };
-        this._issueCounter.data = { ...this._issueCounter.data, compact: enable };
     }
     static instance(opts = { forceNew: null }) {
         const { forceNew } = opts;

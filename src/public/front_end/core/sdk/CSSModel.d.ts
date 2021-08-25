@@ -14,7 +14,7 @@ import { ResourceTreeModel } from './ResourceTreeModel.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
 import { SourceMapManager } from './SourceMapManager.js';
-export declare class CSSModel extends SDKModel<EventTypes> {
+export declare class CSSModel extends SDKModel {
     _isEnabled: boolean;
     _cachedMatchedCascadeNode: DOMNode | null;
     _cachedMatchedCascadePromise: Promise<CSSMatchedStyles | null> | null;
@@ -102,22 +102,6 @@ export declare enum Events {
     StyleSheetChanged = "StyleSheetChanged",
     StyleSheetRemoved = "StyleSheetRemoved"
 }
-export declare type EventTypes = {
-    [Events.FontsUpdated]: void;
-    [Events.MediaQueryResultChanged]: void;
-    [Events.ModelWasEnabled]: void;
-    [Events.PseudoStateForced]: {
-        node: DOMNode;
-        pseudoClass: string;
-        enable: boolean;
-    };
-    [Events.StyleSheetAdded]: CSSStyleSheetHeader;
-    [Events.StyleSheetChanged]: {
-        styleSheetId: string;
-        edit?: Edit;
-    };
-    [Events.StyleSheetRemoved]: CSSStyleSheetHeader;
-};
 export declare class Edit {
     styleSheetId: string;
     oldRange: TextUtils.TextRange.TextRange;

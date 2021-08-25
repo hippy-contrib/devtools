@@ -20,5 +20,4 @@ const mockIssueManager = {
 };
 appendComponent({ issuesManager: mockIssueManager });
 appendComponent({ issuesManager: mockIssueManager, clickHandler: () => { } });
-appendComponent({ issuesManager: mockIssueManager, clickHandler: () => { }, compact: true });
 //# sourceMappingURL=basic.js.map

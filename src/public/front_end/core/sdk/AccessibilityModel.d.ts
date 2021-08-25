@@ -50,7 +50,7 @@ export declare class AccessibilityNode {
     numChildren(): number;
     hasOnlyUnloadedChildren(): boolean;
 }
-export declare class AccessibilityModel extends SDKModel<void> {
+export declare class AccessibilityModel extends SDKModel {
     _agent: ProtocolProxyApi.AccessibilityApi;
     _axIdToAXNode: Map<string, AccessibilityNode>;
     _backendDOMNodeIdToAXNode: Map<any, any>;

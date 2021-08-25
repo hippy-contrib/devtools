@@ -38,18 +38,6 @@ import { SDKModel } from './SDKModel.js';
 import { TargetManager } from './TargetManager.js';
 const UIStrings = {
     /**
-    *@description Explanation why no content is shown for WebSocket connection.
-    */
-    noContentForWebSocket: 'Content for WebSockets is currently not supported',
-    /**
-    *@description Explanation why no content is shown for redirect response.
-    */
-    noContentForRedirect: 'No content available because this request was redirected',
-    /**
-    *@description Explanation why no content is shown for preflight request.
-    */
-    noContentForPreflight: 'No content available for preflight request',
-    /**
     *@description Text to indicate that network throttling is disabled
     */
     noThrottling: 'No throttling',
@@ -157,16 +145,13 @@ export class NetworkManager extends SDKModel {
     }
     static async requestContentData(request) {
         if (request.resourceType() === Common.ResourceType.resourceTypes.WebSocket) {
-            return { error: i18nString(UIStrings.noContentForWebSocket), content: null, encoded: false };
+            return { error: 'Content for WebSockets is currently not supported', content: null, encoded: false };
         }
         if (!request.finished) {
             await request.once(NetworkRequestEvents.FinishedLoading);
         }
         if (request.isRedirect()) {
-            return { error: i18nString(UIStrings.noContentForRedirect), content: null, encoded: false };
-        }
-        if (request.isPreflightRequest()) {
-            return { error: i18nString(UIStrings.noContentForPreflight), content: null, encoded: false };
+            return { error: 'No content available because this request was redirected', content: null, encoded: false };
         }
         const manager = NetworkManager.forRequest(request);
         if (!manager) {
@@ -658,7 +643,7 @@ export class NetworkDispatcher {
         };
         this._getExtraInfoBuilder(requestId).addRequestExtraInfo(extraRequestInfo);
     }
-    responseReceivedExtraInfo({ requestId, blockedCookies, headers, headersText, resourceIPAddressSpace, statusCode }) {
+    responseReceivedExtraInfo({ requestId, blockedCookies, headers, headersText, resourceIPAddressSpace }) {
         const extraResponseInfo = {
             blockedResponseCookies: blockedCookies.map(blockedCookie => {
                 return {
@@ -670,7 +655,6 @@ export class NetworkDispatcher {
             responseHeaders: this._headersMapToHeadersArray(headers),
             responseHeadersText: headersText,
             resourceIPAddressSpace,
-            statusCode,
         };
         this._getExtraInfoBuilder(requestId).addResponseExtraInfo(extraResponseInfo);
     }

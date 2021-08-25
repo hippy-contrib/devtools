@@ -402,9 +402,9 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
     _onRequestStarted(event) {
-        const { request, originalRequest } = event.data;
-        if (originalRequest) {
-            this._sentNetworkRequests.push(originalRequest);
+        const request = event.data.request;
+        if (event.data.originalRequest) {
+            this._sentNetworkRequests.push(event.data.originalRequest);
         }
         this._requestsSet.add(request);
         const manager = SDK.NetworkManager.NetworkManager.forRequest(request);
@@ -426,7 +426,8 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         this.dispatchEventToListeners(Events.RequestUpdated, request);
     }
     _onRequestRedirect(event) {
-        this._initiatorData.delete(event.data);
+        const request = event.data;
+        this._initiatorData.delete(request);
     }
     _onDOMContentLoaded(resourceTreeModel, event) {
         const networkManager = resourceTreeModel.target().model(SDK.NetworkManager.NetworkManager);
@@ -458,9 +459,9 @@ export class NetworkLog extends Common.ObjectWrapper.ObjectWrapper {
         this.dispatchEventToListeners(Events.Reset, { clearIfPreserved });
     }
     _networkMessageGenerated(networkManager, event) {
-        const { message, warning, requestId } = event.data;
-        const consoleMessage = new SDK.ConsoleModel.ConsoleMessage(networkManager.target().model(SDK.RuntimeModel.RuntimeModel), "network" /* Network */, warning ? "warning" /* Warning */ : "info" /* Info */, message);
-        this.associateConsoleMessageWithRequest(consoleMessage, requestId);
+        const message = event.data;
+        const consoleMessage = new SDK.ConsoleModel.ConsoleMessage(networkManager.target().model(SDK.RuntimeModel.RuntimeModel), "network" /* Network */, message.warning ? "warning" /* Warning */ : "info" /* Info */, message.message);
+        this.associateConsoleMessageWithRequest(consoleMessage, message.requestId);
         SDK.ConsoleModel.ConsoleModel.instance().addMessage(consoleMessage);
     }
     associateConsoleMessageWithRequest(consoleMessage, requestId) {

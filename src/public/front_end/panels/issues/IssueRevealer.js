@@ -22,7 +22,7 @@ export class IssueRevealer {
         if (view) {
             const issuesPane = await view.widget();
             if (issuesPane instanceof IssuesPane) {
-                await issuesPane.revealByCode(issue.code());
+                issuesPane.revealByCode(issue.code());
             }
             else {
                 throw new Error('Expected issues pane to be an instance of IssuesPane');

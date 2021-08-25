@@ -13,7 +13,6 @@ export declare class ChangesSidebar extends UI.Widget.Widget {
     _uiSourceCodeMofiedStatusChanged(event: Common.EventTarget.EventTargetEvent): void;
     _removeUISourceCode(uiSourceCode: Workspace.UISourceCode.UISourceCode): void;
     _addUISourceCode(uiSourceCode: Workspace.UISourceCode.UISourceCode): void;
-    wasShown(): void;
 }
 export declare const enum Events {
     SelectedUISourceCodeChanged = "SelectedUISourceCodeChanged"

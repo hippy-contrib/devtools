@@ -13,7 +13,6 @@ import { DomainRegister } from './utils/cdp';
 import { parseWsUrl } from './utils/url';
 
 const debug = createDebug('socket-bridge');
-createDebug.enable('socket-bridge');
 
 export class SocketServer extends DomainRegister {
   // key: appClientId
@@ -87,8 +86,7 @@ export class SocketServer extends DomainRegister {
           if (Ctor.name === AppClientType.WS) {
             newOption.ws = conn.appWs;
             if (!newOption.ws) {
-              debug('no app ws connection, ignore WsAppClient.');
-              return;
+              return debug('no app ws connection, ignore WsAppClient.');
             }
           }
           return new Ctor(appClientId, newOption);
@@ -107,6 +105,7 @@ export class SocketServer extends DomainRegister {
         if ('id' in msg) {
           // command 上行到调用的 ws
           const currentWs = this.idWsMap.get(msg.id);
+          if (!currentWs) return;
           currentWs.send(JSON.stringify(msg));
           this.idWsMap.delete(msg.id);
         } else {
@@ -170,7 +169,7 @@ export class SocketServer extends DomainRegister {
     if (clientRole === ClientRole.Devtools) {
       this.selectDebugTarget(debugTarget, ws);
     } else {
-      debug('ws app client connected.');
+      debug('ws app client connected. %s', clientId);
       if (platform === DevicePlatform.Android) {
         androidDebugTargetManager.addWsTarget(clientId);
       }
@@ -182,7 +181,7 @@ export class SocketServer extends DomainRegister {
         });
       }
       ws.on('close', () => {
-        debug('ws app client disconnect.');
+        debug('ws app client disconnect. %s', clientId);
         for (const [clientId, { appWs }] of this.connectionMap.entries()) {
           if (appWs === ws) {
             this.connectionMap.delete(clientId);

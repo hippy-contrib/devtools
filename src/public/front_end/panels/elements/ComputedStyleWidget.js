@@ -124,7 +124,7 @@ const processColor = (autoDetectFormat, text) => {
     const valueElement = document.createElement('span');
     valueElement.textContent = text;
     swatch.append(valueElement);
-    swatch.addEventListener(InlineEditor.ColorSwatch.FormatChangedEvent.eventName, (event) => {
+    swatch.addEventListener('formatchanged', (event) => {
         const { data } = event;
         valueElement.textContent = data.text;
     });

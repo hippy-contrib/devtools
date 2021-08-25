@@ -35,7 +35,6 @@ import * as Root from '../../core/root/root.js';
 import * as IconButton from '../../ui/components/icon_button/icon_button.js';
 import * as Components from '../../ui/legacy/components/utils/utils.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import settingsScreenStyles from './settingsScreen.css.js';
 const UIStrings = {
     /**
     *@description Name of the Settings view
@@ -96,11 +95,12 @@ export class SettingsScreen extends UI.Widget.VBox {
     _reportTabOnReveal;
     constructor() {
         super(true);
+        this.registerRequiredCSS('panels/settings/settingsScreen.css');
         this.contentElement.classList.add('settings-window-main');
         this.contentElement.classList.add('vbox');
         const settingsLabelElement = document.createElement('div');
         const settingsTitleElement = UI.Utils
-            .createShadowRootWithCoreStyles(settingsLabelElement, { cssFile: [settingsScreenStyles], delegatesFocus: undefined })
+            .createShadowRootWithCoreStyles(settingsLabelElement, { cssFile: 'panels/settings/settingsScreen.css', delegatesFocus: undefined })
             .createChild('div', 'settings-window-title');
         UI.ARIAUtils.markAsHeading(settingsTitleElement, 1);
         settingsTitleElement.textContent = i18nString(UIStrings.settings);
@@ -192,10 +192,6 @@ export class SettingsScreen extends UI.Widget.VBox {
         if (this._tabbedLocation.tabbedPane().selectedTabId === 'keybinds' && this._keybindsTab) {
             this._keybindsTab.onEscapeKeyPressed(event);
         }
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([settingsScreenStyles]);
     }
 }
 class SettingsTab extends UI.Widget.VBox {

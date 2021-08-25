@@ -3,9 +3,9 @@ import { EventEmitter } from 'events';
 import { DeviceManagerEvent, DevicePlatform, DeviceStatus } from './@types/enum';
 import { DeviceInfo } from './@types/tunnel';
 import { androidDebugTargetManager } from './android-debug-target-manager';
+import { getDeviceList, selectDevice } from './child-process/addon';
 
 const debug = createDebug('device-manager');
-createDebug.enable('device-manager');
 
 class DeviceManager extends EventEmitter {
   deviceList: DeviceInfo[] = [];
@@ -39,12 +39,11 @@ class DeviceManager extends EventEmitter {
   }
 
   getDeviceList() {
-    global.addon.getDeviceList((devices: any) => {
+    androidDebugTargetManager.clearCustomTarget();
+    getDeviceList((devices: DeviceInfo[]) => {
       debug('getDeviceList: %j', devices);
       for (const device of devices) {
-        if (device.physicalstatus === DeviceStatus.Disconnected) {
-          device.devicename = `${device.devicename}(已断开)`;
-        } else if (device.platform === DevicePlatform.Android) {
+        if (device.physicalstatus !== DeviceStatus.Disconnected && device.platform === DevicePlatform.Android) {
           androidDebugTargetManager.addCustomTarget(device.deviceid);
         }
       }
@@ -62,7 +61,7 @@ class DeviceManager extends EventEmitter {
           const device = this.deviceList[this.selectedIndex];
           const deviceId = device.deviceid;
           debug(`selectDevice ${deviceId}`);
-          global.addon.selectDevice(deviceId);
+          selectDevice(deviceId);
         }
       } else {
         this.selectedIndex = -1;

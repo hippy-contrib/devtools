@@ -187,7 +187,7 @@ export class CSSPlugin extends Plugin {
         const value = swatch.createChild('span');
         value.textContent = text;
         value.setAttribute('hidden', 'true');
-        swatch.addEventListener(InlineEditor.ColorSwatch.ClickEvent.eventName, this._swatchIconClicked.bind(this, swatch), false);
+        swatch.addEventListener('swatch-click', this._swatchIconClicked.bind(this, swatch), false);
         return swatch;
     }
     _createBezierSwatch(text) {

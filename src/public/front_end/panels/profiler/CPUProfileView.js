@@ -167,8 +167,9 @@ export class CPUProfileType extends ProfileType {
     }
     _consoleProfileFinished(event) {
         const data = event.data;
+        const cpuProfile = data.cpuProfile;
         const profile = new CPUProfileHeader(data.cpuProfilerModel, this, data.title);
-        profile.setProtocolProfile(data.cpuProfile);
+        profile.setProtocolProfile(cpuProfile);
         this.addProfile(profile);
     }
     _startRecordingProfile() {

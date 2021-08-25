@@ -16,16 +16,9 @@ const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 const getStyleSheets = ComponentHelpers.GetStylesheet.getStyleSheets;
 export class FormatChangedEvent extends Event {
     data;
-    static eventName = 'formatchanged';
     constructor(format, text) {
-        super(FormatChangedEvent.eventName, {});
+        super('formatchanged', {});
         this.data = { format, text };
-    }
-}
-export class ClickEvent extends Event {
-    static eventName = 'swatchclick';
-    constructor() {
-        super(ClickEvent.eventName, {});
     }
 }
 export class ColorSwatch extends HTMLElement {
@@ -111,7 +104,7 @@ export class ColorSwatch extends HTMLElement {
             this.toggleNextFormat();
             return;
         }
-        this.dispatchEvent(new ClickEvent());
+        this.dispatchEvent(new Event('swatch-click'));
     }
     consume(e) {
         e.stopPropagation();

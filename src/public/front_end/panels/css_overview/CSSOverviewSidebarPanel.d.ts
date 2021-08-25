@@ -8,7 +8,6 @@ export declare class CSSOverviewSidebarPanel extends UI.Widget.VBox {
     _deselectAllItems(): void;
     _onItemClick(event: Event): void;
     select(id: string): void;
-    wasShown(): void;
 }
 export declare const enum SidebarEvents {
     ItemSelected = "ItemSelected",

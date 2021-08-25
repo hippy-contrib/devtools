@@ -1,8 +1,6 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-/* eslint-disable rulesdir/no_underscored_properties */
-import lighthouseStartViewStyles from './lighthouseStartView.css.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { Events, Presets, RuntimeSettings } from './LighthouseController.js';
@@ -44,6 +42,7 @@ export class StartView extends UI.Widget.Widget {
     _shouldConfirm;
     constructor(controller) {
         super();
+        this.registerRequiredCSS('panels/lighthouse/lighthouseStartView.css');
         this._controller = controller;
         this._settingsToolbar = new UI.Toolbar.Toolbar('');
         this._render();
@@ -176,10 +175,6 @@ export class StartView extends UI.Widget.Widget {
             this._warningText.classList.toggle('hidden', !text);
             this._shouldConfirm = Boolean(text);
         }
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([lighthouseStartViewStyles]);
     }
 }
 //# sourceMappingURL=LighthouseStartView.js.map

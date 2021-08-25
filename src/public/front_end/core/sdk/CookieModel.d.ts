@@ -2,7 +2,7 @@ import type { Attributes } from './Cookie.js';
 import { Cookie } from './Cookie.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
-export declare class CookieModel extends SDKModel<void> {
+export declare class CookieModel extends SDKModel {
     _blockedCookies: Map<string, Cookie>;
     _cookieToBlockedReasons: Map<Cookie, BlockedReason[]>;
     constructor(target: Target);

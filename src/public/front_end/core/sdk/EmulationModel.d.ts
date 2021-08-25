@@ -4,7 +4,7 @@ import { CSSModel } from './CSSModel.js';
 import { OverlayModel } from './OverlayModel.js';
 import type { Target } from './Target.js';
 import { SDKModel } from './SDKModel.js';
-export declare class EmulationModel extends SDKModel<void> {
+export declare class EmulationModel extends SDKModel {
     _emulationAgent: ProtocolProxyApi.EmulationApi;
     _pageAgent: ProtocolProxyApi.PageApi;
     _deviceOrientationAgent: ProtocolProxyApi.DeviceOrientationApi;

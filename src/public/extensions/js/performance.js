@@ -113,7 +113,7 @@
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "7abd4bcd2cffd7cd13a2";
+/******/ 	var hotCurrentHash = "372541c9c939b44088a0";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -1415,13 +1415,13 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ 3:
 /*!***************************************************************************************************************************************************!*\
-  !*** multi (webpack)/hot/dev-server.js (webpack)-dev-server/client?http://10.45.18.74:8888&sockPath=/sockjs-node ./src/views/performance/main.ts ***!
+  !*** multi (webpack)/hot/dev-server.js (webpack)-dev-server/client?http://10.45.18.67:8888&sockPath=/sockjs-node ./src/views/performance/main.ts ***!
   \***************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(/*! /Users/shenchaoran/Workspace/tencent/dynamic-framework/chrome-devtools-extensions/node_modules/webpack/hot/dev-server.js */"./node_modules/webpack/hot/dev-server.js");
-__webpack_require__(/*! /Users/shenchaoran/Workspace/tencent/dynamic-framework/chrome-devtools-extensions/node_modules/webpack-dev-server/client/index.js?http://10.45.18.74:8888&sockPath=/sockjs-node */"./node_modules/webpack-dev-server/client/index.js?http://10.45.18.74:8888&sockPath=/sockjs-node");
+__webpack_require__(/*! /Users/shenchaoran/Workspace/tencent/dynamic-framework/chrome-devtools-extensions/node_modules/webpack-dev-server/client/index.js?http://10.45.18.67:8888&sockPath=/sockjs-node */"./node_modules/webpack-dev-server/client/index.js?http://10.45.18.67:8888&sockPath=/sockjs-node");
 module.exports = __webpack_require__(/*! /Users/shenchaoran/Workspace/tencent/dynamic-framework/chrome-devtools-extensions/src/views/performance/main.ts */"./src/views/performance/main.ts");
 
 

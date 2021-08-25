@@ -7,7 +7,6 @@ import * as Host from '../../core/host/host.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as Root from '../../core/root/root.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import keybindsSettingsTabStyles from './keybindsSettingsTab.css.js';
 const UIStrings = {
     /**
     *@description Text for keyboard shortcuts
@@ -82,6 +81,7 @@ export class KeybindsSettingsTab extends UI.Widget.VBox {
     _editingRow;
     constructor() {
         super(true);
+        this.registerRequiredCSS('panels/settings/keybindsSettingsTab.css');
         const header = this.contentElement.createChild('header');
         header.createChild('h1').textContent = i18nString(UIStrings.shortcuts);
         const keybindsSetSetting = Common.Settings.Settings.instance().moduleSetting('activeKeybindSet');
@@ -97,6 +97,7 @@ export class KeybindsSettingsTab extends UI.Widget.VBox {
         this._list = new UI.ListControl.ListControl(this._items, this, UI.ListControl.ListMode.NonViewport);
         this._items.replaceAll(this._createListItems());
         UI.ARIAUtils.markAsList(this._list.element);
+        this.registerRequiredCSS('panels/settings/keybindsSettingsTab.css');
         this.contentElement.appendChild(this._list.element);
         UI.ARIAUtils.setAccessibleName(this._list.element, i18nString(UIStrings.keyboardShortcutsList));
         const footer = this.contentElement.createChild('div');
@@ -250,10 +251,6 @@ export class KeybindsSettingsTab extends UI.Widget.VBox {
         if (this._editingItem) {
             this.stopEditing(this._editingItem);
         }
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([keybindsSettingsTabStyles]);
     }
 }
 export class ShortcutListItem {

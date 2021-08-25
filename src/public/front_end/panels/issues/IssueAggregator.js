@@ -10,7 +10,6 @@ import * as IssuesManager from '../../models/issues_manager/issues_manager.js';
  */
 export class AggregatedIssue extends IssuesManager.Issue.Issue {
     affectedCookies = new Map();
-    affectedRawCookieLines = new Map();
     affectedRequests = new Map();
     affectedLocations = new Map();
     heavyAdIssues = new Set();
@@ -35,9 +34,6 @@ export class AggregatedIssue extends IssuesManager.Issue.Issue {
     }
     cookies() {
         return Array.from(this.affectedCookies.values()).map(x => x.cookie);
-    }
-    getRawCookieLines() {
-        return this.affectedRawCookieLines.values();
     }
     sources() {
         return this.affectedLocations.values();
@@ -120,11 +116,6 @@ export class AggregatedIssue extends IssuesManager.Issue.Issue {
                 this.affectedCookies.set(key, { cookie, hasRequest });
             }
         }
-        for (const rawCookieLine of issue.rawCookieLines()) {
-            if (!this.affectedRawCookieLines.has(rawCookieLine)) {
-                this.affectedRawCookieLines.set(rawCookieLine, { rawCookieLine, hasRequest });
-            }
-        }
         for (const location of issue.sources()) {
             const key = JSON.stringify(location);
             if (!this.affectedLocations.has(key)) {
@@ -173,7 +164,6 @@ export class AggregatedIssue extends IssuesManager.Issue.Issue {
 export class IssueAggregator extends Common.ObjectWrapper.ObjectWrapper {
     issuesManager;
     aggregatedIssuesByCode = new Map();
-    hiddenAggregatedIssuesByCode = new Map();
     constructor(issuesManager) {
         super();
         this.issuesManager = issuesManager;
@@ -188,27 +178,19 @@ export class IssueAggregator extends Common.ObjectWrapper.ObjectWrapper {
     }
     onFullUpdateRequired() {
         this.aggregatedIssuesByCode.clear();
-        this.hiddenAggregatedIssuesByCode.clear();
         for (const issue of this.issuesManager.issues()) {
             this.aggregateIssue(issue);
         }
         this.dispatchEventToListeners("FullUpdateRequired" /* FullUpdateRequired */);
     }
     aggregateIssue(issue) {
-        if (issue.isHidden()) {
-            return this.aggregateIssueByStatus(this.hiddenAggregatedIssuesByCode, issue);
-        }
-        const aggregatedIssue = this.aggregateIssueByStatus(this.aggregatedIssuesByCode, issue);
-        this.dispatchEventToListeners("AggregatedIssueUpdated" /* AggregatedIssueUpdated */, aggregatedIssue);
-        return aggregatedIssue;
-    }
-    aggregateIssueByStatus(aggregatedIssuesMap, issue) {
-        let aggregatedIssue = aggregatedIssuesMap.get(issue.code());
+        let aggregatedIssue = this.aggregatedIssuesByCode.get(issue.code());
         if (!aggregatedIssue) {
             aggregatedIssue = new AggregatedIssue(issue.code());
-            aggregatedIssuesMap.set(issue.code(), aggregatedIssue);
+            this.aggregatedIssuesByCode.set(issue.code(), aggregatedIssue);
         }
         aggregatedIssue.addInstance(issue);
+        this.dispatchEventToListeners("AggregatedIssueUpdated" /* AggregatedIssueUpdated */, aggregatedIssue);
         return aggregatedIssue;
     }
     aggregatedIssues() {
@@ -226,9 +208,6 @@ export class IssueAggregator extends Common.ObjectWrapper.ObjectWrapper {
     }
     numberOfAggregatedIssues() {
         return this.aggregatedIssuesByCode.size;
-    }
-    numberOfHiddenAggregatedIssues() {
-        return this.hiddenAggregatedIssuesByCode.size;
     }
 }
 //# sourceMappingURL=IssueAggregator.js.map

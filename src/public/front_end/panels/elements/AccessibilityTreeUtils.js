@@ -1,13 +1,11 @@
 // Copyright 2021 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import * as SDK from '../../core/sdk/sdk.js';
 import * as ElementsComponents from './components/components.js';
 import * as LitHtml from '../../ui/lit-html/lit-html.js';
 export function sdkNodeToAXTreeNode(sdkNode) {
     const treeNodeData = sdkNode;
-    const role = sdkNode.role()?.value;
-    if (!sdkNode.numChildren() && role !== 'Iframe') {
+    if (!sdkNode.numChildren()) {
         return {
             treeNodeData,
             id: sdkNode.id(),
@@ -16,26 +14,8 @@ export function sdkNodeToAXTreeNode(sdkNode) {
     return {
         treeNodeData,
         children: async () => {
-            const domNode = await sdkNode.deferredDOMNode()?.resolvePromise();
-            const document = domNode?.contentDocument();
-            if (document) {
-                const axmodel = document.domModel().target().model(SDK.AccessibilityModel.AccessibilityModel);
-                if (!axmodel) {
-                    throw new Error('Could not create AccessibilityModel for iframe');
-                }
-                // Check if we have requested the node before:
-                if (!axmodel.axNodeForDOMNode(document)) {
-                    // Request root node from backend and add to model
-                    await axmodel.requestPartialAXTree(document);
-                }
-                const localRoot = axmodel.axNodeForDOMNode(document);
-                if (!localRoot) {
-                    throw new Error('Could not find root node');
-                }
-                return [sdkNodeToAXTreeNode(localRoot)];
-            }
             if (sdkNode.numChildren() === sdkNode.children().length) {
-                return sdkNode.children().map(child => sdkNodeToAXTreeNode(child));
+                return Promise.resolve(sdkNode.children().map(child => sdkNodeToAXTreeNode(child)));
             }
             // numChildren returns the number of children that this node has, whereas node.children()
             // returns only children that have been loaded. If these two don't match, that means that
@@ -48,7 +28,7 @@ export function sdkNodeToAXTreeNode(sdkNode) {
             for (const child of sdkNode.children()) {
                 treeNodeChildren.push(sdkNodeToAXTreeNode(child));
             }
-            return treeNodeChildren;
+            return Promise.resolve(treeNodeChildren);
         },
         id: sdkNode.id(),
     };

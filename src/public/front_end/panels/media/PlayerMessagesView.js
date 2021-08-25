@@ -5,7 +5,6 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import playerMessagesViewStyles from './playerMessagesView.css.js';
 const UIStrings = {
     /**
     *@description A context menu item in the Console View of the Console panel
@@ -160,7 +159,7 @@ class MessageLevelSelector extends Common.ObjectWrapper.ObjectWrapper {
     }
     createElementForItem(item) {
         const element = document.createElement('div');
-        const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(element, { cssFile: [playerMessagesViewStyles], delegatesFocus: undefined });
+        const shadowRoot = UI.Utils.createShadowRootWithCoreStyles(element, { cssFile: 'panels/media/playerMessagesView.css', delegatesFocus: undefined });
         const container = shadowRoot.createChild('div', 'media-messages-level-dropdown-element');
         const checkBox = container.createChild('div', 'media-messages-level-dropdown-checkbox');
         const text = container.createChild('span', 'media-messages-level-dropdown-text');
@@ -187,6 +186,7 @@ export class PlayerMessagesView extends UI.Widget.VBox {
     _messageLevelSelector;
     constructor() {
         super();
+        this.registerRequiredCSS('panels/media/playerMessagesView.css');
         this._headerPanel = this.contentElement.createChild('div', 'media-messages-header');
         this._bodyPanel = this.contentElement.createChild('div', 'media-messages-body');
         this._buildToolbar();
@@ -255,10 +255,6 @@ export class PlayerMessagesView extends UI.Widget.VBox {
     addMessage(message) {
         const container = this._bodyPanel.createChild('div', 'media-messages-message-container media-message-' + message.level);
         UI.UIUtils.createTextChild(container, message.message);
-    }
-    wasShown() {
-        super.wasShown();
-        this.registerCSSFiles([playerMessagesViewStyles]);
     }
 }
 //# sourceMappingURL=PlayerMessagesView.js.map

@@ -35,6 +35,7 @@ function flattenRuleRanges(rule) {
     ranges.push({range: rule.style.range, name: 'style range'});
   }
 
+
   const properties = rule.style.allProperties();
 
   for (let i = 0; i < properties.length; ++i) {

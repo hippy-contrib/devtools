@@ -6,7 +6,7 @@ export interface EventDescriptor<Events = any, T extends EventType<Events> = any
     listener: (arg0: EventTargetEvent<EventPayload<Events, T>>) => void;
 }
 export declare function removeEventListeners(eventList: EventDescriptor[]): void;
-export declare type EventType<Events> = Events extends Object ? keyof Events : Events extends void ? never : string | symbol;
+export declare type EventType<Events> = Events extends Object ? keyof Events : string | symbol;
 export declare type EventPayload<Events, T> = T extends keyof Events ? Events[T] : unknown;
 export declare type EventPayloadToRestParameters<T> = T extends void ? [] : [T];
 export interface EventTarget<Events = any> {

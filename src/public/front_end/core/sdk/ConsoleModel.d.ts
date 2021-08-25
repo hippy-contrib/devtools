@@ -2,7 +2,6 @@ import * as Protocol from '../../generated/protocol.js';
 import * as Common from '../common/common.js';
 import { FrontendMessageSource, FrontendMessageType } from './ConsoleModelTypes.js';
 export { FrontendMessageSource, FrontendMessageType } from './ConsoleModelTypes.js';
-import type { EventData } from './CPUProfilerModel.js';
 import { CPUProfilerModel } from './CPUProfilerModel.js';
 import type { Location } from './DebuggerModel.js';
 import { RemoteObject } from './RemoteObject.js';
@@ -10,7 +9,6 @@ import type { ConsoleAPICall, ExceptionWithTimestamp, ExecutionContext, QueryObj
 import { RuntimeModel } from './RuntimeModel.js';
 import type { Target } from './Target.js';
 import type { Observer } from './TargetManager.js';
-import type { ResourceTreeFrame } from './ResourceTreeModel.js';
 export declare class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper implements Observer {
     _messages: ConsoleMessage[];
     _messageByExceptionId: Map<RuntimeModel, Map<number, ConsoleMessage>>;
@@ -34,9 +32,9 @@ export declare class ConsoleModel extends Common.ObjectWrapper.ObjectWrapper imp
     _consoleAPICalled(runtimeModel: RuntimeModel, event: Common.EventTarget.EventTargetEvent<ConsoleAPICall>): void;
     _queryObjectRequested(runtimeModel: RuntimeModel, event: Common.EventTarget.EventTargetEvent<QueryObjectRequestedEvent>): void;
     _clearIfNecessary(): void;
-    _mainFrameNavigated(event: Common.EventTarget.EventTargetEvent<ResourceTreeFrame>): void;
-    _consoleProfileStarted(cpuProfilerModel: CPUProfilerModel, event: Common.EventTarget.EventTargetEvent<EventData>): void;
-    _consoleProfileFinished(cpuProfilerModel: CPUProfilerModel, event: Common.EventTarget.EventTargetEvent<EventData>): void;
+    _mainFrameNavigated(event: Common.EventTarget.EventTargetEvent): void;
+    _consoleProfileStarted(cpuProfilerModel: CPUProfilerModel, event: Common.EventTarget.EventTargetEvent): void;
+    _consoleProfileFinished(cpuProfilerModel: CPUProfilerModel, event: Common.EventTarget.EventTargetEvent): void;
     _addConsoleProfileMessage(cpuProfilerModel: CPUProfilerModel, type: MessageType, scriptLocation: Location, messageText: string): void;
     _incrementErrorWarningCount(msg: ConsoleMessage): void;
     messages(): ConsoleMessage[];

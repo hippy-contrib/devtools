@@ -9,7 +9,6 @@ import * as Platform from '../../core/platform/platform.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { AnimationGroupPreviewUI } from './AnimationGroupPreviewUI.js';
-import animationTimelineStyles from './animationTimeline.css.js';
 import { AnimationModel, Events } from './AnimationModel.js';
 import { AnimationScreenshotPopover } from './AnimationScreenshotPopover.js';
 import { AnimationUI } from './AnimationUI.js';
@@ -115,6 +114,7 @@ export class AnimationTimeline extends UI.Widget.VBox {
     _originalMousePosition;
     constructor() {
         super(true);
+        this.registerRequiredCSS('panels/animation/animationTimeline.css');
         this.element.classList.add('animations-timeline');
         this._gridWrapper = this.contentElement.createChild('div', 'grid-overflow-wrapper');
         this._grid = UI.UIUtils.createSVGChild(this._gridWrapper, 'svg', 'animation-timeline-grid');
@@ -147,7 +147,6 @@ export class AnimationTimeline extends UI.Widget.VBox {
         for (const animationModel of SDK.TargetManager.TargetManager.instance().models(AnimationModel)) {
             this._addEventListeners(animationModel);
         }
-        this.registerCSSFiles([animationTimelineStyles]);
     }
     willHide() {
         for (const animationModel of SDK.TargetManager.TargetManager.instance().models(AnimationModel)) {
@@ -597,7 +596,7 @@ export class AnimationTimeline extends UI.Widget.VBox {
         this._animationsMap.set(animation.id(), animation);
     }
     _nodeRemoved(event) {
-        const { node } = event.data;
+        const node = event.data.node;
         const nodeUI = nodeUIsByNode.get(node);
         if (nodeUI) {
             nodeUI.nodeRemoved();

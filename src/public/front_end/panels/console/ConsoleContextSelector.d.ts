@@ -25,6 +25,6 @@ export declare class ConsoleContextSelector implements SDK.TargetManager.SDKMode
     isItemSelectable(item: SDK.RuntimeModel.ExecutionContext): boolean;
     itemSelected(item: SDK.RuntimeModel.ExecutionContext | null): void;
     _callFrameSelectedInUI(): void;
-    _callFrameSelectedInModel(event: Common.EventTarget.EventTargetEvent<SDK.DebuggerModel.DebuggerModel>): void;
+    _callFrameSelectedInModel(event: Common.EventTarget.EventTargetEvent): void;
     _frameNavigated(event: Common.EventTarget.EventTargetEvent<SDK.ResourceTreeModel.ResourceTreeFrame>): void;
 }

@@ -14,7 +14,7 @@ export declare enum StepMode {
     StepOut = "StepOut",
     StepOver = "StepOver"
 }
-export declare class DebuggerModel extends SDKModel<EventTypes> {
+export declare class DebuggerModel extends SDKModel {
     _agent: ProtocolProxyApi.DebuggerApi;
     _runtimeModel: RuntimeModel;
     _sourceMapManager: SourceMapManager<Script>;
@@ -132,22 +132,13 @@ export declare enum Events {
     DebuggerPaused = "DebuggerPaused",
     DebuggerResumed = "DebuggerResumed",
     ParsedScriptSource = "ParsedScriptSource",
+    FailedToParseScriptSource = "FailedToParseScriptSource",
     DiscardedAnonymousScriptSource = "DiscardedAnonymousScriptSource",
     GlobalObjectCleared = "GlobalObjectCleared",
     CallFrameSelected = "CallFrameSelected",
+    ConsoleCommandEvaluatedInSelectedCallFrame = "ConsoleCommandEvaluatedInSelectedCallFrame",
     DebuggerIsReadyToPause = "DebuggerIsReadyToPause"
 }
-export declare type EventTypes = {
-    [Events.DebuggerWasEnabled]: DebuggerModel;
-    [Events.DebuggerWasDisabled]: void;
-    [Events.DebuggerPaused]: DebuggerModel;
-    [Events.DebuggerResumed]: DebuggerModel;
-    [Events.ParsedScriptSource]: Script;
-    [Events.DiscardedAnonymousScriptSource]: Script;
-    [Events.GlobalObjectCleared]: DebuggerModel;
-    [Events.CallFrameSelected]: DebuggerModel;
-    [Events.DebuggerIsReadyToPause]: DebuggerModel;
-};
 export declare class Location {
     debuggerModel: DebuggerModel;
     scriptId: string;

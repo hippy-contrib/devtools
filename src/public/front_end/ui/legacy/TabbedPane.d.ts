@@ -82,7 +82,6 @@ export declare class TabbedPane extends VBox {
     setPlaceholderElement(element: Element, focusedElement?: Element): void;
     waitForTabElementUpdate(): Promise<void>;
     _innerUpdateTabElements(): void;
-    _adjustToolbarWidth(): void;
     _showTabElement(index: number, tab: TabbedPaneTab): void;
     _hideTabElement(tab: TabbedPaneTab): void;
     _createDropDownButton(): HTMLDivElement;

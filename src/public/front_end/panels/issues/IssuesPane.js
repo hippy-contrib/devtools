@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
-import * as Root from '../../core/root/root.js';
 import * as IssuesManager from '../../models/issues_manager/issues_manager.js';
-import * as IconButton from '../../ui/components/icon_button/icon_button.js';
 import * as IssueCounter from '../../ui/components/issue_counter/issue_counter.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { IssueAggregator } from './IssueAggregator.js';
@@ -85,10 +83,6 @@ const UIStrings = {
      *              browser behaviors.
      */
     quirksMode: 'Quirks Mode',
-    /**
-     * @description Tooltip label for the button which reveals all hidden isssues.
-     */
-    unHideAllHiddenIssues: 'Unhide all hidden issues',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/issues/IssuesPane.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -198,16 +192,6 @@ export class IssuesPane extends UI.Widget.VBox {
         const groupByCategoryCheckbox = new UI.Toolbar.ToolbarSettingCheckbox(groupByCategorySetting, i18nString(UIStrings.groupDisplayedIssuesUnder), i18nString(UIStrings.groupByCategory));
         // Hide the option to toggle category grouping for now.
         groupByCategoryCheckbox.setVisible(false);
-        if (Root.Runtime.experiments.isEnabled('hideIssuesFeature')) {
-            const button = new UI.Toolbar.ToolbarButton(i18nString(UIStrings.unHideAllHiddenIssues));
-            button.element.classList.add('unhide-all-issues-btn');
-            button.addEventListener(UI.Toolbar.ToolbarButton.Events.Click, () => IssuesManager.IssuesManager.IssuesManager.instance().unhideAllIssues());
-            UI.ARIAUtils.markAsMenuButton(button.element);
-            const icon = new IconButton.Icon.Icon();
-            icon.data = { iconName: 'refresh_12x12_icon', color: '', height: '12px', width: '12px' };
-            button.element.appendChild(icon);
-            rightToolbar.appendToolbarItem(button);
-        }
         rightToolbar.appendToolbarItem(groupByCategoryCheckbox);
         groupByCategorySetting.addChangeListener(() => {
             this.fullUpdate(true);
@@ -327,8 +311,7 @@ export class IssuesPane extends UI.Widget.VBox {
             this.noIssuesMessageDiv.style.display = 'flex';
         }
     }
-    async revealByCode(code) {
-        await this.issueViewUpdatePromise;
+    revealByCode(code) {
         const issueView = this.issueViews.get(code);
         if (issueView) {
             issueView.expand();

@@ -403,10 +403,10 @@ export class AppManifestView extends UI.Widget.VBox {
         }
         this._updateManifest(true);
         this._registeredListeners = [
-            this._resourceTreeModel.addEventListener(SDK.ResourceTreeModel.Events.DOMContentLoaded, () => {
+            this._resourceTreeModel.addEventListener(SDK.ResourceTreeModel.Events.DOMContentLoaded, _event => {
                 this._updateManifest(true);
             }),
-            this._serviceWorkerManager.addEventListener(SDK.ServiceWorkerManager.Events.RegistrationUpdated, () => {
+            this._serviceWorkerManager.addEventListener(SDK.ServiceWorkerManager.Events.RegistrationUpdated, _event => {
                 this._updateManifest(false);
             }),
         ];

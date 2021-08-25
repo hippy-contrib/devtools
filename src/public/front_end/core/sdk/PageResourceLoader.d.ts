@@ -1,7 +1,6 @@
 import * as Common from '../common/common.js';
 import * as Host from '../host/host.js';
 import type * as Protocol from '../../generated/protocol.js';
-import type { ResourceTreeFrame } from './ResourceTreeModel.js';
 import type { Target } from './Target.js';
 export declare type PageResourceLoadInitiator = {
     target: null;
@@ -54,7 +53,7 @@ export declare class PageResourceLoader extends Common.ObjectWrapper.ObjectWrapp
         maxConcurrentLoads: number;
         loadTimeout: number;
     }): PageResourceLoader;
-    _onMainFrameNavigated(event: Common.EventTarget.EventTargetEvent<ResourceTreeFrame>): void;
+    _onMainFrameNavigated(event: Common.EventTarget.EventTargetEvent): void;
     getResourcesLoaded(): Map<string, PageResource>;
     /**
      * Loading is the number of currently loading and queued items. Resources is the total number of resources,

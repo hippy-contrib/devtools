@@ -56,7 +56,7 @@ export class NetworkOverview extends PerfUI.TimelineOverviewPane.TimelineOvervie
         this.scheduleUpdate();
     }
     _domContentLoadedEventFired(event) {
-        const { data } = event;
+        const data = event.data;
         if (data) {
             this._domContentLoadedEvents.push(data * 1000);
         }

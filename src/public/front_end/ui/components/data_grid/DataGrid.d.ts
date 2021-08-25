@@ -1,5 +1,5 @@
 import * as UI from '../../legacy/legacy.js';
-import type { Column, Row, SortState } from './DataGridUtils.js';
+import type { Cell, Column, Row, SortState } from './DataGridUtils.js';
 export interface DataGridContextMenusConfiguration {
     headerRow?: (menu: UI.ContextMenu.ContextMenu, columns: readonly Column[]) => void;
     bodyRow?: (menu: UI.ContextMenu.ContextMenu, columns: readonly Column[], row: Readonly<Row>) => void;
@@ -9,6 +9,32 @@ export interface DataGridData {
     rows: Row[];
     activeSort: SortState | null;
     contextMenus?: DataGridContextMenusConfiguration;
+}
+export declare class ColumnHeaderClickEvent extends Event {
+    data: {
+        column: Column;
+        columnIndex: number;
+    };
+    constructor(column: Column, columnIndex: number);
+}
+export declare class NewUserFilterTextEvent extends Event {
+    data: {
+        filterText: string;
+    };
+    constructor(filterText: string);
+}
+export declare class BodyCellFocusedEvent extends Event {
+    /**
+     * Although the DataGrid cares only about the focused cell, and has no concept
+     * of a focused row, many components that render a data grid want to know what
+     * row is active, so on the cell focused event we also send the row that the
+     * cell is part of.
+     */
+    data: {
+        cell: Cell;
+        row: Row;
+    };
+    constructor(cell: Cell, row: Row);
 }
 export declare class DataGrid extends HTMLElement {
     static readonly litTagName: import("../../lit-html/static.js").Static;

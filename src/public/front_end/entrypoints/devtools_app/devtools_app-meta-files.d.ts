@@ -11,7 +11,6 @@ import '../../panels/layer_viewer/layer_viewer-meta.js';
 import '../../panels/mobile_throttling/mobile_throttling-meta.js';
 import '../../panels/network/network-meta.js';
 import '../../panels/performance_monitor/performance_monitor-meta.js';
-import '../../panels/sensors/sensors-meta.js';
 import '../../panels/webauthn/webauthn-meta.js';
 import '../../panels/web_audio/web_audio-meta.js';
 import '../inspector_main/inspector_main-meta.js';

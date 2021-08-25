@@ -7,7 +7,6 @@ export var FilterType;
 (function (FilterType) {
     FilterType["Domain"] = "domain";
     FilterType["HasResponseHeader"] = "has-response-header";
-    FilterType["ResponseHeaderValueSetCookie"] = "response-header-set-cookie";
     FilterType["Is"] = "is";
     FilterType["LargerThan"] = "larger-than";
     FilterType["Method"] = "method";

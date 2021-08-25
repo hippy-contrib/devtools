@@ -259,7 +259,8 @@ export class CoverageModel extends SDK.SDKModel.SDKModel {
         return updatedEntries;
     }
     handleStyleSheetAdded(event) {
-        this.addStyleSheetToCSSCoverage(event.data);
+        const styleSheetHeader = event.data;
+        this.addStyleSheetToCSSCoverage(styleSheetHeader);
     }
     async takeCSSCoverage() {
         // Don't poll if we have no model, or are suspended.

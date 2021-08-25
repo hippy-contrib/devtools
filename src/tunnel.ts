@@ -4,6 +4,7 @@
 import createDebug from 'debug';
 import { EventEmitter } from 'events';
 import { ClientEvent } from './@types/enum';
+import { sendMsg } from './child-process/addon';
 import { DomainRegister } from './utils/cdp';
 
 const debug = createDebug('tunnel');
@@ -44,7 +45,7 @@ export class Tunnel extends DomainRegister {
         return;
       }
       debug('sendMessage: %j', msg);
-      global.addon.sendMsg(JSON.stringify(msg));
+      sendMsg(JSON.stringify(msg));
 
       if (msg.id) {
         this.requestPromiseMap.set(msg.id, { resolve, reject });

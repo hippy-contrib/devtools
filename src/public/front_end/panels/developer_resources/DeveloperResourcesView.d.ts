@@ -21,5 +21,4 @@ export declare class DeveloperResourcesView extends UI.Widget.VBox {
      *
      */
     _onFilterChanged(): void;
-    wasShown(): void;
 }

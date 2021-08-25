@@ -1,12 +1,12 @@
-import * as EmulationModel from '../../models/emulation/emulation.js';
 import * as UI from '../../ui/legacy/legacy.js';
-export declare class DevicesSettingsTab extends UI.Widget.VBox implements UI.ListWidget.Delegate<EmulationModel.EmulatedDevices.EmulatedDevice> {
+import { EmulatedDevice, EmulatedDevicesList } from './EmulatedDevices.js';
+export declare class DevicesSettingsTab extends UI.Widget.VBox implements UI.ListWidget.Delegate<EmulatedDevice> {
     containerElement: HTMLElement;
     _addCustomButton: HTMLButtonElement;
-    _list: UI.ListWidget.ListWidget<EmulationModel.EmulatedDevices.EmulatedDevice>;
+    _list: UI.ListWidget.ListWidget<EmulatedDevice>;
     _muteUpdate: boolean;
-    _emulatedDevicesList: EmulationModel.EmulatedDevices.EmulatedDevicesList;
-    _editor?: UI.ListWidget.Editor<EmulationModel.EmulatedDevices.EmulatedDevice>;
+    _emulatedDevicesList: EmulatedDevicesList;
+    _editor?: UI.ListWidget.Editor<EmulatedDevice>;
     private constructor();
     static instance(): DevicesSettingsTab;
     wasShown(): void;
@@ -14,9 +14,9 @@ export declare class DevicesSettingsTab extends UI.Widget.VBox implements UI.Lis
     _muteAndSaveDeviceList(custom: boolean): void;
     _addCustomDevice(): void;
     _toNumericInputValue(value: number): string;
-    renderItem(device: EmulationModel.EmulatedDevices.EmulatedDevice, editable: boolean): Element;
-    removeItemRequested(item: EmulationModel.EmulatedDevices.EmulatedDevice): void;
-    commitEdit(device: EmulationModel.EmulatedDevices.EmulatedDevice, editor: UI.ListWidget.Editor<EmulationModel.EmulatedDevices.EmulatedDevice>, isNew: boolean): void;
-    beginEdit(device: EmulationModel.EmulatedDevices.EmulatedDevice): UI.ListWidget.Editor<EmulationModel.EmulatedDevices.EmulatedDevice>;
-    _createEditor(): UI.ListWidget.Editor<EmulationModel.EmulatedDevices.EmulatedDevice>;
+    renderItem(device: EmulatedDevice, editable: boolean): Element;
+    removeItemRequested(item: EmulatedDevice): void;
+    commitEdit(device: EmulatedDevice, editor: UI.ListWidget.Editor<EmulatedDevice>, isNew: boolean): void;
+    beginEdit(device: EmulatedDevice): UI.ListWidget.Editor<EmulatedDevice>;
+    _createEditor(): UI.ListWidget.Editor<EmulatedDevice>;
 }

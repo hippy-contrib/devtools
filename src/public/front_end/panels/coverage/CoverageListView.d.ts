@@ -17,7 +17,6 @@ export declare class CoverageListView extends UI.Widget.VBox {
     _onKeyDown(event: KeyboardEvent): void;
     _revealSourceForSelectedNode(): Promise<void>;
     _sortingChanged(): void;
-    wasShown(): void;
 }
 export declare class GridNode extends DataGrid.SortableDataGrid.SortableDataGridNode<GridNode> {
     _coverageInfo: URLCoverageInfo;

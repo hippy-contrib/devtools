@@ -371,7 +371,7 @@ export class DOMDebuggerModel extends SDKModel {
         if (this.suspended) {
             return;
         }
-        const { node } = event.data;
+        const node = event.data.node;
         const children = node.children() || [];
         this._removeDOMBreakpoints(breakpoint => breakpoint.node === node || children.indexOf(breakpoint.node) !== -1);
     }

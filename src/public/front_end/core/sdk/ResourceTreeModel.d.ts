@@ -3,7 +3,6 @@ import type * as ProtocolProxyApi from '../../generated/protocol-proxy-api.js';
 import * as Protocol from '../../generated/protocol.js';
 import type { DeferredDOMNode, DOMNode } from './DOMModel.js';
 import { DOMModel } from './DOMModel.js';
-import type { RequestUpdateDroppedEventData } from './NetworkManager.js';
 import type { NetworkRequest } from './NetworkRequest.js';
 import { Resource } from './Resource.js';
 import { ExecutionContext } from './RuntimeModel.js';
@@ -37,8 +36,8 @@ export declare class ResourceTreeModel extends SDKModel<EventTypes> {
     _frameNavigated(framePayload: Protocol.Page.Frame, type: Protocol.Page.NavigationType | undefined): void;
     _documentOpened(framePayload: Protocol.Page.Frame): void;
     _frameDetached(frameId: string, isSwap: boolean): void;
-    _onRequestFinished(event: Common.EventTarget.EventTargetEvent<NetworkRequest>): void;
-    _onRequestUpdateDropped(event: Common.EventTarget.EventTargetEvent<RequestUpdateDroppedEventData>): void;
+    _onRequestFinished(event: Common.EventTarget.EventTargetEvent): void;
+    _onRequestUpdateDropped(event: Common.EventTarget.EventTargetEvent): void;
     frameForId(frameId: string): ResourceTreeFrame | null;
     forAllResources(callback: (arg0: Resource) => boolean): boolean;
     frames(): ResourceTreeFrame[];

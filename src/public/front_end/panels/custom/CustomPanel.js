@@ -10,7 +10,7 @@ export class CustomPanel extends UI.Panel.Panel {
         iframe.style.height = '100%';
         iframe.style.overflow = 'auto';
         this.contentElement.appendChild(iframe);
-        window.addEventListener('message', (e) => {
+        window.addEventListener('message', e => {
             if (e.data === 'getParentUrl') {
                 iframe.contentWindow?.postMessage(window.location.href, e.origin);
             }

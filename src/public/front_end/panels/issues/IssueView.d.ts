@@ -14,15 +14,12 @@ export declare class IssueView extends UI.TreeOutline.TreeElement {
     _hasBeenExpandedBefore: boolean;
     private throttle;
     private needsUpdateOnExpand;
-    private hiddenIssuesMenu;
     constructor(parent: UI.Widget.VBox, issue: AggregatedIssue, description: IssuesManager.MarkdownIssueDescription.IssueDescription);
     private static getBodyCSSClass;
     getIssueTitle(): string;
     onattach(): void;
     appendAffectedResource(resource: UI.TreeOutline.TreeElement): void;
     _appendHeader(): void;
-    private showHiddenIssuesMenu;
-    private hideHiddenIssuesMenu;
     onexpand(): void;
     private updateFromIssue;
     updateAffectedResourceVisibility(): void;

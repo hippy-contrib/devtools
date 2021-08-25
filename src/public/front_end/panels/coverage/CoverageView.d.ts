@@ -56,7 +56,6 @@ export declare class CoverageView extends UI.Widget.VBox {
     _exportReport(): Promise<void>;
     selectCoverageItemByUrl(url: string): void;
     static readonly EXTENSION_BINDINGS_URL_PREFIX = "extensions::";
-    wasShown(): void;
 }
 export declare class ActionDelegate implements UI.ActionRegistration.ActionDelegate {
     handleAction(context: UI.Context.Context, actionId: string): boolean;

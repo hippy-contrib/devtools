@@ -55,7 +55,6 @@ export declare class PaintProfilerView extends UI.Widget.HBox {
     } | null;
     _updateImage(): void;
     _reset(): void;
-    wasShown(): void;
 }
 export declare enum Events {
     WindowChanged = "WindowChanged"

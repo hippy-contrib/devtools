@@ -5,7 +5,6 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as UI from '../../ui/legacy/legacy.js';
-import lighthouseDialogStyles from './lighthouseDialog.css.js';
 import { Events, RuntimeSettings } from './LighthouseController.js';
 const UIStrings = {
     /**
@@ -166,7 +165,7 @@ export class StatusView {
         this._render();
     }
     _render() {
-        const dialogRoot = UI.Utils.createShadowRootWithCoreStyles(this._dialog.contentElement, { cssFile: [lighthouseDialogStyles], delegatesFocus: undefined });
+        const dialogRoot = UI.Utils.createShadowRootWithCoreStyles(this._dialog.contentElement, { cssFile: 'panels/lighthouse/lighthouseDialog.css', delegatesFocus: undefined });
         const lighthouseViewElement = dialogRoot.createChild('div', 'lighthouse-view vbox');
         const cancelButton = UI.UIUtils.createTextButton(i18nString(UIStrings.cancel), this._cancel.bind(this));
         const fragment = UI.Fragment.Fragment.build `

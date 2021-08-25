@@ -14,15 +14,14 @@ export declare class DOMBreakpointsSidebarPane extends UI.Widget.VBox implements
     isItemSelectable(_item: SDK.DOMDebuggerModel.DOMBreakpoint): boolean;
     updateSelectedItemARIA(_fromElement: Element | null, _toElement: Element | null): boolean;
     selectedItemChanged(from: SDK.DOMDebuggerModel.DOMBreakpoint | null, to: SDK.DOMDebuggerModel.DOMBreakpoint | null, fromElement: HTMLElement | null, toElement: HTMLElement | null): void;
-    _breakpointAdded(event: Common.EventTarget.EventTargetEvent<SDK.DOMDebuggerModel.DOMBreakpoint>): void;
-    _breakpointToggled(event: Common.EventTarget.EventTargetEvent<SDK.DOMDebuggerModel.DOMBreakpoint>): void;
-    _breakpointsRemoved(event: Common.EventTarget.EventTargetEvent<SDK.DOMDebuggerModel.DOMBreakpoint[]>): void;
+    _breakpointAdded(event: Common.EventTarget.EventTargetEvent): void;
+    _breakpointToggled(event: Common.EventTarget.EventTargetEvent): void;
+    _breakpointsRemoved(event: Common.EventTarget.EventTargetEvent): void;
     _addBreakpoint(breakpoint: SDK.DOMDebuggerModel.DOMBreakpoint): void;
     _contextMenu(breakpoint: SDK.DOMDebuggerModel.DOMBreakpoint, event: Event): void;
     _checkboxClicked(breakpoint: SDK.DOMDebuggerModel.DOMBreakpoint, event: Event): void;
     flavorChanged(_object: Object | null): void;
     _update(): void;
-    wasShown(): void;
 }
 export declare class ContextMenuProvider implements UI.ContextMenu.Provider {
     static instance(opts?: {

@@ -923,9 +923,6 @@ export class NetworkRequestNode extends NetworkNode {
         if (this._request.webBundleInfo()?.errorMessage || this._request.webBundleInnerRequestInfo()?.errorMessage) {
             return true;
         }
-        if (this._request.corsErrorStatus()) {
-            return true;
-        }
         return false;
     }
     _renderPrimaryCell(cell, columnId, text) {
@@ -1006,15 +1003,15 @@ export class NetworkRequestNode extends NetworkNode {
                 this._setTextAndTitle(cell, failText);
             }
         }
-        else if (this._request.statusCode && this._request.statusCode >= 400) {
+        else if (this._request.statusCode) {
             UI.UIUtils.createTextChild(cell, String(this._request.statusCode));
             this._appendSubtitle(cell, this._request.statusText);
             UI.Tooltip.Tooltip.install(cell, this._request.statusCode + ' ' + this._request.statusText);
         }
-        else if (!this._request.statusCode && this._request.parsedURL.isDataURL()) {
+        else if (this._request.parsedURL.isDataURL()) {
             this._setTextAndTitle(cell, i18nString(UIStrings.data));
         }
-        else if (!this._request.statusCode && this._request.canceled) {
+        else if (this._request.canceled) {
             this._setTextAndTitle(cell, i18nString(UIStrings.canceled));
         }
         else if (this._request.wasBlocked()) {
@@ -1079,11 +1076,6 @@ export class NetworkRequestNode extends NetworkNode {
         }
         else if (corsErrorStatus) {
             this._setTextAndTitle(cell, i18nString(UIStrings.corsError), i18nString(UIStrings.crossoriginResourceSharingErrorS, { PH1: corsErrorStatus.corsError }));
-        }
-        else if (this._request.statusCode) {
-            UI.UIUtils.createTextChild(cell, String(this._request.statusCode));
-            this._appendSubtitle(cell, this._request.statusText);
-            UI.Tooltip.Tooltip.install(cell, this._request.statusCode + ' ' + this._request.statusText);
         }
         else if (this._request.finished) {
             this._setTextAndTitle(cell, i18nString(UIStrings.finished));

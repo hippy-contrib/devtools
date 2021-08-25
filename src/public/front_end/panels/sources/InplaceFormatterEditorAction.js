@@ -89,8 +89,8 @@ export class InplaceFormatterEditorAction {
     }
     async _contentLoaded(uiSourceCode, content) {
         const highlighterType = uiSourceCode.mimeType();
-        const { formattedContent, formattedMapping } = await Formatter.ScriptFormatter.format(uiSourceCode.contentType(), highlighterType, content);
-        this._formattingComplete(uiSourceCode, formattedContent, formattedMapping);
+        const { content: formattedContent, mapping: formatterMapping } = await Formatter.ScriptFormatter.format(uiSourceCode.contentType(), highlighterType, content);
+        this._formattingComplete(uiSourceCode, formattedContent, formatterMapping);
     }
     /**
      * Post-format callback

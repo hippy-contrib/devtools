@@ -67,5 +67,4 @@ export declare class LighthousePanel extends UI.Panel.Panel {
      */
     _setupEmulationAndProtocolConnection(): Promise<void>;
     _resetEmulationAndProtocolConnection(): Promise<void>;
-    wasShown(): void;
 }

@@ -34,7 +34,6 @@ export declare enum IssueKind {
      */
     Improvement = "Improvement"
 }
-export declare function getIssueKindDescription(issueKind: IssueKind): Common.UIString.LocalizedString;
 /**
  * Union two issue kinds for issue aggregation. The idea is to show the most
  * important kind on aggregated issues that union issues of different kinds.
@@ -50,7 +49,6 @@ export declare abstract class Issue<IssueCode extends string = string> {
     private issueCode;
     private issuesModel;
     protected issueId: string | undefined;
-    private hidden;
     constructor(code: IssueCode | {
         code: IssueCode;
         umaCode: string;
@@ -62,7 +60,6 @@ export declare abstract class Issue<IssueCode extends string = string> {
     abstract getKind(): IssueKind;
     getBlockedByResponseDetails(): Iterable<Protocol.Audits.BlockedByResponseIssueDetails>;
     cookies(): Iterable<Protocol.Audits.AffectedCookie>;
-    rawCookieLines(): Iterable<string>;
     elements(): Iterable<AffectedElement>;
     requests(): Iterable<Protocol.Audits.AffectedRequest>;
     sources(): Iterable<Protocol.Audits.SourceCodeLocation>;
@@ -73,8 +70,6 @@ export declare abstract class Issue<IssueCode extends string = string> {
     model(): SDK.IssuesModel.IssuesModel | null;
     isCausedByThirdParty(): boolean;
     getIssueId(): string | undefined;
-    isHidden(): boolean;
-    setHidden(hidden: boolean): void;
 }
 export declare function toZeroBasedLocation(location: Protocol.Audits.SourceCodeLocation | undefined): {
     url: string;

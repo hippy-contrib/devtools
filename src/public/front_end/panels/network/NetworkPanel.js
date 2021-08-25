@@ -208,7 +208,7 @@ export class NetworkPanel extends UI.Panel.Panel {
         this._rightToolbar = new UI.Toolbar.Toolbar('', networkToolbarContainer);
         this._filterBar = new UI.FilterBar.FilterBar('networkPanel', true);
         this._filterBar.show(panel.contentElement);
-        this._filterBar.addEventListener("Changed" /* Changed */, this._handleFilterChanged.bind(this));
+        this._filterBar.addEventListener(UI.FilterBar.FilterBar.Events.Changed, this._handleFilterChanged.bind(this));
         this._settingsPane = new UI.Widget.HBox();
         this._settingsPane.element.classList.add('network-settings-pane');
         this._settingsPane.show(panel.contentElement);
@@ -441,7 +441,7 @@ export class NetworkPanel extends UI.Panel.Panel {
             this._resetFilmStripView();
         }
     }
-    _willReloadPage() {
+    _willReloadPage(_event) {
         if (this._pendingStopTimer) {
             clearTimeout(this._pendingStopTimer);
             delete this._pendingStopTimer;
@@ -450,7 +450,7 @@ export class NetworkPanel extends UI.Panel.Panel {
             this._filmStripRecorder.startRecording();
         }
     }
-    _load() {
+    _load(_event) {
         if (this._filmStripRecorder && this._filmStripRecorder.isRecording()) {
             this._pendingStopTimer = window.setTimeout(this._stopFilmStripRecording.bind(this), displayScreenshotDelay);
         }

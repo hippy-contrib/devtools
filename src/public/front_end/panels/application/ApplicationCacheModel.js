@@ -39,7 +39,8 @@ export class ApplicationCacheModel extends SDK.SDKModel.SDKModel {
         }
     }
     _frameDetached(event) {
-        this._frameManifestRemoved(event.data.frame.id);
+        const frame = event.data.frame;
+        this._frameManifestRemoved(frame.id);
     }
     reset() {
         this._statuses.clear();

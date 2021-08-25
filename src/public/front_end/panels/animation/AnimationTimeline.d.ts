@@ -72,10 +72,7 @@ export declare class AnimationTimeline extends UI.Widget.VBox implements SDK.Tar
     _removeAnimationGroup(group: AnimationGroup, event: Event): void;
     _selectAnimationGroup(group: AnimationGroup): void;
     _addAnimation(animation: AnimationImpl): void;
-    _nodeRemoved(event: Common.EventTarget.EventTargetEvent<{
-        node: SDK.DOMModel.DOMNode;
-        parent: SDK.DOMModel.DOMNode;
-    }>): void;
+    _nodeRemoved(event: Common.EventTarget.EventTargetEvent): void;
     _renderGrid(): void;
     scheduleRedraw(): void;
     _render(timestamp?: number): void;

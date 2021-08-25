@@ -12,10 +12,7 @@ export declare class Toolbar {
     _shadowRoot: ShadowRoot;
     _contentElement: Element;
     _insertionPoint: Element;
-    private compactLayout;
     constructor(className: string, parentElement?: Element);
-    hasCompactLayout(): boolean;
-    setCompactLayout(enable: boolean): void;
     static createLongPressActionButton(action: Action, toggledOptions: ToolbarButton[], untoggledOptions: ToolbarButton[]): ToolbarButton;
     static createActionButton(action: Action, options?: ToolbarButtonOptions | undefined): ToolbarButton;
     static createActionButtonForId(actionId: string, options?: ToolbarButtonOptions | undefined): ToolbarButton;
@@ -41,7 +38,7 @@ export interface ToolbarButtonOptions {
     showLabel: boolean;
     userActionCode?: Host.UserMetrics.Action;
 }
-export declare class ToolbarItem<T = any> extends Common.ObjectWrapper.ObjectWrapper<T> {
+export declare class ToolbarItem extends Common.ObjectWrapper.ObjectWrapper {
     element: HTMLElement;
     _visible: boolean;
     _enabled: boolean;
@@ -51,27 +48,18 @@ export declare class ToolbarItem<T = any> extends Common.ObjectWrapper.ObjectWra
     setTitle(title: string, actionId?: string | undefined): void;
     setEnabled(value: boolean): void;
     _applyEnabledState(enabled: boolean): void;
+    /** x
+       */
     visible(): boolean;
     setVisible(x: boolean): void;
     setRightAligned(alignRight: boolean): void;
-    setCompactLayout(_enable: boolean): void;
 }
-export declare const enum ToolbarItemWithCompactLayoutEvents {
-    CompactLayoutUpdated = "CompactLayoutUpdated"
-}
-declare type ToolbarItemWithCompactLayoutEventTypes = {
-    [ToolbarItemWithCompactLayoutEvents.CompactLayoutUpdated]: boolean;
-};
-export declare class ToolbarItemWithCompactLayout extends ToolbarItem<ToolbarItemWithCompactLayoutEventTypes> {
-    constructor(element: Element);
-    setCompactLayout(enable: boolean): void;
-}
-export declare class ToolbarText extends ToolbarItem<void> {
+export declare class ToolbarText extends ToolbarItem {
     constructor(text?: string);
     text(): string;
     setText(text: string): void;
 }
-export declare class ToolbarButton extends ToolbarItem<ToolbarButton.EventTypes> {
+export declare class ToolbarButton extends ToolbarItem {
     _glyphElement: Icon;
     _textElement: HTMLElement;
     _title: string;
@@ -89,19 +77,15 @@ export declare class ToolbarButton extends ToolbarItem<ToolbarButton.EventTypes>
     setDarkText(): void;
     turnIntoSelect(shrinkable?: boolean | undefined): void;
     _clicked(event: Event): void;
-    _mouseDown(event: MouseEvent): void;
+    _mouseDown(event: Event): void;
 }
 export declare namespace ToolbarButton {
     enum Events {
         Click = "Click",
         MouseDown = "MouseDown"
     }
-    type EventTypes = {
-        [Events.Click]: Event;
-        [Events.MouseDown]: MouseEvent;
-    };
 }
-export declare class ToolbarInput extends ToolbarItem<ToolbarInput.EventTypes> {
+export declare class ToolbarInput extends ToolbarItem {
     _prompt: TextPrompt;
     _proxyElement: Element;
     constructor(placeholder: string, accessiblePlaceholder?: string, growFactor?: number, shrinkFactor?: number, tooltip?: string, completions?: ((arg0: string, arg1: string, arg2?: boolean | undefined) => Promise<Suggestion[]>), dynamicCompletions?: boolean);
@@ -116,10 +100,6 @@ export declare namespace ToolbarInput {
     enum Event {
         TextChanged = "TextChanged",
         EnterPressed = "EnterPressed"
-    }
-    interface EventTypes {
-        [Event.TextChanged]: string;
-        [Event.EnterPressed]: string;
     }
 }
 export declare class ToolbarToggle extends ToolbarButton {
@@ -138,7 +118,7 @@ export declare class ToolbarMenuButton extends ToolbarButton {
     _triggerTimeout?: number;
     _lastTriggerTime?: number;
     constructor(contextMenuHandler: (arg0: ContextMenu) => void, useSoftMenu?: boolean);
-    _mouseDown(event: MouseEvent): void;
+    _mouseDown(event: Event): void;
     _trigger(event: Event): void;
     _clicked(event: Event): void;
 }
@@ -150,7 +130,7 @@ export declare class ToolbarSettingToggle extends ToolbarToggle {
     _settingChanged(): void;
     _clicked(event: Event): void;
 }
-export declare class ToolbarSeparator extends ToolbarItem<void> {
+export declare class ToolbarSeparator extends ToolbarItem {
     constructor(spacer?: boolean);
 }
 export interface Provider {
@@ -159,7 +139,7 @@ export interface Provider {
 export interface ItemsProvider {
     toolbarItems(): ToolbarItem[];
 }
-export declare class ToolbarComboBox extends ToolbarItem<void> {
+export declare class ToolbarComboBox extends ToolbarItem {
     _selectElement: HTMLSelectElement;
     constructor(changeHandler: ((arg0: Event) => void) | null, title: string, className?: string);
     selectElement(): HTMLSelectElement;
@@ -191,7 +171,7 @@ export declare class ToolbarSettingComboBox extends ToolbarComboBox {
     _settingChanged(): void;
     _valueChanged(_event: Event): void;
 }
-export declare class ToolbarCheckbox extends ToolbarItem<void> {
+export declare class ToolbarCheckbox extends ToolbarItem {
     inputElement: HTMLInputElement;
     constructor(text: string, tooltip?: string, listener?: ((arg0: MouseEvent) => void));
     checked(): boolean;
@@ -217,4 +197,3 @@ export declare enum ToolbarItemLocation {
     MAIN_TOOLBAR_LEFT = "main-toolbar-left",
     STYLES_SIDEBARPANE_TOOLBAR = "styles-sidebarpane-toolbar"
 }
-export {};
