@@ -40,7 +40,7 @@ export const logMiddleWareManager: MiddleWareManager = {
         networkRequestId: message.networkRequestId,
       };
 
-      sendToDevtools({
+      return sendToDevtools({
         method: 'Log.entryAdded',
         params: {
           entry: consoleMessage,
@@ -49,30 +49,28 @@ export const logMiddleWareManager: MiddleWareManager = {
     },
   },
   downwardMiddleWareListMap: {
-    [ChromeCommand.LogClear]: ({ msg, sendToApp }) => {
+    [ChromeCommand.LogClear]: ({ msg, sendToApp }) =>
       sendToApp({
         id: (msg as Adapter.CDP.Req).id,
         method: 'Console.clearMessages',
         params: {},
-      });
-    },
-    'Log.disable': ({ msg, sendToApp }) => {
+      }),
+    'Log.disable': ({ msg, sendToApp }) =>
       sendToApp({
         id: (msg as Adapter.CDP.Req).id,
         method: 'Console.disable',
         params: {},
-      });
-    },
+      }),
     'Log.enable': ({ msg, sendToApp, sendToDevtools }) => {
-      sendToApp({
-        id: (msg as Adapter.CDP.Req).id,
-        method: 'Console.enable',
-        params: {},
-      });
       sendToDevtools({
         id: (msg as Adapter.CDP.Req).id,
         method: msg.method,
         result: {},
+      });
+      return sendToApp({
+        id: (msg as Adapter.CDP.Req).id,
+        method: 'Console.enable',
+        params: {},
       });
     },
   },

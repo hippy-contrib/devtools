@@ -124,13 +124,13 @@ export class Application {
     this.socketServer.selectDebugTarget(debugTarget);
   }
 
-  public static getDebugTargets(): Promise<DebugTarget[]> {
-    const { iwdpPort, host, port, wsPath } = Application.argv;
+  public static getDebugTargets(argv): Promise<DebugTarget[]> {
+    const { iwdpPort, host, port, wsPath } = argv;
     return DebugTargetManager.getDebugTargets({ iwdpPort, host, port, wsPath });
   }
 
   public static sendMessage(msg: Adapter.CDP.Req) {
-    Application.socketServer.sendMessage(msg);
+    return Application.socketServer.sendMessage(msg);
   }
 
   public static registerDomainListener(domain, listener) {
@@ -147,6 +147,7 @@ export class Application {
   }
 
   private static setEnv(env: DevtoolsEnv) {
+    setConfig('env', env);
     if (env === DevtoolsEnv.Hippy) initHippyEnv();
     else if (env === DevtoolsEnv.Voltron) initVoltronEnv();
     else if (env === DevtoolsEnv.TDF) initTdfEnv();

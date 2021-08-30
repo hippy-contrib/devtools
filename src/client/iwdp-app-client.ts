@@ -35,17 +35,19 @@ export class IwdpAppClient extends AppClient {
 
   protected registerMessageListener() {
     this.ws.on('message', (msg: string) => {
-      let msgObj;
+      let msgObj: Adapter.CDP.Res;
       try {
         msgObj = JSON.parse(msg);
       } catch (e) {
         console.error(`parse json error: ${msg}`);
       }
-      this.onMessage(msgObj);
-      const requestPromise = this.requestPromiseMap.get(msgObj.id);
-      if (requestPromise) {
-        requestPromise.resolve(msgObj);
-      }
+      this.onMessage(msgObj).then((res) => {
+        if (!('id' in msgObj)) return;
+        const requestPromise = this.requestPromiseMap.get(msgObj.id);
+        if (requestPromise) {
+          requestPromise.resolve(res);
+        }
+      });
     });
 
     this.ws.on('open', () => {

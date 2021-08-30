@@ -17,7 +17,7 @@ export const compose = (middlewareList: MiddleWare[]) => {
    * @api public
    */
 
-  return function (context, next = noop) {
+  return function (context, next?) {
     // last called middleware #
     let index = -1;
     return dispatch(0);
@@ -28,12 +28,10 @@ export const compose = (middlewareList: MiddleWare[]) => {
       if (i === middlewareList.length) fn = next;
       if (!fn) return Promise.resolve();
       try {
-        return Promise.resolve(fn(context, dispatch.bind(null, i + 1)));
+        return fn(context, dispatch.bind(null, i + 1));
       } catch (err) {
         return Promise.reject(err);
       }
     }
   };
 };
-
-function noop() {}

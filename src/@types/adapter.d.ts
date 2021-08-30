@@ -48,6 +48,8 @@ declare namespace Adapter {
   type ConnectionList = Connection[];
   type ConnectionListMap<T> = Map<string, ConnectionList<T>>;
 
+  type Resolve<T> = (value: T) => TResult1 | PromiseLike<TResult1>;
+  type Reject = (reason: any) => TResult2 | PromiseLike<TResult2>;
   type RequestPromiseMap = Map<
     string | number,
     {

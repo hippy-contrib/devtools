@@ -1,11 +1,15 @@
 'use strict';
 
+const fs = require('fs');
 const gulp = require('gulp');
 const ts = require('gulp-typescript');
 const clean = require('gulp-clean');
+const rimraf = require('rimraf');
 
-gulp.task('mkdir', () => {
-  return gulp.src('*.*', { read: false }).pipe(gulp.dest('./dist')).pipe(gulp.dest('./dist/cache'));
+gulp.task('mkdir', (cb) => {
+  fs.mkdirSync('./dist/cache', {recursive: true});
+  fs.mkdirSync('./src/cache', {recursive: true});
+  cb();
 });
 
 gulp.task('compile', () => {
@@ -20,7 +24,22 @@ gulp.task('copy-resource', function (cb) {
 });
 
 gulp.task('clean', () => {
-  return gulp.src('dist', { read: false }).pipe(clean({ allowEmpty: true }));
+  return Promise.all([rimrafAsync('dist'), rimrafAsync('src/cache')]);
 });
+
+function rimrafAsync(fpath) {
+  return new Promise((resolve, reject) => {
+    rimraf(fpath, error => {
+      console.log(error);
+      if(error) {
+        if(error.code === 'ENOENT') {
+          return resolve();
+        }
+        return reject();
+      }
+      return resolve();
+    })
+  });
+}
 
 gulp.task('default', gulp.series(['clean', 'mkdir', 'compile', 'copy-resource']));

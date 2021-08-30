@@ -2,7 +2,7 @@ import { TdfCommand, TdfEvent } from 'tdf-devtools-protocol/types/enum-tdf-mappi
 import { cssMiddleWareManager } from '../css-middleware';
 import { onFetchHeapCache, onGetHeapMeta } from '../heap-middleware';
 import { MiddleWareManager } from '../middleware-context';
-import { onGetTDFLog } from '../tdf-log-middleware';
+import { onReceiveTDFLog } from '../tdf-log-middleware';
 import { debuggerMiddleWareManager } from './debugger-middleware';
 import { heapMiddleWareManager } from './heap-middleware';
 import { logMiddleWareManager } from './log-middleware';
@@ -12,7 +12,7 @@ import { traceMiddleWareManager } from './trace-middleware';
 export const iosMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {
     [TdfCommand.TDFMemoryGetHeapMeta]: [onGetHeapMeta],
-    [TdfEvent.TDFLogGetLog]: [onGetTDFLog],
+    [TdfEvent.TDFLogGetLog]: [onReceiveTDFLog],
     ...debuggerMiddleWareManager.upwardMiddleWareListMap,
     ...logMiddleWareManager.upwardMiddleWareListMap,
     ...runtimeMiddleWareManager.upwardMiddleWareListMap,

@@ -46,12 +46,12 @@ export class WsAppClient extends AppClient {
       } catch (e) {
         console.error(`parse json error: ${msg}`);
       }
-      this.onMessage(msgObj);
 
-      if ('id' in msgObj) {
+      this.onMessage(msgObj).then((res) => {
+        if (!('id' in msgObj)) return;
         const requestPromise = this.requestPromiseMap.get(msgObj.id);
-        if (requestPromise) requestPromise.resolve(msgObj);
-      }
+        if (requestPromise) requestPromise.resolve(res);
+      });
     });
 
     this.ws.on('close', (msg) => {

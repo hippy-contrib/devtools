@@ -10,6 +10,7 @@ import createDebug from 'debug';
 import { EventEmitter } from 'events';
 import WebSocket from 'ws/index.js';
 import { AppClientType, ClientEvent, DevicePlatform } from '../@types/enum';
+import { ERROR_CODE } from '../error-code';
 import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
@@ -67,8 +68,11 @@ export abstract class AppClient extends EventEmitter {
     this.platform = platform;
   }
 
-  public send(msg: Adapter.CDP.Req): void {
-    if (!this.filter(msg)) return downwardDebug(`'${msg.method}' is filtered in app client type: ${this.type}`);
+  public send(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
+    if (!this.filter(msg)) {
+      downwardDebug(`'${msg.method}' is filtered in app client type: ${this.type}`);
+      return Promise.reject(ERROR_CODE.DOMAIN_FILTERED);
+    }
 
     const { method } = msg;
     this.msgIdMethodMap.set(msg.id, msg.method);
@@ -77,15 +81,16 @@ export abstract class AppClient extends EventEmitter {
     if (!(middlewareList instanceof Array)) middlewareList = [middlewareList];
     const fullMiddlewareList = [...middlewareList, defaultDownwardMiddleware];
 
-    compose(fullMiddlewareList)(this.makeContext(msg));
+    return compose(fullMiddlewareList)(this.makeContext(msg));
   }
 
   protected sendToDevtools(msg: Adapter.CDP.Res) {
-    if (!msg) return;
+    if (!msg) return Promise.reject(ERROR_CODE.EMPTY_COMMAND);
     this.emit(ClientEvent.Message, msg);
+    return Promise.resolve(msg);
   }
 
-  protected onMessage(msg: Adapter.CDP.Res) {
+  protected onMessage(msg: Adapter.CDP.Res): Promise<Adapter.CDP.Res> {
     try {
       if ('id' in msg) {
         const method = this.msgIdMethodMap.get(msg.id);
@@ -98,9 +103,10 @@ export abstract class AppClient extends EventEmitter {
       if (!middlewareList) middlewareList = [];
       if (!(middlewareList instanceof Array)) middlewareList = [middlewareList];
       const fullMiddlewareList = [...middlewareList, defaultUpwardMiddleware];
-      compose(fullMiddlewareList)(this.makeContext(msg));
+      return compose(fullMiddlewareList)(this.makeContext(msg));
     } catch (e) {
       console.error(`app client on message error: ${JSON.stringify(e)}`);
+      return Promise.reject(e);
     }
   }
 
@@ -117,7 +123,7 @@ export abstract class AppClient extends EventEmitter {
       },
       sendToDevtools: (msg: Adapter.CDP.Req) => {
         upwardDebug('%j', msg);
-        this.sendToDevtools(msg);
+        return this.sendToDevtools(msg);
       },
     };
   }

@@ -10,9 +10,10 @@ export const onGetHeapMeta: MiddleWare = async (ctx, next) => {
     }
     const fpath = path.join(config.cachePath, `${ctx.msg.id}.json`);
     await fs.promises.writeFile(fpath, JSON.stringify(ctx.msg));
-    ctx.sendToDevtools(ctx.msg as Adapter.CDP.Res);
+    return ctx.sendToDevtools(ctx.msg as Adapter.CDP.Res);
   } catch (e) {
     console.error('write heap failed!', e);
+    return Promise.reject(e);
   }
 };
 
@@ -25,12 +26,13 @@ export const onFetchHeapCache: MiddleWare = async (ctx, next) => {
     const fpath = path.join(config.cachePath, `${req.params.id}.json`);
     const cacheMsgStr = await fs.promises.readFile(fpath, 'utf8');
     const cacheMsg: Adapter.CDP.CommandRes = JSON.parse(cacheMsgStr);
-    ctx.sendToDevtools({
+    return ctx.sendToDevtools({
       id: ctx.msg.id,
       method: ctx.msg.method,
       result: cacheMsg.result,
     });
   } catch (e) {
     console.error('write heap failed!', e);
+    return Promise.reject(e);
   }
 };

@@ -10,7 +10,7 @@ const debug = createDebug('device-manager');
 class DeviceManager extends EventEmitter {
   deviceList: DeviceInfo[] = [];
   selectedIndex = -1;
-  appConnect = false;
+  isAppConnected = false;
 
   addDevice(device: DeviceInfo) {
     if (!this.deviceList.find((item) => item.deviceid === device.deviceid)) {
@@ -28,25 +28,25 @@ class DeviceManager extends EventEmitter {
   }
 
   appDidDisConnect() {
-    this.appConnect = false;
+    this.isAppConnected = false;
     // state.selectedIndex = -1;
     this.emit(DeviceManagerEvent.appDidDisConnect, this.getCurrent());
   }
 
   appDidConnect() {
-    this.appConnect = true;
+    this.isAppConnected = true;
+    androidDebugTargetManager.clearCustomTarget();
+    for (const device of this.deviceList) {
+      if (device.physicalstatus !== DeviceStatus.Disconnected && device.platform === DevicePlatform.Android) {
+        androidDebugTargetManager.addCustomTarget(device.deviceid);
+      }
+    }
     this.emit(DeviceManagerEvent.appDidConnect, this.getCurrent());
   }
 
   getDeviceList() {
-    androidDebugTargetManager.clearCustomTarget();
     getDeviceList((devices: DeviceInfo[]) => {
       debug('getDeviceList: %j', devices);
-      for (const device of devices) {
-        if (device.physicalstatus !== DeviceStatus.Disconnected && device.platform === DevicePlatform.Android) {
-          androidDebugTargetManager.addCustomTarget(device.deviceid);
-        }
-      }
 
       this.deviceList = devices;
       if (devices.length) {

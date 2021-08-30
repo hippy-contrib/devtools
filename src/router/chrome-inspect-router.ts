@@ -1,14 +1,16 @@
 import Router from 'koa-router';
 import request from 'request-promise';
-import { AppClientType, DevicePlatform } from 'src/@types/enum';
+import { AppClientType, DevicePlatform, DevtoolsEnv } from 'src/@types/enum';
 import { v4 as uuidv4 } from 'uuid';
 import { ChromePageType, ClientRole } from '../@types/enum';
 import { DebugTarget } from '../@types/tunnel';
 import { androidDebugTargetManager } from '../android-debug-target-manager';
 import { appClientManager } from '../client';
+import { config } from '../config';
 import { makeUrl } from '../utils/url';
 
 type RouterArgv = Pick<Application.StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'wsPath'>;
+const TDFTabs = ['core-memory'];
 
 export const getChromeInspectRouter = ({ host, port, iwdpPort, wsPath }: RouterArgv) => {
   const chromeInspectRouter = new Router();
@@ -84,6 +86,7 @@ const getIosTargets = async ({ iwdpPort, host, port, wsPath, clientId }): Promis
         remoteFrontend: true,
         experiments: true,
         ws: wsUrl,
+        customTabs: JSON.stringify(config.env === DevtoolsEnv.TDF ? TDFTabs : []),
       });
       const matchRst = debugTarget.title.match(/^HippyContext:\s(.*)$/);
       const bundleName = matchRst ? matchRst[1] : '';
@@ -128,6 +131,7 @@ const getAndroidTargets = ({ host, port, wsPath, clientId }): DebugTarget[] => {
       remoteFrontend: true,
       experiments: true,
       ws: wsUrl,
+      customTabs: JSON.stringify(config.env === DevtoolsEnv.TDF ? TDFTabs : []),
     });
     return {
       id: targetId || clientId,

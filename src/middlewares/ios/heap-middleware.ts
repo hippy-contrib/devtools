@@ -6,32 +6,32 @@ import HeapAdapter from './heap-adapter';
 export const heapMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {},
   downwardMiddleWareListMap: {
-    [ChromeCommand.HeapProfilerEnable]: ({ msg, sendToApp, sendToDevtools }) => {
+    [ChromeCommand.HeapProfilerEnable]: ({ msg, sendToApp, sendToDevtools }) =>
       sendToApp({
         id: getRequestId(),
         method: 'Heap.enable',
         params: {},
       }).then((res) => {
         console.log('Heap.enable res', msg);
-        sendToDevtools({
+        const convertedRes = {
           id: (msg as Adapter.CDP.Req).id,
           method: msg.method,
           result: res,
-        });
-      });
-    },
-    [ChromeCommand.HeapProfilerDisable]: ({ sendToApp }) => {
+        };
+        sendToDevtools(convertedRes);
+        return convertedRes;
+      }),
+    [ChromeCommand.HeapProfilerDisable]: ({ sendToApp }) =>
       sendToApp({
         id: getRequestId(),
         method: 'Heap.disable',
         params: {},
-      });
-    },
+      }),
     [ChromeCommand.HeapProfilerTakeHeapSnapshot]: ({ msg, sendToApp, sendToDevtools }) => {
       const req = msg as Adapter.CDP.Req;
       console.log('onTakeHeapSnapshot', msg);
       const { reportProgress } = req.params;
-      sendToApp({
+      return sendToApp({
         id: getRequestId(),
         method: 'Heap.snapshot',
         params: {},
@@ -56,19 +56,20 @@ export const heapMiddleWareManager: MiddleWareManager = {
             chunk: wholeChunk,
           },
         });
-        sendToDevtools({
+        const convertedRes = {
           id: (msg as Adapter.CDP.Req).id,
           method: msg.method,
           result: {},
-        });
+        };
+        sendToDevtools(convertedRes);
+        return convertedRes;
       });
     },
-    [ChromeCommand.HeapProfilerCollectGarbage]: ({ sendToApp }) => {
+    [ChromeCommand.HeapProfilerCollectGarbage]: ({ sendToApp }) =>
       sendToApp({
         id: getRequestId(),
         method: 'Heap.gc',
         params: {},
-      });
-    },
+      }),
   },
 };

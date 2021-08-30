@@ -1,5 +1,5 @@
-import { MiddleWareManager } from '../middleware-context';
 import { getRequestId } from '../global-id';
+import { MiddleWareManager } from '../middleware-context';
 import TraceAdapter from './trace-adapter';
 
 export const traceMiddleWareManager: MiddleWareManager = {
@@ -9,7 +9,7 @@ export const traceMiddleWareManager: MiddleWareManager = {
       console.log(`onPerformanceProfileCompleteEvent, msg = ${eventRes}`);
       const traceAdapter = new TraceAdapter();
       const v8json = traceAdapter.jsc2v8(eventRes.params);
-      sendToDevtools({
+      return sendToDevtools({
         method: 'Tracing.dataCollected',
         params: {
           value: v8json,
@@ -18,19 +18,17 @@ export const traceMiddleWareManager: MiddleWareManager = {
     },
   },
   downwardMiddleWareListMap: {
-    'Tracing.start': ({ sendToApp }) => {
+    'Tracing.start': ({ sendToApp }) =>
       sendToApp({
         id: getRequestId(),
         method: 'ScriptProfiler.startTracking',
         params: { includeSamples: true },
-      });
-    },
-    'Tracing.end': ({ sendToApp }) => {
+      }),
+    'Tracing.end': ({ sendToApp }) =>
       sendToApp({
         id: getRequestId(),
         method: 'ScriptProfiler.stopTracking',
         params: {},
-      });
-    },
+      }),
   },
 };

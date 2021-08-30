@@ -7,6 +7,7 @@ import { androidDebugTargetManager } from './android-debug-target-manager';
 import { appClientManager } from './client';
 import { AppClient, AppClientOption } from './client/app-client';
 import { AppClientFullOptionOmicCtx } from './client/app-client-manager';
+import { ERROR_CODE } from './error-code';
 import { debugTarget2UrlParsedContext } from './middlewares';
 import { DebugTargetManager } from './router/chrome-inspect-router';
 import { DomainRegister } from './utils/cdp';
@@ -45,11 +46,16 @@ export class SocketServer extends DomainRegister {
     });
   }
 
-  public sendMessage(msg: Adapter.CDP.Req) {
-    const appClientList = this.selectDebugTarget(this.debugTarget);
-    if (!appClientList) return;
-    appClientList.forEach((appClient) => {
-      appClient.send(msg);
+  public sendMessage(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
+    return new Promise((resolve, reject) => {
+      const appClientList = this.selectDebugTarget(this.debugTarget);
+      if (!appClientList) return reject(ERROR_CODE.NO_APP_CLIENT);
+      Promise.all(appClientList.map((appClient) => appClient.send(msg).catch(() => null))).then((resList) => {
+        const filtered = resList.filter((res) => res);
+        if (filtered?.length) {
+          return resolve(filtered[0]);
+        }
+      });
     });
   }
 

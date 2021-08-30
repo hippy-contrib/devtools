@@ -1,6 +1,7 @@
 import { sendEmptyResultToDevtools } from '../default-middleware';
 import { getContextId, getRequestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
+import { MiddleWare } from './../middleware-context';
 import { lastScriptEval } from './debugger-middleware';
 
 let lastPageExecutionContextId;
@@ -28,7 +29,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
         }
       }
 
-      sendToDevtools(eventRes);
+      return sendToDevtools(eventRes);
     },
     'Runtime.evaluate': ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
@@ -56,7 +57,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
         commandRes.result.result.preview.description = commandRes.result.result.description;
         commandRes.result.result.preview.type = 'object';
       }
-      sendToDevtools(commandRes);
+      return sendToDevtools(commandRes);
     },
     'Runtime.getProperties': ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
@@ -69,7 +70,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
       }
       commandRes.result.result = null;
       commandRes.result.result = newPropertyDescriptors;
-      sendToDevtools(commandRes);
+      return sendToDevtools(commandRes);
     },
     'Runtime.enable': ({ msg, sendToDevtools }) => {
       sendToDevtools({
@@ -82,11 +83,11 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
           },
         },
       });
-      sendToDevtools(msg);
+      return sendToDevtools(msg);
     },
   },
   downwardMiddleWareListMap: {
-    'Runtime.enable': sendEmptyResultToDevtools,
+    'Runtime.enable': sendEmptyResultToDevtools as MiddleWare,
     'Runtime.compileScript': ({ msg, sendToApp, sendToDevtools }) =>
       sendToApp({
         id: getRequestId(),
@@ -95,15 +96,17 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
           expression: (msg as any).params.expression,
           contextId: (msg as any).params.executionContextId,
         },
-      }).then(() =>
-        sendToDevtools({
+      }).then(() => {
+        const convertedRes = {
           id: (msg as Adapter.CDP.Req).id,
           method: msg.method,
           result: {
             scriptId: null,
             exceptionDetails: null,
           },
-        }),
-      ),
+        };
+        sendToDevtools(convertedRes);
+        return convertedRes;
+      }),
   },
 };

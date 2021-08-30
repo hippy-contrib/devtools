@@ -1,0 +1,5 @@
+export const ERROR_CODE = {
+  DOMAIN_FILTERED: 1,
+  NO_APP_CLIENT: 2,
+  EMPTY_COMMAND: 3,
+};

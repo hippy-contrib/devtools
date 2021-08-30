@@ -7,6 +7,7 @@ import { AppClient } from './app-client';
 const debug = createDebug('app-client:ws');
 
 export class TunnelAppClient extends AppClient {
+  private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
   constructor(id, option) {
     super(id, option);
     this.type = AppClientType.Tunnel;
@@ -27,11 +28,20 @@ export class TunnelAppClient extends AppClient {
 
   protected registerMessageListener() {
     Tunnel.tunnelMessageEmitter.on(ClientEvent.Message, (msg: Adapter.CDP.Res) => {
-      this.onMessage(msg);
+      this.onMessage(msg).then((res) => {
+        if (!('id' in msg)) return;
+        const requestPromise = this.requestPromiseMap.get(msg.id);
+        if (requestPromise) {
+          requestPromise.resolve(res);
+        }
+      });
     });
   }
 
   protected sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
-    return tunnel.sendMessage(msg);
+    return new Promise((resolve, reject) => {
+      tunnel.sendMessage(msg);
+      this.requestPromiseMap.set(msg.id, { resolve, reject });
+    });
   }
 }
