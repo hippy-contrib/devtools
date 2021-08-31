@@ -1,60 +1,34 @@
-# Change Log
+# ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+## [2021-08-31, Version  v1.0.0-alpha.0](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/v1.0.0-alpha.0)
 
-## [2.1.2](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/compare/2.1.1...2.1.2) (2020-11-23)
-
-
-### Bug Fixes
-
-* **hippy-debug-server:** fixed the way the server read from file ([#405](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/issues/405)) ([fa16ee8](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/commit/fa16ee85a31cfbd05c91e33a8b3f4029a15936ac))
-* **hippy-debug-server:** response 404 when file not found ([#410](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/issues/410)) ([8b161a8](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/commit/8b161a883d8506015cb7c0f0c41cc4fc2022a89e))
 
 
 ### Features
 
-* **hippy-debug-server:** modify debug server to support multiple files ([#411](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/issues/411)) ([508ec9f](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/commit/508ec9f2f11070b1616cf155a330fb538d9c23ff))
+ - [[`aecfdba1`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/aecfdba1)] **-** 删除校验tag name的脚本 (sicilyliu) 
 
 
 
 
-
-## [2.1.1](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/compare/2.1.0...2.1.1) (2020-11-11)
-
-**Note:** Version bump only for package @hippy/debug-server
+## [2021-08-31, Version  v1.0.0](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/v1.0.0)
 
 
 
+### Features
 
+ - [[`bec8c387`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/bec8c387)] **-** 接入oci (sicilyliu) 
+ - [[`6f4a9bfc`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/6f4a9bfc)] **-** 提取tag自动发布npm (chestershen) 
+ - [[`cdeded53`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/cdeded53)] **-** TDF环境加url加参数开启自定义tab (merge request !4) (chestershen) 
+ - [[`1ce7335b`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/1ce7335b)] **-** tdf-log-middleware 日志信息修改 (merge request !2) (minushuang) 
+ - [[`9ab7a690`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/9ab7a690)] **-** 若干功能修复 (merge request !1) (chestershen) 
 
-# [2.1.0](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/compare/2.0.3...2.1.0) (2020-10-29)
+### Bug fixes
 
-**Note:** Version bump only for package @hippy/debug-server
-
-
-
-
-## [2.0.3](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/compare/2.0.2...2.0.3) (2020-04-23)
-
-**Note:** Version bump only for package @hippy/debug-server
+ - [[`41ae3eac`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/41ae3eac)] **-** 触发oci (sicilyliu) 
+ - [[`e6fe56e6`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/e6fe56e6)] **-** 触发oci (sicilyliu) 
+ - [[`68a6ccd6`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/68a6ccd6)] **-** find debugPage 失败 (chestershen) 
 
 
 
 
-
-## [2.0.2](https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server/compare/2.0.1...2.0.2) (2020-03-18)
-
-**Note:** Version bump only for package @hippy/debug-server
-
-## 2.0.1 (2020-01-22)
-
-### Change
-
-* Rename to @hippy/debug-server.
-
-## 2.0.0 (2019-12-18)
-
-### Change
-
-* Extract from hippy-cli and make it public.
