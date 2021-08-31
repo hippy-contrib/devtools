@@ -1,5 +1,16 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-08-31, Version  3.0.35-alpha.9](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.9)
+
+
+
+### Features
+
+ - [[`c35321c8`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/c35321c8)] **-** 暂时注释替换版本号脚本 (sicilyliu) 
+
+
+
+
 ## [2021-08-31, Version  3.0.35-alpha.8](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.8)
 
 
