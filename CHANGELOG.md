@@ -1,5 +1,16 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-08-31, Version  1.0.0-alpha.1](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/1.0.0-alpha.1)
+
+
+
+### Features
+
+ - [[`16c29062`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/16c29062)] **-** 获取发布 npm 包的账号密码 (sicilyliu) 
+
+
+
+
 ## [2021-08-31, Version  1.0.0-alpha.0](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/1.0.0-alpha.0)
 
 
