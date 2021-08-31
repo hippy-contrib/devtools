@@ -1,5 +1,16 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-08-31, Version  3.0.35-alpha.7](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.7)
+
+
+
+### Features
+
+ - [[`b50f9e04`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/b50f9e04)] **-** 提取tag自动发布npm (chestershen) 
+
+
+
+
 ## [2021-08-31, Version  3.0.35-alpha.6](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.6)
 
 
