@@ -1,6 +1,6 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
-## [2021-08-31, Version  v1.0.0-alpha.0](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/v1.0.0-alpha.0)
+## [2021-08-31, Version  1.0.0-alpha.0](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/1.0.0-alpha.0)
 
 
 
