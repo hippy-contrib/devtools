@@ -1,5 +1,25 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-01, Version  3.0.36](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.36)
+
+
+
+### Features
+
+ - [[`48f1f7dc`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/48f1f7dc)] **-** publish npm add notify (sicilyliu) 
+ - [[`c4ebc9b8`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/c4ebc9b8)] **-** 自定义日志信息部分增加颜色美化 (merge request !14) (minushuang) 
+
+### Bug fixes
+
+ - [[`ab50fcc8`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/ab50fcc8)] **-** 移除token hardcode (chestershen) 
+ - [[`7e0648ec`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/7e0648ec)] **-** 设备断连；日志 (chestershen) 
+ - [[`f811a228`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/f811a228)] **-** find debugPage 失败 (chestershen) 
+ - [[`c2655d4b`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/c2655d4b)] **-** oci编译问题 (sicilyliu) 
+ - [[`deae4e4a`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/deae4e4a)] **-** oci编译问题 (sicilyliu) 
+
+
+
+
 ## [2021-08-31, Version  3.0.35-alpha.10](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.10)
 
 
