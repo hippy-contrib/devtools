@@ -1,5 +1,15 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-01, Version  3.0.35-alpha.23](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.23)
+
+
+### Bug fixes
+
+ - [[`12fe6e54`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/12fe6e54)] **-** get tag branch (chestershen) 
+
+
+
+
 ## [2021-09-01, Version  3.0.35-alpha.22](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.22)
 
 
