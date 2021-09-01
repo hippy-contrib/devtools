@@ -1,5 +1,15 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-01, Version  3.0.37](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.37)
+
+
+### Bug fixes
+
+ - [[`99147298`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/99147298)] **-** 查找tag所在分支 (chestershen) 
+
+
+
+
 ## [2021-09-01, Version  3.0.36](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.36)
 
 
