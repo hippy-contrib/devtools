@@ -1,3 +1,4 @@
+import colors from 'colors-console';
 import { ChromeEvent } from 'tdf-devtools-protocol/types/enum-chrome-mapping';
 import { MiddleWare } from './middleware-context';
 
@@ -8,13 +9,14 @@ export const onReceiveTDFLog: MiddleWare = async (ctx) => {
     let firstLog;
     params.log.forEach((log) => {
       const timestamp = `${new Date(Math.floor(log.timestamp / 1000000)).toLocaleString()}(${log.timestamp})`; // 换算为毫秒， 1毫秒 = 1000000纳秒
-      const logPrefix = `[${timestamp}][${log.level}][${log.source}]`;
+      const logPrefixTemp = `[${timestamp}] [${log.level}] [${log.source}] `;
+      const logPrefix = log.module ? `${logPrefixTemp}[${log.module}] ` : `${logPrefixTemp}`;
       const consoleMessage = {
         source: 'other',
         level: 'info',
-        text: log.module ? `${logPrefix}[${log.module}]${log.message}` : `${logPrefix}${log.message}`,
+        text: `${colors('blue', logPrefix)}${colors('black', log.message)}`,
         lineNumber: log.line_number,
-        timestamp,
+        timestamp: Date.now(),
         url: log.file_name,
       };
       const event = {

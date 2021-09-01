@@ -1,6 +1,6 @@
 {
   "name": "debug-server-next",
-  "version": "3.0.35-alpha.5",
+  "version": "3.0.35",
   "description": "Dev server for hippy-core.",
   "repository": "https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server",
   "homepage": "http://hippyjs.org",
@@ -35,6 +35,7 @@
   "types": "dist/@types/index.d.ts",
   "dependencies": {
     "color-normalize": "^1.5.2",
+    "colors-console": "^1.0.3",
     "debug": "^4.3.2",
     "find-up": "^4.1.0",
     "kill-port": "^1.6.1",
