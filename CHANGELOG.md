@@ -5,7 +5,7 @@
 
 ### Bug fixes
 
- - [[`fb4c9eb3`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/fb4c9eb3)] **-** 查找tag所在分支 (chestershen) 
+ - [[`a030b661`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/a030b661)] **-** 查找tag所在分支 (chestershen) 
 
 
 
