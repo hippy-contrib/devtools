@@ -1,10 +1,11 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
-## [2021-09-01, Version  3.0.35-alpha.27](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.27)
+## [2021-09-02, Version  3.0.35-alpha.27](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.27)
 
 
 ### Bug fixes
 
+ - [[`66f26bdf`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/66f26bdf)] **-** npm token 替换 (chestershen) 
  - [[`c5450427`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/c5450427)] **-** token (chestershen) 
 
 
