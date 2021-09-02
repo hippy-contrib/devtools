@@ -15,5 +15,6 @@ declare namespace Application {
     env: string;
     publicPath?: string;
     cachePath?: string;
+    logPath?: string;
   }
 }

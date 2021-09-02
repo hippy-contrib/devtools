@@ -1,10 +1,10 @@
-import createDebug from 'debug';
 import WebSocket from 'ws/index.js';
 import { AppClientType, ClientEvent, DevicePlatform } from '../@types/enum';
 import { getRequestId } from '../middlewares';
+import { Logger } from '../utils/log';
 import { AppClient } from './app-client';
 
-const debug = createDebug('app-client:ws');
+const log = new Logger('app-client:ws');
 
 export class WsAppClient extends AppClient {
   private ws: WebSocket;
@@ -19,7 +19,7 @@ export class WsAppClient extends AppClient {
   }
 
   public resumeApp() {
-    debug('ws app client resume');
+    log.info('ws app client resume');
     if (this.platform === DevicePlatform.Android) {
       this.ws.send(
         JSON.stringify({
@@ -44,7 +44,7 @@ export class WsAppClient extends AppClient {
       try {
         msgObj = JSON.parse(msg);
       } catch (e) {
-        console.error(`parse json error: ${msg}`);
+        log.error(`parse json error: ${msg}`);
       }
 
       this.onMessage(msgObj).then((res) => {

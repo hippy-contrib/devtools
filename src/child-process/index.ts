@@ -1,15 +1,16 @@
 import { spawn } from 'child_process';
-import createDebug from 'debug';
 import { EventEmitter } from 'events';
 import path from 'path';
 import { TunnelEvent } from '../@types/enum';
 import deviceManager from '../device-manager';
 import { tunnel } from '../tunnel';
+import { Logger } from '../utils/log';
 import { exec } from '../utils/process';
 import { addEventListener, exit, getDeviceList, selectDevice, sendMsg, tunnelStart } from './addon';
 export { addEventListener, tunnelStart, getDeviceList, selectDevice, exit, sendMsg };
 
-const debug = createDebug('child-process');
+const childProcessLog = new Logger('child-process');
+const tunnelLog = new Logger('tunnel');
 let proxyProcess;
 
 export const tunnelEmitter = new EventEmitter();
@@ -32,7 +33,7 @@ export const startTunnel = (
 ) => {
   addEventListener((event, data) => {
     try {
-      debug(`receive tunnel event: ${event}`);
+      childProcessLog.info(`receive tunnel event: ${event}`);
       if (event === TunnelEvent.ReceiveData) {
         tunnel.onMessage(data);
       } else if (event === TunnelEvent.GetWebsocketPort) {
@@ -48,16 +49,18 @@ export const startTunnel = (
           deviceManager.appDidConnect();
         } else if (event === TunnelEvent.AppDisconnect) {
           deviceManager.appDidDisConnect();
+        } else if (event === TunnelEvent.TunnelLog) {
+          if (data) tunnelLog.info(data);
         }
 
         if (cb) cb(event, data);
       }
     } catch (e) {
-      console.error(`handle tunnel event error: ${JSON.stringify(e)}`);
+      childProcessLog.error(`handle tunnel event error: ${JSON.stringify(e)}`);
     }
   });
 
-  adbPath ??= path.join(__dirname, './build/adb');
+  adbPath ??= path.join(__dirname, '../build/adb');
   const iwdpParams = ['--no-frontend', `--config=null:${iwdpPort},:${iwdpStartPort}-${iwdpEndPort}`];
   tunnelStart(adbPath, iwdpParams, iwdpPort);
 };
@@ -70,13 +73,13 @@ export const startIosProxy = ({ iwdpPort, iwdpStartPort, iwdpEndPort }) => {
   );
   proxyProcess.unref();
 
-  debug(`start IWDP on port ${iwdpPort}`);
+  childProcessLog.info(`start IWDP on port ${iwdpPort}`);
 
   proxyProcess.on('error', (e) => {
-    debug('IWDP error: %j', e);
+    childProcessLog.info('IWDP error: %j', e);
   });
   proxyProcess.on('close', (code) => {
-    debug(`IWDP close with code: ${code}`);
+    childProcessLog.info(`IWDP close with code: ${code}`);
   });
 };
 
@@ -84,16 +87,16 @@ export const startAdbProxy = (port: number) => {
   exec('adb', ['reverse', '--remove-all'])
     .then(() => exec('adb', ['reverse', `tcp:${port}`, `tcp:${port}`]))
     .catch((err: Error) => {
-      debug('Port reverse failed, For iOS app debug only just ignore the message.');
-      debug('Otherwise please check adb devices command working correctly');
-      debug(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
-      debug('start adb reverse error: %j', err);
+      childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
+      childProcessLog.info('Otherwise please check adb devices command working correctly');
+      childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
+      childProcessLog.info('start adb reverse error: %j', err);
     });
 };
 
 export const onExit = () => {
   if (!proxyProcess) return;
-  debug('on debug server exit, do some clean...');
+  childProcessLog.info('on log.info server exit, do some clean...');
   proxyProcess?.kill('SIGKILL');
   proxyProcess = null;
 };

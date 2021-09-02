@@ -1,4 +1,3 @@
-import createDebug from 'debug';
 import { AppClientType } from 'src/@types/enum';
 import WebSocket, { Server } from 'ws/index.js';
 import { ClientEvent, ClientRole, DevicePlatform } from './@types/enum';
@@ -12,8 +11,9 @@ import { debugTarget2UrlParsedContext } from './middlewares';
 import { DebugTargetManager } from './router/chrome-inspect-router';
 import { DomainRegister } from './utils/cdp';
 import { parseWsUrl } from './utils/url';
+import { Logger } from './utils/log';
 
-const debug = createDebug('socket-bridge');
+const log = new Logger('socket-bridge');
 
 export class SocketServer extends DomainRegister {
   // key: appClientId
@@ -42,7 +42,7 @@ export class SocketServer extends DomainRegister {
 
   public close() {
     this.wss.close(() => {
-      debug('close wss.');
+      log.info('close wss.');
     });
   }
 
@@ -92,7 +92,7 @@ export class SocketServer extends DomainRegister {
           if (Ctor.name === AppClientType.WS) {
             newOption.ws = conn.appWs;
             if (!newOption.ws) {
-              return debug('no app ws connection, ignore WsAppClient.');
+              return log.info('no app ws connection, ignore WsAppClient.');
             }
           }
           return new Ctor(appClientId, newOption);
@@ -135,7 +135,7 @@ export class SocketServer extends DomainRegister {
       });
 
       ws.on('close', () => {
-        debug('devtools ws disconnect.');
+        log.info('devtools ws disconnect.');
         conn.appClientList.forEach((appClient) => {
           appClient.resumeApp();
         });
@@ -147,35 +147,35 @@ export class SocketServer extends DomainRegister {
     return conn.appClientList;
   }
 
-  private onConnection(ws, req) {
+  private async onConnection(ws, req) {
     const ctx = parseWsUrl(req.url);
     const { platform, clientRole, clientId, targetId, pathname } = ctx;
-    const debugTarget = DebugTargetManager.findTarget(targetId);
-    debug('debug page: %j', debugTarget);
-    debug('%s connected!', clientRole);
+    const debugTarget = await DebugTargetManager.findTarget(targetId);
+    log.info('log.info page: %j', debugTarget);
+    log.info('%s connected!', clientRole);
 
     if (pathname !== this.wsPath) {
       ws.close();
-      return debug('invalid ws connection path!');
+      return log.info('invalid ws connection path!');
     }
     if (clientRole === ClientRole.Devtools && !debugTarget) {
       ws.close();
-      return debug("debugTarget doesn't exist!");
+      return log.info("debugTarget doesn't exist!");
     }
     if (!Object.values(ClientRole).includes(clientRole)) {
       ws.close();
-      return debug('invalid client role!');
+      return log.info('invalid client role!');
     }
     if (!clientId) {
       ws.close();
-      return debug('invalid ws connection!');
+      return log.info('invalid ws connection!');
     }
     ws.clientId = clientId;
 
     if (clientRole === ClientRole.Devtools) {
       this.selectDebugTarget(debugTarget, ws);
     } else {
-      debug('ws app client connected. %s', clientId);
+      log.info('ws app client connected. %s', clientId);
       if (platform === DevicePlatform.Android) {
         androidDebugTargetManager.addWsTarget(clientId);
       }
@@ -187,7 +187,7 @@ export class SocketServer extends DomainRegister {
         });
       }
       ws.on('close', () => {
-        debug('ws app client disconnect. %s', clientId);
+        log.info('ws app client disconnect. %s', clientId);
         for (const [clientId, { appWs }] of this.connectionMap.entries()) {
           if (appWs === ws) {
             this.connectionMap.delete(clientId);

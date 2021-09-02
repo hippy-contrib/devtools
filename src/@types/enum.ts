@@ -22,6 +22,7 @@ export const TunnelEvent = {
   AppConnect: 'tunnel_app_connect',
   AppDisconnect: 'tunnel_app_disconnect',
   ReceiveData: 'tunnel_recv_data',
+  TunnelLog: 'tunnel_log',
 };
 
 export const enum DebuggerProtocolType {

@@ -3,4 +3,6 @@
 dist
 node_modules
 .vscode
-.git
+log
+cache
+public

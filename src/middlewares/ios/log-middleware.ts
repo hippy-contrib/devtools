@@ -32,6 +32,7 @@ export const logMiddleWareManager: MiddleWareManager = {
         lineNumber: message.line,
         timestamp: new Date().getTime(),
         url: message.url,
+        args: message.parameters,
         stackTrace: message.stackTrace
           ? {
               callFrames: message.stackTrace,

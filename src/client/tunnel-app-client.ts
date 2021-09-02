@@ -1,10 +1,10 @@
-import createDebug from 'debug';
 import { AppClientType, ClientEvent, DevicePlatform } from '../@types/enum';
 import { getRequestId } from '../middlewares';
 import { Tunnel, tunnel } from '../tunnel';
+import { Logger } from '../utils/log';
 import { AppClient } from './app-client';
 
-const debug = createDebug('app-client:ws');
+const log = new Logger('app-client:ws');
 
 export class TunnelAppClient extends AppClient {
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
@@ -16,7 +16,7 @@ export class TunnelAppClient extends AppClient {
   }
 
   public resumeApp() {
-    debug('tunnel app client resume');
+    log.info('tunnel app client resume');
     if (this.platform === DevicePlatform.Android) {
       tunnel.sendMessage({
         id: getRequestId(),

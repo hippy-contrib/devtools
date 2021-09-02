@@ -1,13 +1,13 @@
 /**
  * 注意：请勿引用此文件接口🚫，需调用 dev-server/adapter 下的 messageChannel 做消息收发！！！
  */
-import createDebug from 'debug';
 import { EventEmitter } from 'events';
 import { ClientEvent } from './@types/enum';
 import { sendMsg } from './child-process/addon';
 import { DomainRegister } from './utils/cdp';
+import { Logger } from './utils/log';
 
-const debug = createDebug('tunnel');
+const log = new Logger('tunnel');
 
 export class Tunnel extends DomainRegister {
   public static tunnelMessageEmitter = new EventEmitter();
@@ -33,7 +33,7 @@ export class Tunnel extends DomainRegister {
       this.triggerListerner(msgObject);
       Tunnel.tunnelMessageEmitter.emit(ClientEvent.Message, msgObject);
     } catch (e) {
-      debug(`parse tunnel response json failed. error: %j, \n msg: %j`, e, msg);
+      log.info(`parse tunnel response json failed. error: %j, \n msg: %j`, e, msg);
     }
   }
 
@@ -41,10 +41,10 @@ export class Tunnel extends DomainRegister {
     return new Promise((resolve, reject) => {
       if (!Tunnel.isTunnelReady) {
         Tunnel.msgQueue.push(msg);
-        debug('tunnel is not ready, push msg to queue.');
+        log.info('tunnel is not ready, push msg to queue.');
         return;
       }
-      debug('sendMessage: %j', msg);
+      log.info('sendMessage: %j', msg);
       sendMsg(JSON.stringify(msg));
 
       if (msg.id) {

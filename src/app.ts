@@ -1,4 +1,3 @@
-import createDebug from 'debug';
 import fs from 'fs';
 import kill from 'kill-port';
 import Koa from 'koa';
@@ -11,8 +10,9 @@ import { initHippyEnv, initTdfEnv, initVoltronEnv } from './client';
 import { config, setConfig } from './config';
 import { DebugTargetManager, getChromeInspectRouter } from './router/chrome-inspect-router';
 import { SocketServer } from './socket-server';
+import { Logger } from './utils/log';
 
-const debug = createDebug('server');
+const log = new Logger('application');
 
 export class Application {
   public static isServerReady = false;
@@ -21,7 +21,7 @@ export class Application {
   private static socketServer: SocketServer;
 
   public static async startServer(argv: Application.StartServerArgv) {
-    debug('start server argv: %j', argv);
+    log.info('start server argv: %j', argv);
     const {
       host,
       port,
@@ -35,8 +35,10 @@ export class Application {
       env,
       publicPath,
       cachePath,
+      logPath,
     } = argv;
     if (cachePath) setConfig('cachePath', cachePath);
+    if (logPath) setConfig('logPath', logPath);
     Application.argv = argv;
     Application.init();
     Application.setEnv(env as DevtoolsEnv);
@@ -46,7 +48,7 @@ export class Application {
         await kill(port, 'tcp');
         await kill(iwdpPort, 'tcp');
       } catch (e) {
-        debug('Address already in use!');
+        log.error('Address already in use!');
         return process.exit(1);
       }
     }
@@ -54,7 +56,7 @@ export class Application {
       const app = new Koa();
 
       Application.server = app.listen(port, host, () => {
-        debug('start debug server.');
+        log.info('start debug server.');
         if (shouldStartTunnel) startTunnel(argv);
         else if (startIWDP) startIosProxy(argv);
         if (startAdb) startAdbProxy(port);
@@ -66,7 +68,7 @@ export class Application {
       });
 
       Application.server.on('close', () => {
-        debug('debug server is closed.');
+        log.info('debug server is closed.');
         reject();
       });
 
@@ -74,7 +76,7 @@ export class Application {
         try {
           await next();
         } catch (e) {
-          debug('koa error: %j', e);
+          log.error('koa error: %j', e);
           return (ctx.body = e.msg);
         }
       });
@@ -88,7 +90,7 @@ export class Application {
       } else {
         servePath = path.resolve(path.dirname(entry));
       }
-      debug(`serve bundle: ${entry} \nserve folder: ${servePath}`);
+      log.info(`serve bundle: ${entry} \nserve folder: ${servePath}`);
       app.use(serve(servePath));
       app.use(
         serve(publicPath || path.join(__dirname, 'public'), {
@@ -100,7 +102,7 @@ export class Application {
 
   public static stopServer(exitProcess = false) {
     try {
-      debug('stopServer');
+      log.info('stopServer');
       if (Application.server) {
         Application.server.close();
         Application.server = null;
@@ -111,7 +113,7 @@ export class Application {
           process.exit(0);
         }, 100);
     } catch (e) {
-      debug('stopServer error, %j', e);
+      log.error('stopServer error, %j', e);
     }
   }
 
@@ -119,14 +121,13 @@ export class Application {
     onExit();
   }
 
-  public static selectDebugTarget(id: string) {
-    const debugTarget = DebugTargetManager.findTarget(id);
+  public static async selectDebugTarget(id: string) {
+    const debugTarget = await DebugTargetManager.findTarget(id);
     this.socketServer.selectDebugTarget(debugTarget);
   }
 
-  public static getDebugTargets(argv): Promise<DebugTarget[]> {
-    const { iwdpPort, host, port, wsPath } = argv;
-    return DebugTargetManager.getDebugTargets({ iwdpPort, host, port, wsPath });
+  public static getDebugTargets(): Promise<DebugTarget[]> {
+    return DebugTargetManager.getDebugTargets();
   }
 
   public static sendMessage(msg: Adapter.CDP.Req) {
@@ -141,7 +142,7 @@ export class Application {
     try {
       fs.rmdirSync(config.cachePath, { recursive: true });
     } catch (e) {
-      debug('rm cache dir error: %j', e);
+      log.error('rm cache dir error: %j', e);
     }
     return fs.promises.mkdir(config.cachePath, { recursive: true });
   }
@@ -161,5 +162,5 @@ process.on('SIGINT', () => Application.stopServer(true));
 process.on('SIGTERM', () => Application.stopServer(true));
 
 process.on('unhandledRejection', (e) => {
-  debug('unhandledRejection %j', e);
+  log.error('unhandledRejection %j', e);
 });

@@ -1,4 +1,4 @@
-import colors from 'colors-console';
+import colors from 'colors/safe';
 import { ChromeEvent } from 'tdf-devtools-protocol/types/enum-chrome-mapping';
 import { MiddleWare } from './middleware-context';
 
@@ -14,7 +14,7 @@ export const onReceiveTDFLog: MiddleWare = async (ctx) => {
       const consoleMessage = {
         source: 'other',
         level: 'info',
-        text: `${colors('blue', logPrefix)}${colors('black', log.message)}`,
+        text: `${colors.blue(logPrefix)}${colors.black(log.message)}`,
         lineNumber: log.line_number,
         timestamp: Date.now(),
         url: log.file_name,

@@ -8,11 +8,16 @@ import { androidDebugTargetManager } from '../android-debug-target-manager';
 import { appClientManager } from '../client';
 import { config } from '../config';
 import { makeUrl } from '../utils/url';
+import { Logger } from '../utils/log';
+
+const log = new Logger('chrome-inspect-router');
 
 type RouterArgv = Pick<Application.StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'wsPath'>;
 const TDFTabs = ['core-memory'];
+let cachedRouterArgv: RouterArgv;
 
-export const getChromeInspectRouter = ({ host, port, iwdpPort, wsPath }: RouterArgv) => {
+export const getChromeInspectRouter = (routerArgv: RouterArgv) => {
+  cachedRouterArgv = routerArgv;
   const chromeInspectRouter = new Router();
 
   chromeInspectRouter.get('/json/version', (ctx) => {
@@ -20,7 +25,7 @@ export const getChromeInspectRouter = ({ host, port, iwdpPort, wsPath }: RouterA
   });
 
   chromeInspectRouter.get('/json', async (ctx) => {
-    const rst = await DebugTargetManager.getDebugTargets({ iwdpPort, host, port, wsPath });
+    const rst = await DebugTargetManager.getDebugTargets();
     ctx.body = rst;
   });
 
@@ -30,8 +35,9 @@ export const getChromeInspectRouter = ({ host, port, iwdpPort, wsPath }: RouterA
 export class DebugTargetManager {
   public static debugTargets: DebugTarget[] = [];
 
-  public static getDebugTargets = async ({ iwdpPort, host, port, wsPath }: RouterArgv): Promise<DebugTarget[]> => {
+  public static getDebugTargets = async (): Promise<DebugTarget[]> => {
     // clientId 可以随意赋值，每个 ws 连过来时 clientId 不同即可
+    const { iwdpPort, host, port, wsPath } = cachedRouterArgv;
     const clientId = uuidv4();
     const rst: DebugTarget[] = [];
     const iosTargets = await getIosTargets({ iwdpPort, host, port, wsPath, clientId });
@@ -42,8 +48,9 @@ export class DebugTargetManager {
     return rst;
   };
 
-  public static findTarget(id: string) {
-    return DebugTargetManager.debugTargets.find((target) => target.id === id);
+  public static async findTarget(id: string) {
+    const debugTargets = await DebugTargetManager.getDebugTargets();
+    return debugTargets.find((target) => target.id === id);
   }
 }
 
@@ -70,6 +77,7 @@ const getIosTargets = async ({ iwdpPort, host, port, wsPath, clientId }): Promis
           targets.map((target) => (target.device = device));
           return targets;
         } catch (e) {
+          log.error(e);
           return [];
         }
       }),
@@ -109,6 +117,7 @@ const getIosTargets = async ({ iwdpPort, host, port, wsPath, clientId }): Promis
       };
     });
   } catch (e) {
+    log.error(e);
     return [];
   }
 };

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import createDebug from 'debug';
 import yargs from 'yargs';
 import { DevtoolsEnv } from './@types/enum';
 import { Application } from './app';
@@ -56,10 +55,6 @@ const { argv } = yargs
     choices: [DevtoolsEnv.Hippy, DevtoolsEnv.Voltron, DevtoolsEnv.TDF],
   })
   .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`) as any;
-
-if (argv.verbose) {
-  createDebug.enable('*');
-}
 
 if (argv.help) {
   yargs.showHelp().exit(0, null);

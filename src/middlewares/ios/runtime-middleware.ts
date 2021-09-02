@@ -62,10 +62,10 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
     'Runtime.getProperties': ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
       const newPropertyDescriptors = [];
-      for (let i = 0; i < commandRes.result?.result?.length; i += 1) {
-        if (commandRes.result.result[i].isOwn || commandRes.result.result[i].nativeGetter) {
-          commandRes.result.result[i].isOwn = true;
-          newPropertyDescriptors.push(commandRes.result.result[i]);
+      for (let i = 0; i < commandRes.result?.properties?.length; i += 1) {
+        if (commandRes.result.properties[i].isOwn || commandRes.result.properties[i].nativeGetter) {
+          commandRes.result.properties[i].isOwn = true;
+          newPropertyDescriptors.push(commandRes.result.properties[i]);
         }
       }
       commandRes.result.result = null;

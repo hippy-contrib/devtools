@@ -1,11 +1,11 @@
-import createDebug from 'debug';
 import { EventEmitter } from 'events';
 import { DeviceManagerEvent, DevicePlatform, DeviceStatus } from './@types/enum';
 import { DeviceInfo } from './@types/tunnel';
 import { androidDebugTargetManager } from './android-debug-target-manager';
 import { getDeviceList, selectDevice } from './child-process/addon';
+import { Logger } from './utils/log';
 
-const debug = createDebug('device-manager');
+const log = new Logger('device-manager');
 
 class DeviceManager extends EventEmitter {
   deviceList: DeviceInfo[] = [];
@@ -30,6 +30,7 @@ class DeviceManager extends EventEmitter {
   appDidDisConnect() {
     this.isAppConnected = false;
     // state.selectedIndex = -1;
+    androidDebugTargetManager.clearCustomTarget();
     this.emit(DeviceManagerEvent.appDidDisConnect, this.getCurrent());
   }
 
@@ -46,7 +47,7 @@ class DeviceManager extends EventEmitter {
 
   getDeviceList() {
     getDeviceList((devices: DeviceInfo[]) => {
-      debug('getDeviceList: %j', devices);
+      log.info('getDeviceList: %j', devices);
 
       this.deviceList = devices;
       if (devices.length) {
@@ -60,7 +61,7 @@ class DeviceManager extends EventEmitter {
           this.selectedIndex = 0;
           const device = this.deviceList[this.selectedIndex];
           const deviceId = device.deviceid;
-          debug(`selectDevice ${deviceId}`);
+          log.info(`selectDevice ${deviceId}`);
           selectDevice(deviceId);
         }
       } else {

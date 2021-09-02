@@ -1,10 +1,10 @@
-import createDebug from 'debug';
 import WebSocket from 'ws/index.js';
 import { AppClientType, ClientEvent } from '../@types/enum';
 import { getRequestId } from '../middlewares/global-id';
+import { Logger } from '../utils/log';
 import { AppClient } from './app-client';
 
-const debug = createDebug('app-client:ios-proxy');
+const log = new Logger('app-client:ios-proxy');
 
 export class IwdpAppClient extends AppClient {
   private url: string;
@@ -39,7 +39,7 @@ export class IwdpAppClient extends AppClient {
       try {
         msgObj = JSON.parse(msg);
       } catch (e) {
-        console.error(`parse json error: ${msg}`);
+        log.error(`parse json error: ${msg}`);
       }
       this.onMessage(msgObj).then((res) => {
         if (!('id' in msgObj)) return;
@@ -51,7 +51,7 @@ export class IwdpAppClient extends AppClient {
     });
 
     this.ws.on('open', () => {
-      debug(`ios proxy client opened: ${this.url}`);
+      log.info(`ios proxy client opened: ${this.url}`);
       for (const msg of this.msgBuffer) {
         this.send(msg);
       }
@@ -69,7 +69,7 @@ export class IwdpAppClient extends AppClient {
     });
 
     this.ws.on('error', (e) => {
-      debug('ios proxy client error: %j', e);
+      log.error('ios proxy client error: %j', e);
     });
   }
 
