@@ -1,6 +1,6 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
-## [2021-09-02, Version  3.0.35-alpha.27](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.27)
+## [2021-09-02, Version  3.0.35-alpha.28](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.28)
 
 
 ### Bug fixes
