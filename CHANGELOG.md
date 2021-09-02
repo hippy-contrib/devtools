@@ -1,5 +1,15 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-02, Version  3.0.35-alpha.30](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.30)
+
+
+### Bug fixes
+
+ - [[`628b24d2`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/628b24d2)] **-** oci rebuild时无change,不用commit (chestershen) 
+
+
+
+
 ## [2021-09-02, Version  3.0.35-alpha.29](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.29)
 
 
