@@ -1,5 +1,16 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-03, Version  3.0.35-alpha.32](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.32)
+
+
+
+### Features
+
+ - [[`e6d2c506`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/e6d2c506)] **-** x (chestershen) 
+
+
+
+
 ## [2021-09-03, Version  3.0.35-alpha.31](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.31)
 
 
