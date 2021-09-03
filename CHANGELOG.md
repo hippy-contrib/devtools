@@ -1,5 +1,16 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-03, Version  3.0.35-alpha.31](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.31)
+
+
+
+### Features
+
+ - [[`73c9ed5f`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/73c9ed5f)] **-** 修改以触发tag push (sicilyliu) 
+
+
+
+
 ## [2021-09-02, Version  3.0.35-alpha.30](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.30)
 
 
@@ -32,6 +43,15 @@
 ### Bug fixes
 
  - [[`66f26bdf`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/66f26bdf)] **-** npm token 替换 (chestershen) 
+
+
+
+
+## [2021-09-01, Version  3.0.35-alpha.27](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.27)
+
+
+### Bug fixes
+
  - [[`c5450427`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/c5450427)] **-** token (chestershen) 
 
 
@@ -95,11 +115,21 @@
 
  - [[`3e8637ec`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/3e8637ec)] **-** find target (chestershen) 
  - [[`48f1f7dc`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/48f1f7dc)] **-** publish npm add notify (sicilyliu) 
- - [[`18d9ed24`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/18d9ed24)] **-** 提取tag自动发布npm (chestershen) 
 
 ### Bug fixes
 
  - [[`deae4e4a`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/deae4e4a)] **-** oci编译问题 (sicilyliu) 
+
+
+
+
+## [2021-08-31, Version  3.0.35-alpha.20](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.20)
+
+
+
+### Features
+
+ - [[`18d9ed24`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/18d9ed24)] **-** 提取tag自动发布npm (chestershen) 
 
 
 
@@ -111,6 +141,16 @@
 ### Features
 
  - [[`c35321c8`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/c35321c8)] **-** 暂时注释替换版本号脚本 (sicilyliu) 
+
+
+
+
+## [2021-08-31, Version  3.0.35-alpha.8](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.8)
+
+
+
+### Features
+
  - [[`e59ae061`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/e59ae061)] **-** 提取tag自动发布npm (chestershen) 
 
 
