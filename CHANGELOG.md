@@ -6,7 +6,7 @@
 
 ### Features
 
- - [[`847586ce`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/847586ce)] **-** 如果查不到分支名,则不修改package.json (chestershen) 
+ - [[`d42074b2`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/d42074b2)] **-** 如果查不到分支名,则不修改package.json (chestershen) 
  - [[`56ee3726`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/56ee3726)] **-** x (chestershen) 
  - [[`56213636`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/56213636)] **-** oci checkout分支 (chestershen) 
 
