@@ -1,5 +1,17 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-06, Version  3.0.35-alpha.35](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.35)
+
+
+
+### Features
+
+ - [[`56ee3726`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/56ee3726)] **-** x (chestershen) 
+ - [[`56213636`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/56213636)] **-** oci checkout分支 (chestershen) 
+
+
+
+
 ## [2021-09-03, Version  3.0.35-alpha.34](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.34)
 
 
