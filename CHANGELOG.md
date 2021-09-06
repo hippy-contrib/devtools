@@ -1,5 +1,16 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-06, Version  3.0.36](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.36)
+
+
+
+### Features
+
+ - [[`788baa15`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/788baa15)] **-** 修改package.json仓库信息 (chestershen) 
+
+
+
+
 ## [2021-09-06, Version  3.0.35-alpha.36](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.36)
 
 
