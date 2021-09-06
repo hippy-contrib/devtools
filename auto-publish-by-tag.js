@@ -5,8 +5,6 @@ const { spawn } = require('child_process');
 let logStr = '';
 const logFile = path.join(__dirname, 'oci-log.log');
 const tag = process.env.ORANGE_BRANCH;
-const auth = process.env.AUTH;
-const email = process.env.EMAIL;
 const npmToken = process.env.NPM_TOKEN;
 
 function log(...args) {
@@ -38,7 +36,6 @@ function exec(cmd, argv, options) {
     const cp = spawn(cmd, argv, options);
     cp.stdout.on('data', (msg) => {
       log(`stdout: ${msg.toString()}`);
-      log(msg.toString());
       stdout += msg.toString();
     });
     cp.stderr.on('data', (err) => log(err.toString()));
@@ -73,44 +70,38 @@ function commitPackageJson() {
 }
 
 function checkout() {
+  function findBranch(stdout) {
+    const branchs = stdout
+      .split('\n')
+      .map((v) => v.replace('*', '').trim())
+      .filter((v) => v.startsWith('remotes/origin/'))
+      .map((v) => v.replace('remotes/origin/', ''));
+    if (branchs.indexOf('master') !== -1) return 'master';
+
+    const branch = branchs.find((branch) => branch.indexOf('detached') === -1);
+    if (branch) return branch;
+  }
   return exec('git', ['config', '--global', 'pager.branch', 'false'])
-    .then(() => exec('git', ['fetch', '--all']))
     .then(() => exec('git', ['branch', '-a', '--contains', `tags/${tag}`]))
     .then((stdout) => {
       log(stdout);
-
-      const branchs = stdout
-        .split('\n')
-        .map((v) => v.replace('*', '').trim())
-        .filter((v) => v.startsWith('remotes/origin/'))
-        .map((v) => v.replace('remotes/origin/', ''));
-      if (branchs.indexOf('master') !== -1) return 'master';
-
-      const branch = branchs.find((branch) => branch.indexOf('detached') === -1);
+      const branch = findBranch(stdout);
       if (branch) return branch;
 
-      // let row = stdout
-      //   .split('\n')
-      //   .find(row => row.startsWith('*'));
-      // const result = row.match(/detached.*\s([\d|\w]+)\)$/);
-      // if(result && result[1]) {
-      //   const commitId = result[1];
-      //   return exec('git', ['branch', '-a', '--contains', commitId])
-      //     .then(stdout => {
-      //     })
-      // }
-      // else {
-      //   return row.replace('*', '').trim();
-      // }
+      const row = stdout.split('\n').find((row) => row.startsWith('*'));
+      const result = row.match(/detached.*\s([\d|\w]+)\)$/);
+      if (result && result[1]) {
+        const commitId = result[1];
+        return exec('git', ['branch', '-a', '--contains', commitId]).then((stdout) => findBranch(stdout));
+      }
 
-      //   .map((v) => v.replace('*', '').trim())
-      //   .filter((v) => v.startsWith('remotes/origin/'))
-      //   .map((v) => v.replace('remotes/origin/', ''));
-      // if (branchs.indexOf('master') !== -1) return 'master';
-      // else if (branchs.length > 1) return branchs[1];
-      // else return branchs[0];
+      return row.replace('*', '').trim();
     })
-    .then((branch) => exec('git', ['checkout', `${branch}`]));
+    .then((branch) => {
+      if (branch) {
+        return exec('git', ['checkout', `${branch}`]).then(() => branch);
+      }
+    });
 }
 
 function installDependencies() {
@@ -126,9 +117,9 @@ function npmLogin() {
     ['registry', 'https://registry.npmjs.org/'],
     ['always-auth', 'true'],
     ['strict-ssl', 'true'],
-    ['//registry.npmjs.org/:username', auth.split(':')[0]],
-    ['//registry.npmjs.org/:_password', auth.split(':')[1]],
-    ['//registry.npmjs.org/:email', email],
+    // ['//registry.npmjs.org/:username', auth.split(':')[0]],
+    // ['//registry.npmjs.org/:_password', auth.split(':')[1]],
+    // ['//registry.npmjs.org/:email', email],
     ['//registry.npmjs.org/:_authToken', npmToken],
   ];
   return Promise.all(configs.map((config) => exec('npm', ['config', 'set', ...config])));
@@ -147,9 +138,11 @@ function publishNpm() {
 (async () => {
   // try {
   checkTag();
-  await checkout();
-  await updatePackageJson();
-  await commitPackageJson();
+  const branch = await checkout();
+  if (branch) {
+    await updatePackageJson();
+    await commitPackageJson();
+  }
   await installDependencies();
   await build();
   await npmLogin();

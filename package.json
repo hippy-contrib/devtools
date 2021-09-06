@@ -1,10 +1,10 @@
 {
   "name": "debug-server-next",
-  "version": "3.0.35-alpha.28",
+  "version": "3.0.35-alpha.27",
   "description": "Dev server for hippy-core.",
-  "repository": "https://github.com/Tencent/Hippy/tree/master/packages/hippy-debug-server",
+  "repository": "https://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server",
   "homepage": "http://hippyjs.org",
-  "author": "XQ Kuang <x@kxq.io>",
+  "author": "chestershen@tencent.com",
   "license": "Apache-2.0",
   "bin": {
     "hippy-debug": "dist/index.js"
@@ -15,7 +15,7 @@
     "dev:gamecenter": "cross-env DEBUG=*,-↓↓↓,-↑↑↑,-koa-router TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts --entry=src/public/game-center/index.bundle",
     "build": "npx gulp",
     "test": "npx jest",
-    "lint": "npx eslint --fix --quiet --ext .js,.ts ./src"
+    "lint": "npx eslint --fix --ext .js,.ts ./src"
   },
   "nodemonConfig": {
     "watch": [

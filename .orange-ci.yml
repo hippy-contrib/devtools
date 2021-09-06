@@ -24,7 +24,7 @@ master:
             > ${REVIEWED_BY}
 
   merge_request:
-    - name: 检查代码质量流水线
+    - name: MR流水线
       runner:
         network: devnet
 
@@ -141,13 +141,13 @@ $:
         - name: notify npm publish
           type: wework:message
           options:
-          robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
-          message: |
-            > npm 包已发布
-            > 　
-            > version: ${ORANGE_BRANCH}
-            > 　
-            > published by ${ORANGE_BUILD_USER}
+            robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+            message: |
+              > npm 包已发布
+              > 　
+              > version: ${ORANGE_BRANCH}
+              > 　
+              > published by ${ORANGE_BUILD_USER}
 
       failStages:
         - name: echo log
