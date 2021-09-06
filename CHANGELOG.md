@@ -1,5 +1,16 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-09-06, Version  3.0.35-alpha.36](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.36)
+
+
+
+### Features
+
+ - [[`a826474e`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/a826474e)] **-** fix oci 缩进 (chestershen) 
+
+
+
+
 ## [2021-09-06, Version  3.0.35-alpha.35](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.35-alpha.35)
 
 
