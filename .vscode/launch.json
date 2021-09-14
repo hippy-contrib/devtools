@@ -5,11 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Attach to Chrome",
+      "name": "Attach to hippy bundle",
       "port": 38989,
       "request": "attach",
-      "type": "pwa-chrome",
-      "webRoot": "${workspaceFolder}"
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
     },
     {
       "name": "Attach dist",

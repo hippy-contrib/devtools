@@ -7,8 +7,8 @@ import { DebugTarget } from '../@types/tunnel';
 import { androidDebugTargetManager } from '../android-debug-target-manager';
 import { appClientManager } from '../client';
 import { config } from '../config';
-import { makeUrl } from '../utils/url';
 import { Logger } from '../utils/log';
+import { makeUrl } from '../utils/url';
 
 const log = new Logger('chrome-inspect-router');
 
@@ -25,6 +25,11 @@ export const getChromeInspectRouter = (routerArgv: RouterArgv) => {
   });
 
   chromeInspectRouter.get('/json', async (ctx) => {
+    const rst = await DebugTargetManager.getDebugTargets();
+    ctx.body = rst;
+  });
+
+  chromeInspectRouter.get('/json/list', async (ctx) => {
     const rst = await DebugTargetManager.getDebugTargets();
     ctx.body = rst;
   });

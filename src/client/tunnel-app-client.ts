@@ -24,6 +24,11 @@ export class TunnelAppClient extends AppClient {
         params: {},
       });
     }
+    tunnel.sendMessage({
+      id: requestId.create(),
+      method: 'Debugger.disable',
+      params: {},
+    });
   }
 
   protected registerMessageListener() {
