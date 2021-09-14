@@ -10,7 +10,7 @@
     "hippy-debug": "dist/index.js"
   },
   "scripts": {
-    "start": "nodemon",
+    "start": "nodemon --exec \"npm run dev\"",
     "dev": "cross-env DEBUG=*,-↓↓↓,-↑↑↑,-koa-router,-koa-send TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts",
     "dev:gamecenter": "cross-env DEBUG=*,-↓↓↓,-↑↑↑,-koa-router TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts --entry=src/public/game-center/index.bundle",
     "build": "npx gulp",
@@ -21,7 +21,6 @@
     "watch": [
       "src"
     ],
-    "exec": "npm run dev",
     "ext": "ts"
   },
   "keywords": [

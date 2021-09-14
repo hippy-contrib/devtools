@@ -1,11 +1,17 @@
-let requestId = 0;
-export const getRequestId = () => {
-  requestId -= 1;
-  return requestId;
-};
+class GlobalId {
+  private _id = 0;
 
-let contextId = 0;
-export const getContextId = () => {
-  contextId -= 1;
-  return contextId;
-};
+  constructor(private step: number = 1) {}
+
+  public get id() {
+    return this._id;
+  }
+
+  public create() {
+    this._id += this.step;
+    return this._id;
+  }
+}
+
+export const requestId = new GlobalId(-1);
+export const contextId = new GlobalId();

@@ -1,6 +1,6 @@
 import WebSocket from 'ws/index.js';
 import { AppClientType, ClientEvent } from '../@types/enum';
-import { getRequestId } from '../middlewares/global-id';
+import { requestId } from '../middlewares/global-id';
 import { Logger } from '../utils/log';
 import { AppClient } from './app-client';
 
@@ -20,8 +20,13 @@ export class IwdpAppClient extends AppClient {
 
   public resumeApp() {
     this.sendToApp({
-      id: getRequestId(),
+      id: requestId.create(),
       method: 'Debugger.disable',
+      params: {},
+    });
+    this.sendToApp({
+      id: requestId.create(),
+      method: 'Runtime.disable',
       params: {},
     });
   }

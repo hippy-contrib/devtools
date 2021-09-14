@@ -91,7 +91,15 @@ export class Application {
         servePath = path.resolve(path.dirname(entry));
       }
       log.info(`serve bundle: ${entry} \nserve folder: ${servePath}`);
-      app.use(serve(servePath));
+      app.use(
+        serve(servePath, {
+          setHeaders: (res, path) => {
+            if (/index\.bundle$/.test(path)) {
+              res.setHeader('Content-Type', 'application/javascript');
+            }
+          },
+        }),
+      );
       app.use(
         serve(publicPath || path.join(__dirname, 'public'), {
           maxage: 30 * 24 * 60 * 60 * 1000,

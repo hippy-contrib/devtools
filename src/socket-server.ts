@@ -10,8 +10,8 @@ import { ERROR_CODE } from './error-code';
 import { debugTarget2UrlParsedContext } from './middlewares';
 import { DebugTargetManager } from './router/chrome-inspect-router';
 import { DomainRegister } from './utils/cdp';
-import { parseWsUrl } from './utils/url';
 import { Logger } from './utils/log';
+import { parseWsUrl } from './utils/url';
 
 const log = new Logger('socket-bridge');
 
@@ -130,7 +130,12 @@ export class SocketServer extends DomainRegister {
         const msgObj: Adapter.CDP.Req = JSON.parse(msg);
         this.idWsMap.set(msgObj.id, ws);
         conn.appClientList.forEach((appClient) => {
-          appClient.send(msgObj);
+          appClient.send(msgObj)
+            .catch(e => {
+              if(e === ERROR_CODE.DOMAIN_FILTERED) {
+                log.info('command is filtered');
+              }
+            });
         });
       });
 

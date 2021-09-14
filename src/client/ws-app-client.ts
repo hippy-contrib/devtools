@@ -1,6 +1,6 @@
 import WebSocket from 'ws/index.js';
 import { AppClientType, ClientEvent, DevicePlatform } from '../@types/enum';
-import { getRequestId } from '../middlewares';
+import { requestId } from '../middlewares';
 import { Logger } from '../utils/log';
 import { AppClient } from './app-client';
 
@@ -23,7 +23,7 @@ export class WsAppClient extends AppClient {
     if (this.platform === DevicePlatform.Android) {
       this.ws.send(
         JSON.stringify({
-          id: getRequestId(),
+          id: requestId.create(),
           method: 'TDFRuntime.resume',
           params: {},
         }),
@@ -31,7 +31,7 @@ export class WsAppClient extends AppClient {
     }
     this.ws.send(
       JSON.stringify({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'Debugger.disable',
         params: {},
       }),

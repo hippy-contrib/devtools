@@ -1,5 +1,5 @@
 import { AppClientType, ClientEvent, DevicePlatform } from '../@types/enum';
-import { getRequestId } from '../middlewares';
+import { requestId } from '../middlewares';
 import { Tunnel, tunnel } from '../tunnel';
 import { Logger } from '../utils/log';
 import { AppClient } from './app-client';
@@ -19,7 +19,7 @@ export class TunnelAppClient extends AppClient {
     log.info('tunnel app client resume');
     if (this.platform === DevicePlatform.Android) {
       tunnel.sendMessage({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'TDFRuntime.resume',
         params: {},
       });

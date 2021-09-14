@@ -1,5 +1,5 @@
 import { ChromeCommand } from 'tdf-devtools-protocol/types/enum-chrome-mapping';
-import { getRequestId } from '../global-id';
+import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
 import HeapAdapter from './heap-adapter';
 
@@ -8,7 +8,7 @@ export const heapMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [ChromeCommand.HeapProfilerEnable]: ({ msg, sendToApp, sendToDevtools }) =>
       sendToApp({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'Heap.enable',
         params: {},
       }).then((res) => {
@@ -23,7 +23,7 @@ export const heapMiddleWareManager: MiddleWareManager = {
       }),
     [ChromeCommand.HeapProfilerDisable]: ({ sendToApp }) =>
       sendToApp({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'Heap.disable',
         params: {},
       }),
@@ -32,7 +32,7 @@ export const heapMiddleWareManager: MiddleWareManager = {
       console.log('onTakeHeapSnapshot', msg);
       const { reportProgress } = req.params;
       return sendToApp({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'Heap.snapshot',
         params: {},
       }).then((res) => {
@@ -67,7 +67,7 @@ export const heapMiddleWareManager: MiddleWareManager = {
     },
     [ChromeCommand.HeapProfilerCollectGarbage]: ({ sendToApp }) =>
       sendToApp({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'Heap.gc',
         params: {},
       }),

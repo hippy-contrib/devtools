@@ -34,9 +34,9 @@ export class Logger {
   private initLoggerInstance() {
     const transport = new winston.transports.DailyRotateFile({
       filename: path.join(config.logPath, '%DATE%.log'),
-      datePattern: 'YYYY-MM-DD-HH',
+      datePattern: 'YYYY-MM-DD',
       zippedArchive: false,
-      maxSize: '20m',
+      maxSize: '50m',
       maxFiles: '7d',
     });
     const { format } = winston;
@@ -48,7 +48,7 @@ export class Logger {
         format.colorize(),
         format.printf(({ level, message, label, timestamp }) => `${timestamp} ${label} ${level} ${message}`),
       ),
-      transports: [transport, new winston.transports.Console()],
+      transports: [transport],
     });
   }
 }

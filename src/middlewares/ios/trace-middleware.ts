@@ -1,4 +1,4 @@
-import { getRequestId } from '../global-id';
+import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
 import TraceAdapter from './trace-adapter';
 
@@ -20,13 +20,13 @@ export const traceMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     'Tracing.start': ({ sendToApp }) =>
       sendToApp({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'ScriptProfiler.startTracking',
         params: { includeSamples: true },
       }),
     'Tracing.end': ({ sendToApp }) =>
       sendToApp({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'ScriptProfiler.stopTracking',
         params: {},
       }),

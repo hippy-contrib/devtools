@@ -1,7 +1,7 @@
 import { ChromeCommand, ChromeEvent } from 'tdf-devtools-protocol/types/enum-chrome-mapping';
 import { sendEmptyResultToDevtools } from '../default-middleware';
-import { getRequestId } from '../global-id';
-import { MiddleWareManager, MiddleWare } from '../middleware-context';
+import { requestId } from '../global-id';
+import { MiddleWare, MiddleWareManager } from '../middleware-context';
 
 export let lastScriptEval;
 
@@ -9,6 +9,17 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {
     [ChromeEvent.DebuggerScriptParsed]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
+      eventRes.params = {
+        ...eventRes.params,
+        hasSourceURL: !!eventRes.params.sourceURL,
+        // executionContextId: contextId.id,
+        // isLiveEdit: false,
+        isModule: eventRes.params.module,
+        // sourceMapURL: '',
+        scriptLanguage: 'JavaScript',
+        url: eventRes.params.url || eventRes.params.sourceURL,
+      };
+      delete eventRes.params.module
       lastScriptEval = eventRes.params.scriptId;
       return sendToDevtools(eventRes);
     },
@@ -27,7 +38,7 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [ChromeCommand.DebuggerEnable]: ({ sendToApp, msg }) => {
       sendToApp({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'Debugger.setBreakpointsActive',
         params: { active: true },
       });

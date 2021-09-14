@@ -14,9 +14,9 @@ import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
   MiddleWareManager,
-  UrlParsedContext,
+  UrlParsedContext
 } from '../middlewares';
-import { getRequestId } from '../middlewares/global-id';
+import { requestId } from '../middlewares/global-id';
 import { CDP_DOMAIN_LIST, getDomain } from '../utils/cdp';
 import { Logger } from '../utils/log';
 import { compose } from '../utils/middleware';
@@ -116,15 +116,15 @@ export abstract class AppClient extends EventEmitter {
       msg,
       sendToApp: (msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> => {
         if (!msg.id) {
-          msg.id = getRequestId();
+          msg.id = requestId.create();
         }
         downwardLog.info('%j', msg);
         return this.sendToApp(msg);
       },
       sendToDevtools: (msg: Adapter.CDP.Req) => {
-        upwardLog.info('%j', msg);
+        upwardLog.info('%j %j', msg.id, msg.method);
         return this.sendToDevtools(msg);
-      },
+      }
     };
   }
 

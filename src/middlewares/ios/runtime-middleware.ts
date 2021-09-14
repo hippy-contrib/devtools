@@ -1,7 +1,5 @@
-import { sendEmptyResultToDevtools } from '../default-middleware';
-import { getContextId, getRequestId } from '../global-id';
+import { contextId, requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
-import { MiddleWare } from './../middleware-context';
 import { lastScriptEval } from './debugger-middleware';
 
 let lastPageExecutionContextId;
@@ -77,20 +75,20 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
         method: 'Runtime.executionContextCreated',
         params: {
           context: {
-            id: getContextId(),
+            id: contextId.create(),
             name: 'tdf',
             origin: '',
           },
         },
       });
       return sendToDevtools(msg);
-    },
+    }
   },
   downwardMiddleWareListMap: {
-    'Runtime.enable': sendEmptyResultToDevtools as MiddleWare,
+    // 'Runtime.enable': sendEmptyResultToDevtools as MiddleWare,
     'Runtime.compileScript': ({ msg, sendToApp, sendToDevtools }) =>
       sendToApp({
-        id: getRequestId(),
+        id: requestId.create(),
         method: 'Runtime.evaluate',
         params: {
           expression: (msg as any).params.expression,
