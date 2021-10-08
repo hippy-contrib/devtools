@@ -1,6 +1,6 @@
 {
   "name": "debug-server-next",
-  "version": "3.0.35-alpha.27",
+  "version": "3.0.38",
   "description": "Dev server for hippy-core.",
   "repository": "https://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server",
   "homepage": "http://hippyjs.org",
@@ -50,6 +50,7 @@
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5",
     "ws": "^7.5.3",
+    "tslib": "^2.3.0",
     "yargs": "^15.0.2"
   },
   "devDependencies": {
@@ -82,7 +83,6 @@
     "ts-jest": "^27.0.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
-    "tslib": "^2.3.0",
     "typescript": "^4.3.5"
   }
 }
