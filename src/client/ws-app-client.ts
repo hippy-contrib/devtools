@@ -62,6 +62,7 @@ export class WsAppClient extends AppClient {
 
   protected sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     return new Promise((resolve, reject) => {
+      log.info(`ws send to app: '${JSON.stringify(msg)}'`);
       const msgStr = JSON.stringify(msg);
       this.ws.send(msgStr);
       this.requestPromiseMap.set(msg.id, { resolve, reject });

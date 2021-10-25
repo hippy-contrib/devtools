@@ -14,7 +14,7 @@ import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
   MiddleWareManager,
-  UrlParsedContext
+  UrlParsedContext,
 } from '../middlewares';
 import { requestId } from '../middlewares/global-id';
 import { CDP_DOMAIN_LIST, getDomain } from '../utils/cdp';
@@ -39,7 +39,6 @@ export abstract class AppClient extends EventEmitter {
   protected msgBuffer: any[] = [];
   protected acceptDomains: string[] = CDP_DOMAIN_LIST;
   protected ignoreDomains: string[] = [];
-  protected useAdapter = true;
   protected useAllDomain = true;
   protected isClosed = false;
   protected msgIdMethodMap: Map<number, string> = new Map();
@@ -49,7 +48,6 @@ export abstract class AppClient extends EventEmitter {
     id,
     {
       useAllDomain = true,
-      useAdapter = true,
       acceptDomains,
       ignoreDomains = [],
       middleWareManager,
@@ -62,7 +60,6 @@ export abstract class AppClient extends EventEmitter {
     this.useAllDomain = useAllDomain;
     this.acceptDomains = acceptDomains;
     this.ignoreDomains = ignoreDomains;
-    this.useAdapter = useAdapter;
     this.middleWareManager = middleWareManager;
     this.urlParsedContext = urlParsedContext;
     this.platform = platform;
@@ -80,6 +77,7 @@ export abstract class AppClient extends EventEmitter {
     if (!middlewareList) middlewareList = [];
     if (!(middlewareList instanceof Array)) middlewareList = [middlewareList];
     const fullMiddlewareList = [...middlewareList, defaultDownwardMiddleware];
+    downwardLog.info(`'${msg.method}' middlewareLength: ${fullMiddlewareList.length}`);
 
     return compose(fullMiddlewareList)(this.makeContext(msg));
   }
@@ -121,10 +119,10 @@ export abstract class AppClient extends EventEmitter {
         downwardLog.info('%j', msg);
         return this.sendToApp(msg);
       },
-      sendToDevtools: (msg: Adapter.CDP.Req) => {
-        upwardLog.info('%j %j', msg.id, msg.method);
+      sendToDevtools: (msg: Adapter.CDP.Res) => {
+        upwardLog.info('%j %j', (msg as Adapter.CDP.CommandRes).id, msg.method);
         return this.sendToDevtools(msg);
-      }
+      },
     };
   }
 
@@ -151,7 +149,6 @@ export abstract class AppClient extends EventEmitter {
 
 export type AppClientOption = {
   useAllDomain: boolean;
-  useAdapter: boolean;
   acceptDomains?: string[];
   ignoreDomains?: string[];
   ws?: WebSocket;

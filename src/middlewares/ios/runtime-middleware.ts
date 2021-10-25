@@ -1,12 +1,13 @@
 import { contextId, requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
 import { lastScriptEval } from './debugger-middleware';
+import { ChromeCommand, ChromeEvent, Ios90Command } from 'tdf-devtools-protocol/types';
 
 let lastPageExecutionContextId;
 
 export const runtimeMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {
-    'Runtime.executionContextCreated': ({ msg, sendToDevtools }) => {
+    [ChromeEvent.RuntimeExecutionContextCreated]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
       if (eventRes.params?.context) {
         if (!eventRes.params.context.origin) {
@@ -29,7 +30,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
 
       return sendToDevtools(eventRes);
     },
-    'Runtime.evaluate': ({ msg, sendToDevtools }) => {
+    [ChromeCommand.RuntimeEvaluate]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
       if (commandRes.result?.wasThrown) {
         commandRes.result.result.subtype = 'error';
@@ -57,7 +58,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
       }
       return sendToDevtools(commandRes);
     },
-    'Runtime.getProperties': ({ msg, sendToDevtools }) => {
+    [ChromeCommand.RuntimeGetProperties]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
       const newPropertyDescriptors = [];
       for (let i = 0; i < commandRes.result?.properties?.length; i += 1) {
@@ -70,9 +71,9 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
       commandRes.result.result = newPropertyDescriptors;
       return sendToDevtools(commandRes);
     },
-    'Runtime.enable': ({ msg, sendToDevtools }) => {
+    [ChromeCommand.RuntimeEnable]: ({ msg, sendToDevtools }) => {
       sendToDevtools({
-        method: 'Runtime.executionContextCreated',
+        method: ChromeEvent.RuntimeExecutionContextCreated,
         params: {
           context: {
             id: contextId.create(),
@@ -82,14 +83,13 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
         },
       });
       return sendToDevtools(msg);
-    }
+    },
   },
   downwardMiddleWareListMap: {
-    // 'Runtime.enable': sendEmptyResultToDevtools as MiddleWare,
-    'Runtime.compileScript': ({ msg, sendToApp, sendToDevtools }) =>
+    [ChromeCommand.RuntimeCompileScript]: ({ msg, sendToApp, sendToDevtools }) =>
       sendToApp({
         id: requestId.create(),
-        method: 'Runtime.evaluate',
+        method: Ios90Command.RuntimeEvaluate,
         params: {
           expression: (msg as any).params.expression,
           contextId: (msg as any).params.executionContextId,

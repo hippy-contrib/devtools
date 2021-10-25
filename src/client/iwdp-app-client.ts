@@ -34,12 +34,16 @@ export class IwdpAppClient extends AppClient {
   protected connect() {
     if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return;
 
-    this.ws = new WebSocket(this.url);
-    this.type = AppClientType.IosProxy;
+    try {
+      this.ws = new WebSocket(this.url);
+      this.type = AppClientType.IosProxy;
+    } catch (e) {
+      log.error('%j', e);
+    }
   }
 
   protected registerMessageListener() {
-    this.ws.on('message', (msg: string) => {
+    this.ws?.on('message', (msg: string) => {
       let msgObj: Adapter.CDP.Res;
       try {
         msgObj = JSON.parse(msg);
@@ -55,7 +59,7 @@ export class IwdpAppClient extends AppClient {
       });
     });
 
-    this.ws.on('open', () => {
+    this.ws?.on('open', () => {
       log.info(`ios proxy client opened: ${this.url}`);
       for (const msg of this.msgBuffer) {
         this.send(msg);
@@ -63,7 +67,7 @@ export class IwdpAppClient extends AppClient {
       this.msgBuffer = [];
     });
 
-    this.ws.on('close', () => {
+    this.ws?.on('close', () => {
       this.isClosed = true;
       this.emit(ClientEvent.Close);
 
@@ -73,7 +77,7 @@ export class IwdpAppClient extends AppClient {
       }
     });
 
-    this.ws.on('error', (e) => {
+    this.ws?.on('error', (e) => {
       log.error('ios proxy client error: %j', e);
     });
   }

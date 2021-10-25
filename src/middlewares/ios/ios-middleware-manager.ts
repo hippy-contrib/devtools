@@ -1,4 +1,4 @@
-import { TdfCommand, TdfEvent } from 'tdf-devtools-protocol/types/enum-tdf-mapping';
+import { TdfCommand, TdfEvent } from 'tdf-devtools-protocol/types';
 import { cssMiddleWareManager } from '../css-middleware';
 import { onFetchHeapCache, onGetHeapMeta } from '../heap-middleware';
 import { MiddleWareManager } from '../middleware-context';
@@ -21,7 +21,7 @@ export const iosMiddleWareManager: MiddleWareManager = {
     ...cssMiddleWareManager.upwardMiddleWareListMap,
   },
   downwardMiddleWareListMap: {
-    'TDFMemory.fetchHeapCache': [onFetchHeapCache],
+    [TdfCommand.TDFMemoryFetchHeapCache]: [onFetchHeapCache],
     ...debuggerMiddleWareManager.downwardMiddleWareListMap,
     ...logMiddleWareManager.downwardMiddleWareListMap,
     ...runtimeMiddleWareManager.downwardMiddleWareListMap,

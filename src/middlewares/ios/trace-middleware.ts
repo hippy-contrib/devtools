@@ -1,16 +1,17 @@
 import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
 import TraceAdapter from './trace-adapter';
+import { ChromeCommand, ChromeEvent, Ios100Command, Ios100Event } from 'tdf-devtools-protocol/types';
 
 export const traceMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {
-    'ScriptProfiler.trackingComplete': ({ msg, sendToDevtools }) => {
+    [Ios100Event.ScriptProfilerTrackingComplete]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
       console.log(`onPerformanceProfileCompleteEvent, msg = ${eventRes}`);
       const traceAdapter = new TraceAdapter();
       const v8json = traceAdapter.jsc2v8(eventRes.params);
       return sendToDevtools({
-        method: 'Tracing.dataCollected',
+        method: ChromeEvent.TracingDataCollected,
         params: {
           value: v8json,
         },
@@ -18,16 +19,16 @@ export const traceMiddleWareManager: MiddleWareManager = {
     },
   },
   downwardMiddleWareListMap: {
-    'Tracing.start': ({ sendToApp }) =>
+    [ChromeCommand.TracingStart]: ({ sendToApp }) =>
       sendToApp({
         id: requestId.create(),
-        method: 'ScriptProfiler.startTracking',
+        method: Ios100Command.ScriptProfilerStartTracking,
         params: { includeSamples: true },
       }),
-    'Tracing.end': ({ sendToApp }) =>
+    [ChromeCommand.TracingEnd]: ({ sendToApp }) =>
       sendToApp({
         id: requestId.create(),
-        method: 'ScriptProfiler.stopTracking',
+        method: Ios100Command.ScriptProfilerStopTracking,
         params: {},
       }),
   },

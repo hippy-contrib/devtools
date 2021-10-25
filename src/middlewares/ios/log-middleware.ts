@@ -1,9 +1,9 @@
-import { ChromeCommand } from 'tdf-devtools-protocol/types/enum-chrome-mapping';
+import { ChromeCommand, ChromeEvent, Ios100Event, Ios90Command } from 'tdf-devtools-protocol/types';
 import { MiddleWareManager } from '../middleware-context';
 
 export const logMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {
-    'Console.messageAdded': ({ msg, sendToDevtools }) => {
+    [Ios100Event.ConsoleMessageAdded]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
       const { message } = eventRes.params;
       let type;
@@ -42,7 +42,7 @@ export const logMiddleWareManager: MiddleWareManager = {
       };
 
       return sendToDevtools({
-        method: 'Log.entryAdded',
+        method: ChromeEvent.LogEntryAdded,
         params: {
           entry: consoleMessage,
         },
@@ -53,16 +53,16 @@ export const logMiddleWareManager: MiddleWareManager = {
     [ChromeCommand.LogClear]: ({ msg, sendToApp }) =>
       sendToApp({
         id: (msg as Adapter.CDP.Req).id,
-        method: 'Console.clearMessages',
+        method: ChromeCommand.ConsoleClearMessages,
         params: {},
       }),
-    'Log.disable': ({ msg, sendToApp }) =>
+    [ChromeCommand.LogDisable]: ({ msg, sendToApp }) =>
       sendToApp({
         id: (msg as Adapter.CDP.Req).id,
         method: 'Console.disable',
         params: {},
       }),
-    'Log.enable': ({ msg, sendToApp, sendToDevtools }) => {
+    [ChromeCommand.LogEnable]: ({ msg, sendToApp, sendToDevtools }) => {
       sendToDevtools({
         id: (msg as Adapter.CDP.Req).id,
         method: msg.method,
@@ -70,7 +70,7 @@ export const logMiddleWareManager: MiddleWareManager = {
       });
       return sendToApp({
         id: (msg as Adapter.CDP.Req).id,
-        method: 'Console.enable',
+        method: Ios90Command.ConsoleEnable,
         params: {},
       });
     },

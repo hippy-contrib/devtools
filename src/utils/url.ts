@@ -4,6 +4,7 @@ export const parseWsUrl = (reqUrl: string) => {
   const url = new URL(reqUrl, 'http://0.0.0.0');
   const clientId = url.searchParams.get('clientId');
   const targetId = url.searchParams.get('targetId');
+  const contextName = url.searchParams.get('contextName');
   let platform = url.searchParams.get('platform') as DevicePlatform;
   const clientRole = url.searchParams.get('role') as ClientRole;
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
@@ -13,6 +14,7 @@ export const parseWsUrl = (reqUrl: string) => {
     platform,
     clientRole,
     pathname: url.pathname,
+    contextName,
   };
 };
 

@@ -5,18 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Attach to hippy bundle",
+      "name": "Attach 38989",
       "port": 38989,
       "request": "attach",
       "skipFiles": ["<node_internals>/**"],
+      // "localRoot": "${workspaceFolder}/src/public",
+      // "remoteRoot": ".",
       "type": "node"
-    },
-    {
-      "name": "Attach dist",
-      "port": 9229,
-      "request": "attach",
-      "skipFiles": ["<node_internals>/**"],
-      "type": "pwa-node"
     },
     {
       "type": "node",

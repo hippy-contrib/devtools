@@ -38,6 +38,16 @@ export class SocketServer extends DomainRegister {
     });
     this.wss = wss;
     wss.on('connection', this.onConnection.bind(this));
+
+    wss.on('error', (e) => {
+      log.info('wss error: %j', e);
+    });
+    wss.on('headers', (headers) => {
+      log.info('wss headers: %j', headers);
+    });
+    wss.on('upgrade', (response) => {
+      log.info('wss upgrade: %j', response);
+    });
   }
 
   public close() {
@@ -65,7 +75,8 @@ export class SocketServer extends DomainRegister {
   public selectDebugTarget(debugTarget: DebugTarget, ws?: WebSocket): AppClient[] {
     if (!debugTarget) return;
     this.debugTarget = debugTarget;
-    const appClientId = debugTarget.id;
+    // ios 用 jsContext name 作为 appClientId，用来匹配 ws 通道和 IWDP 通道
+    const appClientId = debugTarget.platform === DevicePlatform.IOS ? debugTarget.title : debugTarget.id;
     if (!this.connectionMap.has(appClientId)) {
       this.connectionMap.set(appClientId, {
         appClientList: [],
@@ -84,6 +95,7 @@ export class SocketServer extends DomainRegister {
 
       conn.appClientList = options
         .map(({ Ctor, ...option }: AppClientFullOptionOmicCtx) => {
+          log.info(`app client ${Ctor.name}`);
           const urlParsedContext = debugTarget2UrlParsedContext(debugTarget);
           const newOption: AppClientOption = {
             urlParsedContext,
@@ -130,12 +142,12 @@ export class SocketServer extends DomainRegister {
         const msgObj: Adapter.CDP.Req = JSON.parse(msg);
         this.idWsMap.set(msgObj.id, ws);
         conn.appClientList.forEach((appClient) => {
-          appClient.send(msgObj)
-            .catch(e => {
-              if(e === ERROR_CODE.DOMAIN_FILTERED) {
-                log.info('command is filtered');
-              }
-            });
+          appClient.send(msgObj).catch((e) => {
+            if (e === ERROR_CODE.DOMAIN_FILTERED) {
+              return log.info('command is filtered');
+            }
+            log.error('app client send error: %j', e);
+          });
         });
       });
 
@@ -153,10 +165,12 @@ export class SocketServer extends DomainRegister {
   }
 
   private async onConnection(ws, req) {
+    log.info('on connection, ws url: %s', req.url);
     const ctx = parseWsUrl(req.url);
-    const { platform, clientRole, clientId, targetId, pathname } = ctx;
+    const { clientRole, targetId, pathname, contextName, platform } = ctx;
+    let { clientId } = ctx;
     const debugTarget = await DebugTargetManager.findTarget(targetId);
-    log.info('log.info page: %j', debugTarget);
+    log.info('page: %j', debugTarget);
     log.info('%s connected!', clientRole);
 
     if (pathname !== this.wsPath) {
@@ -171,6 +185,14 @@ export class SocketServer extends DomainRegister {
       ws.close();
       return log.info('invalid client role!');
     }
+    if (clientRole === ClientRole.Ios && platform === DevicePlatform.IOS) {
+      if (!contextName) {
+        ws.close();
+        return log.info('invalid ios connection, should request with contextName!');
+      }
+      clientId = contextName;
+    }
+
     if (!clientId) {
       ws.close();
       return log.info('invalid ws connection!');

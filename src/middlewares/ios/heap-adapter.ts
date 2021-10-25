@@ -5,8 +5,41 @@
  * edge:
  *    jsc: fromId, toId, typeTableIndex, edgeDataIndexOrEdgeNameIndex
  *    v8: type, nameOrIndex, toNodeIndex
- *
+ * edge 是按 fromId 相同的顺序排列
  */
+
+type JscHeapSnapshot = {
+  version: number;
+  type: string;
+  nodes: number[];
+  edges: number[];
+  edgeTypes: string[];
+  edgeNames: string[];
+  nodeClassNames: string[];
+};
+
+type V8HeapSnapshot = {
+  snapshot: {
+    meta: {
+      node_fields: string[];
+      node_types: Array<string | Array<string>>;
+      edge_fields: string[];
+      edge_types: Array<string | Array<string>>;
+      trace_function_info_fields: string[];
+      trace_node_fields: string[];
+    };
+    node_count: number;
+    edge_count: number;
+    trace_function_count: number;
+  };
+  nodes: number[];
+  edges: number[];
+  trace_function_infos: [];
+  trace_tree: [];
+  samples: [];
+  locations: string[];
+  strings: string[];
+};
 
 const nodeFieldCount = 4;
 const nodeIdOffset = 0;
@@ -38,7 +71,7 @@ const v8NodeFieldCount = 5;
 // const v8EdgeFieldCount = 3;
 
 export default class HeapAdapter {
-  jsc2v8(json) {
+  jsc2v8(json: JscHeapSnapshot): V8HeapSnapshot {
     const { nodes, nodeClassNames, edges, edgeNames } = json;
 
     const nodeCount = nodes.length / nodeFieldCount;

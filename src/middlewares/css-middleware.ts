@@ -1,26 +1,27 @@
 import color from 'color-normalize';
 import { MiddleWareManager } from './middleware-context';
+import { ChromeCommand } from 'tdf-devtools-protocol/types';
 
 export const cssMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {
-    'CSS.getMatchedStylesForNode': ({ msg, sendToDevtools }) => {
+    [ChromeCommand.CSSGetMatchedStylesForNode]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
       commandRes.result.inlineStyle = CssDomain.conversionInlineStyle(commandRes.result.inlineStyle);
       return sendToDevtools(commandRes);
     },
-    'CSS.getComputedStyleForNode': ({ msg, sendToDevtools }) => {
+    [ChromeCommand.CSSGetComputedStyleForNode]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
       commandRes.result.computedStyle = CssDomain.conversionComputedStyle(commandRes.result.computedStyle);
       return sendToDevtools(commandRes);
     },
-    'CSS.setStyleTexts': ({ msg, sendToDevtools }) => {
+    [ChromeCommand.CSSSetStyleTexts]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
       commandRes.result.styles = commandRes.result.styles.map((style) => CssDomain.conversionInlineStyle(style));
       return sendToDevtools(commandRes);
     },
   },
   downwardMiddleWareListMap: {
-    'CSS.setStyleTexts': ({ msg, sendToApp }) => {
+    [ChromeCommand.CSSSetStyleTexts]: ({ msg, sendToApp }) => {
       const req = msg as Adapter.CDP.Req;
       req.params.edits = req.params.edits.map((data) => {
         const textList = data.text

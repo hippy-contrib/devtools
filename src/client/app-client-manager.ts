@@ -47,14 +47,13 @@ export const initHippyEnv = () => {
   appClientManager.reset();
   appClientManager.addAndroidAppClientOption({
     useAllDomain: true,
-    useAdapter: true,
     middleWareManager: androidMiddleWareManager,
     Ctor: WsAppClient,
     platform: DevicePlatform.Android,
   });
   appClientManager.addIosAppClientOption({
-    useAllDomain: true,
-    useAdapter: true,
+    useAllDomain: false,
+    ignoreDomains: customDomains,
     middleWareManager: iosMiddleWareManager,
     Ctor: IwdpAppClient,
     platform: DevicePlatform.IOS,
@@ -62,7 +61,6 @@ export const initHippyEnv = () => {
   appClientManager.addIosAppClientOption({
     useAllDomain: false,
     acceptDomains: customDomains,
-    useAdapter: false,
     middleWareManager: iosMiddleWareManager,
     Ctor: WsAppClient,
     platform: DevicePlatform.IOS,
@@ -107,18 +105,15 @@ export const initVoltronEnv = () => {
  */
 export const initTdfEnv = () => {
   androidDebugTargetManager.useCustom = true;
-  console.log('initTdfEnv');
   appClientManager.reset();
   appClientManager.addAndroidAppClientOption({
     useAllDomain: true,
-    useAdapter: true,
     middleWareManager: androidMiddleWareManager,
     Ctor: TunnelAppClient,
     platform: DevicePlatform.Android,
   });
   appClientManager.addIosAppClientOption({
     useAllDomain: false,
-    useAdapter: true,
     ignoreDomains: customDomains,
     middleWareManager: iosMiddleWareManager,
     Ctor: IwdpAppClient,
@@ -127,7 +122,6 @@ export const initTdfEnv = () => {
   appClientManager.addIosAppClientOption({
     useAllDomain: false,
     acceptDomains: customDomains,
-    useAdapter: false,
     middleWareManager: iosMiddleWareManager,
     Ctor: TunnelAppClient,
     platform: DevicePlatform.IOS,

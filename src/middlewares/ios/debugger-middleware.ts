@@ -1,4 +1,4 @@
-import { ChromeCommand, ChromeEvent } from 'tdf-devtools-protocol/types/enum-chrome-mapping';
+import { ChromeCommand, ChromeEvent, Ios90Command, Ios90Event } from 'tdf-devtools-protocol/types';
 import { sendEmptyResultToDevtools } from '../default-middleware';
 import { requestId } from '../global-id';
 import { MiddleWare, MiddleWareManager } from '../middleware-context';
@@ -19,39 +19,22 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
         scriptLanguage: 'JavaScript',
         url: eventRes.params.url || eventRes.params.sourceURL,
       };
-      delete eventRes.params.module
+      delete eventRes.params.module;
       lastScriptEval = eventRes.params.scriptId;
       return sendToDevtools(eventRes);
     },
-    'Inspector.inspect': ({ msg, sendToDevtools }) => {
-      const res = msg as UnionToIntersection<Adapter.CDP.Res>;
-      res.method = 'DOM.inspectNodeRequested';
-      res.params.backendNodeId = res.params.object.objectId;
-      delete res.params.object;
-      delete res.params.hints;
-      return sendToDevtools(res);
-    },
-    'Debugger.enable': sendEmptyResultToDevtools as MiddleWare,
+    [Ios90Command.DebuggerEnable]: sendEmptyResultToDevtools as MiddleWare,
     'Debugger.setBlackboxPatterns': sendEmptyResultToDevtools as MiddleWare,
-    'Debugger.setPauseOnExceptions': sendEmptyResultToDevtools as MiddleWare,
+    [Ios90Command.DebuggerSetPauseOnExceptions]: sendEmptyResultToDevtools as MiddleWare,
   },
   downwardMiddleWareListMap: {
     [ChromeCommand.DebuggerEnable]: ({ sendToApp, msg }) => {
       sendToApp({
         id: requestId.create(),
-        method: 'Debugger.setBreakpointsActive',
+        method: ChromeCommand.DebuggerSetBreakpointsActive,
         params: { active: true },
       });
       return sendToApp(msg);
-    },
-    ['Debugger.canSetScriptSource']: ({ msg, sendToDevtools }) => {
-      const res = {
-        id: (msg as Adapter.CDP.Req).id,
-        method: msg.method,
-        result: false,
-      };
-      sendToDevtools(res);
-      return Promise.resolve(res);
     },
     [ChromeCommand.DebuggerSetBlackboxPatterns]: ({ msg, sendToDevtools }) => {
       const res = {
@@ -62,7 +45,7 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
       sendToDevtools(res);
       return Promise.resolve(res);
     },
-    'Debugger.setAsyncCallStackDepth': ({ msg, sendToDevtools }) => {
+    [ChromeCommand.RuntimeSetAsyncCallStackDepth]: ({ msg, sendToDevtools }) => {
       const res = {
         id: (msg as Adapter.CDP.Req).id,
         method: msg.method,
