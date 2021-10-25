@@ -1,15 +1,15 @@
 class GlobalId {
-  private _id = 0;
+  private globalId = 0;
 
   constructor(private step: number = 1) {}
 
   public get id() {
-    return this._id;
+    return this.globalId;
   }
 
   public create() {
-    this._id += this.step;
-    return this._id;
+    this.globalId += this.step;
+    return this.globalId;
   }
 }
 

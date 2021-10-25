@@ -82,13 +82,11 @@ export default class TraceAdapter {
         if (end === trace.stackFrames.length - 1) {
           trees.push(lastTree);
           lastTree = this.buildTree(trace.stackFrames, trace.timestamp);
-        }
-        // trace 和 prevTrace 完全重合，更新其 sampleNum
-        else if (end === -1) {
+        } else if (end === -1) {
+          // trace 和 prevTrace 完全重合，更新其 sampleNum
           this.updateSampleNum(trace, prevTrace, end);
-        }
-        // 有共用的节点，可添加到上一颗树，同时更新相同节点的 sampleNum
-        else {
+        } else {
+          // 有共用的节点，可添加到上一颗树，同时更新相同节点的 sampleNum
           this.appendToTree(trace, prevTrace, end);
           this.updateSampleNum(trace, prevTrace, end);
         }
