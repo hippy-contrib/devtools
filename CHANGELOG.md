@@ -1,5 +1,24 @@
 # ChangeLog (TencentDynamicFramework/DevTools/devtools-debug-server)
 
+## [2021-10-25, Version  3.0.39](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.39)
+
+
+
+### Features
+
+ - [[`240d857c`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/240d857c)] **-** 添加codecc扫描 (chestershen) 
+ - [[`888ebee4`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/888ebee4)] **-** 若干bug修复 (chestershen) 
+ - [[`f6d8fe90`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/f6d8fe90)] **-** 支持使用vscode内置的debugger断点调试 (chestershen) 
+
+### Bug fixes
+
+ - [[`79d74121`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/79d74121)] **-** codecc 问题处理 (chestershen) 
+ - [[`48d9cfb4`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/48d9cfb4)] **-** npm 包依赖 (chestershen) 
+ - [[`01ad9198`](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/commit/01ad9198)] **-** scriptParsed协议适配；global id create, get 接口 (chestershen) 
+
+
+
+
 ## [2021-09-06, Version  3.0.36](http://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server/-/tags/3.0.36)
 
 
