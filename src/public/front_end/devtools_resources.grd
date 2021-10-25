@@ -339,10 +339,16 @@
       <include file="panels/console/console-meta.js" name="PANELS_CONSOLE_CONSOLE_META_JS" resource_path="panels/console/console-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/console/console.js" name="PANELS_CONSOLE_CONSOLE_JS" resource_path="panels/console/console.js" type="BINDATA" compress="false"/>
       <include file="panels/console/console_module.js" name="PANELS_CONSOLE_CONSOLE_MODULE_JS" resource_path="panels/console/console_module.js" type="BINDATA" compress="false"/>
-      <include file="panels/custom/custom-legacy.js" name="PANELS_CUSTOM_CUSTOM_LEGACY_JS" resource_path="panels/custom/custom-legacy.js" type="BINDATA" compress="false"/>
-      <include file="panels/custom/custom-meta.js" name="PANELS_CUSTOM_CUSTOM_META_JS" resource_path="panels/custom/custom-meta.js" type="BINDATA" compress="false"/>
-      <include file="panels/custom/custom.js" name="PANELS_CUSTOM_CUSTOM_JS" resource_path="panels/custom/custom.js" type="BINDATA" compress="false"/>
-      <include file="panels/custom/custom_module.js" name="PANELS_CUSTOM_CUSTOM_MODULE_JS" resource_path="panels/custom/custom_module.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_memory/core_memory-legacy.js" name="PANELS_CORE_MEMORY_CORE_MEMORY_LEGACY_JS" resource_path="panels/core_memory/core_memory-legacy.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_memory/core_memory-meta.js" name="PANELS_CORE_MEMORY_CORE_MEMORY_META_JS" resource_path="panels/core_memory/core_memory-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_memory/core_memory.js" name="PANELS_CORE_MEMORY_CORE_MEMORY_JS" resource_path="panels/core_memory/core_memory.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_memory/core_memory_module.js" name="PANELS_CORE_MEMORY_CORE_MEMORY_MODULE_JS" resource_path="panels/core_memory/core_memory_module.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_memory/CoreMemoryPanel.js" name="PANELS_CORE_MEMORY_COREMEMORYPANEL_JS" resource_path="panels/core_memory/CoreMemoryPanel.js" type="BINDATA" compress="false"/>
+      <include file="panels/ui_inspector/ui_inspector-legacy.js" name="PANELS_UI_INSPECTOR_UI_INSPECTOR_LEGACY_JS" resource_path="panels/ui_inspector/ui_inspector-legacy.js" type="BINDATA" compress="false"/>
+      <include file="panels/ui_inspector/ui_inspector-meta.js" name="PANELS_UI_INSPECTOR_UI_INSPECTOR_META_JS" resource_path="panels/ui_inspector/ui_inspector-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/ui_inspector/ui_inspector.js" name="PANELS_UI_INSPECTOR_UI_INSPECTOR_JS" resource_path="panels/ui_inspector/ui_inspector.js" type="BINDATA" compress="false"/>
+      <include file="panels/ui_inspector/ui_inspector_module.js" name="PANELS_UI_INSPECTOR_UI_INSPECTOR_MODULE_JS" resource_path="panels/ui_inspector/ui_inspector_module.js" type="BINDATA" compress="false"/>
+      <include file="panels/ui_inspector/UiInspectorPanel.js" name="PANELS_UI_INSPECTOR_UIINSPECTORPANEL_JS" resource_path="panels/ui_inspector/UiInspectorPanel.js" type="BINDATA" compress="false"/>
       <include file="panels/console_counters/console_counters-meta.js" name="PANELS_CONSOLE_COUNTERS_CONSOLE_COUNTERS_META_JS" resource_path="panels/console_counters/console_counters-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/console_counters/console_counters.js" name="PANELS_CONSOLE_COUNTERS_CONSOLE_COUNTERS_JS" resource_path="panels/console_counters/console_counters.js" type="BINDATA" compress="false"/>
       <include file="panels/coverage/coverage-legacy.js" name="PANELS_COVERAGE_COVERAGE_LEGACY_JS" resource_path="panels/coverage/coverage-legacy.js" type="BINDATA" compress="false"/>
@@ -512,6 +518,7 @@
       <include file="ui/legacy/legacy.js" name="UI_LEGACY_LEGACY_JS" resource_path="ui/legacy/legacy.js" type="BINDATA" compress="false"/>
       <include file="ui/legacy/theme_support/theme_support.js" name="UI_LEGACY_THEME_SUPPORT_THEME_SUPPORT_JS" resource_path="ui/legacy/theme_support/theme_support.js" type="BINDATA" compress="false"/>
       <include file="ui/legacy/utils/utils.js" name="UI_LEGACY_UTILS_UTILS_JS" resource_path="ui/legacy/utils/utils.js" type="BINDATA" compress="false"/>
+      <include file="ui/legacy/CustomPanel.js" name="UI_LEGACY_CUSTOMPANEL_JS" resource_path="ui/legacy/CustomPanel.js" type="BINDATA" compress="false"/>
       <include file="ui/lit-html/lit-html.js" name="UI_LIT_HTML_LIT_HTML_JS" resource_path="ui/lit-html/lit-html.js" type="BINDATA" compress="false"/>
       <include file="worker_app.html" name="WORKER_APP_HTML" resource_path="worker_app.html" type="BINDATA" compress="false"/>
       <include file="core/common/App.js" name="CORE_COMMON_APP_JS" resource_path="core/common/App.js" type="BINDATA" compress="false"/>
@@ -827,7 +834,6 @@
       <include file="panels/console/consoleSidebar.css.js" name="PANELS_CONSOLE_CONSOLESIDEBAR_CSS_JS" resource_path="panels/console/consoleSidebar.css.js" type="BINDATA" compress="false"/>
       <include file="panels/console/consoleView.css.js" name="PANELS_CONSOLE_CONSOLEVIEW_CSS_JS" resource_path="panels/console/consoleView.css.js" type="BINDATA" compress="false"/>
       <include file="panels/console_counters/WarningErrorCounter.js" name="PANELS_CONSOLE_COUNTERS_WARNINGERRORCOUNTER_JS" resource_path="panels/console_counters/WarningErrorCounter.js" type="BINDATA" compress="false"/>
-      <include file="panels/custom/CustomPanel.js" name="PANELS_CUSTOM_CUSTOMPANEL_JS" resource_path="panels/custom/CustomPanel.js" type="BINDATA" compress="false"/>
       <include file="panels/coverage/CoverageDecorationManager.js" name="PANELS_COVERAGE_COVERAGEDECORATIONMANAGER_JS" resource_path="panels/coverage/CoverageDecorationManager.js" type="BINDATA" compress="false"/>
       <include file="panels/coverage/CoverageListView.js" name="PANELS_COVERAGE_COVERAGELISTVIEW_JS" resource_path="panels/coverage/CoverageListView.js" type="BINDATA" compress="false"/>
       <include file="panels/coverage/CoverageModel.js" name="PANELS_COVERAGE_COVERAGEMODEL_JS" resource_path="panels/coverage/CoverageModel.js" type="BINDATA" compress="false"/>

@@ -1,4 +1,4 @@
-import { ChromeCommand, ChromeEvent, Ios90Command, Ios90Event } from 'tdf-devtools-protocol/types';
+import { ChromeCommand, ChromeEvent, Ios90Command } from 'tdf-devtools-protocol/types';
 import { sendEmptyResultToDevtools } from '../default-middleware';
 import { requestId } from '../global-id';
 import { MiddleWare, MiddleWareManager } from '../middleware-context';
