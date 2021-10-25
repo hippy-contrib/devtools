@@ -32,22 +32,14 @@ master:
         # 提交注释检查
         - name: commit lint
           type: epc:commit-lint
-
-        # issue 状态检查，是否正确的扭转状态
-        - name: issue lint
-          type: git:issueUpdate
+        - name: 代码安全审计
+          type: security:code-scan
           options:
-            lint:
-              # 检查 issue 当前是否处于，accepted 或 resolved状态
-              acceptance:
-                - accepted
-                - resolved
-
+            sourcePath: src
+            ignoreFolder: src/public
         # 代码规范检查
         - name: eslint-config-tencent
-          script: "tnpm install \ &&
-          tnpm run lint"
-
+          script: "tnpm install && tnpm run lint"
         # 发送到 CR 专用群
         - name: notify
           type: wework:message
