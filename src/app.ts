@@ -2,6 +2,8 @@ import fs from 'fs';
 import kill from 'kill-port';
 import Koa from 'koa';
 import serve from 'koa-static';
+import conditional from 'koa-conditional-get';
+import etag from 'koa-etag';
 import path from 'path';
 import { DevtoolsEnv } from './@types/enum';
 import { DebugTarget } from './@types/tunnel.d';
@@ -72,6 +74,8 @@ export class Application {
         reject();
       });
 
+      app.use(conditional());
+      app.use(etag());
       app.use(async (ctx, next) => {
         try {
           await next();
@@ -91,6 +95,7 @@ export class Application {
         servePath = path.resolve(path.dirname(entry));
       }
       log.info(`serve bundle: ${entry} \nserve folder: ${servePath}`);
+
       app.use(
         serve(servePath, {
           setHeaders: (res, path) => {
@@ -100,11 +105,7 @@ export class Application {
           },
         }),
       );
-      app.use(
-        serve(publicPath || path.join(__dirname, 'public'), {
-          maxage: 30 * 24 * 60 * 60 * 1000,
-        }),
-      );
+      app.use(serve(publicPath || path.join(__dirname, 'public')));
     });
   }
 
