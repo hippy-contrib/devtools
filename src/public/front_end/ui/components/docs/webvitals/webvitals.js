@@ -21,4 +21,3 @@ component.data = {
     ],
     mainFrameNavigations: [500, 1500, 12000],
 };
-//# sourceMappingURL=webvitals.js.map

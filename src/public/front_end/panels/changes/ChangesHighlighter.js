@@ -139,4 +139,3 @@ export function ChangesHighlighter(config, parserConfig) {
 }
 // @ts-ignore TODO(crbug.com/1011811): Fix after upstream CodeMirror type fixes
 CodeMirror.defineMode('devtools-diff', ChangesHighlighter);
-//# sourceMappingURL=ChangesHighlighter.js.map

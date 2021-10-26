@@ -535,4 +535,3 @@ export class UserAgentClientHintsForm extends HTMLElement {
     };
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-user-agent-client-hints-form', UserAgentClientHintsForm);
-//# sourceMappingURL=UserAgentClientHintsForm.js.map

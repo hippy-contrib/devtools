@@ -72,4 +72,3 @@ UI.ActionRegistration.registerActionExtension({
         },
     ],
 });
-//# sourceMappingURL=js_profiler-meta.js.map

@@ -33,4 +33,3 @@ MobileThrottling.networkPresets = MobileThrottlingModule.ThrottlingPresets.Throt
 MobileThrottling.cpuThrottlingPresets = MobileThrottlingModule.ThrottlingPresets.ThrottlingPresets.cpuThrottlingPresets;
 /** @constructor */
 MobileThrottling.ThrottlingSettingsTab = MobileThrottlingModule.ThrottlingSettingsTab.ThrottlingSettingsTab;
-//# sourceMappingURL=mobile_throttling-legacy.js.map

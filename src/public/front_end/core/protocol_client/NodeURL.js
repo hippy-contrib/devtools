@@ -29,4 +29,3 @@ export class NodeURL {
         return fileSystemPath.length ? fileSystemPath[0] === '/' : false;
     }
 }
-//# sourceMappingURL=NodeURL.js.map

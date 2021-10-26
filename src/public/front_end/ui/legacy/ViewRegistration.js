@@ -46,4 +46,3 @@ export const ViewLocationCategoryValues = {
     SETTINGS: 'Settings',
     SOURCES: 'Sources',
 };
-//# sourceMappingURL=ViewRegistration.js.map

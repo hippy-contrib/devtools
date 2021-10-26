@@ -59,4 +59,3 @@ export var Events;
 })(Events || (Events = {}));
 // TODO(jarhar): this is the only usage of Capability.None. Do something about it!
 SDKModel.register(SecurityOriginManager, { capabilities: Capability.None, autostart: false });
-//# sourceMappingURL=SecurityOriginManager.js.map

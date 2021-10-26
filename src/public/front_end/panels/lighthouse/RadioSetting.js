@@ -58,4 +58,3 @@ export class RadioSetting {
         this._setting.set(selectedRadio.value);
     }
 }
-//# sourceMappingURL=RadioSetting.js.map

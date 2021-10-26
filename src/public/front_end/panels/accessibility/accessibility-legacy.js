@@ -84,4 +84,3 @@ Accessibility.AccessibilityStrings = {};
 Accessibility.AccessibilityStrings.AXAttributes = AccessibilityModule.AccessibilityStrings.AXAttributes;
 Accessibility.AccessibilityStrings.AXSourceTypes = AccessibilityModule.AccessibilityStrings.AXSourceTypes;
 Accessibility.AccessibilityStrings.AXNativeSourceTypes = AccessibilityModule.AccessibilityStrings.AXNativeSourceTypes;
-//# sourceMappingURL=accessibility-legacy.js.map

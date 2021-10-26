@@ -126,4 +126,3 @@ export class UISourceCodeTreeElement extends UI.TreeOutline.TreeElement {
         Common.EventTarget.removeEventListeners(this._eventListeners);
     }
 }
-//# sourceMappingURL=ChangesSidebar.js.map

@@ -11,4 +11,3 @@ export class IdentityFormatter {
         this.builder.addToken(content, fromOffset);
     }
 }
-//# sourceMappingURL=IdentityFormatter.js.map

@@ -115,4 +115,3 @@ export function toZeroBasedLocation(location) {
         columnNumber: location.columnNumber === 0 ? undefined : location.columnNumber - 1,
     };
 }
-//# sourceMappingURL=Issue.js.map

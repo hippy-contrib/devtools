@@ -35,4 +35,3 @@ export class AccessibilitySubPane extends UI.View.SimpleView {
         return treeOutline;
     }
 }
-//# sourceMappingURL=AccessibilitySubPane.js.map

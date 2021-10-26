@@ -16,4 +16,3 @@ import * as TimelineModelFilter from './TimelineModelFilter.js';
 import * as TimelineProfileTree from './TimelineProfileTree.js';
 import * as TracingLayerTree from './TracingLayerTree.js';
 export { TimelineFrameModel, TimelineIRModel, TimelineJSProfile, TimelineModel, TimelineModelFilter, TimelineProfileTree, TracingLayerTree, };
-//# sourceMappingURL=timeline_model.js.map

@@ -65,4 +65,3 @@ function htmlWithStatics(strings, ...values) {
     flattenedTemplates.set(strings, flattenTemplate(strings, ...values));
     return htmlWithStatics(strings, ...values);
 }
-//# sourceMappingURL=static.js.map

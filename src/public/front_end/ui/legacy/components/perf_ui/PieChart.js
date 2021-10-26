@@ -195,4 +195,3 @@ export class PieChart extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-perf-piechart', PieChart);
-//# sourceMappingURL=PieChart.js.map

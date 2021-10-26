@@ -534,4 +534,3 @@ export class ShortcutListItem {
         });
     }
 }
-//# sourceMappingURL=KeybindsSettingsTab.js.map

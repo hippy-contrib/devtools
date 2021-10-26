@@ -125,4 +125,3 @@ export class Linkifier {
         throw new Error('Can\'t linkify non-node');
     }
 }
-//# sourceMappingURL=DOMLinkifier.js.map

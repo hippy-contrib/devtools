@@ -9,4 +9,3 @@ export var Events;
     Events["TextChanged"] = "TextChanged";
     Events["SuggestionChanged"] = "SuggestionChanged";
 })(Events || (Events = {}));
-//# sourceMappingURL=TextEditor.js.map

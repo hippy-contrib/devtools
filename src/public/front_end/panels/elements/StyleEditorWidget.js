@@ -142,4 +142,3 @@ function getAuthoredStyles(section, editableProperties) {
     }
     return authoredProperties;
 }
-//# sourceMappingURL=StyleEditorWidget.js.map

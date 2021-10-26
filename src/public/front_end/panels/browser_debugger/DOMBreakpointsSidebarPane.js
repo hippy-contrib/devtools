@@ -366,4 +366,3 @@ export class ContextMenuProvider {
         }
     }
 }
-//# sourceMappingURL=DOMBreakpointsSidebarPane.js.map

@@ -133,4 +133,3 @@ export class RequestInitiatorView extends UI.Widget.VBox {
         this._hasShown = true;
     }
 }
-//# sourceMappingURL=RequestInitiatorView.js.map

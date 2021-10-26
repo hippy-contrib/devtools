@@ -71,4 +71,3 @@ Elements.StylesSidebarPane.CSSPropertyPrompt = ElementsModule.StylesSidebarPane.
 Elements.StylesSidebarPane.ButtonProvider = ElementsModule.StylesSidebarPane.ButtonProvider;
 /** @constructor */
 Elements.StylePropertiesSection = ElementsModule.StylesSidebarPane.StylePropertiesSection;
-//# sourceMappingURL=elements-legacy.js.map

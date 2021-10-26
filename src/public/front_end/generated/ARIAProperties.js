@@ -520,4 +520,3 @@ export const config = {
         'namespacePrefix': 'xhtml'
     }
 };
-//# sourceMappingURL=ARIAProperties.js.map

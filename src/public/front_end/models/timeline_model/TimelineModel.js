@@ -2094,4 +2094,3 @@ export class TimelineData {
 }
 const eventToData = new WeakMap();
 const eventToInvalidation = new WeakMap();
-//# sourceMappingURL=TimelineModel.js.map

@@ -3,4 +3,3 @@
 // found in the LICENSE file.
 import * as RequestTrustTokensView from './RequestTrustTokensView.js';
 export { RequestTrustTokensView, };
-//# sourceMappingURL=components.js.map

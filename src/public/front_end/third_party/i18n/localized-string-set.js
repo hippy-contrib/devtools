@@ -100,4 +100,3 @@ export class LocalizedStringSet {
         return formatter.format(values);
     }
 }
-//# sourceMappingURL=localized-string-set.js.map

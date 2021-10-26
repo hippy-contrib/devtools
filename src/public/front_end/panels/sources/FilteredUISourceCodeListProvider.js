@@ -178,4 +178,3 @@ export class FilteredUISourceCodeListProvider extends QuickOpen.FilteredListWidg
         this._defaultScores = null;
     }
 }
-//# sourceMappingURL=FilteredUISourceCodeListProvider.js.map

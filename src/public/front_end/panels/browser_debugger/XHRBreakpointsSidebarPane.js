@@ -337,4 +337,3 @@ export class XHRBreakpointsSidebarPane extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=XHRBreakpointsSidebarPane.js.map

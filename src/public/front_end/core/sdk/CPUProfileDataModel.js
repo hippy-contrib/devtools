@@ -463,4 +463,3 @@ export class CPUProfileDataModel extends ProfileTreeModel {
         return this.samples && this._idToNode.get(this.samples[index]) || null;
     }
 }
-//# sourceMappingURL=CPUProfileDataModel.js.map

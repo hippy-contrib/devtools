@@ -110,4 +110,3 @@ const issueDescriptions = new Map([
         },
     ],
 ]);
-//# sourceMappingURL=CrossOriginEmbedderPolicyIssue.js.map

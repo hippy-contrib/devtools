@@ -37,4 +37,3 @@ document.getElementById('add')?.addEventListener('click', () => {
         rows: [...component.data.rows, newRow],
     };
 });
-//# sourceMappingURL=basic.js.map

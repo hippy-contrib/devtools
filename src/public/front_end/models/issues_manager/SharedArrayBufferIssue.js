@@ -52,4 +52,3 @@ export class SharedArrayBufferIssue extends Issue {
         return [new SharedArrayBufferIssue(sabIssueDetails, issuesModel)];
     }
 }
-//# sourceMappingURL=SharedArrayBufferIssue.js.map

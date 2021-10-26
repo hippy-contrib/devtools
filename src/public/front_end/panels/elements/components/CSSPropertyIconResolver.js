@@ -385,4 +385,3 @@ export function findGridItemIcon(text, computedStyles, parentComputedStyles) {
     }
     return null;
 }
-//# sourceMappingURL=CSSPropertyIconResolver.js.map

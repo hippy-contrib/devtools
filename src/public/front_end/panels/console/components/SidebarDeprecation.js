@@ -41,4 +41,3 @@ export class SidebarDeprecation extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-console-sidebar-deprecation', SidebarDeprecation);
-//# sourceMappingURL=SidebarDeprecation.js.map

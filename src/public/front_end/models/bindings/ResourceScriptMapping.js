@@ -373,4 +373,3 @@ export class ResourceScriptFile extends Common.ObjectWrapper.ObjectWrapper {
         Events["DidDivergeFromVM"] = "DidDivergeFromVM";
     })(Events = ResourceScriptFile.Events || (ResourceScriptFile.Events = {}));
 })(ResourceScriptFile || (ResourceScriptFile = {}));
-//# sourceMappingURL=ResourceScriptMapping.js.map

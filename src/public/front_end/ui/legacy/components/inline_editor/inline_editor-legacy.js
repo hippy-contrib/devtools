@@ -28,4 +28,3 @@ InlineEditor.FontEditor.Events = InlineEditorModule.FontEditor.Events;
 InlineEditor.CSSShadowSwatch = InlineEditorModule.Swatches.CSSShadowSwatch;
 /** @constructor */
 InlineEditor.SwatchPopoverHelper = InlineEditorModule.SwatchPopoverHelper.SwatchPopoverHelper;
-//# sourceMappingURL=inline_editor-legacy.js.map

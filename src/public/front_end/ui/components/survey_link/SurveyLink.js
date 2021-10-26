@@ -104,4 +104,3 @@ export class SurveyLink extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-survey-link', SurveyLink);
-//# sourceMappingURL=SurveyLink.js.map

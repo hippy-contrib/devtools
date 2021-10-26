@@ -12,4 +12,3 @@ Platform.runOnWindowLoad(() => {
     const app = window.opener.Emulation.AdvancedApp._instance();
     app.deviceModeEmulationFrameLoaded(document);
 });
-//# sourceMappingURL=device_mode_emulation_frame.js.map

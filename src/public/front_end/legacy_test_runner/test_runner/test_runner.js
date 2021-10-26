@@ -101,4 +101,3 @@ export class _TestObserver {
     }
 }
 SDK.targetManager.observeTargets(new _TestObserver());
-//# sourceMappingURL=test_runner.js.map

@@ -33,4 +33,3 @@ export class JsMainImpl extends Common.ObjectWrapper.ObjectWrapper {
     }
 }
 Common.Runnable.registerEarlyInitializationRunnable(JsMainImpl.instance);
-//# sourceMappingURL=JsMain.js.map

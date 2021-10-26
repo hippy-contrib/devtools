@@ -31,4 +31,3 @@ Host.UserMetrics._PanelCodes = HostModule.UserMetrics.PanelCodes;
 Host.UserMetrics.Action = HostModule.UserMetrics.Action;
 /** @type {!Host.UserMetrics} */
 Host.userMetrics = HostModule.userMetrics;
-//# sourceMappingURL=host-legacy.js.map

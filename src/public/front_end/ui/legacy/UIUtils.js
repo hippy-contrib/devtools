@@ -1482,4 +1482,3 @@ export function getApplicableRegisteredRenderers(object) {
         return false;
     }
 }
-//# sourceMappingURL=UIUtils.js.map

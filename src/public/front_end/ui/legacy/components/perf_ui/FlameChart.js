@@ -1981,4 +1981,3 @@ export const Colors = {
     SelectedGroupBackground: 'hsl(215, 85%, 98%)',
     SelectedGroupBorder: 'hsl(216, 68%, 54%)',
 };
-//# sourceMappingURL=FlameChart.js.map

@@ -219,4 +219,3 @@ function renderStackTraceTable(container, stackTraceRows) {
     }
     return links;
 }
-//# sourceMappingURL=JSPresentationUtils.js.map

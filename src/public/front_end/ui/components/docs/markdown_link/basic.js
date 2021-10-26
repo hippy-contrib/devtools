@@ -13,4 +13,3 @@ link.data = {
     key: 'textLink',
     title: 'Test link title',
 };
-//# sourceMappingURL=basic.js.map

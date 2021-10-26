@@ -11,4 +11,3 @@ export function appendStyle(node, cssFile) {
     styleElement.textContent = content;
     node.appendChild(styleElement);
 }
-//# sourceMappingURL=append-style.js.map

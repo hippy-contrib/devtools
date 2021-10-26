@@ -247,4 +247,3 @@ globalThis.addIssueForTest = (issue) => {
     const issuesModel = mainTarget?.model(SDK.IssuesModel.IssuesModel);
     issuesModel?.issueAdded({ issue });
 };
-//# sourceMappingURL=IssuesManager.js.map

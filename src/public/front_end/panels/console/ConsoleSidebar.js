@@ -221,4 +221,3 @@ export class FilterTreeElement extends ConsoleSidebarTreeElement {
         return child;
     }
 }
-//# sourceMappingURL=ConsoleSidebar.js.map

@@ -267,4 +267,3 @@ export class ParsedJSON {
         this.suffix = suffix;
     }
 }
-//# sourceMappingURL=JSONView.js.map

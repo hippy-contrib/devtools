@@ -479,4 +479,3 @@ export var Events;
 (function (Events) {
     Events["DrawerChange"] = "drawerchange";
 })(Events || (Events = {}));
-//# sourceMappingURL=InspectorView.js.map

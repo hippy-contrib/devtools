@@ -178,4 +178,3 @@ export class PermissionsPolicySection extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-resources-permissions-policy-section', PermissionsPolicySection);
-//# sourceMappingURL=PermissionsPolicySection.js.map

@@ -33,4 +33,3 @@ export const getMarkdownLink = (key) => {
     }
     return link;
 };
-//# sourceMappingURL=MarkdownLinksMap.js.map

@@ -9,4 +9,3 @@ import * as ObjectPropertiesSection from './ObjectPropertiesSection.js';
 import * as RemoteObjectPreviewFormatter from './RemoteObjectPreviewFormatter.js';
 export { CustomPreviewComponent, JavaScriptAutocomplete, JavaScriptREPL, ObjectPopoverHelper, ObjectPropertiesSection, RemoteObjectPreviewFormatter, };
 export const javaScriptAutocomplete = JavaScriptAutocomplete.JavaScriptAutocomplete.instance();
-//# sourceMappingURL=object_ui.js.map

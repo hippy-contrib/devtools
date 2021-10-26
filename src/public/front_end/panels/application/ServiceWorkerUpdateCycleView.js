@@ -317,4 +317,3 @@ export class ServiceWorkerUpdateCycleView {
         this.updateTimingTable(timeRanges);
     }
 }
-//# sourceMappingURL=ServiceWorkerUpdateCycleView.js.map

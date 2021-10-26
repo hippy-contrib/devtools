@@ -47,4 +47,3 @@ export class RequestResolver extends Common.ResolverBase.ResolverBase {
         this.networkListener = null;
     }
 }
-//# sourceMappingURL=RequestResolver.js.map

@@ -28,6 +28,7 @@ export const mappingForLayoutTests = new Map([
     ['panels/console', 'console'],
     ['panels/core_memory', 'core_memory'],
     ['panels/ui_inspector', 'ui_inspector'],
+    ['panels/cdp_debug', 'cdp_debug'],
     ['panels/elements', 'elements'],
     ['panels/emulation', 'emulation'],
     ['panels/mobile_throttling', 'mobile_throttling'],
@@ -469,4 +470,3 @@ export var ConditionName;
     ConditionName["CAN_DOCK"] = "can_dock";
     ConditionName["NOT_SOURCES_HIDE_ADD_FOLDER"] = "!sources.hide_add_folder";
 })(ConditionName || (ConditionName = {}));
-//# sourceMappingURL=Runtime.js.map

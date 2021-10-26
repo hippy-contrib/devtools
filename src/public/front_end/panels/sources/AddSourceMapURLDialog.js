@@ -56,4 +56,3 @@ export class AddSourceMapURLDialog extends UI.Widget.HBox {
         }
     }
 }
-//# sourceMappingURL=AddSourceMapURLDialog.js.map

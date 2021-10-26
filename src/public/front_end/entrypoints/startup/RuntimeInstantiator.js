@@ -83,4 +83,3 @@ export async function startWorker(appName) {
         self.postMessage('workerReady');
     }
 }
-//# sourceMappingURL=RuntimeInstantiator.js.map

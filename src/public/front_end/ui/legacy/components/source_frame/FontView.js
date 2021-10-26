@@ -167,4 +167,3 @@ const _fontPreviewLines = ['ABCDEFGHIJKLM', 'NOPQRSTUVWXYZ', 'abcdefghijklm', 'n
 // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const _measureFontSize = 50;
-//# sourceMappingURL=FontView.js.map

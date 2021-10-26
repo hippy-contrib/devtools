@@ -212,4 +212,3 @@ export class FileOutputStream {
         Workspace.FileManager.FileManager.instance().close(this._fileName);
     }
 }
-//# sourceMappingURL=FileUtils.js.map

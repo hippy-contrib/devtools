@@ -227,4 +227,3 @@ export class Resource {
         return this._request ? this._request.statusCode : 0;
     }
 }
-//# sourceMappingURL=Resource.js.map

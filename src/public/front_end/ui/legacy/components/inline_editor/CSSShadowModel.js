@@ -242,4 +242,3 @@ export class CSSLength {
         return new RegExp(number + unit + '|' + zero, 'gi');
     })();
 }
-//# sourceMappingURL=CSSShadowModel.js.map

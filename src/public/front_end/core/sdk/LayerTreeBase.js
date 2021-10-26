@@ -117,4 +117,3 @@ export class LayerTreeBase {
         return this._domModel ? this._domModel.nodeForId(id) : null;
     }
 }
-//# sourceMappingURL=LayerTreeBase.js.map

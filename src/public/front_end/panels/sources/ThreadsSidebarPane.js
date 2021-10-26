@@ -124,4 +124,3 @@ export class ThreadsSidebarPane extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=ThreadsSidebarPane.js.map

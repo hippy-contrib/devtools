@@ -41,4 +41,3 @@ UI.ViewManager.registerViewExtension({
     },
     tags: [i18nLazyString(UIStrings.node)],
 });
-//# sourceMappingURL=node_main-meta.js.map

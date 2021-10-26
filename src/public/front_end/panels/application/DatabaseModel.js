@@ -166,4 +166,3 @@ export class DatabaseDispatcher {
         this._model._addDatabase(new Database(this._model, database.id, database.domain, database.name, database.version));
     }
 }
-//# sourceMappingURL=DatabaseModel.js.map

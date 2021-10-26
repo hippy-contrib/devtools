@@ -271,4 +271,3 @@ export class IgnoreListManager {
     }
 }
 const scriptToRange = new WeakMap();
-//# sourceMappingURL=IgnoreListManager.js.map

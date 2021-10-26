@@ -90,4 +90,3 @@ export class CoveragePlugin extends Plugin {
         return [this.infoInToolbar];
     }
 }
-//# sourceMappingURL=CoveragePlugin.js.map

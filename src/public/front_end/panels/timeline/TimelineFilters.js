@@ -41,4 +41,3 @@ export class TimelineRegExp extends TimelineModel.TimelineModelFilter.TimelineMo
         return !this._regExp || TimelineUIUtils.testContentMatching(event, this._regExp);
     }
 }
-//# sourceMappingURL=TimelineFilters.js.map

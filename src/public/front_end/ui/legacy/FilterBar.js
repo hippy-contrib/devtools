@@ -435,4 +435,3 @@ export class CheckboxFilterUI extends Common.ObjectWrapper.ObjectWrapper {
         this._label.borderColor = borderColor;
     }
 }
-//# sourceMappingURL=FilterBar.js.map

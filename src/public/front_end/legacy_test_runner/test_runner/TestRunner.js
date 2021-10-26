@@ -1396,4 +1396,3 @@ TestRunner.dumpInspectedPageElementText = dumpInspectedPageElementText;
 TestRunner.waitForPendingLiveLocationUpdates = waitForPendingLiveLocationUpdates;
 TestRunner.findLineEndingIndexes = findLineEndingIndexes;
 TestRunner.isScrolledToBottom = UI.UIUtils.isScrolledToBottom;
-//# sourceMappingURL=TestRunner.js.map

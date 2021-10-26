@@ -623,4 +623,3 @@ export const ConnectionSetupRangeNames = new Set([
     RequestTimeRangeNames.Proxy,
     RequestTimeRangeNames.SSL,
 ]);
-//# sourceMappingURL=RequestTimingView.js.map

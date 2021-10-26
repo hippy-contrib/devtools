@@ -758,4 +758,3 @@ class _StackLocation extends _Location {
     }
 }
 export { getRegisteredViewExtensions, maybeRemoveViewExtension, registerViewExtension, getRegisteredLocationResolvers, registerLocationResolver, ViewLocationCategoryValues, };
-//# sourceMappingURL=ViewManager.js.map

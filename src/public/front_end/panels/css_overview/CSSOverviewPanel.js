@@ -164,4 +164,3 @@ export class CSSOverviewPanel extends UI.Panel.Panel {
         this._renderOverviewCompletedView();
     }
 }
-//# sourceMappingURL=CSSOverviewPanel.js.map

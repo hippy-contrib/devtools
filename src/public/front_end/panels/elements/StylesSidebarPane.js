@@ -2665,4 +2665,3 @@ export class ButtonProvider {
         return this._button;
     }
 }
-//# sourceMappingURL=StylesSidebarPane.js.map

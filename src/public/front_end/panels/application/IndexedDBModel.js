@@ -425,4 +425,3 @@ export class Index {
         return IndexedDBModel.keyPathStringFromIDBKeyPath(this.keyPath);
     }
 }
-//# sourceMappingURL=IndexedDBModel.js.map

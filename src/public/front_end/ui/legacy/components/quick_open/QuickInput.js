@@ -56,4 +56,3 @@ class QuickInputProvider extends Provider {
         this._resolve(promptValue);
     }
 }
-//# sourceMappingURL=QuickInput.js.map

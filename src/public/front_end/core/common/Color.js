@@ -811,4 +811,3 @@ export class Generator {
 // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const _tmpHSLA = [0, 0, 0, 0];
-//# sourceMappingURL=Color.js.map

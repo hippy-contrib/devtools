@@ -55,4 +55,3 @@ export class Linkifier extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-linkifier', Linkifier);
-//# sourceMappingURL=LinkifierImpl.js.map

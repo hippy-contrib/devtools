@@ -47,4 +47,3 @@ export class OverlayColorGenerator {
         return color;
     }
 }
-//# sourceMappingURL=OverlayColorGenerator.js.map

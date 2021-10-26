@@ -9,4 +9,3 @@ import * as TextCursor from './TextCursor.js';
 import * as TextRange from './TextRange.js';
 import * as TextUtils from './TextUtils.js';
 export { CodeMirrorUtils, ContentProvider, StaticContentProvider, Text, TextCursor, TextRange, TextUtils, };
-//# sourceMappingURL=text_utils.js.map

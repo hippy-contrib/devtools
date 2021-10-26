@@ -23,4 +23,3 @@ export class SimpleAppProvider {
         return new SimpleApp();
     }
 }
-//# sourceMappingURL=SimpleApp.js.map

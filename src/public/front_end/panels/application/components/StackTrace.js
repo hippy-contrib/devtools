@@ -154,4 +154,3 @@ export class StackTrace extends HTMLElement {
 ComponentHelpers.CustomElements.defineComponent('devtools-stack-trace-row', StackTraceRow);
 ComponentHelpers.CustomElements.defineComponent('devtools-stack-trace-link-button', StackTraceLinkButton);
 ComponentHelpers.CustomElements.defineComponent('devtools-resources-stack-trace', StackTrace);
-//# sourceMappingURL=StackTrace.js.map

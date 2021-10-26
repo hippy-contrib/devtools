@@ -8,4 +8,3 @@ import * as QuickInput from './QuickInput.js';
 import * as QuickOpen from './QuickOpen.js';
 import * as QuickPick from './QuickPick.js';
 export { CommandMenu, FilteredListWidget, HelpQuickOpen, QuickInput, QuickOpen, QuickPick, };
-//# sourceMappingURL=quick_open.js.map

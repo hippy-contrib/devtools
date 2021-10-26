@@ -18,4 +18,3 @@ import * as CSSOverviewSidebarPanel from './CSSOverviewSidebarPanel.js';
 import * as CSSOverviewStartView from './CSSOverviewStartView.js';
 import * as CSSOverviewUnusedDeclarations from './CSSOverviewUnusedDeclarations.js';
 export { CSSOverviewCompletedView, CSSOverviewController, CSSOverviewModel, CSSOverviewPanel, CSSOverviewProcessingView, CSSOverviewSidebarPanel, CSSOverviewStartView, CSSOverviewUnusedDeclarations, };
-//# sourceMappingURL=css_overview.js.map

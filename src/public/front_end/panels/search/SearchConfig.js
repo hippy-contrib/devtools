@@ -131,4 +131,3 @@ export class QueryTerm {
         this.isNegative = isNegative;
     }
 }
-//# sourceMappingURL=SearchConfig.js.map

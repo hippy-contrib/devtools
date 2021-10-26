@@ -241,4 +241,3 @@ export class RequestCookiesView extends UI.Widget.Widget {
         this._request.removeEventListener(SDK.NetworkRequest.Events.ResponseHeadersChanged, this._refreshRequestCookiesView, this);
     }
 }
-//# sourceMappingURL=RequestCookiesView.js.map

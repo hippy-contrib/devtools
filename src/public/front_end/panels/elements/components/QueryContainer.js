@@ -106,4 +106,3 @@ export class QueryContainer extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-query-container', QueryContainer);
-//# sourceMappingURL=QueryContainer.js.map

@@ -200,4 +200,3 @@ export class AffectedDirectivesView extends AffectedResourcesView {
         this._appendAffectedContentSecurityPolicyDetails(this._issue.getCspIssues());
     }
 }
-//# sourceMappingURL=AffectedDirectivesView.js.map

@@ -152,4 +152,3 @@ export var RecordType;
     RecordType["NeedsBeginFrameChanged"] = "NeedsBeginFrameChanged";
     RecordType["ThreadControllerImplRunTask"] = "ThreadControllerImpl::RunTask";
 })(RecordType || (RecordType = {}));
-//# sourceMappingURL=UIDevtoolsUtils.js.map

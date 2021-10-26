@@ -69,4 +69,3 @@ export class WorkerWrapper {
         });
     }
 }
-//# sourceMappingURL=Worker.js.map

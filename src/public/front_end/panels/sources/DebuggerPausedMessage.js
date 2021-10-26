@@ -243,4 +243,3 @@ export const BreakpointTypeNouns = new Map([
     ["attribute-modified" /* AttributeModified */, i18nLazyString(UIStrings.attributeModifications)],
     ["node-removed" /* NodeRemoved */, i18nLazyString(UIStrings.nodeRemoval)],
 ]);
-//# sourceMappingURL=DebuggerPausedMessage.js.map

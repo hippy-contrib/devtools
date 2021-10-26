@@ -47,4 +47,3 @@ export class ComboBoxOfCheckBoxes extends UI.Toolbar.ToolbarButton {
         contextMenu.show();
     }
 }
-//# sourceMappingURL=ComboBoxOfCheckBoxes.js.map

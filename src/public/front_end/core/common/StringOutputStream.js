@@ -15,4 +15,3 @@ export class StringOutputStream {
         return this.dataInternal;
     }
 }
-//# sourceMappingURL=StringOutputStream.js.map

@@ -20,4 +20,3 @@ import '../../../../third_party/codemirror/package/mode/xml/xml.js';
 import '../../../../third_party/codemirror/package/mode/htmlmixed/htmlmixed.js';
 import '../../../../third_party/codemirror/package/mode/htmlembedded/htmlembedded.js';
 import '../../../../third_party/codemirror/package/mode/wast/wast.js';
-//# sourceMappingURL=cm_modes.js.map

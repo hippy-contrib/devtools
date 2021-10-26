@@ -65,4 +65,3 @@ Emulation.SensorsView = EmulationModule.SensorsView.SensorsView;
  * @constructor
  */
 Emulation.SensorsView.ShowActionDelegate = EmulationModule.SensorsView.ShowActionDelegate;
-//# sourceMappingURL=emulation-legacy.js.map

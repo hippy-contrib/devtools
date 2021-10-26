@@ -174,4 +174,3 @@ export function findSnippetsProject() {
     }
     return workspaceProject;
 }
-//# sourceMappingURL=ScriptSnippetFileSystem.js.map

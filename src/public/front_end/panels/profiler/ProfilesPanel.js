@@ -581,4 +581,3 @@ export class JSProfilerPanel extends ProfilesPanel {
         return true;
     }
 }
-//# sourceMappingURL=ProfilesPanel.js.map

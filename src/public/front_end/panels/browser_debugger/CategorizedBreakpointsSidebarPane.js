@@ -184,4 +184,3 @@ export class CategorizedBreakpointsSidebarPane extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=CategorizedBreakpointsSidebarPane.js.map

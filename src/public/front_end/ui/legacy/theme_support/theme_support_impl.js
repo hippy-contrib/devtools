@@ -299,4 +299,3 @@ export class ThemeSupport {
         ColorUsage[ColorUsage["Background"] = 2] = "Background";
     })(ColorUsage = ThemeSupport.ColorUsage || (ThemeSupport.ColorUsage = {}));
 })(ThemeSupport || (ThemeSupport = {}));
-//# sourceMappingURL=theme_support_impl.js.map

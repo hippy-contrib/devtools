@@ -59,4 +59,3 @@ export class NetworkPanelIndicator {
         }
     }
 }
-//# sourceMappingURL=NetworkPanelIndicator.js.map

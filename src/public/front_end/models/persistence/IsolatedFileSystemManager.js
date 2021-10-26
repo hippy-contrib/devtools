@@ -293,4 +293,3 @@ export var Events;
     Events["ExcludedFolderRemoved"] = "ExcludedFolderRemoved";
 })(Events || (Events = {}));
 let lastRequestId = 0;
-//# sourceMappingURL=IsolatedFileSystemManager.js.map

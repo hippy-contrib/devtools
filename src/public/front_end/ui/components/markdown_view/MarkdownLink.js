@@ -36,4 +36,3 @@ export class MarkdownLink extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-markdown-link', MarkdownLink);
-//# sourceMappingURL=MarkdownLink.js.map

@@ -22,4 +22,3 @@ export async function setup() {
     });
     await Promise.all(allPromises);
 }
-//# sourceMappingURL=component-server-setup.js.map

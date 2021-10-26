@@ -1264,4 +1264,3 @@ export class Swatch {
         UI.ARIAUtils.setPressed(this._swatchOverlayElement, false);
     }
 }
-//# sourceMappingURL=Spectrum.js.map

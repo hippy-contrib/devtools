@@ -162,4 +162,3 @@ export function getLocalizedLanguageRegion(localeString, devtoolsLocale) {
     }
     return `${languageInCurrentLocale}${wrappedRegionInCurrentLocale} - ${languageInTargetLocale}${wrappedRegionInTargetLocale}`;
 }
-//# sourceMappingURL=i18nImpl.js.map

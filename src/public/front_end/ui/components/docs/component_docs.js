@@ -7,4 +7,3 @@ import * as CreateBreadcrumbs from './create_breadcrumbs.js';
 import * as ToggleDarkMode from './toggle_dark_mode.js';
 ToggleDarkMode.init();
 CreateBreadcrumbs.init();
-//# sourceMappingURL=component_docs.js.map

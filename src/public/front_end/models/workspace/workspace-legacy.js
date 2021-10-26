@@ -29,4 +29,3 @@ Workspace.Project = WorkspaceModule.Workspace.Project;
 Workspace.projectTypes = WorkspaceModule.Workspace.projectTypes;
 /** @constructor */
 Workspace.ProjectStore = WorkspaceModule.Workspace.ProjectStore;
-//# sourceMappingURL=workspace-legacy.js.map

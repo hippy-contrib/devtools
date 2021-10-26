@@ -238,4 +238,3 @@ export class BlockedURLsPane extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=BlockedURLsPane.js.map

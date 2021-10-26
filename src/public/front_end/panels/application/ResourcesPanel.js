@@ -222,4 +222,3 @@ export class FrameDetailsRevealer {
         sidebar.showFrame(frame);
     }
 }
-//# sourceMappingURL=ResourcesPanel.js.map

@@ -794,4 +794,3 @@ class DispatcherManager {
     }
 }
 export const inspectorBackend = new InspectorBackend();
-//# sourceMappingURL=InspectorBackend.js.map

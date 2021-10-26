@@ -895,4 +895,3 @@ export class TokenHighlighter {
 const LinesToScanForIndentationGuessing = 1000;
 const MaximumNumberOfWhitespacesPerSingleSpan = 16;
 export const lineNumbersGutterType = 'CodeMirror-linenumbers';
-//# sourceMappingURL=SourcesTextEditor.js.map

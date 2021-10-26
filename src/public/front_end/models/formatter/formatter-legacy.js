@@ -12,4 +12,3 @@ Formatter.formatterWorkerPool = FormatterModule.FormatterWorkerPool.formatterWor
 Formatter.FormatterSourceMapping = FormatterModule.ScriptFormatter.FormatterSourceMapping;
 /** @constructor */
 Formatter.SourceFormatter = FormatterModule.SourceFormatter.SourceFormatter;
-//# sourceMappingURL=formatter-legacy.js.map

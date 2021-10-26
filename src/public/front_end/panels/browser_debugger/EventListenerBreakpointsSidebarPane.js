@@ -22,4 +22,3 @@ export class EventListenerBreakpointsSidebarPane extends CategorizedBreakpointsS
         return SDK.DOMDebuggerModel.DOMDebuggerManager.instance().resolveEventListenerBreakpoint(details.auxData);
     }
 }
-//# sourceMappingURL=EventListenerBreakpointsSidebarPane.js.map

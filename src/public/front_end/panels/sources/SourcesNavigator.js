@@ -343,4 +343,3 @@ export class ActionDelegate {
         return false;
     }
 }
-//# sourceMappingURL=SourcesNavigator.js.map

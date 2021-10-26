@@ -357,4 +357,3 @@ export class CSSPlugin extends Plugin {
 export const maxSwatchProcessingLength = 300;
 export const SwatchBookmark = Symbol('swatch');
 const swatchToBookmark = new WeakMap();
-//# sourceMappingURL=CSSPlugin.js.map

@@ -582,4 +582,3 @@ SourceFrame.SourceFrame.registerLineDecorator({
     lineDecorator: LineDecorator.instance,
     decoratorType: SourceFrame.SourceFrame.DecoratorType.COVERAGE,
 });
-//# sourceMappingURL=CoverageView.js.map

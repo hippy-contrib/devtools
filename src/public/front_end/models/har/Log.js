@@ -367,4 +367,3 @@ export class Entry {
         return this._request.resourceSize - this.responseBodySize;
     }
 }
-//# sourceMappingURL=Log.js.map

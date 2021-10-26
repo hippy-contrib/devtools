@@ -305,4 +305,3 @@ export class TracingLayer {
         return this._drawsContent;
     }
 }
-//# sourceMappingURL=TracingLayerTree.js.map

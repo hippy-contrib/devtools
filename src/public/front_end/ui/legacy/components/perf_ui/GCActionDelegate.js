@@ -19,4 +19,3 @@ export class GCActionDelegate {
         return true;
     }
 }
-//# sourceMappingURL=GCActionDelegate.js.map

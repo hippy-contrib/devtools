@@ -156,4 +156,3 @@ export class ContrastRatioLineBuilder {
         return pathBuilder.join(' ');
     }
 }
-//# sourceMappingURL=ContrastOverlay.js.map

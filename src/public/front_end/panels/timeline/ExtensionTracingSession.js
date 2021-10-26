@@ -45,4 +45,3 @@ export class ExtensionTracingSession {
         return this._completionPromise;
     }
 }
-//# sourceMappingURL=ExtensionTracingSession.js.map

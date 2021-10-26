@@ -1305,4 +1305,3 @@ export class ActionDelegate {
     }
 }
 const traceProviderToSetting = new WeakMap();
-//# sourceMappingURL=TimelinePanel.js.map

@@ -40,4 +40,3 @@ export class ComputedStyleProperty extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-computed-style-property', ComputedStyleProperty);
-//# sourceMappingURL=ComputedStyleProperty.js.map

@@ -171,4 +171,3 @@ const BUTTONID_TO_ACTION_NAME = new Map([
     [4, "forward" /* Forward */],
 ]);
 SDK.SDKModel.SDKModel.register(InputModel, { capabilities: SDK.Target.Capability.Input, autostart: false });
-//# sourceMappingURL=InputModel.js.map

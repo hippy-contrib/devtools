@@ -26,4 +26,3 @@ export class WebVitalsTooltip extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-timeline-webvitals-tooltip', WebVitalsTooltip);
-//# sourceMappingURL=WebVitalsTooltip.js.map

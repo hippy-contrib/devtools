@@ -130,4 +130,3 @@ export var Events;
 (function (Events) {
     Events["WillShowPopover"] = "WillShowPopover";
 })(Events || (Events = {}));
-//# sourceMappingURL=SwatchPopoverHelper.js.map

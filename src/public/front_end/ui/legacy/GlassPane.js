@@ -353,4 +353,3 @@ const _containers = new Map();
 const _panes = new Set();
 // Exported for layout tests.
 export const GlassPanePanes = _panes;
-//# sourceMappingURL=GlassPane.js.map

@@ -91,4 +91,3 @@ export class AdornerSettingsPane extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-adorner-settings-pane', AdornerSettingsPane);
-//# sourceMappingURL=AdornerSettingsPane.js.map

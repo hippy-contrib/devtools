@@ -226,4 +226,3 @@ export class LinearMemoryViewer extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-linear-memory-inspector-viewer', LinearMemoryViewer);
-//# sourceMappingURL=LinearMemoryViewer.js.map

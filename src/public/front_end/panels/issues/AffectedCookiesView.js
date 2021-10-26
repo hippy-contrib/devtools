@@ -83,4 +83,3 @@ export class AffectedCookiesView extends AffectedResourcesView {
         this.appendAffectedCookies(this.issue.cookiesWithRequestIndicator());
     }
 }
-//# sourceMappingURL=AffectedCookiesView.js.map

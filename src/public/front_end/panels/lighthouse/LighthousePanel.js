@@ -381,4 +381,3 @@ export class LighthousePanel extends UI.Panel.Panel {
         await resourceTreeModel.navigate(inspectedURL);
     }
 }
-//# sourceMappingURL=LighthousePanel.js.map

@@ -11,4 +11,3 @@ export const ARROW_KEYS = new Set([
 export function keyIsArrowKey(key) {
     return ARROW_KEYS.has(key);
 }
-//# sourceMappingURL=keyboard-utilities.js.map

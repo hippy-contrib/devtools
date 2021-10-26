@@ -37,4 +37,3 @@ export class TextCursor {
         return this._columnNumber;
     }
 }
-//# sourceMappingURL=TextCursor.js.map

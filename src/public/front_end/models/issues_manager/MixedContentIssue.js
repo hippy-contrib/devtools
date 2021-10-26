@@ -57,4 +57,3 @@ export class MixedContentIssue extends Issue {
         return [new MixedContentIssue(mixedContentDetails, issuesModel)];
     }
 }
-//# sourceMappingURL=MixedContentIssue.js.map

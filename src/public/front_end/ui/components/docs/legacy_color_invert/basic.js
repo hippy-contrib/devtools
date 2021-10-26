@@ -78,4 +78,3 @@ function legacyInvertVariableForDarkMode(cssProperty, cssValue) {
     }
     return output.join(' ');
 }
-//# sourceMappingURL=basic.js.map

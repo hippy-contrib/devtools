@@ -45,4 +45,3 @@ QuickOpen.QuickPick = QuickOpenModule.QuickPick.QuickPick;
  * @constructor
  */
 QuickOpen.QuickOpen.ShowActionDelegate = QuickOpenModule.QuickOpen.ShowActionDelegate;
-//# sourceMappingURL=quick_open-legacy.js.map

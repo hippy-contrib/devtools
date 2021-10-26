@@ -13,4 +13,3 @@ export function linkText(url, lineNumber) {
     }
     throw new Error('New linkifier component error: don\'t know how to generate link text for given arguments');
 }
-//# sourceMappingURL=LinkifierUtils.js.map

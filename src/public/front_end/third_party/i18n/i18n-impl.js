@@ -40,4 +40,3 @@ export class I18n {
         return this.defaultLocale;
     }
 }
-//# sourceMappingURL=i18n-impl.js.map

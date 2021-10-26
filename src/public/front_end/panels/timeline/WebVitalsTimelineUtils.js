@@ -34,4 +34,3 @@ export class WebVitalsIntegrator extends UI.Widget.VBox {
         this.webVitalsTimeline.render();
     }
 }
-//# sourceMappingURL=WebVitalsTimelineUtils.js.map

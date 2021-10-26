@@ -85,4 +85,3 @@ const issueDescriptions = new Map([
     ["kUnavailableOffline" /* KUnavailableOffline */, twaPageUnavailableOffline],
     ["kDigitalAssetLinks" /* KDigitalAssetLinks */, twaDigitalAssetLinksFailed],
 ]);
-//# sourceMappingURL=TrustedWebActivityIssue.js.map

@@ -177,4 +177,3 @@ export class EditFileSystemView extends UI.Widget.VBox {
         return prefix + (prefix[prefix.length - 1] === '/' ? '' : '/');
     }
 }
-//# sourceMappingURL=EditFileSystemView.js.map

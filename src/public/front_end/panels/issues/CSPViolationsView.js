@@ -76,4 +76,3 @@ export class CSPViolationsView extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=CSPViolationsView.js.map

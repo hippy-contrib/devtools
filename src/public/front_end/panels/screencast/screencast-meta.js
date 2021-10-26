@@ -38,4 +38,3 @@ UI.ContextMenu.registerItem({
     order: 10,
     actionId: 'components.request-app-banner',
 });
-//# sourceMappingURL=screencast-meta.js.map

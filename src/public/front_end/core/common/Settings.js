@@ -921,4 +921,3 @@ export function detectColorFormat(color) {
     return format;
 }
 export { getLocalizedSettingsCategory, getRegisteredSettings, maybeRemoveSettingExtension, registerSettingExtension, SettingCategory, SettingType, registerSettingsForTest, resetSettings, };
-//# sourceMappingURL=Settings.js.map

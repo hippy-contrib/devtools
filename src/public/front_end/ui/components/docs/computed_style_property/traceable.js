@@ -21,4 +21,3 @@ component.data = {
     traceable: true,
     onNavigateToSource: () => { },
 };
-//# sourceMappingURL=traceable.js.map

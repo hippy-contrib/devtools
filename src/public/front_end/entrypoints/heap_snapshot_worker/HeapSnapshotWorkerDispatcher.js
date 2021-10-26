@@ -108,4 +108,3 @@ export class HeapSnapshotWorkerDispatcher {
         this._postMessage(response);
     }
 }
-//# sourceMappingURL=HeapSnapshotWorkerDispatcher.js.map

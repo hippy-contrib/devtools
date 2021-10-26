@@ -89,4 +89,3 @@ export class Adorner extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-adorner', Adorner);
-//# sourceMappingURL=Adorner.js.map

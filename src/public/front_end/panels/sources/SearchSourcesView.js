@@ -55,4 +55,3 @@ export class ActionDelegate {
         return SearchSourcesView.openSearch(queryCandidate);
     }
 }
-//# sourceMappingURL=SearchSourcesView.js.map

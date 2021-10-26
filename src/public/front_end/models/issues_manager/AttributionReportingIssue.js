@@ -87,4 +87,3 @@ export class AttributionReportingIssue extends Issue {
         return [new AttributionReportingIssue(attributionReportingIssueDetails, issuesModel)];
     }
 }
-//# sourceMappingURL=AttributionReportingIssue.js.map

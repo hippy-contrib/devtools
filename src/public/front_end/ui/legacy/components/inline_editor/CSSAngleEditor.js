@@ -138,4 +138,3 @@ export class CSSAngleEditor extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-css-angle-editor', CSSAngleEditor);
-//# sourceMappingURL=CSSAngleEditor.js.map

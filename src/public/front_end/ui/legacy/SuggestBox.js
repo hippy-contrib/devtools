@@ -298,4 +298,3 @@ export class SuggestBox {
         return hasSelectedItem;
     }
 }
-//# sourceMappingURL=SuggestBox.js.map

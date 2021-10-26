@@ -54,8 +54,6 @@ master:
     - name: push流水线
       ifModify:
         - src/**
-        - package.json
-        - package-lock.json
       stages:
         # 更新 issue 状态为已解决并关闭，对应 EPC 考核中的 开发完成时间点
         - name: update issue

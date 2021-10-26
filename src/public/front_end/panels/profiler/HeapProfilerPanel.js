@@ -89,4 +89,3 @@ export class HeapProfilerPanel extends ProfilesPanel {
         }
     }
 }
-//# sourceMappingURL=HeapProfilerPanel.js.map

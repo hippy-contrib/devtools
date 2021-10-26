@@ -50,4 +50,3 @@ import * as RequestTimingView from './RequestTimingView.js';
 import * as ResourceWebSocketFrameView from './ResourceWebSocketFrameView.js';
 import * as SignedExchangeInfoView from './SignedExchangeInfoView.js';
 export { BinaryResourceView, BlockedURLsPane, EventSourceMessagesView, NetworkConfigView, NetworkDataGridNode, NetworkFrameGrouper, NetworkItemView, NetworkLogView, NetworkLogViewColumns, NetworkManageCustomHeadersView, NetworkOverview, NetworkPanel, NetworkSearchScope, NetworkTimeCalculator, NetworkWaterfallColumn, RequestCookiesView, RequestHeadersView, RequestHTMLView, RequestInitiatorView, RequestPreviewView, RequestResponseView, RequestTimingView, ResourceWebSocketFrameView, SignedExchangeInfoView, };
-//# sourceMappingURL=network.js.map

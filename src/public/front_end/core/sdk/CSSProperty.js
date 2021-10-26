@@ -262,4 +262,3 @@ export class CSSProperty {
         return this._invalidString;
     }
 }
-//# sourceMappingURL=CSSProperty.js.map

@@ -376,4 +376,3 @@ export class OverviewPane extends UI.Widget.VBox {
         this._overviewCanvas.style.height = height + 'px';
     }
 }
-//# sourceMappingURL=CPUProfileFlameChart.js.map

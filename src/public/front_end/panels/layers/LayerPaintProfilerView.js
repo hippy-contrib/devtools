@@ -36,4 +36,3 @@ export class LayerPaintProfilerView extends UI.SplitWidget.SplitWidget {
         this._logTreeView.updateWindow(this._paintProfilerView.selectionWindow());
     }
 }
-//# sourceMappingURL=LayerPaintProfilerView.js.map

@@ -895,4 +895,3 @@ export class SearchNetworkView extends Search.SearchView.SearchView {
         return new NetworkSearchScope();
     }
 }
-//# sourceMappingURL=NetworkPanel.js.map

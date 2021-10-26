@@ -741,4 +741,3 @@ export var CSSPropertyTrackerEvents;
     CSSPropertyTrackerEvents["TrackedCSSPropertiesUpdated"] = "TrackedCSSPropertiesUpdated";
 })(CSSPropertyTrackerEvents || (CSSPropertyTrackerEvents = {}));
 SDKModel.register(CSSModel, { capabilities: Capability.DOM, autostart: true });
-//# sourceMappingURL=CSSModel.js.map

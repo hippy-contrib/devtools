@@ -40,4 +40,3 @@ SourceFrame.SourcesTextEditor.TokenHighlighter = SourceFrameModule.SourcesTextEd
 SourceFrame.XMLView = SourceFrameModule.XMLView.XMLView;
 /** @constructor */
 SourceFrame.XMLView.Node = SourceFrameModule.XMLView.XMLViewNode;
-//# sourceMappingURL=source_frame-legacy.js.map

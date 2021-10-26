@@ -6,4 +6,3 @@ self.UIInspector = self.UIInspector || {};
 UIInspector = UIInspector || {};
 // 定义全局变量 UIInspector.CustomPanel，对应 module.json 中 panel 插件的 className。在切换到 custom 模块时，调用 extension.instance() 新建 CustomPanel。
 UIInspector.CustomPanel = UIInspector.CustomPanel.CustomPanel;
-//# sourceMappingURL=ui_inspector-legacy.js.map

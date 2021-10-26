@@ -446,4 +446,3 @@ class StackTraceTopFrameLocation extends LiveLocationWithPool {
         this.update();
     }
 }
-//# sourceMappingURL=DebuggerWorkspaceBinding.js.map

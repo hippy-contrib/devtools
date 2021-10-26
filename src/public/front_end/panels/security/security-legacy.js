@@ -41,4 +41,3 @@ Security.SecurityPanelSidebarTreeElement = SecurityModule.SecurityPanel.Security
  * @constructor
  */
 Security.SecurityOriginView = SecurityModule.SecurityPanel.SecurityOriginView;
-//# sourceMappingURL=security-legacy.js.map

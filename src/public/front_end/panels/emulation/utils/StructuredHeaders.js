@@ -614,4 +614,3 @@ function serializeByteSequence(_input) {
 function serializeBoolean(input) {
     return { kind: 13 /* SERIALIZATION_RESULT */, value: input.value ? '?1' : '?0' };
 }
-//# sourceMappingURL=StructuredHeaders.js.map

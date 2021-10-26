@@ -207,4 +207,3 @@ export const DispatchFilterBy = {
     Passive: 'Passive',
 };
 const objectGroupName = 'event-listeners-panel';
-//# sourceMappingURL=EventListenersWidget.js.map

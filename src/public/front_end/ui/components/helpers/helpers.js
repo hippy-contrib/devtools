@@ -9,4 +9,3 @@ import * as GetStylesheet from './get-stylesheet.js';
 import * as ScheduledRender from './scheduled-render.js';
 import * as SetCSSProperty from './set-css-property.js';
 export { ComponentServerSetup, CustomElements, Directives, GetRootNode, GetStylesheet, ScheduledRender, SetCSSProperty, };
-//# sourceMappingURL=helpers.js.map

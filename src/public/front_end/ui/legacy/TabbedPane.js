@@ -1090,4 +1090,3 @@ export class TabbedPaneTab {
     }
 }
 const tabIcons = new WeakMap();
-//# sourceMappingURL=TabbedPane.js.map

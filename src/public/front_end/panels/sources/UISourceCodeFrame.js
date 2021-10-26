@@ -800,4 +800,3 @@ export var Events;
 (function (Events) {
     Events["ToolbarItemsChanged"] = "ToolbarItemsChanged";
 })(Events || (Events = {}));
-//# sourceMappingURL=UISourceCodeFrame.js.map

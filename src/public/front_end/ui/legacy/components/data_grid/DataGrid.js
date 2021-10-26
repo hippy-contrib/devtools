@@ -2059,4 +2059,3 @@ export class DataGridWidget extends UI.Widget.VBox {
         return [this._dataGrid._scrollContainer];
     }
 }
-//# sourceMappingURL=DataGrid.js.map

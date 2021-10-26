@@ -236,4 +236,3 @@ UI.Context.registerListener({
         return BrowserDebugger.DOMBreakpointsSidebarPane.DOMBreakpointsSidebarPane.instance();
     },
 });
-//# sourceMappingURL=browser_debugger-meta.js.map

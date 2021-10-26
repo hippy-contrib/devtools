@@ -439,4 +439,3 @@ export class InfoWidget extends UI.Widget.VBox {
         this._tabbedPane.changeTabView('response', SourceFrame.JSONView.JSONView.createViewSync(responseParsed));
     }
 }
-//# sourceMappingURL=ProtocolMonitor.js.map

@@ -36,4 +36,3 @@ export class SnippetsPlugin extends Plugin {
         return [runSnippet];
     }
 }
-//# sourceMappingURL=SnippetsPlugin.js.map

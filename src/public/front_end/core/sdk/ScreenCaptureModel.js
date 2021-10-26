@@ -105,4 +105,3 @@ export class ScreenCaptureModel extends SDKModel {
     }
 }
 SDKModel.register(ScreenCaptureModel, { capabilities: Capability.ScreenCapture, autostart: false });
-//# sourceMappingURL=ScreenCaptureModel.js.map

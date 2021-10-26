@@ -833,4 +833,3 @@ export class AppManifestView extends UI.Widget.VBox {
         return { imageResourceErrors, squareSizedIconAvailable };
     }
 }
-//# sourceMappingURL=AppManifestView.js.map

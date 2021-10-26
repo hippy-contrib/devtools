@@ -549,4 +549,3 @@ export class SearchConfig {
         return regex;
     }
 }
-//# sourceMappingURL=SearchableView.js.map

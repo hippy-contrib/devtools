@@ -20,4 +20,3 @@ import * as ConsoleView from './ConsoleView.js';
 import * as ConsoleViewMessage from './ConsoleViewMessage.js';
 import * as ConsoleViewport from './ConsoleViewport.js';
 export { ConsoleContextSelector, ConsoleFilter, ConsolePanel, ConsolePinPane, ConsolePrompt, ConsoleSidebar, ConsoleView, ConsoleViewMessage, ConsoleViewport, };
-//# sourceMappingURL=console.js.map

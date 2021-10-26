@@ -160,4 +160,3 @@ function nextColorFormat(color, curFormat) {
             return cf.RGBA;
     }
 }
-//# sourceMappingURL=ColorSwatch.js.map

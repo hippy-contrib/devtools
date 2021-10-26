@@ -70,4 +70,3 @@ export const registerPanelView = ({ viewId, UIStrings, UIStringsKey, moduleName,
         },
     });
 };
-//# sourceMappingURL=CustomPanel.js.map

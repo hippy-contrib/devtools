@@ -113,4 +113,3 @@ export class DeveloperResourcesView extends UI.Widget.VBox {
         this._updateStats();
     }
 }
-//# sourceMappingURL=DeveloperResourcesView.js.map

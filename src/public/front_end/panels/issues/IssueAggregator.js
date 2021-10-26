@@ -210,4 +210,3 @@ export class IssueAggregator extends Common.ObjectWrapper.ObjectWrapper {
         return this.aggregatedIssuesByCode.size;
     }
 }
-//# sourceMappingURL=IssueAggregator.js.map

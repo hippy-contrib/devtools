@@ -64,4 +64,3 @@ QuickOpen.FilteredListWidget.registerProvider({
     title: i18nLazyString(UIStrings.runSnippet),
     provider: () => Promise.resolve(SnippetsQuickOpen.instance()),
 });
-//# sourceMappingURL=SnippetsQuickOpen.js.map

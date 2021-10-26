@@ -220,4 +220,3 @@ export const GridEditableProperties = [
         ],
     },
 ];
-//# sourceMappingURL=StylePropertyEditor.js.map

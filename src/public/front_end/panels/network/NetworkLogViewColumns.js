@@ -941,4 +941,3 @@ export var WaterfallSortIds;
     WaterfallSortIds["Duration"] = "duration";
     WaterfallSortIds["Latency"] = "latency";
 })(WaterfallSortIds || (WaterfallSortIds = {}));
-//# sourceMappingURL=NetworkLogViewColumns.js.map

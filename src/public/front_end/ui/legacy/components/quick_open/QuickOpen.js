@@ -92,4 +92,3 @@ export class ShowActionDelegate {
         return false;
     }
 }
-//# sourceMappingURL=QuickOpen.js.map

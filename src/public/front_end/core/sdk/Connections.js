@@ -246,4 +246,3 @@ function createMainConnection(websocketConnectionLost) {
     }
     return new MainConnection();
 }
-//# sourceMappingURL=Connections.js.map

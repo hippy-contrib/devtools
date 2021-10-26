@@ -21,4 +21,3 @@ UI.CustomPanel.registerPanelView({
     customModulePath: 'panels/core_memory/core_memory.js',
     tabName: 'core-memory',
 });
-//# sourceMappingURL=core_memory-meta.js.map

@@ -3,4 +3,3 @@
 // found in the LICENSE file.
 import * as RuntimeInstantiator from './RuntimeInstantiator.js';
 export { RuntimeInstantiator, };
-//# sourceMappingURL=startup.js.map

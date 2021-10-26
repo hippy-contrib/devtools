@@ -113,4 +113,3 @@ export class BackForwardCacheView extends UI.ThrottledWidget.ThrottledWidget {
         })}`}</${ReportView.ReportView.ReportValue.litTagName}>`;
     }
 }
-//# sourceMappingURL=BackForwardCacheView.js.map

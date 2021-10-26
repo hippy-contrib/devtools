@@ -58,4 +58,3 @@ export class AccessibilityTreeNode extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-accessibility-tree-node', AccessibilityTreeNode);
-//# sourceMappingURL=AccessibilityTreeNode.js.map

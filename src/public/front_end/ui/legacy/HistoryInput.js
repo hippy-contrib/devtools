@@ -55,4 +55,3 @@ export class HistoryInput extends HTMLInputElement {
         this._history.push('');
     }
 }
-//# sourceMappingURL=HistoryInput.js.map

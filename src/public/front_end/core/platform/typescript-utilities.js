@@ -19,4 +19,3 @@ export function assertNotNullOrUndefined(val) {
 export function assertUnhandled(_caseVariable) {
     return _caseVariable;
 }
-//# sourceMappingURL=typescript-utilities.js.map

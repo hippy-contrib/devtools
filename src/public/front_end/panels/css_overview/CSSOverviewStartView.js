@@ -38,4 +38,3 @@ export class CSSOverviewStartView extends UI.Widget.Widget {
         this.contentElement.style.overflow = 'auto';
     }
 }
-//# sourceMappingURL=CSSOverviewStartView.js.map

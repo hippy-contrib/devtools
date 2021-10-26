@@ -82,4 +82,3 @@ export class AffectedTrustedWebActivityIssueDetailsView extends AffectedResource
         this.appendDetails(this.issue.getTrustedWebActivityIssues());
     }
 }
-//# sourceMappingURL=AffectedTrustedWebActivityIssueDetailsView.js.map

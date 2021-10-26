@@ -133,4 +133,3 @@ export class ContextMenuProvider {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('x-link', XLink);
-//# sourceMappingURL=XLink.js.map

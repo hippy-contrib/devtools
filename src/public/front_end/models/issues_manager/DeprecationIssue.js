@@ -66,4 +66,3 @@ export class DeprecationIssue extends Issue {
         return [new DeprecationIssue(details, issuesModel)];
     }
 }
-//# sourceMappingURL=DeprecationIssue.js.map

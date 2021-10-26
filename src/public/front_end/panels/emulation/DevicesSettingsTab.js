@@ -278,4 +278,3 @@ export class DevicesSettingsTab extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=DevicesSettingsTab.js.map

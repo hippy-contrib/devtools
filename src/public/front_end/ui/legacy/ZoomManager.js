@@ -43,4 +43,3 @@ export class ZoomManager extends Common.ObjectWrapper.ObjectWrapper {
         }
     }
 }
-//# sourceMappingURL=ZoomManager.js.map

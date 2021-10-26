@@ -517,4 +517,3 @@ export class TextEditorAutocompleteController {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     static HintBookmark = Symbol('hint');
 }
-//# sourceMappingURL=TextEditorAutocompleteController.js.map

@@ -410,4 +410,3 @@ export class Swatch {
         this._swatchElement.classList.toggle('swatch-inner-white', bgColor.hsla()[2] > 0.9);
     }
 }
-//# sourceMappingURL=ContrastDetails.js.map

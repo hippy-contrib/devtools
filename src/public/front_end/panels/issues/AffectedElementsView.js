@@ -39,4 +39,3 @@ export class AffectedElementsView extends AffectedResourcesView {
         this.appendAffectedElements(this.issue.elements());
     }
 }
-//# sourceMappingURL=AffectedElementsView.js.map

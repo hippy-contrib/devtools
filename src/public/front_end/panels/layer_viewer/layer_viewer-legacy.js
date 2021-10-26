@@ -127,4 +127,3 @@ LayerViewer.TransformController.Events = LayerViewerModule.TransformController.E
  * @enum {string}
  */
 LayerViewer.TransformController.Modes = LayerViewerModule.TransformController.Modes;
-//# sourceMappingURL=layer_viewer-legacy.js.map

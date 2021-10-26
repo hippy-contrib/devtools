@@ -443,4 +443,3 @@ export const slowScrollRectNames = new Map([
         i18nLazyString(UIStrings.mainThreadScrollingReason),
     ],
 ]);
-//# sourceMappingURL=LayerDetailsView.js.map

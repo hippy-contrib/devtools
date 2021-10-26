@@ -138,4 +138,3 @@ export class SimpleHistoryManager {
         return true;
     }
 }
-//# sourceMappingURL=SimpleHistoryManager.js.map

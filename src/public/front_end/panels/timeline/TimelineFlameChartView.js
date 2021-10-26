@@ -516,4 +516,3 @@ export var ColorBy;
 (function (ColorBy) {
     ColorBy["URL"] = "URL";
 })(ColorBy || (ColorBy = {}));
-//# sourceMappingURL=TimelineFlameChartView.js.map

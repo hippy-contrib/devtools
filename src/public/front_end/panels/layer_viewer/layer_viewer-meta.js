@@ -151,4 +151,3 @@ UI.ActionRegistration.registerActionExtension({
         },
     ],
 });
-//# sourceMappingURL=layer_viewer-meta.js.map

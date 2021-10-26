@@ -767,4 +767,3 @@ export class ReloadActionDelegate {
     }
 }
 new MainImpl();
-//# sourceMappingURL=MainImpl.js.map

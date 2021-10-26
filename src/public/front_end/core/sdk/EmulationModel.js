@@ -408,4 +408,3 @@ export class DeviceOrientation {
     }
 }
 SDKModel.register(EmulationModel, { capabilities: Capability.Emulation, autostart: true });
-//# sourceMappingURL=EmulationModel.js.map

@@ -117,4 +117,3 @@ export class PropertiesWidget extends UI.ThrottledWidget.ThrottledWidget {
         this.update();
     }
 }
-//# sourceMappingURL=PropertiesWidget.js.map

@@ -59,4 +59,3 @@ export class InspectedPagePlaceholder extends UI.Widget.Widget {
         this.dispatchEventToListeners("Update" /* Update */, bounds);
     }
 }
-//# sourceMappingURL=InspectedPagePlaceholder.js.map

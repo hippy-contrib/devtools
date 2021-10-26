@@ -213,4 +213,3 @@ export var Events;
     Events["ResourceAdded"] = "ResourceAdded";
     Events["TopFrameNavigated"] = "TopFrameNavigated";
 })(Events || (Events = {}));
-//# sourceMappingURL=FrameManager.js.map

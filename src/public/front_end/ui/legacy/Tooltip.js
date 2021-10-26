@@ -10,4 +10,3 @@ export class Tooltip {
         element.title = tooltipContent || '';
     }
 }
-//# sourceMappingURL=Tooltip.js.map

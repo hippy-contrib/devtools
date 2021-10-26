@@ -402,4 +402,3 @@ export class TreeOutline extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-tree-outline', TreeOutline);
-//# sourceMappingURL=TreeOutline.js.map

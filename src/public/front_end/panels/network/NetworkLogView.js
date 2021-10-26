@@ -1885,4 +1885,3 @@ export const HTTPSchemas = {
     'wss': true,
 };
 const searchKeys = Object.values(NetworkForward.UIFilter.FilterType);
-//# sourceMappingURL=NetworkLogView.js.map

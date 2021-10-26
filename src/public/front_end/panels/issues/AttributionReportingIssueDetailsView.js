@@ -175,4 +175,3 @@ export class AttributionReportingIssueDetailsView extends AffectedResourcesView 
         parent.appendChild(this.createRequestCell(request, opts));
     }
 }
-//# sourceMappingURL=AttributionReportingIssueDetailsView.js.map

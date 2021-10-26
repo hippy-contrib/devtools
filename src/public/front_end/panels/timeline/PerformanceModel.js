@@ -203,4 +203,3 @@ export var Events;
     Events["ExtensionDataAdded"] = "ExtensionDataAdded";
     Events["WindowChanged"] = "WindowChanged";
 })(Events || (Events = {}));
-//# sourceMappingURL=PerformanceModel.js.map

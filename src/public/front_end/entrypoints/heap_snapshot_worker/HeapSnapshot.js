@@ -2433,4 +2433,3 @@ export class JSHeapSnapshotRetainerEdge extends HeapSnapshotRetainerEdge {
         return this._edge().isWeak();
     }
 }
-//# sourceMappingURL=HeapSnapshot.js.map

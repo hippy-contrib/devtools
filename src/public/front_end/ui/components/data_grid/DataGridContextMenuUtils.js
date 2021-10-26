@@ -52,4 +52,3 @@ export function addSortableColumnItems(dataGrid, contextMenu) {
         }
     }
 }
-//# sourceMappingURL=DataGridContextMenuUtils.js.map

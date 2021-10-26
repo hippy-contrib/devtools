@@ -48,4 +48,3 @@ import * as StylePropertyHighlighter from './StylePropertyHighlighter.js';
 import * as StylePropertyTreeElement from './StylePropertyTreeElement.js';
 import * as StylesSidebarPane from './StylesSidebarPane.js';
 export { ClassesPaneWidget, ColorSwatchPopoverIcon, ComputedStyleModel, ComputedStyleWidget, DOMLinkifier, DOMPath, ElementsPanel, ElementsSidebarPane, ElementStatePaneWidget, ElementsTreeElement, ElementsTreeElementHighlighter, ElementsTreeOutline, EventListenersWidget, InspectElementModeController, LayoutSidebarPane, MarkerDecorator, MetricsSidebarPane, NodeStackTraceWidget, PlatformFontsWidget, PropertiesWidget, StyleEditorWidget, StylePropertyHighlighter, StylePropertyTreeElement, StylesSidebarPane, };
-//# sourceMappingURL=elements.js.map

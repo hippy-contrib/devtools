@@ -64,4 +64,3 @@ export class PerformanceMetricsModel extends SDKModel {
     }
 }
 SDKModel.register(PerformanceMetricsModel, { capabilities: Capability.DOM, autostart: false });
-//# sourceMappingURL=PerformanceMetricsModel.js.map

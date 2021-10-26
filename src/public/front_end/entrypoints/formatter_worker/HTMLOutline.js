@@ -39,4 +39,3 @@ export function htmlOutline(content, chunkCallback) {
     }
     chunkCallback({ chunk: [], isLastChunk: true });
 }
-//# sourceMappingURL=HTMLOutline.js.map

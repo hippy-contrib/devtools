@@ -409,4 +409,3 @@ const RESERVED_FILENAMES = new Set([
 export const Events = {
     ProjectChanged: Symbol('ProjectChanged'),
 };
-//# sourceMappingURL=NetworkPersistenceManager.js.map

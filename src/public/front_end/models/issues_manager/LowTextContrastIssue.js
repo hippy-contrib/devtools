@@ -51,4 +51,3 @@ export class LowTextContrastIssue extends Issue {
         return [new LowTextContrastIssue(lowTextContrastIssueDetails)];
     }
 }
-//# sourceMappingURL=LowTextContrastIssue.js.map

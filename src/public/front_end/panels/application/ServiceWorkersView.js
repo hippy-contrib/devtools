@@ -709,4 +709,3 @@ export class Section {
         return contentElement;
     }
 }
-//# sourceMappingURL=ServiceWorkersView.js.map

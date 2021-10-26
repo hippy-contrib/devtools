@@ -450,4 +450,3 @@ export function retrieveLocationForElement(element) {
     return elementToUILocationMap.get(element);
 }
 const elementToBreakpointMap = new WeakMap();
-//# sourceMappingURL=JavaScriptBreakpointsSidebarPane.js.map

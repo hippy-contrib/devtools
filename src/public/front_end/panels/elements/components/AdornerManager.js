@@ -112,4 +112,3 @@ export function compareAdornerNamesByCategory(nameA, nameB) {
     const orderB = AdornerCategoryOrder.get(getCategoryFromAdornerName(nameB)) || Number.POSITIVE_INFINITY;
     return orderA - orderB;
 }
-//# sourceMappingURL=AdornerManager.js.map

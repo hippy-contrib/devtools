@@ -9,4 +9,3 @@ import { getCurrentTheme, getThemeColorValue, injectCoreStyles } from './inject-
 import { measuredScrollbarWidth } from './measured-scrollbar-width.js';
 import { registerCustomElement } from './register-custom-element.js';
 export { appendStyle, createShadowRootWithCoreStyles, focusChanged, getCurrentTheme, getThemeColorValue, injectCoreStyles, measuredScrollbarWidth, registerCustomElement, };
-//# sourceMappingURL=utils.js.map

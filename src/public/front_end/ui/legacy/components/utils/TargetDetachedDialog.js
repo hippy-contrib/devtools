@@ -61,4 +61,3 @@ export class TargetDetachedDialog extends SDK.SDKModel.SDKModel {
     }
 }
 SDK.SDKModel.SDKModel.register(TargetDetachedDialog, { capabilities: SDK.Target.Capability.Inspector, autostart: true });
-//# sourceMappingURL=TargetDetachedDialog.js.map

@@ -349,6 +349,11 @@
       <include file="panels/ui_inspector/ui_inspector.js" name="PANELS_UI_INSPECTOR_UI_INSPECTOR_JS" resource_path="panels/ui_inspector/ui_inspector.js" type="BINDATA" compress="false"/>
       <include file="panels/ui_inspector/ui_inspector_module.js" name="PANELS_UI_INSPECTOR_UI_INSPECTOR_MODULE_JS" resource_path="panels/ui_inspector/ui_inspector_module.js" type="BINDATA" compress="false"/>
       <include file="panels/ui_inspector/UiInspectorPanel.js" name="PANELS_UI_INSPECTOR_UIINSPECTORPANEL_JS" resource_path="panels/ui_inspector/UiInspectorPanel.js" type="BINDATA" compress="false"/>
+      <include file="panels/cdp_debug/cdp_debug-legacy.js" name="PANELS_CDP_DEBUG_CDP_DEBUG_LEGACY_JS" resource_path="panels/cdp_debug/cdp_debug-legacy.js" type="BINDATA" compress="false"/>
+      <include file="panels/cdp_debug/cdp_debug-meta.js" name="PANELS_CDP_DEBUG_CDP_DEBUG_META_JS" resource_path="panels/cdp_debug/cdp_debug-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/cdp_debug/cdp_debug.js" name="PANELS_CDP_DEBUG_CDP_DEBUG_JS" resource_path="panels/cdp_debug/cdp_debug.js" type="BINDATA" compress="false"/>
+      <include file="panels/cdp_debug/cdp_debug_module.js" name="PANELS_CDP_DEBUG_CDP_DEBUG_MODULE_JS" resource_path="panels/cdp_debug/cdp_debug_module.js" type="BINDATA" compress="false"/>
+      <include file="panels/cdp_debug/CdpDebugPanel.js" name="PANELS_CDP_DEBUG_CDPDEBUGPANEL_JS" resource_path="panels/cdp_debug/CdpDebugPanel.js" type="BINDATA" compress="false"/>
       <include file="panels/console_counters/console_counters-meta.js" name="PANELS_CONSOLE_COUNTERS_CONSOLE_COUNTERS_META_JS" resource_path="panels/console_counters/console_counters-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/console_counters/console_counters.js" name="PANELS_CONSOLE_COUNTERS_CONSOLE_COUNTERS_JS" resource_path="panels/console_counters/console_counters.js" type="BINDATA" compress="false"/>
       <include file="panels/coverage/coverage-legacy.js" name="PANELS_COVERAGE_COVERAGE_LEGACY_JS" resource_path="panels/coverage/coverage-legacy.js" type="BINDATA" compress="false"/>

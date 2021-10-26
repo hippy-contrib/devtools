@@ -277,4 +277,3 @@ class StyleMapping {
         return [];
     }
 }
-//# sourceMappingURL=SourceFormatter.js.map

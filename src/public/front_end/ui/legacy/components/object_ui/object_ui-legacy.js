@@ -51,4 +51,3 @@ ObjectUI.ObjectPropertiesSectionsTreeExpandController =
     ObjectUIModule.ObjectPropertiesSection.ObjectPropertiesSectionsTreeExpandController;
 /** @constructor */
 ObjectUI.RemoteObjectPreviewFormatter = ObjectUIModule.RemoteObjectPreviewFormatter.RemoteObjectPreviewFormatter;
-//# sourceMappingURL=object_ui-legacy.js.map

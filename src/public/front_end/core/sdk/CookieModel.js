@@ -120,4 +120,3 @@ export class CookieModel extends SDKModel {
     }
 }
 SDKModel.register(CookieModel, { capabilities: Capability.Network, autostart: false });
-//# sourceMappingURL=CookieModel.js.map

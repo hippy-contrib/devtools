@@ -73,4 +73,3 @@ HeapSnapshotWorker.HeapSnapshotLoader = HeapSnapshotWorkerModule.HeapSnapshotLoa
 /** @constructor */
 HeapSnapshotWorker.HeapSnapshotWorkerDispatcher =
     HeapSnapshotWorkerModule.HeapSnapshotWorkerDispatcher.HeapSnapshotWorkerDispatcher;
-//# sourceMappingURL=heap_snapshot_worker-legacy.js.map

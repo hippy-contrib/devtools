@@ -413,4 +413,3 @@ export class FontEditorSectionManager {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     static _treeElementSymbol = Symbol('FontEditorSectionManager._treeElementSymbol');
 }
-//# sourceMappingURL=ColorSwatchPopoverIcon.js.map

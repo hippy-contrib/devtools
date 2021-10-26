@@ -227,4 +227,3 @@ export class NetworkItemView extends UI.TabbedPane.TabbedPane {
         this._headersView.revealHeader(section, header);
     }
 }
-//# sourceMappingURL=NetworkItemView.js.map

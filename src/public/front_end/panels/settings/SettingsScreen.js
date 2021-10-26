@@ -484,4 +484,3 @@ export class Revealer {
         return success ? Promise.resolve() : Promise.reject();
     }
 }
-//# sourceMappingURL=SettingsScreen.js.map

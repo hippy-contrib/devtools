@@ -35,4 +35,3 @@ export class ElementsPanelLink extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-elements-panel-link', ElementsPanelLink);
-//# sourceMappingURL=ElementsPanelLink.js.map

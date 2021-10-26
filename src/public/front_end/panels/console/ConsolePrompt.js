@@ -395,4 +395,3 @@ export class ConsoleHistoryManager {
         return this._data[this._data.length - this._historyOffset];
     }
 }
-//# sourceMappingURL=ConsolePrompt.js.map

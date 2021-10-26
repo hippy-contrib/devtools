@@ -674,4 +674,3 @@ export class SourceOrderHighlighter {
     }
 }
 SDKModel.register(OverlayModel, { capabilities: Capability.DOM, autostart: true });
-//# sourceMappingURL=OverlayModel.js.map

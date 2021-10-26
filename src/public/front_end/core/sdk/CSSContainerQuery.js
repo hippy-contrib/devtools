@@ -98,4 +98,3 @@ export const getPhysicalAxisFromQueryAxis = (queryAxis, writingMode) => {
             return isVerticalWritingMode ? "Horizontal" /* Horizontal */ : "Vertical" /* Vertical */;
     }
 };
-//# sourceMappingURL=CSSContainerQuery.js.map

@@ -158,4 +158,3 @@ class Task {
 export function formatterWorkerPool() {
     return FormatterWorkerPool.instance();
 }
-//# sourceMappingURL=FormatterWorkerPool.js.map

@@ -155,4 +155,3 @@ export function formatInteger(value, mode) {
             throw new Error(`Unknown mode for integers: ${mode}.`);
     }
 }
-//# sourceMappingURL=ValueInterpreterDisplayUtils.js.map

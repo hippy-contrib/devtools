@@ -525,4 +525,3 @@ const _maxLinkLength = 30;
 // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const _alwaysShownComputedProperties = new Set(['display', 'height', 'width']);
-//# sourceMappingURL=ComputedStyleWidget.js.map

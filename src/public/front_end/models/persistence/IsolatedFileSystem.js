@@ -555,4 +555,3 @@ export const BinaryExtensions = new Set([
     'tif',
     'bmp',
 ]);
-//# sourceMappingURL=IsolatedFileSystem.js.map

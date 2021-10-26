@@ -1261,4 +1261,3 @@ export var EntryType;
     EntryType["ExtensionEvent"] = "ExtensionEvent";
     EntryType["Screenshot"] = "Screenshot";
 })(EntryType || (EntryType = {}));
-//# sourceMappingURL=TimelineFlameChartDataProvider.js.map

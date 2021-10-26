@@ -905,4 +905,3 @@ export class AllocationDataGrid extends HeapSnapshotViewportDataGrid {
         return compare;
     }
 }
-//# sourceMappingURL=HeapSnapshotDataGrids.js.map

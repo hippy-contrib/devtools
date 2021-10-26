@@ -284,4 +284,3 @@ SourceFrame.SourceFrame.registerLineDecorator({
     lineDecorator: LineDecorator.instance,
     decoratorType: SourceFrame.SourceFrame.DecoratorType.PERFORMANCE,
 });
-//# sourceMappingURL=LineLevelProfile.js.map

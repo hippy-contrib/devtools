@@ -18,4 +18,3 @@ import * as FontEditorUtils from './FontEditorUtils.js';
 import * as Swatches from './Swatches.js';
 import * as SwatchPopoverHelper from './SwatchPopoverHelper.js';
 export { BezierEditor, BezierUI, ColorSwatch, ColorSwatchImpl, CSSAngle, CSSAngleImpl, CSSAngleUtils, CSSShadowEditor, CSSShadowModel, CSSVarSwatch, CSSVarSwatchImpl, FontEditor, FontEditorUnitConverter, FontEditorUtils, Swatches, SwatchPopoverHelper, };
-//# sourceMappingURL=inline_editor.js.map

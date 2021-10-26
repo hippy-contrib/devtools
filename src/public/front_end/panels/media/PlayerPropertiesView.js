@@ -521,4 +521,3 @@ export class PlayerPropertiesView extends UI.Widget.VBox {
         this._attributeMap.set("kTextTracks" /* TextTracks */, textTrackManager);
     }
 }
-//# sourceMappingURL=PlayerPropertiesView.js.map

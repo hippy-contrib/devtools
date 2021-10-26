@@ -23,4 +23,3 @@ Components.LinkDecorator = ComponentsModule.Linkifier.LinkDecorator;
 Components.reload = ComponentsModule.Reload.reload;
 /** @constructor */
 Components.TargetDetachedDialog = ComponentsModule.TargetDetachedDialog.TargetDetachedDialog;
-//# sourceMappingURL=utils-legacy.js.map

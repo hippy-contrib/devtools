@@ -12,4 +12,3 @@ export const codeBlockRenderer = (value) => {
     const stringValue = String(value);
     return LitHtml.html `<code>${stringValue}</code>`;
 };
-//# sourceMappingURL=DataGridRenderers.js.map

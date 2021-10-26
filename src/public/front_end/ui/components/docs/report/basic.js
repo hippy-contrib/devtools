@@ -35,4 +35,3 @@ LitHtml.render(LitHtml.html `
           <${ReportView.ReportView.ReportSectionDivider.litTagName}></${ReportView.ReportView.ReportSectionDivider.litTagName}>
         </${ReportView.ReportView.Report.litTagName}>
       `, container);
-//# sourceMappingURL=basic.js.map

@@ -356,4 +356,3 @@ export class ParsedURL {
     }
     static _urlRegexInstance = null;
 }
-//# sourceMappingURL=ParsedURL.js.map

@@ -27,4 +27,3 @@ export const getMarkdownImage = (key) => {
     }
     return image;
 };
-//# sourceMappingURL=MarkdownImagesMap.js.map

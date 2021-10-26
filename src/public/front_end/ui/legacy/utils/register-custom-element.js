@@ -14,4 +14,3 @@ export function registerCustomElement(localName, typeExtension, definition) {
     }, { extends: localName });
     return () => document.createElement(localName, { is: typeExtension });
 }
-//# sourceMappingURL=register-custom-element.js.map

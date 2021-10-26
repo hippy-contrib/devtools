@@ -20,4 +20,3 @@ export const isEqual = function (setA, setB) {
     }
     return true;
 };
-//# sourceMappingURL=set-utilities.js.map

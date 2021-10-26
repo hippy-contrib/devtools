@@ -67,4 +67,3 @@ export class ExpandableApplicationPanelTreeElement extends ApplicationPanelTreeE
         this.expandedSetting.set(false);
     }
 }
-//# sourceMappingURL=ApplicationPanelTreeElement.js.map

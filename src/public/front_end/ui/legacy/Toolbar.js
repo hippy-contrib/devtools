@@ -864,4 +864,3 @@ export var ToolbarItemLocation;
     ToolbarItemLocation["MAIN_TOOLBAR_LEFT"] = "main-toolbar-left";
     ToolbarItemLocation["STYLES_SIDEBARPANE_TOOLBAR"] = "styles-sidebarpane-toolbar";
 })(ToolbarItemLocation || (ToolbarItemLocation = {}));
-//# sourceMappingURL=Toolbar.js.map

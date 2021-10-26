@@ -56,4 +56,3 @@ PerfUI.TimelineOverviewPane.Events = PerfUIModule.TimelineOverviewPane.Events;
 PerfUI.TimelineOverviewBase = PerfUIModule.TimelineOverviewPane.TimelineOverviewBase;
 /** @interface */
 PerfUI.TimelineOverview = PerfUIModule.TimelineOverviewPane.TimelineOverview;
-//# sourceMappingURL=perf_ui-legacy.js.map

@@ -161,4 +161,3 @@ export class CSSStyleSheetHeader {
         return { target: null, frameId: this.frameId, initiatorUrl: this.hasSourceURL ? '' : this.sourceURL };
     }
 }
-//# sourceMappingURL=CSSStyleSheetHeader.js.map

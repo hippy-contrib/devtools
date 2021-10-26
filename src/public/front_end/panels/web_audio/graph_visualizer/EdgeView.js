@@ -66,4 +66,3 @@ export var EdgeTypes;
     EdgeTypes["NodeToNode"] = "NodeToNode";
     EdgeTypes["NodeToParam"] = "NodeToParam";
 })(EdgeTypes || (EdgeTypes = {}));
-//# sourceMappingURL=EdgeView.js.map

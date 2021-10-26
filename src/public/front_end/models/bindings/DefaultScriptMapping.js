@@ -124,4 +124,3 @@ export class DefaultScriptMapping {
         this._project.dispose();
     }
 }
-//# sourceMappingURL=DefaultScriptMapping.js.map

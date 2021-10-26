@@ -112,4 +112,3 @@ ComponentHelpers.CustomElements.defineComponent('x-cbox', XCBox);
 ComponentHelpers.CustomElements.defineComponent('x-div', XDiv);
 ComponentHelpers.CustomElements.defineComponent('x-span', XSpan);
 ComponentHelpers.CustomElements.defineComponent('x-text', XText);
-//# sourceMappingURL=XElement.js.map

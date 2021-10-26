@@ -639,4 +639,3 @@ export class FrameDetailsReportView extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-resources-frame-details-view', FrameDetailsReportView);
-//# sourceMappingURL=FrameDetailsView.js.map

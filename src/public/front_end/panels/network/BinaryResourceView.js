@@ -187,4 +187,3 @@ export class BinaryViewObject {
         return this._view;
     }
 }
-//# sourceMappingURL=BinaryResourceView.js.map

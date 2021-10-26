@@ -314,4 +314,3 @@ export var Type;
     Type["Inline"] = "Inline";
     Type["Attributes"] = "Attributes";
 })(Type || (Type = {}));
-//# sourceMappingURL=CSSStyleDeclaration.js.map

@@ -33,4 +33,3 @@ export class SimpleView extends VBox {
     disposeView() {
     }
 }
-//# sourceMappingURL=View.js.map

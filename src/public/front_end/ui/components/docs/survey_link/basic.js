@@ -21,4 +21,3 @@ link.data = {
         setTimeout(callback.bind(undefined, { surveyShown: true }), 1500);
     },
 };
-//# sourceMappingURL=basic.js.map

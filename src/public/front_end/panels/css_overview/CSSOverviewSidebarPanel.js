@@ -72,4 +72,3 @@ export class CSSOverviewSidebarPanel extends UI.Widget.VBox {
         target.classList.add(CSSOverviewSidebarPanel.SELECTED);
     }
 }
-//# sourceMappingURL=CSSOverviewSidebarPanel.js.map

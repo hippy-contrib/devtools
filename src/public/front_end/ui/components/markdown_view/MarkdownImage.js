@@ -57,4 +57,3 @@ export class MarkdownImage extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-markdown-image', MarkdownImage);
-//# sourceMappingURL=MarkdownImage.js.map

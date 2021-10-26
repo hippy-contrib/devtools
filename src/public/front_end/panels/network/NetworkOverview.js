@@ -272,4 +272,3 @@ export const _bandHeight = 3;
 export const _padding = 5;
 // Border between bars in network overview panel for accessibility.
 const BORDER_WIDTH = 1;
-//# sourceMappingURL=NetworkOverview.js.map

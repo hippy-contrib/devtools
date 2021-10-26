@@ -317,4 +317,3 @@ export class TimelineController {
         this._client.loadingProgress(progress);
     }
 }
-//# sourceMappingURL=TimelineController.js.map

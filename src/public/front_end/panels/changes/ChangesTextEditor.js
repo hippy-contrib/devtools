@@ -84,4 +84,3 @@ export class DevToolsAccessibleDiffTextArea extends TextEditor.CodeMirrorTextEdi
 }
 // @ts-ignore CodeMirror integration with externals, not yet part of codemirror-legacy.d.ts
 CodeMirror.inputStyles.devToolsAccessibleDiffTextArea = DevToolsAccessibleDiffTextArea;
-//# sourceMappingURL=ChangesTextEditor.js.map

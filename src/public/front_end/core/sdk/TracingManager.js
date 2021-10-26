@@ -94,4 +94,3 @@ class TracingDispatcher {
     }
 }
 SDKModel.register(TracingManager, { capabilities: Capability.Tracing, autostart: false });
-//# sourceMappingURL=TracingManager.js.map

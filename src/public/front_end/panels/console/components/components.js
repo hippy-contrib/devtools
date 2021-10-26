@@ -3,4 +3,3 @@
 // found in the LICENSE file.
 import * as SidebarDeprecation from './SidebarDeprecation.js';
 export { SidebarDeprecation, };
-//# sourceMappingURL=components.js.map

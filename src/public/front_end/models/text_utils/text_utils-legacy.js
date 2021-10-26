@@ -38,4 +38,3 @@ TextUtils.CodeMirrorUtils.changeObjectToEditOperation = TextUtilsModule.CodeMirr
 TextUtils.CodeMirrorUtils.pullLines = TextUtilsModule.CodeMirrorUtils.pullLines;
 /** @constructor */
 TextUtils.CodeMirrorUtils.TokenizerFactory = TextUtilsModule.CodeMirrorUtils.TokenizerFactory;
-//# sourceMappingURL=text_utils-legacy.js.map

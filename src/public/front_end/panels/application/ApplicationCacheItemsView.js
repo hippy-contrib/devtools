@@ -257,4 +257,3 @@ export class ApplicationCacheItemsView extends UI.View.SimpleView {
         // this._update();
     }
 }
-//# sourceMappingURL=ApplicationCacheItemsView.js.map

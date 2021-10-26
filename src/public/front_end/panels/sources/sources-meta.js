@@ -1636,4 +1636,3 @@ QuickOpen.FilteredListWidget.registerProvider({
         return Sources.OpenFileQuickOpen.OpenFileQuickOpen.instance();
     },
 });
-//# sourceMappingURL=sources-meta.js.map

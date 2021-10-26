@@ -16,4 +16,3 @@ export function getRegisteredAppProviders() {
         return order1 - order2;
     });
 }
-//# sourceMappingURL=AppProvider.js.map

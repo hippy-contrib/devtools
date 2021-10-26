@@ -25,4 +25,3 @@ Search.SearchResultsPane = SearchModule.SearchResultsPane.SearchResultsPane;
  * @constructor
  */
 Search.SearchView = SearchModule.SearchView.SearchView;
-//# sourceMappingURL=search-legacy.js.map

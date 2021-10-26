@@ -191,4 +191,3 @@ export function getRoundingPrecision(step) {
             return 0;
     }
 }
-//# sourceMappingURL=FontEditorUtils.js.map

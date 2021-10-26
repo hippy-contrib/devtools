@@ -112,4 +112,3 @@ UI.ContextMenu.registerItem({
     actionId: 'quickOpen.show',
     order: undefined,
 });
-//# sourceMappingURL=quick_open-meta.js.map

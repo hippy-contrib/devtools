@@ -470,4 +470,3 @@ UI.ContextMenu.registerItem({
     order: 13,
     actionId: 'emulation.capture-full-height-screenshot',
 });
-//# sourceMappingURL=emulation-meta.js.map

@@ -320,4 +320,3 @@ export class IssuesPane extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=IssuesPane.js.map

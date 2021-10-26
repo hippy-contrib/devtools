@@ -59,4 +59,3 @@ DataGrid.ViewportDataGrid.Events = DataGridModule.ViewportDataGrid.Events;
  * @constructor
  */
 DataGrid.ViewportDataGridNode = DataGridModule.ViewportDataGrid.ViewportDataGridNode;
-//# sourceMappingURL=data_grid-legacy.js.map

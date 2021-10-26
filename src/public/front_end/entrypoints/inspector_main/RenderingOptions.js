@@ -258,4 +258,3 @@ export class RenderingOptionsView extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=RenderingOptions.js.map

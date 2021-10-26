@@ -228,4 +228,3 @@ export class OverlayPersistentHighlighter {
         overlayModel.target().overlayAgent().invoke_setShowScrollSnapOverlays({ scrollSnapHighlightConfigs });
     }
 }
-//# sourceMappingURL=OverlayPersistentHighlighter.js.map

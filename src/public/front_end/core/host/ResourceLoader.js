@@ -213,4 +213,3 @@ export const loadAsStream = function (url, headers, stream, callback) {
         finishedCallback({ statusCode: 404, messageOverride });
     }
 };
-//# sourceMappingURL=ResourceLoader.js.map

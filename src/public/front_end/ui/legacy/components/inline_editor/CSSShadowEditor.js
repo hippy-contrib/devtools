@@ -398,4 +398,3 @@ export var Events;
 (function (Events) {
     Events["ShadowChanged"] = "ShadowChanged";
 })(Events || (Events = {}));
-//# sourceMappingURL=CSSShadowEditor.js.map

@@ -13,4 +13,3 @@ import * as PieChart from './PieChart.js';
 import * as TimelineGrid from './TimelineGrid.js';
 import * as TimelineOverviewPane from './TimelineOverviewPane.js';
 export { ChartViewport, FilmStripView, FlameChart, GCActionDelegate, LineLevelProfile, LiveHeapProfile, NetworkPriorities, OverviewGrid, PieChart, TimelineGrid, TimelineOverviewPane, };
-//# sourceMappingURL=perf_ui.js.map

@@ -382,4 +382,3 @@ export function alert(message) {
     alertElement.textContent = '';
     alertElement.textContent = Platform.StringUtilities.trimEndWithMaxLength(message, 10000);
 }
-//# sourceMappingURL=ARIAUtils.js.map

@@ -479,4 +479,3 @@ export class WatchExpression extends Common.ObjectWrapper.ObjectWrapper {
         ExpressionUpdated: Symbol('ExpressionUpdated'),
     };
 })(WatchExpression || (WatchExpression = {}));
-//# sourceMappingURL=WatchExpressionsSidebarPane.js.map

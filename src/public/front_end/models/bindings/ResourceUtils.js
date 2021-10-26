@@ -93,4 +93,3 @@ export function resourceMetadata(resource) {
     }
     return new Workspace.UISourceCode.UISourceCodeMetadata(resource.lastModified(), resource.contentSize());
 }
-//# sourceMappingURL=ResourceUtils.js.map

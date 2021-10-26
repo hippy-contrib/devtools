@@ -10,4 +10,3 @@ export function getRootNode(node) {
     Platform.DCHECK(() => potentialRoot instanceof Document || potentialRoot instanceof ShadowRoot, `Expected root of widget to be a document or shadowRoot, but was "${potentialRoot.nodeName}"`);
     return potentialRoot;
 }
-//# sourceMappingURL=get-root-node.js.map

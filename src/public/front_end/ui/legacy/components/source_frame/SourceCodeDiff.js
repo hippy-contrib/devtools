@@ -119,4 +119,3 @@ export var EditType;
     EditType["Delete"] = "Delete";
     EditType["Modify"] = "Modify";
 })(EditType || (EditType = {}));
-//# sourceMappingURL=SourceCodeDiff.js.map

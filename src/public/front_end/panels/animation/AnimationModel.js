@@ -519,4 +519,3 @@ export class ScreenshotCapture {
     }
 }
 SDK.SDKModel.SDKModel.register(AnimationModel, { capabilities: SDK.Target.Capability.DOM, autostart: false });
-//# sourceMappingURL=AnimationModel.js.map

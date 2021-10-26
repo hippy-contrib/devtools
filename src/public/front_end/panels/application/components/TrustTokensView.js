@@ -163,4 +163,3 @@ function removeTrailingSlash(s) {
 // eslint-disable-next-line rulesdir/check_component_naming
 ComponentHelpers.CustomElements.defineComponent('devtools-trust-tokens-delete-button', TrustTokensDeleteButton);
 ComponentHelpers.CustomElements.defineComponent('devtools-trust-tokens-storage-view', TrustTokensView);
-//# sourceMappingURL=TrustTokensView.js.map

@@ -364,4 +364,3 @@ export class HeapSnapshotProviderProxy extends HeapSnapshotProxyObject {
         await this._callMethodPromise('sortAndRewind', comparator);
     }
 }
-//# sourceMappingURL=HeapSnapshotProxy.js.map

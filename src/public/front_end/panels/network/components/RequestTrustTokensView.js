@@ -256,4 +256,3 @@ function renderRowWithCodeValue(key, value) {
   `;
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-trust-token-report', RequestTrustTokensReport);
-//# sourceMappingURL=RequestTrustTokensView.js.map

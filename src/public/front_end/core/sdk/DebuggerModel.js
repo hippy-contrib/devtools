@@ -1226,4 +1226,3 @@ export class DebuggerPausedDetails {
     }
 }
 SDKModel.register(DebuggerModel, { capabilities: Capability.JS, autostart: true });
-//# sourceMappingURL=DebuggerModel.js.map

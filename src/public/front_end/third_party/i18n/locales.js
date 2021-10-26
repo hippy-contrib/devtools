@@ -50,4 +50,3 @@ export const LOCALES = [
     'zh-TW',
 ];
 export const DEFAULT_LOCALE = 'en-US';
-//# sourceMappingURL=locales.js.map

@@ -402,4 +402,3 @@ export const Colors = new Map([
     ['Brown', Common.Color.Color.parse('#795548')],
     ['Cyan', Common.Color.Color.parse('#00BCD4')],
 ]);
-//# sourceMappingURL=AnimationUI.js.map

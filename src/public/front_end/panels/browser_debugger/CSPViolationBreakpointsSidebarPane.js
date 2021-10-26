@@ -29,4 +29,3 @@ export class CSPViolationBreakpointsSidebarPane extends CategorizedBreakpointsSi
         SDK.DOMDebuggerModel.DOMDebuggerManager.instance().updateCSPViolationBreakpoints();
     }
 }
-//# sourceMappingURL=CSPViolationBreakpointsSidebarPane.js.map

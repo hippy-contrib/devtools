@@ -120,4 +120,3 @@ export var FilterType;
     FilterType["Source"] = "source";
     FilterType["Url"] = "url";
 })(FilterType || (FilterType = {}));
-//# sourceMappingURL=ConsoleFilter.js.map

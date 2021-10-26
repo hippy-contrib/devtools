@@ -165,4 +165,3 @@ class LinearMemoryInspectorView extends UI.Widget.VBox {
         });
     }
 }
-//# sourceMappingURL=LinearMemoryInspectorPane.js.map

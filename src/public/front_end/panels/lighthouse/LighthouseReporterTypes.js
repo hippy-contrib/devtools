@@ -6,4 +6,3 @@ export class LighthouseReportGenerator {
         return '';
     }
 }
-//# sourceMappingURL=LighthouseReporterTypes.js.map

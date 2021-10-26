@@ -771,4 +771,3 @@ export var DecoratorType;
     DecoratorType["MEMORY"] = "memory";
     DecoratorType["COVERAGE"] = "coverage";
 })(DecoratorType || (DecoratorType = {}));
-//# sourceMappingURL=SourceFrame.js.map

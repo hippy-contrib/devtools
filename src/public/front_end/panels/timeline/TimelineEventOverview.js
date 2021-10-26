@@ -760,4 +760,3 @@ export class TimelineEventOverviewCoverage extends TimelineEventOverview {
         this._heapSizeLabel.textContent = `${percentUsed}% used`;
     }
 }
-//# sourceMappingURL=TimelineEventOverview.js.map

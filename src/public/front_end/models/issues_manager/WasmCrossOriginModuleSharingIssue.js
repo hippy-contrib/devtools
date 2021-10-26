@@ -49,4 +49,3 @@ export class WasmCrossOriginModuleSharingIssue extends Issue {
         return [new WasmCrossOriginModuleSharingIssue(details, issuesModel)];
     }
 }
-//# sourceMappingURL=WasmCrossOriginModuleSharingIssue.js.map

@@ -68,4 +68,3 @@ export class Text {
         return this._value.substr(sourceRange.offset, sourceRange.length);
     }
 }
-//# sourceMappingURL=Text.js.map

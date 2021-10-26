@@ -530,4 +530,3 @@ export class Item {
         this.updateDelegate(this);
     }
 }
-//# sourceMappingURL=CallStackSidebarPane.js.map

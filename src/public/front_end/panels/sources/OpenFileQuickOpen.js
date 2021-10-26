@@ -38,4 +38,3 @@ export class OpenFileQuickOpen extends FilteredUISourceCodeListProvider {
         return true;
     }
 }
-//# sourceMappingURL=OpenFileQuickOpen.js.map

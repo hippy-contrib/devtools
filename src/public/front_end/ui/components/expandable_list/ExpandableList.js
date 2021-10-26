@@ -48,4 +48,3 @@ export class ExpandableList extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-expandable-list', ExpandableList);
-//# sourceMappingURL=ExpandableList.js.map

@@ -12,4 +12,3 @@ function installMessageEventListener(listener) {
 // @ts-ignore
 installMessageEventListener(dispatcher.dispatchMessage.bind(dispatcher));
 self.postMessage('workerReady');
-//# sourceMappingURL=heap_snapshot_worker-entrypoint.js.map

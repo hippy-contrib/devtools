@@ -129,4 +129,3 @@ export class AccessibilityTreeView extends UI.Widget.VBox {
         await this.loadSubTreeIntoAccessibilityModel(inspectedNode);
     }
 }
-//# sourceMappingURL=AccessibilityTreeView.js.map

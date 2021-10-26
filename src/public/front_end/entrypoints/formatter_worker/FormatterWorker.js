@@ -373,4 +373,3 @@ export function _lastCompleteExpression(content, suffix, types) {
         console.error = () => undefined;
     }
 })();
-//# sourceMappingURL=FormatterWorker.js.map

@@ -170,4 +170,3 @@ export class LinearMemoryInspectorController extends SDK.TargetManager.SDKModelO
         this.bufferIdToRemoteObject.delete(event.data);
     }
 }
-//# sourceMappingURL=LinearMemoryInspectorController.js.map

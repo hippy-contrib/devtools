@@ -129,4 +129,3 @@ export class ScriptFormatterEditorAction {
     }
 }
 registerEditorAction(ScriptFormatterEditorAction.instance);
-//# sourceMappingURL=ScriptFormatterEditorAction.js.map

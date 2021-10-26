@@ -197,4 +197,3 @@ export class Filters extends Common.ObjectWrapper.ObjectWrapper {
         Events["FilterChanged"] = "FilterChanged";
     })(Events = Filters.Events || (Filters.Events = {}));
 })(Filters || (Filters = {}));
-//# sourceMappingURL=EventsTimelineTreeView.js.map

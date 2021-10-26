@@ -44,4 +44,3 @@ export var Events;
     Events["RecordingStateChanged"] = "RecordingStateChanged";
     Events["BackgroundServiceEventReceived"] = "BackgroundServiceEventReceived";
 })(Events || (Events = {}));
-//# sourceMappingURL=BackgroundServiceModel.js.map

@@ -84,4 +84,3 @@ export var Operation;
     Operation[Operation["Delete"] = -1] = "Delete";
     Operation[Operation["Edit"] = 2] = "Edit";
 })(Operation || (Operation = {}));
-//# sourceMappingURL=DiffWrapper.js.map

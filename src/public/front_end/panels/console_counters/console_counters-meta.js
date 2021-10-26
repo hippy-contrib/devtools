@@ -24,4 +24,3 @@ UI.Toolbar.registerToolbarItem({
     separator: undefined,
     actionId: undefined,
 });
-//# sourceMappingURL=console_counters-meta.js.map

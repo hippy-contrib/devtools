@@ -1861,4 +1861,3 @@ class WorkerTreeElement extends ApplicationPanelTreeElement {
         return this._targetInfo.url;
     }
 }
-//# sourceMappingURL=ApplicationPanelSidebar.js.map

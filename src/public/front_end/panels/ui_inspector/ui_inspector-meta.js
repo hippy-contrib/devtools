@@ -21,4 +21,3 @@ UI.CustomPanel.registerPanelView({
     customModulePath: 'panels/ui_inspector/ui_inspector.js',
     tabName: 'ui_inspector',
 });
-//# sourceMappingURL=ui_inspector-meta.js.map

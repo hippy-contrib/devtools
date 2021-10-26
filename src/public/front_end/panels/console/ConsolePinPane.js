@@ -336,4 +336,3 @@ export class ConsolePin extends Common.ObjectWrapper.ObjectWrapper {
         this._pinElement.classList.toggle('error-level', Boolean(isError));
     }
 }
-//# sourceMappingURL=ConsolePinPane.js.map

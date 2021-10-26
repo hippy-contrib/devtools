@@ -92,4 +92,3 @@ export class ProfileTreeModel {
         return this._target;
     }
 }
-//# sourceMappingURL=ProfileTreeModel.js.map

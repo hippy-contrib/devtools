@@ -56,4 +56,3 @@ export class RequestHTMLView extends UI.Widget.VBox {
         this.contentElement.appendChild(iframe);
     }
 }
-//# sourceMappingURL=RequestHTMLView.js.map

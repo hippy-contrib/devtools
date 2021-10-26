@@ -132,4 +132,3 @@ export class ProtocolService extends Common.ObjectWrapper.ObjectWrapper {
         return messageResult;
     }
 }
-//# sourceMappingURL=LighthouseProtocolService.js.map

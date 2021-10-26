@@ -269,4 +269,3 @@ export class WorkerDetailsView extends UI.ThrottledWidget.ThrottledWidget {
         await this._updateCoopCoepStatus();
     }
 }
-//# sourceMappingURL=OpenedWindowDetailsView.js.map

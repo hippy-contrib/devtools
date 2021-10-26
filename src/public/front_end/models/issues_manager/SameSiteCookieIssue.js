@@ -376,4 +376,3 @@ const issueDescriptions = new Map([
     ['SameSiteCookieIssue::ExcludeContextDowngrade::SetCookie::Insecure', sameSiteExcludeContextDowngradeSet(false)],
     ['SameSiteCookieIssue::ExcludeInvalidSameParty::SetCookie', sameSiteInvalidSameParty],
 ]);
-//# sourceMappingURL=SameSiteCookieIssue.js.map

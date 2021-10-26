@@ -98,4 +98,3 @@ export class CSSVarSwatch extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-css-var-swatch', CSSVarSwatch);
-//# sourceMappingURL=CSSVarSwatch.js.map

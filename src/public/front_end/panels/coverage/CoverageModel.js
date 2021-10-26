@@ -682,4 +682,3 @@ export class CoverageInfo {
         return ranges;
     }
 }
-//# sourceMappingURL=CoverageModel.js.map

@@ -678,4 +678,3 @@ export class ShowActionDelegate {
     }
 }
 export const ShiftDragOrientationSpeed = 16;
-//# sourceMappingURL=SensorsView.js.map

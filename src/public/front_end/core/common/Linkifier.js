@@ -32,4 +32,3 @@ export function getApplicableRegisteredlinkifiers(object) {
         return false;
     }
 }
-//# sourceMappingURL=Linkifier.js.map

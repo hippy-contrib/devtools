@@ -1834,4 +1834,3 @@ export function adornerComparator(adornerA, adornerB) {
     }
     return compareCategories;
 }
-//# sourceMappingURL=ElementsTreeElement.js.map

@@ -698,4 +698,3 @@ class FontPropertyInputs {
         this._sliderInput.value = newValue;
     }
 }
-//# sourceMappingURL=FontEditor.js.map

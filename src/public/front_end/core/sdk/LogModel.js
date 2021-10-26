@@ -40,4 +40,3 @@ export var Events;
     Events["EntryAdded"] = "EntryAdded";
 })(Events || (Events = {}));
 SDKModel.register(LogModel, { capabilities: Capability.Log, autostart: true });
-//# sourceMappingURL=LogModel.js.map

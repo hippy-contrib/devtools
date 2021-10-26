@@ -20,4 +20,3 @@ export function imageNameForResourceType(resourceType) {
             return 'ic_file_default';
     }
 }
-//# sourceMappingURL=utils.js.map

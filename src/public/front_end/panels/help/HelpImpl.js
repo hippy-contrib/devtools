@@ -90,4 +90,3 @@ export class ReportIssueActionDelegate {
         return reportIssueActionDelegateInstance;
     }
 }
-//# sourceMappingURL=HelpImpl.js.map

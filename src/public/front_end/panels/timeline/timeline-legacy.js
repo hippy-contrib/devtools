@@ -157,4 +157,3 @@ Timeline.UIDevtoolsController = TimelineModule.UIDevtoolsController.UIDevtoolsCo
 Timeline.UIDevtoolsUtils = TimelineModule.UIDevtoolsUtils.UIDevtoolsUtils;
 /** @enum {string} */
 Timeline.UIDevtoolsUtils.RecordType = TimelineModule.UIDevtoolsUtils.RecordType;
-//# sourceMappingURL=timeline-legacy.js.map

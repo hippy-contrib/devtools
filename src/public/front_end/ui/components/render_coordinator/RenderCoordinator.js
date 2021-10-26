@@ -210,4 +210,3 @@ export class RenderCoordinator extends EventTarget {
         }
     }
 }
-//# sourceMappingURL=RenderCoordinator.js.map

@@ -252,4 +252,3 @@ const initialDescriptors = new Map([
     ['mediumicon-arrow-right', { position: 'a1', spritesheet: 'arrowicons' }],
 ]);
 const descriptors = initialDescriptors;
-//# sourceMappingURL=Icon.js.map

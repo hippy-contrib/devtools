@@ -6,4 +6,3 @@ export { defaultOptions, getLineInfo, isNewLine, lineBreak, lineBreakG, Node, So
 export const Parser = acorn.Parser;
 export const tokenizer = acorn.Parser.tokenizer.bind(acorn.Parser);
 export const parse = acorn.Parser.parse.bind(acorn.Parser);
-//# sourceMappingURL=acorn.js.map

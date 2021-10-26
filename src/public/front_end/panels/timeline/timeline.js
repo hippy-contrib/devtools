@@ -23,4 +23,3 @@ import * as TimelineUIUtils from './TimelineUIUtils.js';
 import * as UIDevtoolsController from './UIDevtoolsController.js';
 import * as UIDevtoolsUtils from './UIDevtoolsUtils.js';
 export { CLSLinkifier, CountersGraph, EventsTimelineTreeView, ExtensionTracingSession, PerformanceModel, TimelineController, TimelineDetailsView, TimelineEventOverview, TimelineFilters, TimelineFlameChartDataProvider, TimelineFlameChartNetworkDataProvider, TimelineFlameChartView, TimelineHistoryManager, TimelineLayersView, TimelineLoader, TimelinePaintProfilerView, TimelinePanel, TimelineTreeView, TimelineUIUtils, UIDevtoolsController, UIDevtoolsUtils, };
-//# sourceMappingURL=timeline.js.map

@@ -69,4 +69,3 @@ export function runOnWindowLoad(callback) {
 export function assertNever(type, message) {
     throw new Error(message);
 }
-//# sourceMappingURL=utilities.js.map

@@ -70,4 +70,3 @@ export class IconButton extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('icon-button', IconButton);
-//# sourceMappingURL=IconButton.js.map

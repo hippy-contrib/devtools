@@ -177,4 +177,3 @@ self.UI.context = UIModule.Context.Context.instance();
  * @type {!UI.DockController}
  */
 UI.dockController;
-//# sourceMappingURL=legacy-legacy.js.map

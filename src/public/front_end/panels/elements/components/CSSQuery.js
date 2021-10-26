@@ -48,4 +48,3 @@ export class CSSQuery extends HTMLElement {
     }
 }
 ComponentHelpers.CustomElements.defineComponent('devtools-css-query', CSSQuery);
-//# sourceMappingURL=CSSQuery.js.map

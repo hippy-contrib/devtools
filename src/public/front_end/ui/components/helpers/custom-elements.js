@@ -12,4 +12,3 @@ export function defineComponent(tagName, componentClass) {
     // eslint-disable-next-line rulesdir/custom_element_component_definition
     customElements.define(tagName, componentClass);
 }
-//# sourceMappingURL=custom-elements.js.map

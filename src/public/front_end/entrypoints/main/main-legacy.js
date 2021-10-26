@@ -41,4 +41,3 @@ Main.SimpleApp = MainModule.SimpleApp.SimpleApp;
  * @constructor
  */
 Main.SimpleAppProvider = MainModule.SimpleApp.SimpleAppProvider;
-//# sourceMappingURL=main-legacy.js.map

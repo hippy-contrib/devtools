@@ -99,4 +99,3 @@ export var EnumeratedHistogram;
     EnumeratedHistogram["LinearMemoryInspectorRevealedFrom"] = "DevTools.LinearMemoryInspector.RevealedFrom";
     EnumeratedHistogram["LinearMemoryInspectorTarget"] = "DevTools.LinearMemoryInspector.Target";
 })(EnumeratedHistogram || (EnumeratedHistogram = {}));
-//# sourceMappingURL=InspectorFrontendHostAPI.js.map

@@ -19,4 +19,3 @@ export const TotalOutputPortHeight = TotalInputPortHeight;
 export const TotalParamPortHeight = AudioParamRadius * 2 + PortPadding;
 export const NodeLabelFontStyle = '14px Segoe UI, Arial';
 export const ParamLabelFontStyle = '12px Segoe UI, Arial';
-//# sourceMappingURL=GraphStyle.js.map

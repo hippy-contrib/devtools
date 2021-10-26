@@ -99,4 +99,3 @@ export class IssueMessage extends Workspace.UISourceCode.Message {
         }
     }
 }
-//# sourceMappingURL=SourceFrameIssuesManager.js.map

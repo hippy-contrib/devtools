@@ -420,4 +420,3 @@ export class Constraints {
         return new Constraints(this.minimum.addHeight(value.minimum), this.preferred.addHeight(value.preferred));
     }
 }
-//# sourceMappingURL=Geometry.js.map

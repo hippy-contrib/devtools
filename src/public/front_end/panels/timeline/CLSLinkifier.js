@@ -37,4 +37,3 @@ export class Linkifier {
         return link;
     }
 }
-//# sourceMappingURL=CLSLinkifier.js.map

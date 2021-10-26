@@ -467,4 +467,3 @@ export function _eventId(event) {
         `${functionName}:${frame['lineNumber']}:${frame['columnNumber']}`;
     return `f:${name}@${location}`;
 }
-//# sourceMappingURL=TimelineProfileTree.js.map

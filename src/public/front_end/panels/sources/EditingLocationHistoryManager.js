@@ -140,4 +140,3 @@ export class EditingLocationHistoryEntry {
         this._sourcesView.showSourceLocation(uiSourceCode, position.lineNumber, position.columnNumber);
     }
 }
-//# sourceMappingURL=EditingLocationHistoryManager.js.map

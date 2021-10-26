@@ -199,4 +199,3 @@ export const Events = {
     SourceMapAttached: Symbol('SourceMapAttached'),
     SourceMapDetached: Symbol('SourceMapDetached'),
 };
-//# sourceMappingURL=SourceMapManager.js.map

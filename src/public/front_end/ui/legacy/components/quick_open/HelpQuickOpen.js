@@ -54,4 +54,3 @@ registerProvider({
     title: undefined,
     provider: () => Promise.resolve(HelpQuickOpen.instance()),
 });
-//# sourceMappingURL=HelpQuickOpen.js.map

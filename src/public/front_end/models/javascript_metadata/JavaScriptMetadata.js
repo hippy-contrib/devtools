@@ -58,4 +58,3 @@ export class JavaScriptMetadataImpl {
         return staticMethod.get(name) || null;
     }
 }
-//# sourceMappingURL=JavaScriptMetadata.js.map

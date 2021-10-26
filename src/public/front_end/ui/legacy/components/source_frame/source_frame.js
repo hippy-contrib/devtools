@@ -12,4 +12,3 @@ import * as SourceFrame from './SourceFrame.js';
 import * as SourcesTextEditor from './SourcesTextEditor.js';
 import * as XMLView from './XMLView.js';
 export { BinaryResourceViewFactory, FontView, ImageView, JSONView, PreviewFactory, ResourceSourceFrame, SourceCodeDiff, SourceFrame, SourcesTextEditor, XMLView, };
-//# sourceMappingURL=source_frame.js.map

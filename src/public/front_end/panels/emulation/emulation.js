@@ -24,4 +24,3 @@ import * as LocationsSettingsTab from './LocationsSettingsTab.js';
 import * as MediaQueryInspector from './MediaQueryInspector.js';
 import * as SensorsView from './SensorsView.js';
 export { AdvancedApp, DeviceModeModel, DeviceModeToolbar, DeviceModeView, DeviceModeWrapper, DevicesSettingsTab, EmulatedDevices, InspectedPagePlaceholder, LocationsSettingsTab, MediaQueryInspector, SensorsView, };
-//# sourceMappingURL=emulation.js.map

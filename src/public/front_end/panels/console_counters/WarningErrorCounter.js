@@ -137,4 +137,3 @@ export class WarningErrorCounter {
     }
     static _instanceForTest = null;
 }
-//# sourceMappingURL=WarningErrorCounter.js.map

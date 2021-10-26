@@ -197,4 +197,3 @@ export class LighthouseReportUIFeatures extends LighthouseReport.ReportUIFeature
         this._resetUIState();
     }
 }
-//# sourceMappingURL=LighthouseReportRenderer.js.map

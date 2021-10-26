@@ -1085,4 +1085,3 @@ export class Tile {
         this.texture = image ? LayerTextureManager._createTextureForImage(glContext, image) : null;
     }
 }
-//# sourceMappingURL=Layers3DView.js.map

@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/cdp_debug"},"files":["../../../../../../chrome-devtools/front_end/panels/cdp_debug/cdp_debug-meta.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}

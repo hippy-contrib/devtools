@@ -496,4 +496,3 @@ export const base64ToSize = function (content) {
     }
     return size;
 };
-//# sourceMappingURL=string-utilities.js.map

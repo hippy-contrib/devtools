@@ -748,4 +748,3 @@ self.buildExtensionAPIInjectedScript = function (extensionInfo, inspectedTabId, 
         '})';
 };
 export {};
-//# sourceMappingURL=ExtensionAPI.js.map

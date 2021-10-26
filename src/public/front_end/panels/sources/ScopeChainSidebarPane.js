@@ -273,4 +273,3 @@ export class OpenLinearMemoryInspector extends UI.Widget.VBox {
         controller.openInspectorView(memoryObj, address);
     }
 }
-//# sourceMappingURL=ScopeChainSidebarPane.js.map

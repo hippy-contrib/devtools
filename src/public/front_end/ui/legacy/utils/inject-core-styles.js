@@ -35,4 +35,3 @@ export function getCurrentTheme() {
     }
     return 'light';
 }
-//# sourceMappingURL=inject-core-styles.js.map

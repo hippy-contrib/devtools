@@ -68,4 +68,3 @@ export class ScriptOriginPlugin extends Plugin {
     }
 }
 export const linkifier = new Components.Linkifier.Linkifier();
-//# sourceMappingURL=ScriptOriginPlugin.js.map

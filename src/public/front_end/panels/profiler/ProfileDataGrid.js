@@ -543,4 +543,3 @@ export class ProfileDataGridTree {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     static propertyComparators = [{}, {}];
 }
-//# sourceMappingURL=ProfileDataGrid.js.map

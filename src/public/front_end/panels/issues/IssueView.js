@@ -365,4 +365,3 @@ export class IssueView extends UI.TreeOutline.TreeElement {
         }
     }
 }
-//# sourceMappingURL=IssueView.js.map

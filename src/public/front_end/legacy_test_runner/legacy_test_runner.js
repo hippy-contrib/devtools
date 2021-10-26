@@ -23,4 +23,3 @@ if (self.testRunner) {
     // @ts-ignore
     testRunner.waitUntilDone();
 }
-//# sourceMappingURL=legacy_test_runner.js.map

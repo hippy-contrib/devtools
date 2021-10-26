@@ -101,4 +101,3 @@ iconInFlex.data = {
     height: '16px',
     color: '',
 };
-//# sourceMappingURL=basic.js.map

@@ -38,4 +38,3 @@ UI.ViewManager.registerViewExtension({
         return DeveloperResources.DeveloperResourcesView.DeveloperResourcesView.instance();
     },
 });
-//# sourceMappingURL=developer_resources-meta.js.map

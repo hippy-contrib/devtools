@@ -8,4 +8,3 @@ const { render, svg, Directives, nothing, noChange } = LitHtml;
 const { html, literal, flattenTemplate } = Static;
 export { render, Directives, nothing, noChange, svg, html, literal, flattenTemplate, // Exposed for unit testing.
  };
-//# sourceMappingURL=lit-html.js.map

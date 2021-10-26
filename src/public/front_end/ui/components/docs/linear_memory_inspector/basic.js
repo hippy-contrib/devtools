@@ -23,4 +23,3 @@ memoryInspector.data = {
     memoryOffset: 0,
     outerMemoryLength: memory.length,
 };
-//# sourceMappingURL=basic.js.map

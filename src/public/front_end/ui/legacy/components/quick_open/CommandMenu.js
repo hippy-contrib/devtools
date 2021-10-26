@@ -304,4 +304,3 @@ registerProvider({
     title: () => i18nString(UIStrings.runCommand),
     provider: () => Promise.resolve(CommandMenuProvider.instance()),
 });
-//# sourceMappingURL=CommandMenu.js.map

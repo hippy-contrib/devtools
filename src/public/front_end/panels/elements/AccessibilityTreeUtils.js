@@ -41,4 +41,3 @@ export function accessibilityNodeRenderer(node) {
     const ignored = sdkNode.ignored();
     return LitHtml.html `<${tag} .data=${{ name, role, ignored }}></${tag}>`;
 }
-//# sourceMappingURL=AccessibilityTreeUtils.js.map

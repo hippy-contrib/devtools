@@ -98,4 +98,3 @@ export const CSS_RESOURCES_TO_LOAD_INTO_RUNTIME = [
     'ui/legacy/components/text_editor/cmdevtools.css',
     'panels/application/serviceWorkerUpdateCycleView.css',
 ];
-//# sourceMappingURL=get-stylesheet.js.map

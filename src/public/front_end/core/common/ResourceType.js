@@ -451,4 +451,3 @@ export const mimeTypeByExtension = new Map([
     ['woff', 'font/woff'],
     ['woff2', 'font/woff2'],
 ]);
-//# sourceMappingURL=ResourceType.js.map

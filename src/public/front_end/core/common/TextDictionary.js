@@ -69,4 +69,3 @@ export class TextDictionary {
         this.index.clear();
     }
 }
-//# sourceMappingURL=TextDictionary.js.map

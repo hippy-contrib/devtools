@@ -58,4 +58,3 @@ export function getRegisteredDecorators() {
         },
     ];
 }
-//# sourceMappingURL=MarkerDecorator.js.map

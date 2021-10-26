@@ -11,4 +11,3 @@ import * as JavaScriptFormatter from './JavaScriptFormatter.js';
 import * as JavaScriptOutline from './JavaScriptOutline.js';
 import * as JSONFormatter from './JSONFormatter.js';
 export { CSSFormatter, CSSRuleParser, FormattedContentBuilder, FormatterWorker, HTMLFormatter, HTMLOutline, JavaScriptFormatter, JavaScriptOutline, JSONFormatter, };
-//# sourceMappingURL=formatter_worker.js.map

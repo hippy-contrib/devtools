@@ -191,4 +191,3 @@ class Binding {
         }
     }
 }
-//# sourceMappingURL=SASSSourceMapping.js.map

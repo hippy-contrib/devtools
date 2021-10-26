@@ -503,4 +503,3 @@ export function registerProvider(registration) {
 export function getRegisteredProviders() {
     return registeredProviders;
 }
-//# sourceMappingURL=FilteredListWidget.js.map

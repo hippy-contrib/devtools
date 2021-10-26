@@ -396,4 +396,3 @@ export class CSSOverviewModel extends SDK.SDKModel.SDKModel {
     }
 }
 SDK.SDKModel.SDKModel.register(CSSOverviewModel, { capabilities: SDK.Target.Capability.DOM, autostart: false });
-//# sourceMappingURL=CSSOverviewModel.js.map

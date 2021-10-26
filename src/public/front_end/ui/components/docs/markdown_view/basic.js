@@ -39,4 +39,3 @@ Proin posuere varius risus, nec tristique urna elementum ut.
 component.data = {
     tokens: markdownAst,
 };
-//# sourceMappingURL=basic.js.map

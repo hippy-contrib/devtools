@@ -1267,4 +1267,3 @@ export const generatedAliasesFor = new Map([
     ['-webkit-user-select', 'user-select'],
     ['word-wrap', 'overflow-wrap']
 ]);
-//# sourceMappingURL=SupportedCSSProperties.js.map

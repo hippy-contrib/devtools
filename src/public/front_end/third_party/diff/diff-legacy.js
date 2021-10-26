@@ -8,4 +8,3 @@ Diff = Diff || {};
 Diff.Diff = DiffModule.Diff.DiffWrapper;
 /** @enum {number} */
 Diff.Diff.Operation = DiffModule.Diff.Operation;
-//# sourceMappingURL=diff-legacy.js.map

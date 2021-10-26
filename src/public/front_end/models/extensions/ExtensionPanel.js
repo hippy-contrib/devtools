@@ -190,4 +190,3 @@ export class ExtensionSidebarPane extends UI.View.SimpleView {
         });
     }
 }
-//# sourceMappingURL=ExtensionPanel.js.map

@@ -7,4 +7,3 @@ import * as FrameworkIgnoreListSettingsTab from './FrameworkIgnoreListSettingsTa
 import * as KeybindsSettingsTab from './KeybindsSettingsTab.js';
 import * as SettingsScreen from './SettingsScreen.js';
 export { FrameworkIgnoreListSettingsTab, KeybindsSettingsTab, SettingsScreen, };
-//# sourceMappingURL=settings.js.map

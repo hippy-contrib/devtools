@@ -220,4 +220,3 @@ export var Events;
     Events["ProjectAdded"] = "ProjectAdded";
     Events["ProjectRemoved"] = "ProjectRemoved";
 })(Events || (Events = {}));
-//# sourceMappingURL=WorkspaceImpl.js.map

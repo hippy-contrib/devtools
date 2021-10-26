@@ -230,4 +230,3 @@ export class Category extends UI.TreeOutline.TreeElement {
         return leaf;
     }
 }
-//# sourceMappingURL=SignedExchangeInfoView.js.map

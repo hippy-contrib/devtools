@@ -23,4 +23,3 @@ TextEditor.SyntaxHighlighter = TextEditorModule.SyntaxHighlighter.SyntaxHighligh
 /** @constructor */
 TextEditor.TextEditorAutocompleteController =
     TextEditorModule.TextEditorAutocompleteController.TextEditorAutocompleteController;
-//# sourceMappingURL=text_editor-legacy.js.map

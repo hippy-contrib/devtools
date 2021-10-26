@@ -37,4 +37,3 @@ export class CSSOverviewProcessingView extends UI.Widget.Widget {
         this.contentElement.style.overflow = 'auto';
     }
 }
-//# sourceMappingURL=CSSOverviewProcessingView.js.map

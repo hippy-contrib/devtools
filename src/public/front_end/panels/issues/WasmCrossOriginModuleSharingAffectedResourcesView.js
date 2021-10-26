@@ -76,4 +76,3 @@ export class WasmCrossOriginModuleSharingAffectedResourcesView extends AffectedR
         this.appendIssues(this.issue.getWasmCrossOriginModuleSharingIssue());
     }
 }
-//# sourceMappingURL=WasmCrossOriginModuleSharingAffectedResourcesView.js.map

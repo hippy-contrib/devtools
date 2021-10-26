@@ -1531,4 +1531,3 @@ export class ExpandableTextPropertyValue extends ObjectPropertyValue {
         Host.InspectorFrontendHost.InspectorFrontendHostInstance.copyText(this._text);
     }
 }
-//# sourceMappingURL=ObjectPropertiesSection.js.map

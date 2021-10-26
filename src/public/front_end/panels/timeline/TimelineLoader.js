@@ -246,4 +246,3 @@ export var State;
     State["SkippingTail"] = "SkippingTail";
     State["LoadingCPUProfileFormat"] = "LoadingCPUProfileFormat";
 })(State || (State = {}));
-//# sourceMappingURL=TimelineLoader.js.map

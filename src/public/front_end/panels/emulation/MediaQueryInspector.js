@@ -418,4 +418,3 @@ export class MediaQueryUIModel {
         return this._active;
     }
 }
-//# sourceMappingURL=MediaQueryInspector.js.map

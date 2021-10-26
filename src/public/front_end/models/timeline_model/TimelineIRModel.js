@@ -275,4 +275,3 @@ export var InputEvents;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     TimelineIRModel._eventIRPhase = Symbol('eventIRPhase');
 })(TimelineIRModel || (TimelineIRModel = {}));
-//# sourceMappingURL=TimelineIRModel.js.map

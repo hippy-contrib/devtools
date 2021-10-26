@@ -12,4 +12,3 @@ chart.data = {
     total: 100,
     slices: [{ value: 75, color: 'crimson', title: 'Filling' }, { value: 25, color: 'burlywood', title: 'Crust' }],
 };
-//# sourceMappingURL=basic-without-legend.js.map

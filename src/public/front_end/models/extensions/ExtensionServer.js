@@ -950,4 +950,3 @@ export class ExtensionStatus {
         this.E_FAILED = makeStatus.bind(null, 'E_FAILED', 'Operation failed: %s');
     }
 }
-//# sourceMappingURL=ExtensionServer.js.map

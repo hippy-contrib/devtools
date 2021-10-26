@@ -519,4 +519,3 @@ export class Calculator {
         return this._maximumBoundary - this._minimumBoundary;
     }
 }
-//# sourceMappingURL=CountersGraph.js.map

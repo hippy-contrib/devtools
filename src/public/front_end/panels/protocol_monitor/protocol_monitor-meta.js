@@ -41,4 +41,3 @@ UI.ViewManager.registerViewExtension({
     },
     experiment: Root.Runtime.ExperimentName.PROTOCOL_MONITOR,
 });
-//# sourceMappingURL=protocol_monitor-meta.js.map

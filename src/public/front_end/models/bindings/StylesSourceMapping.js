@@ -283,4 +283,3 @@ export class StyleFile {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     static updateTimeout = 200;
 }
-//# sourceMappingURL=StylesSourceMapping.js.map

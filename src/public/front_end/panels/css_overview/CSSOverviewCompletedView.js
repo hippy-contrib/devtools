@@ -971,4 +971,3 @@ export class ElementNode extends DataGrid.SortableDataGrid.SortableDataGridNode 
         return linkifier.linkifyCSSLocation(matchingSelectorLocation);
     }
 }
-//# sourceMappingURL=CSSOverviewCompletedView.js.map

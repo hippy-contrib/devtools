@@ -34,4 +34,3 @@ export class ExtensionTraceProvider {
 // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let _lastSessionId = 0;
-//# sourceMappingURL=ExtensionTraceProvider.js.map

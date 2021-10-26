@@ -173,4 +173,3 @@ export var SettingType;
     SettingType["ENUM"] = "enum";
     SettingType["BOOLEAN"] = "boolean";
 })(SettingType || (SettingType = {}));
-//# sourceMappingURL=SettingRegistration.js.map

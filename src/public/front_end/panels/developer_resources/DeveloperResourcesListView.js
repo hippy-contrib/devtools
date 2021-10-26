@@ -294,4 +294,3 @@ class GridNode extends DataGrid.SortableDataGrid.SortableDataGridNode {
         }
     }
 }
-//# sourceMappingURL=DeveloperResourcesListView.js.map

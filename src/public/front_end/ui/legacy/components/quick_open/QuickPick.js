@@ -99,4 +99,3 @@ class QuickPickProvider extends Provider {
         this._resolve(undefined);
     }
 }
-//# sourceMappingURL=QuickPick.js.map

@@ -208,4 +208,3 @@ export class FrameworkIgnoreListSettingsTab extends UI.Widget.VBox {
         }
     }
 }
-//# sourceMappingURL=FrameworkIgnoreListSettingsTab.js.map

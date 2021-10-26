@@ -721,4 +721,3 @@ const defaultMobileUserAgentMetadata = {
     mobile: true,
 };
 export const defaultMobileScaleFactor = 2;
-//# sourceMappingURL=DeviceModeModel.js.map

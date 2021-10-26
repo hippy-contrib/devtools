@@ -467,4 +467,3 @@ export class RequestView extends UI.Widget.VBox {
         this._resourceViewTabSetting.set(event.data.tabId);
     }
 }
-//# sourceMappingURL=ServiceWorkerCacheViews.js.map
