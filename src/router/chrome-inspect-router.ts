@@ -13,7 +13,7 @@ import { makeUrl } from '../utils/url';
 const log = new Logger('chrome-inspect-router');
 
 type RouterArgv = Pick<Application.StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'wsPath'>;
-const TDFTabs = ['core-memory', 'ui_inspector'];
+const TDFTabs = ['core-memory', 'ui_inspector', 'cdp_debug'];
 let cachedRouterArgv: RouterArgv;
 
 export const getChromeInspectRouter = (routerArgv: RouterArgv) => {
