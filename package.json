@@ -50,6 +50,7 @@
     "tdf-devtools-protocol": "0.0.22",
     "tslib": "^2.3.0",
     "uuid": "^8.3.2",
+    "vue-property-decorator": "^9.1.2",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5",
     "ws": "^7.5.3",
