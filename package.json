@@ -1,6 +1,6 @@
 {
   "name": "debug-server-next",
-  "version": "3.0.43",
+  "version": "3.0.44",
   "description": "Dev server for hippy-core.",
   "repository": "https://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server",
   "homepage": "http://hippyjs.org",
