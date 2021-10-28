@@ -16,5 +16,6 @@ declare namespace Application {
     publicPath?: string;
     cachePath?: string;
     logPath?: string;
+    open: boolean;
   }
 }

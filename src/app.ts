@@ -1,7 +1,9 @@
 import fs from 'fs';
 import kill from 'kill-port';
 import Koa from 'koa';
+import cors from '@koa/cors';
 import serve from 'koa-static';
+import compress from 'koa-compress';
 import conditional from 'koa-conditional-get';
 import etag from 'koa-etag';
 import path from 'path';
@@ -13,6 +15,7 @@ import { config, setConfig } from './config';
 import { DebugTargetManager, getChromeInspectRouter } from './router/chrome-inspect-router';
 import { SocketServer } from './socket-server';
 import { Logger } from './utils/log';
+import open from 'open';
 
 const log = new Logger('application');
 
@@ -38,6 +41,7 @@ export class Application {
       publicPath,
       cachePath,
       logPath,
+      open: openChrome = false,
     } = argv;
     if (cachePath) setConfig('cachePath', cachePath);
     if (logPath) setConfig('logPath', logPath);
@@ -56,6 +60,15 @@ export class Application {
     }
     return new Promise((resolve, reject) => {
       const app = new Koa();
+      app.use(cors());
+      app.use(conditional());
+      app.use(etag());
+      app.use(
+        compress({
+          gzip: {},
+          br: false,
+        }),
+      );
 
       Application.server = app.listen(port, host, () => {
         log.info('start debug server.');
@@ -66,6 +79,7 @@ export class Application {
         Application.socketServer = new SocketServer(Application.server, argv);
         Application.socketServer.start();
         Application.isServerReady = true;
+        if (openChrome) open(`http://localhost:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
         resolve(null);
       });
 
@@ -74,8 +88,6 @@ export class Application {
         reject();
       });
 
-      app.use(conditional());
-      app.use(etag());
       app.use(async (ctx, next) => {
         try {
           await next();

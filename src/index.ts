@@ -29,6 +29,11 @@ const { argv } = yargs
     default: 38989,
     describe: 'The port the debug server will listen to',
   })
+  .option('open', {
+    type: 'boolean',
+    default: true,
+    descript: 'auto open chrome debug page',
+  })
   .option('verbose', {
     type: 'boolean',
     default: false,
