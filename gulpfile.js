@@ -28,7 +28,6 @@ gulp.task('clean', () => Promise.all([rimrafAsync('dist'), rimrafAsync('src/cach
 function rimrafAsync(fpath) {
   return new Promise((resolve, reject) => {
     rimraf(fpath, (error) => {
-      console.log(error);
       if (error) {
         if (error.code === 'ENOENT') {
           return resolve();

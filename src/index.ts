@@ -21,7 +21,7 @@ const { argv } = yargs
   })
   .option('host', {
     type: 'string',
-    default: 'localhost',
+    default: '0.0.0.0',
     describe: 'The host the debug server will listen to',
   })
   .option('port', {

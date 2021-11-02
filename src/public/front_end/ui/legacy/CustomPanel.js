@@ -27,6 +27,7 @@ export const createPanel = (panelName, iframeUrl) => {
         static panelInstance;
         constructor() {
             super(panelName);
+            this.setHideOnDetach();
             this.iframe = document.createElement('iframe');
             this.iframe.setAttribute('src', iframeUrl);
             this.iframe.style.width = '100%';
