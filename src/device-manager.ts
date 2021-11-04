@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { DeviceManagerEvent, DevicePlatform, DeviceStatus } from './@types/enum';
+import { DeviceManagerEvent, DeviceStatus } from './@types/enum';
 import { DeviceInfo } from './@types/tunnel';
-import { androidDebugTargetManager } from './android-debug-target-manager';
+import { getDebugTargetManager } from './target-manager';
 import { getDeviceList, selectDevice } from './child-process/addon';
 import { Logger } from './utils/log';
 
@@ -30,16 +30,21 @@ class DeviceManager extends EventEmitter {
   appDidDisConnect() {
     this.isAppConnected = false;
     // state.selectedIndex = -1;
-    androidDebugTargetManager.clearCustomTarget();
+    const device = this.deviceList[0];
+    if (!device) return;
+    getDebugTargetManager(device.platform).clearCustomTarget();
     this.emit(DeviceManagerEvent.appDidDisConnect, this.getCurrent());
   }
 
   appDidConnect() {
     this.isAppConnected = true;
-    androidDebugTargetManager.clearCustomTarget();
+    const device = this.deviceList[0];
+    if (!device) return;
+    const debugTargetManager = getDebugTargetManager(device.platform);
+    debugTargetManager.clearCustomTarget();
     for (const device of this.deviceList) {
-      if (device.physicalstatus !== DeviceStatus.Disconnected && device.platform === DevicePlatform.Android) {
-        androidDebugTargetManager.addCustomTarget(device.deviceid);
+      if (device.physicalstatus !== DeviceStatus.Disconnected) {
+        debugTargetManager.addCustomTarget(device.deviceid);
       }
     }
     this.emit(DeviceManagerEvent.appDidConnect, this.getCurrent());

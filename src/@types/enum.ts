@@ -2,6 +2,7 @@ export const enum DevtoolsEnv {
   Hippy = 'hippy',
   Voltron = 'voltron',
   TDF = 'TDF',
+  TDFCore = 'TDF_core',
 }
 
 export const enum DevicePlatform {
@@ -16,7 +17,6 @@ export const enum DeviceStatus {
 }
 
 export const TunnelEvent = {
-  GetWebsocketPort: 'tunnel_get_websocket_port',
   AddDevice: 'tunnel_add_device',
   RemoveDevice: 'tunnel_remove_device',
   AppConnect: 'tunnel_app_connect',

@@ -2,7 +2,7 @@ import { AppClientType } from 'src/@types/enum';
 import WebSocket, { Server } from 'ws/index.js';
 import { ClientEvent, ClientRole, DevicePlatform } from './@types/enum';
 import { DebugTarget } from './@types/tunnel';
-import { androidDebugTargetManager } from './android-debug-target-manager';
+import { getDebugTargetManager } from './target-manager';
 import { appClientManager } from './client';
 import { AppClient, AppClientOption } from './client/app-client';
 import { AppClientFullOptionOmicCtx } from './client/app-client-manager';
@@ -159,6 +159,9 @@ export class SocketServer extends DomainRegister {
         const i = conn.devtoolsWsList.findIndex((v) => v === ws);
         if (i !== -1) conn.devtoolsWsList.splice(i, 1);
       });
+      ws.on('error', (e) => {
+        log.info('ws error %j', e);
+      });
     }
 
     return conn.appClientList;
@@ -203,15 +206,16 @@ export class SocketServer extends DomainRegister {
       this.selectDebugTarget(debugTarget, ws);
     } else {
       log.info('ws app client connected. %s', clientId);
-      if (platform === DevicePlatform.Android) {
-        androidDebugTargetManager.addWsTarget(clientId);
-      }
+      getDebugTargetManager(platform).addWsTarget(clientId);
       if (!this.connectionMap.has(clientId)) {
         this.connectionMap.set(clientId, {
           appClientList: [],
           devtoolsWsList: [],
           appWs: ws,
         });
+      } else {
+        const conn = this.connectionMap.get(clientId);
+        conn.appWs = ws;
       }
       ws.on('close', () => {
         log.info('ws app client disconnect. %s', clientId);
@@ -220,7 +224,10 @@ export class SocketServer extends DomainRegister {
             this.connectionMap.delete(clientId);
           }
         }
-        androidDebugTargetManager.removeWsTarget(ws.clientId);
+        getDebugTargetManager(platform).removeWsTarget(ws.clientId);
+      });
+      ws.on('error', (e) => {
+        log.info('app ws error %j', e);
       });
     }
   }

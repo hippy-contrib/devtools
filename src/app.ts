@@ -1,31 +1,32 @@
 import fs from 'fs';
 import kill from 'kill-port';
 import Koa from 'koa';
-import cors from '@koa/cors';
+// import cors from '@koa/cors';
 import serve from 'koa-static';
-import compress from 'koa-compress';
-import conditional from 'koa-conditional-get';
-import etag from 'koa-etag';
+// import compress from 'koa-compress';
+// import conditional from 'koa-conditional-get';
+// import etag from 'koa-etag';
 import path from 'path';
 import { DevtoolsEnv } from './@types/enum';
 import { DebugTarget } from './@types/tunnel.d';
 import { onExit, startAdbProxy, startIosProxy, startTunnel } from './child-process';
-import { initHippyEnv, initTdfEnv, initVoltronEnv } from './client';
+import { initHippyEnv, initTdfEnv, initVoltronEnv, initTdfCoreEnv } from './client';
 import { config, setConfig } from './config';
 import { DebugTargetManager, getChromeInspectRouter } from './router/chrome-inspect-router';
 import { SocketServer } from './socket-server';
 import { Logger } from './utils/log';
+import { StartServerArgv } from './@types/app';
 import open from 'open';
 
 const log = new Logger('application');
 
 export class Application {
   public static isServerReady = false;
-  private static argv: Application.StartServerArgv;
+  private static argv: StartServerArgv;
   private static server;
   private static socketServer: SocketServer;
 
-  public static async startServer(argv: Application.StartServerArgv) {
+  public static async startServer(argv: StartServerArgv) {
     log.info('start server argv: %j', argv);
     const {
       host,
@@ -60,15 +61,15 @@ export class Application {
     }
     return new Promise((resolve, reject) => {
       const app = new Koa();
-      app.use(cors());
-      app.use(conditional());
-      app.use(etag());
-      app.use(
-        compress({
-          gzip: {},
-          br: false,
-        }),
-      );
+      // app.use(
+      //   compress({
+      //     gzip: {},
+      //     br: false,
+      //   }),
+      // );
+      // app.use(cors());
+      // app.use(conditional());
+      // app.use(etag());
 
       Application.server = app.listen(port, host, () => {
         log.info('start debug server.');
@@ -173,6 +174,7 @@ export class Application {
     if (env === DevtoolsEnv.Hippy) initHippyEnv();
     else if (env === DevtoolsEnv.Voltron) initVoltronEnv();
     else if (env === DevtoolsEnv.TDF) initTdfEnv();
+    else if (env === DevtoolsEnv.TDFCore) initTdfCoreEnv();
   }
 }
 

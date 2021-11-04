@@ -36,8 +36,6 @@ export const startTunnel = (
       childProcessLog.info(`receive tunnel event: ${event}`);
       if (event === TunnelEvent.ReceiveData) {
         tunnel.onMessage(data);
-      } else if (event === TunnelEvent.GetWebsocketPort) {
-        tunnel.createTunnelClient();
       } else {
         if ([TunnelEvent.RemoveDevice, TunnelEvent.AddDevice].indexOf(event) !== -1) {
           deviceManager.getDeviceList();

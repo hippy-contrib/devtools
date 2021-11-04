@@ -1,5 +1,5 @@
 import { DevicePlatform } from '../@types/enum';
-import { androidDebugTargetManager } from '../android-debug-target-manager';
+import { androidDebugTargetManager, iosDebugTargetManager } from '../target-manager';
 import { androidMiddleWareManager, iosMiddleWareManager } from '../middlewares';
 import { AppClient, AppClientOption } from './app-client';
 import { IwdpAppClient } from './iwdp-app-client';
@@ -122,6 +122,32 @@ export const initTdfEnv = () => {
   appClientManager.addIosAppClientOption({
     useAllDomain: false,
     acceptDomains: customDomains,
+    middleWareManager: iosMiddleWareManager,
+    Ctor: TunnelAppClient,
+    platform: DevicePlatform.IOS,
+  });
+};
+
+/**
+ * tdf_core
+ *
+ * - 安卓
+ *    - tunnel通道
+ * - ios
+ *    - tunnel 通道
+ */
+export const initTdfCoreEnv = () => {
+  androidDebugTargetManager.useCustom = true;
+  iosDebugTargetManager.useCustom = true;
+  appClientManager.reset();
+  appClientManager.addAndroidAppClientOption({
+    useAllDomain: true,
+    middleWareManager: androidMiddleWareManager,
+    Ctor: TunnelAppClient,
+    platform: DevicePlatform.Android,
+  });
+  appClientManager.addIosAppClientOption({
+    useAllDomain: true,
     middleWareManager: iosMiddleWareManager,
     Ctor: TunnelAppClient,
     platform: DevicePlatform.IOS,

@@ -11,17 +11,7 @@ const log = new Logger('tunnel');
 
 export class Tunnel extends DomainRegister {
   public static tunnelMessageEmitter = new EventEmitter();
-  private static isTunnelReady = true;
-  private static msgQueue: Adapter.CDP.Req[] = [];
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
-
-  public createTunnelClient() {
-    Tunnel.isTunnelReady = true;
-    if (Tunnel.msgQueue.length) {
-      Tunnel.msgQueue.forEach(this.sendMessage);
-      Tunnel.msgQueue = [];
-    }
-  }
 
   public onMessage(msg: string) {
     try {
@@ -39,11 +29,6 @@ export class Tunnel extends DomainRegister {
 
   public sendMessage(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     return new Promise((resolve, reject) => {
-      if (!Tunnel.isTunnelReady) {
-        Tunnel.msgQueue.push(msg);
-        log.info('tunnel is not ready, push msg to queue.');
-        return;
-      }
       log.info('sendMessage: %j', msg);
       sendMsg(JSON.stringify(msg));
 

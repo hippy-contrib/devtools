@@ -3,7 +3,10 @@
 import yargs from 'yargs';
 import { DevtoolsEnv } from './@types/enum';
 import { Application } from './app';
+import { Logger } from './utils/log';
+import { version } from '../package.json';
 
+const log = new Logger('entry');
 const { argv } = yargs
   .alias('v', 'version')
   .describe('v', 'show version information')
@@ -57,7 +60,7 @@ const { argv } = yargs
   .option('env', {
     type: 'string',
     default: DevtoolsEnv.Hippy,
-    choices: [DevtoolsEnv.Hippy, DevtoolsEnv.Voltron, DevtoolsEnv.TDF],
+    choices: [DevtoolsEnv.Hippy, DevtoolsEnv.Voltron, DevtoolsEnv.TDF, DevtoolsEnv.TDFCore],
   })
   .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`) as any;
 
@@ -68,6 +71,8 @@ if (argv.help) {
 if (argv.version) {
   yargs.version().exit(0, null);
 }
+
+log.info('version: %s', version);
 
 Application.startServer({
   ...argv,

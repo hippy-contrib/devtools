@@ -2,9 +2,10 @@ import Router from 'koa-router';
 import request from 'request-promise';
 import { AppClientType, DevicePlatform, DevtoolsEnv } from 'src/@types/enum';
 import { v4 as uuidv4 } from 'uuid';
+import { StartServerArgv } from '../@types/app';
 import { ChromePageType, ClientRole } from '../@types/enum';
 import { DebugTarget } from '../@types/tunnel';
-import { androidDebugTargetManager } from '../android-debug-target-manager';
+import { getDebugTargetManager } from '../target-manager';
 import { appClientManager } from '../client';
 import { config } from '../config';
 import { Logger } from '../utils/log';
@@ -12,7 +13,7 @@ import { makeUrl } from '../utils/url';
 
 const log = new Logger('chrome-inspect-router');
 
-type RouterArgv = Pick<Application.StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'wsPath'>;
+type RouterArgv = Pick<StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'wsPath' | 'env'>;
 const TDFTabs = ['core-memory', 'ui_inspector', 'cdp_debug'];
 let cachedRouterArgv: RouterArgv;
 
@@ -45,7 +46,13 @@ export class DebugTargetManager {
     const { iwdpPort, host, port, wsPath } = cachedRouterArgv;
     const clientId = uuidv4();
     const rst: DebugTarget[] = [];
-    const iosTargets = await getIosTargets({ iwdpPort, host, port, wsPath, clientId });
+    let iosTargets;
+    if ([DevtoolsEnv.TDFCore].indexOf(cachedRouterArgv.env) !== -1) {
+      iosTargets = getIosTargetsByManager({ host, port, wsPath, clientId });
+    } else {
+      iosTargets = await getIosTargetsByIWDP({ iwdpPort, host, port, wsPath, clientId });
+    }
+
     const androidTargets = getAndroidTargets({ host, port, wsPath, clientId });
     rst.push(...iosTargets);
     rst.push(...androidTargets);
@@ -62,7 +69,7 @@ export class DebugTargetManager {
 /**
  * ios: 通过 IWDP 获取调试页面列表
  */
-const getIosTargets = async ({ iwdpPort, host, port, wsPath, clientId }): Promise<DebugTarget[]> => {
+const getIosTargetsByIWDP = async ({ iwdpPort, host, port, wsPath, clientId }): Promise<DebugTarget[]> => {
   try {
     const deviceList = await request({
       url: '/json',
@@ -70,23 +77,24 @@ const getIosTargets = async ({ iwdpPort, host, port, wsPath, clientId }): Promis
       json: true,
     });
     const appClientTypeList = appClientManager.getIosAppClientOptions().map(({ Ctor }) => Ctor.name) as AppClientType[];
-    const debugTargets: DebugTarget[] = await Promise.all(
-      deviceList.map(async (device) => {
-        const port = device.url.match(/:(\d+)/)[1];
-        try {
-          const targets = await request({
-            url: '/json',
-            baseUrl: `http://127.0.0.1:${port}`,
-            json: true,
-          });
-          targets.map((target) => (target.device = device));
-          return targets;
-        } catch (e) {
-          log.error(e);
-          return [];
-        }
-      }),
-    );
+    const debugTargets: DebugTarget[] =
+      (await Promise.all(
+        deviceList.map(async (device) => {
+          const port = device.url.match(/:(\d+)/)[1];
+          try {
+            const targets = await request({
+              url: '/json',
+              baseUrl: `http://127.0.0.1:${port}`,
+              json: true,
+            });
+            targets.map((target) => (target.device = device));
+            return targets;
+          } catch (e) {
+            log.error(e);
+            return [];
+          }
+        }),
+      )) || [];
     return debugTargets.flat().map((debugTarget) => {
       const targetId = debugTarget.webSocketDebuggerUrl;
       const wsUrl = makeUrl(`${host}:${port}${wsPath}`, {
@@ -99,7 +107,7 @@ const getIosTargets = async ({ iwdpPort, host, port, wsPath, clientId }): Promis
         remoteFrontend: true,
         experiments: true,
         ws: wsUrl,
-        customTabs: JSON.stringify(config.env === DevtoolsEnv.TDF ? TDFTabs : []),
+        customTabs: JSON.stringify(getCustomTabs(config.env as DevtoolsEnv)),
       });
       const matchRst = debugTarget.title.match(/^HippyContext:\s(.*)$/);
       const bundleName = matchRst ? matchRst[1] : '';
@@ -127,40 +135,60 @@ const getIosTargets = async ({ iwdpPort, host, port, wsPath, clientId }): Promis
   }
 };
 
+const getIosTargetsByManager = (params: GetTargetsParams): DebugTarget[] => getTargets(params, DevicePlatform.IOS);
+
 /**
  * android: 通过 androidDebugTargetManager 获取调试页面列表
  */
-const getAndroidTargets = ({ host, port, wsPath, clientId }): DebugTarget[] => {
-  const appClientTypeList = appClientManager
-    .getAndroidAppClientOptions()
-    .map(({ Ctor }) => Ctor.name) as AppClientType[];
-  return androidDebugTargetManager.getTargetIdList().map((targetId) => {
-    const wsUrl = makeUrl(`${host}:${port}${wsPath}`, {
-      platform: DevicePlatform.Android,
-      clientId,
-      targetId,
-      role: ClientRole.Devtools,
-    });
-    const devtoolsFrontendUrl = makeUrl(`http://localhost:${port}/front_end/inspector.html`, {
-      remoteFrontend: true,
-      experiments: true,
-      ws: wsUrl,
-      customTabs: JSON.stringify(config.env === DevtoolsEnv.TDF ? TDFTabs : []),
-    });
-    return {
-      id: targetId || clientId,
-      clientId,
-      thumbnailUrl: '',
-      description: 'Hippy instance',
-      appClientTypeList,
-      devtoolsFrontendUrl,
-      devtoolsFrontendUrlCompat: devtoolsFrontendUrl,
-      faviconUrl: 'http://res.imtt.qq.com/hippydoc/img/hippy-logo.ico',
-      title: 'Hippy debug tools for V8',
-      type: ChromePageType.Page,
-      platform: DevicePlatform.Android,
-      url: '',
-      webSocketDebuggerUrl: `ws://${wsUrl}`,
-    };
-  });
+
+const getAndroidTargets = (params: GetTargetsParams): DebugTarget[] => getTargets(params, DevicePlatform.Android);
+
+type GetTargetsParams = {
+  host: string;
+  port: number;
+  wsPath: string;
+  clientId: string;
 };
+
+const getTargets = ({ host, port, wsPath, clientId }: GetTargetsParams, platform: DevicePlatform): DebugTarget[] => {
+  const appClientOptionsFunction = {
+    [DevicePlatform.Android]: appClientManager.getAndroidAppClientOptions,
+    [DevicePlatform.IOS]: appClientManager.getIosAppClientOptions,
+  }[platform];
+  const appClientTypeList = appClientOptionsFunction
+    .call(appClientManager)
+    .map(({ Ctor }) => Ctor.name) as AppClientType[];
+  return getDebugTargetManager(platform)
+    .getTargetIdList()
+    .map((targetId) => {
+      const wsUrl = makeUrl(`${host}:${port}${wsPath}`, {
+        platform,
+        clientId,
+        targetId,
+        role: ClientRole.Devtools,
+      });
+      const devtoolsFrontendUrl = makeUrl(`http://localhost:${port}/front_end/inspector.html`, {
+        remoteFrontend: true,
+        experiments: true,
+        ws: wsUrl,
+        customTabs: JSON.stringify(getCustomTabs(config.env as DevtoolsEnv)),
+      });
+      return {
+        id: targetId || clientId,
+        clientId,
+        thumbnailUrl: '',
+        description: 'Hippy instance',
+        appClientTypeList,
+        devtoolsFrontendUrl,
+        devtoolsFrontendUrlCompat: devtoolsFrontendUrl,
+        faviconUrl: 'http://res.imtt.qq.com/hippydoc/img/hippy-logo.ico',
+        title: 'Hippy debug tools for V8',
+        type: ChromePageType.Page,
+        platform,
+        url: '',
+        webSocketDebuggerUrl: `ws://${wsUrl}`,
+      };
+    });
+};
+
+const getCustomTabs = (env: DevtoolsEnv) => ([DevtoolsEnv.TDF, DevtoolsEnv.TDFCore].indexOf(env) !== -1 ? TDFTabs : []);
