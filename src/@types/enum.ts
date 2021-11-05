@@ -2,7 +2,7 @@ export const enum DevtoolsEnv {
   Hippy = 'hippy',
   Voltron = 'voltron',
   TDF = 'TDF',
-  TDFCore = 'TDF_core',
+  TDFCore = 'TDFCore',
 }
 
 export const enum DevicePlatform {

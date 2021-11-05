@@ -3,7 +3,6 @@ import kill from 'kill-port';
 import Koa from 'koa';
 import cors from '@koa/cors';
 import serve from 'koa-static';
-import compress from 'koa-compress';
 import conditional from 'koa-conditional-get';
 import etag from 'koa-etag';
 import path from 'path';
@@ -61,12 +60,6 @@ export class Application {
     }
     return new Promise((resolve, reject) => {
       const app = new Koa();
-      app.use(
-        compress({
-          gzip: {},
-          br: false,
-        }),
-      );
       app.use(cors());
       app.use(conditional());
       app.use(etag());
