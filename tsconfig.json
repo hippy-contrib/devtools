@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": ".",
     "target": "es6",
     "module": "CommonJS",
     "strict": true,
@@ -22,6 +23,6 @@
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts", "package.json"],
   "exclude": ["node_modules"]
 }
