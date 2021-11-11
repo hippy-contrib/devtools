@@ -18,11 +18,12 @@
     "baseUrl": ".",
     "typeRoots": ["src/@types", "node_modules/@types", "node_modules/tdf-devtools-protocol/@types"],
     "paths": {
+      "tslib": ["node_modules/tslib/tslib.d.ts"],
       "*": ["*", "node_modules/*", "src/@types/*"],
       "@/*": ["src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts", "package.json"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts", "package.json", "node_modules/tdf-devtools-protocol/**/*"],
   "exclude": ["node_modules"]
 }

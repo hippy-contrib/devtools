@@ -29,6 +29,7 @@ export const mappingForLayoutTests = new Map([
     ['panels/core_memory', 'core_memory'],
     ['panels/ui_inspector', 'ui_inspector'],
     ['panels/cdp_debug', 'cdp_debug'],
+    ['panels/core_performance', 'core_performance'],
     ['panels/elements', 'elements'],
     ['panels/emulation', 'emulation'],
     ['panels/mobile_throttling', 'mobile_throttling'],

@@ -7,17 +7,17 @@ const UIStrings = {
     /**
     *@description Title of the Console tool
     */
-    custom: 'Protocol Debug',
+    custom: 'Core Performance',
     /**
     *@description Title of an action that shows the console.
     */
-    showCustom: 'Show Protocol Debug',
+    showCustom: 'Show Core Performance',
 };
 UI.CustomPanel.registerPanelView({
-    viewId: 'custom-cdp-debug',
+    viewId: 'custom-core-performance',
     UIStrings,
-    UIStringsKey: 'panels/cdp_debug/cdp_debug-meta.ts',
-    moduleName: 'panels/cdp_debug',
-    customModulePath: 'panels/cdp_debug/cdp_debug.js',
-    tabName: 'cdp_debug',
+    UIStringsKey: 'panels/core_performance/core_performance-meta.ts',
+    moduleName: 'panels/core_performance',
+    customModulePath: 'panels/core_performance/core_performance.js',
+    tabName: 'core_performance',
 });

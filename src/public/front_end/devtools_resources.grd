@@ -354,6 +354,11 @@
       <include file="panels/cdp_debug/cdp_debug.js" name="PANELS_CDP_DEBUG_CDP_DEBUG_JS" resource_path="panels/cdp_debug/cdp_debug.js" type="BINDATA" compress="false"/>
       <include file="panels/cdp_debug/cdp_debug_module.js" name="PANELS_CDP_DEBUG_CDP_DEBUG_MODULE_JS" resource_path="panels/cdp_debug/cdp_debug_module.js" type="BINDATA" compress="false"/>
       <include file="panels/cdp_debug/CdpDebugPanel.js" name="PANELS_CDP_DEBUG_CDPDEBUGPANEL_JS" resource_path="panels/cdp_debug/CdpDebugPanel.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_performance/core_performance-legacy.js" name="PANELS_CORE_PERFORMANCE_CORE_PERFORMANCE_LEGACY_JS" resource_path="panels/core_performance/core_performance-legacy.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_performance/core_performance-meta.js" name="PANELS_CORE_PERFORMANCE_CORE_PERFORMANCE_META_JS" resource_path="panels/core_performance/core_performance-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_performance/core_performance.js" name="PANELS_CORE_PERFORMANCE_CORE_PERFORMANCE_JS" resource_path="panels/core_performance/core_performance.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_performance/core_performance_module.js" name="PANELS_CORE_PERFORMANCE_CORE_PERFORMANCE_MODULE_JS" resource_path="panels/core_performance/core_performance_module.js" type="BINDATA" compress="false"/>
+      <include file="panels/core_performance/CorePerformancePanel.js" name="PANELS_CORE_PERFORMANCE_COREPERFORMANCEPANEL_JS" resource_path="panels/core_performance/CorePerformancePanel.js" type="BINDATA" compress="false"/>
       <include file="panels/console_counters/console_counters-meta.js" name="PANELS_CONSOLE_COUNTERS_CONSOLE_COUNTERS_META_JS" resource_path="panels/console_counters/console_counters-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/console_counters/console_counters.js" name="PANELS_CONSOLE_COUNTERS_CONSOLE_COUNTERS_JS" resource_path="panels/console_counters/console_counters.js" type="BINDATA" compress="false"/>
       <include file="panels/coverage/coverage-legacy.js" name="PANELS_COVERAGE_COVERAGE_LEGACY_JS" resource_path="panels/coverage/coverage-legacy.js" type="BINDATA" compress="false"/>

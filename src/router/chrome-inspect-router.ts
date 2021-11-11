@@ -14,7 +14,7 @@ import { makeUrl } from '../utils/url';
 const log = new Logger('chrome-inspect-router');
 
 type RouterArgv = Pick<StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'wsPath' | 'env'>;
-let cachedRouterArgv: RouterArgv;
+let cachedRouterArgv = {} as unknown as RouterArgv;
 
 export const getChromeInspectRouter = (routerArgv: RouterArgv) => {
   cachedRouterArgv = routerArgv;

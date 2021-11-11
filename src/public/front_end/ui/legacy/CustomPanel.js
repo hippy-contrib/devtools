@@ -56,9 +56,6 @@ export const registerPanelView = ({ viewId, UIStrings, UIStringsKey, moduleName,
         }
         return loadedCustomModule;
     }
-    const customTabs = JSON.parse(decodeURIComponent(new URL(location.href).searchParams.get('customTabs') || '[]'));
-    if (customTabs.indexOf(tabName) === -1)
-        return;
     ViewManager.registerViewExtension({
         location: "panel" /* PANEL */,
         id: viewId,
