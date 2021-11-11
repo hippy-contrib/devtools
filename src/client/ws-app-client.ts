@@ -36,6 +36,13 @@ export class WsAppClient extends AppClient {
         params: {},
       }),
     );
+    this.ws.send(
+      JSON.stringify({
+        id: requestId.create(),
+        method: 'Runtime.disable',
+        params: {},
+      }),
+    );
   }
 
   protected registerMessageListener() {

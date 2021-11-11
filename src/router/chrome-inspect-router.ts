@@ -14,7 +14,6 @@ import { makeUrl } from '../utils/url';
 const log = new Logger('chrome-inspect-router');
 
 type RouterArgv = Pick<StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'wsPath' | 'env'>;
-const TDFTabs = ['core-memory', 'ui_inspector', 'cdp_debug'];
 let cachedRouterArgv: RouterArgv;
 
 export const getChromeInspectRouter = (routerArgv: RouterArgv) => {
@@ -107,7 +106,7 @@ const getIosTargetsByIWDP = async ({ iwdpPort, host, port, wsPath, clientId }): 
         remoteFrontend: true,
         experiments: true,
         ws: wsUrl,
-        customTabs: JSON.stringify(getCustomTabs(config.env as DevtoolsEnv)),
+        env: config.env,
       });
       const matchRst = debugTarget.title.match(/^HippyContext:\s(.*)$/);
       const bundleName = matchRst ? matchRst[1] : '';
@@ -171,7 +170,7 @@ const getTargets = ({ host, port, wsPath, clientId }: GetTargetsParams, platform
         remoteFrontend: true,
         experiments: true,
         ws: wsUrl,
-        customTabs: JSON.stringify(getCustomTabs(config.env as DevtoolsEnv)),
+        env: config.env,
       });
       return {
         id: targetId || clientId,
@@ -190,5 +189,3 @@ const getTargets = ({ host, port, wsPath, clientId }: GetTargetsParams, platform
       };
     });
 };
-
-const getCustomTabs = (env: DevtoolsEnv) => ([DevtoolsEnv.TDF, DevtoolsEnv.TDFCore].indexOf(env) !== -1 ? TDFTabs : []);

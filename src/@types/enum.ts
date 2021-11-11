@@ -6,7 +6,7 @@ export const enum DevtoolsEnv {
 }
 
 export const enum DevicePlatform {
-  Unkonw = '0',
+  Unkonwn = '0',
   IOS = '1',
   Android = '2',
 }
@@ -26,7 +26,7 @@ export const TunnelEvent = {
 };
 
 export const enum DebuggerProtocolType {
-  Unkonw,
+  Unkonwn,
   CDP,
   DAP,
 }
