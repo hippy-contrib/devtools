@@ -1,4 +1,4 @@
-import { DevicePlatform } from '../@types/enum';
+import { DevicePlatform } from '@/@types/enum';
 import { androidDebugTargetManager } from './android-debug-target-manager';
 import { iosDebugTargetManager } from './ios-debug-target-manager';
 

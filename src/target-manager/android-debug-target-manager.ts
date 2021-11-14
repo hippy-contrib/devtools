@@ -4,8 +4,8 @@
  *    - tunnel通道：tunnel app connect 时添加可调试页面， app disconnect 时移除，device disconnect时清空
  * 两通道共存时，走tunnel通道
  */
-import { add, remove } from '../utils/array';
-import { Logger } from '../utils/log';
+import { add, remove } from '@/utils/array';
+import { Logger } from '@/utils/log';
 
 const log = new Logger('android-debug-target-manager');
 

@@ -1,17 +1,15 @@
-import { AppClientType } from 'src/@types/enum';
 import WebSocket, { Server } from 'ws/index.js';
-import { ClientEvent, ClientRole, DevicePlatform } from './@types/enum';
-import { DebugTarget } from './@types/tunnel';
-import { getDebugTargetManager } from './target-manager';
-import { appClientManager } from './client';
-import { AppClient, AppClientOption } from './client/app-client';
-import { AppClientFullOptionOmicCtx } from './client/app-client-manager';
-import { ERROR_CODE } from './error-code';
-import { debugTarget2UrlParsedContext } from './middlewares';
-import { DebugTargetManager } from './router/chrome-inspect-router';
-import { DomainRegister } from './utils/cdp';
-import { Logger } from './utils/log';
-import { parseWsUrl } from './utils/url';
+import { ClientEvent, ClientRole, DevicePlatform, AppClientType, ERROR_CODE } from '@/@types/enum';
+import { DebugTarget } from '@/@types/tunnel';
+import { getDebugTargetManager } from '@/target-manager';
+import { appClientManager } from '@/client';
+import { AppClient, AppClientOption } from '@/client/app-client';
+import { AppClientFullOptionOmicCtx } from '@/client/app-client-manager';
+import { debugTargetToUrlParsedContext } from '@/middlewares';
+import { DebugTargetManager } from '@/router/chrome-inspect-router';
+import { DomainRegister } from '@/utils/cdp';
+import { Logger } from '@/utils/log';
+import { parseWsUrl } from '@/utils/url';
 
 const log = new Logger('socket-bridge');
 
@@ -60,7 +58,7 @@ export class SocketServer extends DomainRegister {
     return new Promise((resolve, reject) => {
       const appClientList = this.selectDebugTarget(this.debugTarget);
       if (!appClientList) return reject(ERROR_CODE.NO_APP_CLIENT);
-      Promise.all(appClientList.map((appClient) => appClient.send(msg).catch(() => null))).then((resList) => {
+      Promise.all(appClientList.map((appClient) => appClient.sendToApp(msg).catch(() => null))).then((resList) => {
         const filtered = resList.filter((res) => res);
         if (filtered?.length) {
           return resolve(filtered[0]);
@@ -96,7 +94,7 @@ export class SocketServer extends DomainRegister {
       conn.appClientList = options
         .map(({ Ctor, ...option }: AppClientFullOptionOmicCtx) => {
           log.info(`app client ${Ctor.name}`);
-          const urlParsedContext = debugTarget2UrlParsedContext(debugTarget);
+          const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
           const newOption: AppClientOption = {
             urlParsedContext,
             ...option,
@@ -142,7 +140,7 @@ export class SocketServer extends DomainRegister {
         const msgObj: Adapter.CDP.Req = JSON.parse(msg);
         this.idWsMap.set(msgObj.id, ws);
         conn.appClientList.forEach((appClient) => {
-          appClient.send(msgObj).catch((e) => {
+          appClient.sendToApp(msgObj).catch((e) => {
             if (e === ERROR_CODE.DOMAIN_FILTERED) {
               return log.info('command is filtered');
             }

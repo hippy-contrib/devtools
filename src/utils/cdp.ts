@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events';
+
 export const CDP_DOMAIN_LIST = [
   'Accessibility',
   'Animation',
@@ -58,17 +60,17 @@ export const getDomain = (method: string) => {
   return domain;
 };
 
-export class DomainRegister {
-  protected listeners: Map<string, Adapter.DomainListener[]> = new Map();
+export class DomainRegister extends EventEmitter {
+  private domainListeners: Map<string, Adapter.DomainListener[]> = new Map();
 
   public registerDomainListener: Adapter.RegisterDomainListener = (domain, listener) => {
-    if (!this.listeners.has(domain)) this.listeners.set(domain, []);
-    this.listeners.get(domain).push(listener);
+    if (!this.domainListeners.has(domain)) this.domainListeners.set(domain, []);
+    this.domainListeners.get(domain).push(listener);
   };
 
   protected triggerListerner(msg: Adapter.CDP.Res) {
-    if (this.listeners.has(msg.method)) {
-      this.listeners.get(msg.method).forEach((listener) => {
+    if (this.domainListeners.has(msg.method)) {
+      this.domainListeners.get(msg.method).forEach((listener) => {
         listener(msg);
       });
     }

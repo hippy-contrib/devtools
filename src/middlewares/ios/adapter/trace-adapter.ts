@@ -7,7 +7,7 @@
  * 用 PH 值表示调用栈的开始结束
  */
 
-import { PH } from '../../@types/enum';
+import { PH } from '@/@types/enum';
 interface JscFrame {
   sourceID: string;
   name: string;

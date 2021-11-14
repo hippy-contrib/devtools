@@ -1,16 +1,15 @@
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
-import { TunnelEvent } from '../@types/enum';
-import deviceManager from '../device-manager';
-import { tunnel } from '../tunnel';
-import { Logger } from '../utils/log';
-import { exec } from '../utils/process';
+import { TunnelEvent } from '@/@types/enum';
+import deviceManager from '@/device-manager';
+import { Logger } from '@/utils/log';
+import { exec } from '@/utils/process';
 import { addEventListener, exit, getDeviceList, selectDevice, sendMsg, tunnelStart } from './addon';
 export { addEventListener, tunnelStart, getDeviceList, selectDevice, exit, sendMsg };
 
 const childProcessLog = new Logger('child-process');
-const tunnelLog = new Logger('tunnel');
+const log = new Logger('tunnel');
 let proxyProcess;
 
 export const tunnelEmitter = new EventEmitter();
@@ -33,9 +32,9 @@ export const startTunnel = (
 ) => {
   addEventListener((event, data) => {
     try {
-      childProcessLog.info(`receive tunnel event: ${event}`);
+      log.info(`receive tunnel event: ${event}`);
       if (event === TunnelEvent.ReceiveData) {
-        tunnel.onMessage(data);
+        tunnelEmitter.emit('message', data);
       } else {
         if ([TunnelEvent.RemoveDevice, TunnelEvent.AddDevice].indexOf(event) !== -1) {
           deviceManager.getDeviceList();
@@ -48,13 +47,13 @@ export const startTunnel = (
         } else if (event === TunnelEvent.AppDisconnect) {
           deviceManager.appDidDisConnect();
         } else if (event === TunnelEvent.TunnelLog) {
-          if (data) tunnelLog.info(data);
+          if (data) log.info(data);
         }
 
         if (cb) cb(event, data);
       }
     } catch (e) {
-      childProcessLog.error(`handle tunnel event error: ${JSON.stringify(e)}`);
+      log.error(`handle tunnel event error: ${JSON.stringify(e)}`);
     }
   });
 
@@ -82,8 +81,9 @@ export const startIosProxy = ({ iwdpPort, iwdpStartPort, iwdpEndPort }) => {
 };
 
 export const startAdbProxy = (port: number) => {
-  exec('adb', ['reverse', '--remove-all'])
-    .then(() => exec('adb', ['reverse', `tcp:${port}`, `tcp:${port}`]))
+  const adbPath = path.join(__dirname, '../build/adb');
+  exec(adbPath, ['reverse', '--remove-all'])
+    .then(() => exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]))
     .catch((err: Error) => {
       childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
       childProcessLog.info('Otherwise please check adb devices command working correctly');

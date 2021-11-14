@@ -1,57 +1,48 @@
-import { AppClientType, ClientEvent, DevicePlatform } from '../@types/enum';
-import { requestId } from '../middlewares';
-import { Tunnel, tunnel } from '../tunnel';
-import { Logger } from '../utils/log';
+import { AppClientType } from '@/@types/enum';
+import { sendMsg } from '@/child-process/addon';
+import { Logger } from '@/utils/log';
+import { tunnelEmitter } from '@/child-process';
 import { AppClient } from './app-client';
 
-const log = new Logger('app-client:ws');
+const log = new Logger('app-client:tunnel');
 
 export class TunnelAppClient extends AppClient {
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
+
   constructor(id, option) {
     super(id, option);
     this.type = AppClientType.Tunnel;
-
     this.registerMessageListener();
   }
 
-  public resumeApp() {
-    log.info('tunnel app client resume');
-    if (this.platform === DevicePlatform.Android) {
-      tunnel.sendMessage({
-        id: requestId.create(),
-        method: 'TDFRuntime.resume',
-        params: {},
-      });
-    }
-    tunnel.sendMessage({
-      id: requestId.create(),
-      method: 'Debugger.disable',
-      params: {},
-    });
-    tunnel.sendMessage({
-      id: requestId.create(),
-      method: 'Runtime.disable',
-      params: {},
-    });
-  }
-
   protected registerMessageListener() {
-    Tunnel.tunnelMessageEmitter.on(ClientEvent.Message, (msg: Adapter.CDP.Res) => {
-      this.onMessage(msg).then((res) => {
-        if (!('id' in msg)) return;
-        const requestPromise = this.requestPromiseMap.get(msg.id);
-        if (requestPromise) {
-          requestPromise.resolve(res);
+    tunnelEmitter.on('message', (data) => {
+      try {
+        const msgObject: Adapter.CDP.Res = JSON.parse(data);
+        if ('id' in msgObject) {
+          const requestPromise = this.requestPromiseMap.get(msgObject.id);
+          if (requestPromise) requestPromise.resolve(msgObject);
         }
-      });
+        this.triggerListerner(msgObject);
+        this.onMessage(msgObject).then((res) => {
+          if (!('id' in msgObject)) return;
+          const requestPromise = this.requestPromiseMap.get(msgObject.id);
+          if (requestPromise) {
+            requestPromise.resolve(res);
+          }
+        });
+      } catch (e) {
+        log.info(`parse tunnel response json failed. error: %j, \n msg: %j`, e, data);
+      }
     });
   }
 
-  protected sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
+  protected sendHandler(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     return new Promise((resolve, reject) => {
-      tunnel.sendMessage(msg);
-      this.requestPromiseMap.set(msg.id, { resolve, reject });
+      if (msg.id) {
+        this.requestPromiseMap.set(msg.id, { resolve, reject });
+      }
+      sendMsg(JSON.stringify(msg));
     });
   }
 }

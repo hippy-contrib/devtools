@@ -1,7 +1,7 @@
+import { ChromeCommand, ChromeEvent, Ios100Command, Ios100Event } from 'tdf-devtools-protocol/types';
 import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
-import TraceAdapter from './trace-adapter';
-import { ChromeCommand, ChromeEvent, Ios100Command, Ios100Event } from 'tdf-devtools-protocol/types';
+import TraceAdapter from './adapter/trace-adapter';
 
 export const traceMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {

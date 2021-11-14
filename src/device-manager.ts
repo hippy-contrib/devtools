@@ -1,9 +1,9 @@
 import { EventEmitter } from 'events';
-import { DeviceManagerEvent, DeviceStatus } from './@types/enum';
-import { DeviceInfo } from './@types/tunnel';
-import { getDebugTargetManager } from './target-manager';
-import { getDeviceList, selectDevice } from './child-process/addon';
-import { Logger } from './utils/log';
+import { DeviceManagerEvent, DeviceStatus } from '@/@types/enum';
+import { DeviceInfo } from '@/@types/tunnel';
+import { getDebugTargetManager } from '@/target-manager';
+import { getDeviceList, selectDevice } from '@/child-process/addon';
+import { Logger } from '@/utils/log';
 
 const log = new Logger('device-manager');
 

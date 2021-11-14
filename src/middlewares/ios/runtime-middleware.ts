@@ -1,9 +1,7 @@
+import { ChromeCommand, ChromeEvent, Ios90Command } from 'tdf-devtools-protocol/types';
 import { contextId, requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
 import { lastScriptEval } from './debugger-middleware';
-import { ChromeCommand, ChromeEvent, Ios90Command } from 'tdf-devtools-protocol/types';
-
-let lastPageExecutionContextId;
 
 export const runtimeMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {
@@ -12,11 +10,6 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
       if (eventRes.params?.context) {
         if (!eventRes.params.context.origin) {
           eventRes.params.context.origin = eventRes.params.context.name;
-        }
-
-        if (eventRes.params.context.isPageContext) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          lastPageExecutionContextId = eventRes.params.context.id;
         }
 
         if (eventRes.params.context.frameId) {

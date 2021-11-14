@@ -1,10 +1,15 @@
 #!/usr/bin/env node
-
+/* eslint-disable import/first -- 在入口最前面注册别名，因此禁用掉此规则 */
+import moduleAlias from 'module-alias';
+moduleAlias.addAliases({
+  '@': __dirname,
+  'package.json': '../package.json',
+});
 import yargs from 'yargs';
-import { DevtoolsEnv } from './@types/enum';
-import { Application } from './app';
-import { Logger } from './utils/log';
-import { version } from '../package.json';
+import { DevtoolsEnv } from '@/@types/enum';
+import { Application } from '@/app';
+import { Logger } from '@/utils/log';
+import { version } from 'package.json';
 
 const log = new Logger('entry');
 const { argv } = yargs

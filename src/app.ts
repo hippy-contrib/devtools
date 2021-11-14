@@ -1,21 +1,21 @@
 import fs from 'fs';
+import path from 'path';
 import kill from 'kill-port';
 import Koa from 'koa';
 import cors from '@koa/cors';
 import serve from 'koa-static';
 import conditional from 'koa-conditional-get';
 import etag from 'koa-etag';
-import path from 'path';
-import { DevtoolsEnv } from './@types/enum';
-import { DebugTarget } from './@types/tunnel.d';
-import { onExit, startAdbProxy, startIosProxy, startTunnel } from './child-process';
-import { initHippyEnv, initTdfEnv, initVoltronEnv, initTdfCoreEnv } from './client';
-import { config, setConfig } from './config';
-import { DebugTargetManager, getChromeInspectRouter } from './router/chrome-inspect-router';
-import { SocketServer } from './socket-server';
-import { Logger } from './utils/log';
-import { StartServerArgv } from './@types/app';
 import open from 'open';
+import { DevtoolsEnv } from '@/@types/enum';
+import { DebugTarget } from '@/@types/tunnel.d';
+import { onExit, startAdbProxy, startIosProxy, startTunnel } from '@/child-process';
+import { initHippyEnv, initTdfEnv, initVoltronEnv, initTdfCoreEnv } from '@/client';
+import { config, setConfig } from '@/config';
+import { DebugTargetManager, getChromeInspectRouter } from '@/router/chrome-inspect-router';
+import { SocketServer } from '@/socket-server';
+import { Logger } from '@/utils/log';
+import { StartServerArgv } from '@/@types/app';
 
 const log = new Logger('application');
 
@@ -66,8 +66,9 @@ export class Application {
 
       Application.server = app.listen(port, host, () => {
         log.info('start debug server.');
-        if (shouldStartTunnel) startTunnel(argv);
-        else if (startIWDP) startIosProxy(argv);
+        if (shouldStartTunnel) {
+          startTunnel(argv);
+        } else if (startIWDP) startIosProxy(argv);
         if (startAdb) startAdbProxy(port);
 
         Application.socketServer = new SocketServer(Application.server, argv);

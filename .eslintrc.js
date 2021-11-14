@@ -8,13 +8,28 @@ module.exports = {
     createDefaultProgram: true,
   },
   extends: [
+    'plugin:import/recommended',
+    'plugin:import/typescript',
     '@tencent/eslint-config-tencent',
     '@tencent/eslint-config-tencent/ts',
     '@tencent/eslint-config-tencent/prettier',
   ],
-  plugins: ['@typescript-eslint'],
+  plugins: ['import', '@typescript-eslint'],
   rules: {
     '@typescript-eslint/explicit-member-accessibility': 'warn',
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+        pathGroups: [
+          {
+            pattern: '@/**',
+            group: 'external',
+            position: 'after',
+          },
+        ],
+      },
+    ],
   },
   env: {
     // 指定代码的运行环境
@@ -24,4 +39,11 @@ module.exports = {
     es6: true,
   },
   globals: {},
+  settings: {
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+      },
+    },
+  },
 };

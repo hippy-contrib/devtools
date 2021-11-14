@@ -1,5 +1,5 @@
-export * from './android/android-middleware-manager';
+export * from './android';
 export * from './default-middleware';
 export * from './global-id';
-export * from './ios/ios-middleware-manager';
+export * from './ios';
 export * from './middleware-context';

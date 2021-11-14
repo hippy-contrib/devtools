@@ -74,3 +74,18 @@ export enum ChromePageType {
   Page = 'page',
   Node = 'node',
 }
+
+export const enum ERROR_CODE {
+  DOMAIN_FILTERED = 1,
+  NO_APP_CLIENT = 2,
+  EMPTY_COMMAND = 3,
+}
+
+export const enum PROTOCOL_ERROR_CODE {
+  ProtocolNotFound = -32601,
+}
+
+export enum MiddlewareType {
+  Upward = 'upward',
+  Downward = 'downward',
+}

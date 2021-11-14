@@ -1,9 +1,9 @@
-import colors from 'colors/safe';
 import path from 'path';
 import util from 'util';
+import colors from 'colors/safe';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
-import { config } from '../config';
+import { config } from '@/config';
 
 export class Logger {
   static debugMap = {};

@@ -1,45 +1,28 @@
 import WebSocket from 'ws/index.js';
-import { AppClientType, ClientEvent } from '../@types/enum';
-import { requestId } from '../middlewares/global-id';
-import { Logger } from '../utils/log';
+import { AppClientType, ClientEvent } from '@/@types/enum';
+import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
-const log = new Logger('app-client:ios-proxy');
+const log = new Logger('app-client:iwdp');
 
+/**
+ * IWDP 调试通道，通过 ws client 与 IWDP server 建立连接
+ */
 export class IwdpAppClient extends AppClient {
   private url: string;
   private ws: WebSocket;
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
+  private msgBuffer: {
+    msg: Adapter.CDP.Req;
+    resolve: Adapter.Resolve<Adapter.CDP.Res>;
+    reject: Adapter.Reject;
+  }[];
 
   constructor(url, option) {
     super(url, option);
     this.url = url;
     this.connect();
     this.registerMessageListener();
-  }
-
-  public resumeApp() {
-    this.sendToApp({
-      id: requestId.create(),
-      method: 'Debugger.disable',
-      params: {},
-    });
-    this.sendToApp({
-      id: requestId.create(),
-      method: 'Runtime.disable',
-      params: {},
-    });
-  }
-
-  protected connect() {
-    if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return;
-
-    try {
-      this.ws = new WebSocket(this.url);
-      this.type = AppClientType.IosProxy;
-    } catch (e) {
-      log.error('%j', e);
-    }
   }
 
   protected registerMessageListener() {
@@ -61,8 +44,10 @@ export class IwdpAppClient extends AppClient {
 
     this.ws?.on('open', () => {
       log.info(`ios proxy client opened: ${this.url}`);
-      for (const msg of this.msgBuffer) {
-        this.send(msg);
+      for (const { msg, resolve, reject } of this.msgBuffer) {
+        const msgStr = JSON.stringify(msg);
+        this.ws.send(msgStr);
+        this.requestPromiseMap.set(msg.id, { resolve, reject });
       }
       this.msgBuffer = [];
     });
@@ -82,15 +67,33 @@ export class IwdpAppClient extends AppClient {
     });
   }
 
-  protected sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
+  protected sendHandler(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     return new Promise((resolve, reject) => {
       if (this.ws?.readyState === WebSocket.OPEN) {
         const msgStr = JSON.stringify(msg);
         this.ws.send(msgStr);
         this.requestPromiseMap.set(msg.id, { resolve, reject });
       } else {
-        this.msgBuffer.push(msg);
+        this.msgBuffer.push({
+          msg,
+          resolve,
+          reject,
+        });
       }
     });
+  }
+
+  /**
+   * 与 IWDP server 建立连接
+   */
+  private connect() {
+    if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return;
+
+    try {
+      this.ws = new WebSocket(this.url);
+      this.type = AppClientType.IosProxy;
+    } catch (e) {
+      log.error('%j', e);
+    }
   }
 }

@@ -8,14 +8,7 @@
  *        ├── Tunnel.node
  */
 
-import addon from '../build/Tunnel.node';
+import addon from '@/build/Tunnel.node';
 global.addon = addon;
 
-export const { 
-  addEventListener, 
-  tunnelStart, 
-  getDeviceList, 
-  selectDevice, 
-  exit, 
-  sendMsg,
-} = global.addon;
+export const { addEventListener, tunnelStart, getDeviceList, selectDevice, exit, sendMsg } = global.addon;

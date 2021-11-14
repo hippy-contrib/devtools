@@ -1,10 +1,23 @@
-import { DevicePlatform } from '../@types/enum';
-import { androidDebugTargetManager, iosDebugTargetManager } from '../target-manager';
-import { androidMiddleWareManager, iosMiddleWareManager } from '../middlewares';
+import { androidDebugTargetManager, iosDebugTargetManager } from '@/target-manager';
+import { DevicePlatform } from '@/@types/enum';
+import { androidMiddleWareManager, iosMiddleWareManager } from '@/middlewares';
 import { AppClient, AppClientOption } from './app-client';
 import { IwdpAppClient } from './iwdp-app-client';
 import { TunnelAppClient } from './tunnel-app-client';
 import { WsAppClient } from './ws-app-client';
+
+// 终端自己实现的调试协议域名
+const customDomains = [
+  'Page',
+  'DOM',
+  'CSS',
+  'Overlay',
+  'TDFInspector',
+  'TDFPerformance',
+  'TDFMemory',
+  'TDFLog',
+  'TDFRuntime',
+];
 
 /**
  * 管理不同调试器的 AppClient 通道
@@ -39,9 +52,8 @@ export const appClientManager = new AppClientManager();
 
 /**
  * hippy
- *
- * - 安卓走 ws 通道
- * - ios走 iwdp 通道
+ *  - 安卓走 ws 通道
+ *  - iOS 走 IWDP + ws 通道
  */
 export const initHippyEnv = () => {
   appClientManager.reset();
@@ -67,27 +79,8 @@ export const initHippyEnv = () => {
   });
 };
 
-// 终端自己实现的域
-const customDomains = [
-  'Page',
-  'DOM',
-  'CSS',
-  'Overlay',
-  'TDFInspector',
-  'TDFPerformance',
-  'TDFMemory',
-  'TDFLog',
-  'TDFRuntime',
-];
-
 /**
- * voltron
- *
- * - 安卓
- *    - 走 ws 通道
- * - ios
- *    - 自实现协议走 ws 通道
- *    - jsc实现的协议走 iwdp
+ * voltron，暂时与 hippy 一致
  */
 export const initVoltronEnv = () => {
   appClientManager.reset();
@@ -95,13 +88,12 @@ export const initVoltronEnv = () => {
 };
 
 /**
- * tdf
- *
- * - 安卓
+ * TDF
+ *  - 安卓
  *    - tunnel通道
- * - ios
+ *  - ios
  *    - 自实现协议走 tunnel 通道
- *    - jsc实现的协议走 iwdp 通道
+ *    - jsc 实现的协议走 IWDP 通道
  */
 export const initTdfEnv = () => {
   androidDebugTargetManager.useCustom = true;
@@ -129,12 +121,9 @@ export const initTdfEnv = () => {
 };
 
 /**
- * tdf_core
- *
- * - 安卓
- *    - tunnel通道
- * - ios
- *    - tunnel 通道
+ * TDFCore
+ *  - 安卓：tunnel 通道
+ *  - ios：tunnel 通道
  */
 export const initTdfCoreEnv = () => {
   androidDebugTargetManager.useCustom = true;
@@ -155,7 +144,8 @@ export const initTdfCoreEnv = () => {
 };
 
 export type AppClientFullOption = AppClientOption & {
-  Ctor: new (id: string, option: AppClientOption) => AppClient; // 构造器外部注入，可在 TDF 上做扩展
+  // 构造器外部注入，可在 TDF 上做扩展
+  Ctor: new (id: string, option: AppClientOption) => AppClient;
 };
 
 export type AppClientFullOptionOmicCtx = Omit<AppClientFullOption, 'urlParsedContext'>;

@@ -1,4 +1,4 @@
-import { ClientRole, DevicePlatform } from '../@types/enum';
+import { ClientRole, DevicePlatform } from '@/@types/enum';
 
 export const parseWsUrl = (reqUrl: string) => {
   const url = new URL(reqUrl, 'http://0.0.0.0');

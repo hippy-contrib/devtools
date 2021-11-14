@@ -1,6 +1,5 @@
-import { AppClientType, DevicePlatform } from 'src/@types/enum';
-import { ClientRole } from '../@types/enum';
-import { DebugTarget } from '../@types/tunnel';
+import { AppClientType, DevicePlatform, ClientRole } from '@/@types/enum';
+import { DebugTarget } from '@/@types/tunnel';
 
 export interface ContextBase {
   url?: string;
@@ -31,7 +30,7 @@ export interface MiddleWareManager {
   downwardMiddleWareListMap?: { [k: string]: Array<MiddleWare> | MiddleWare };
 }
 
-export const debugTarget2UrlParsedContext = (debugTarget: DebugTarget): UrlParsedContext => ({
+export const debugTargetToUrlParsedContext = (debugTarget: DebugTarget): UrlParsedContext => ({
   clientId: debugTarget.clientId,
   targetId: debugTarget.id,
   debugTarget,

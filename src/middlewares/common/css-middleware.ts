@@ -1,6 +1,6 @@
 import color from 'color-normalize';
-import { MiddleWareManager } from './middleware-context';
 import { ChromeCommand } from 'tdf-devtools-protocol/types';
+import { MiddleWareManager } from '../middleware-context';
 
 export const cssMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {
@@ -29,8 +29,9 @@ export const cssMiddleWareManager: MiddleWareManager = {
           .split(';')
           .reduce((ret, styleItem) => {
             if (!styleItem.trim()) return ret;
-            // eslint-disable-next-line prefer-const
-            let [name, ...values] = styleItem.split(':');
+            const styleItems = styleItem.split(':');
+            const [name] = styleItems;
+            let [, ...values] = styleItems;
             if (!CssDomain.skipStyle(name)) {
               if (name.toLowerCase().includes('color')) {
                 const rgba = CssDomain.transformRGBA(values[0]);

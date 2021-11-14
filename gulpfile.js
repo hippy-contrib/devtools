@@ -12,14 +12,19 @@ gulp.task('mkdir', (cb) => {
   cb();
 });
 
-gulp.task('compile', () =>
-  gulp.src(['src/**/*.ts']).pipe(ts.createProject('tsconfig.json')()).pipe(gulp.dest('dist/')),
-);
+gulp.task('compile', (cb) => {
+  gulp
+    .src(['node_modules/tdf-devtools-protocol/types/**/*.ts'])
+    .pipe(ts.createProject('tsconfig.json')())
+    .pipe(gulp.dest('node_modules/tdf-devtools-protocol/types/'));
+  gulp.src(['src/**/*.ts']).pipe(ts.createProject('tsconfig.json')()).pipe(gulp.dest('dist/'));
+  cb();
+});
 
 gulp.task('copy-resource', (cb) => {
   gulp.src(['src/build/**/*']).pipe(gulp.dest('dist/build'));
   gulp.src(['src/public/**/*']).pipe(gulp.dest('dist/public'));
-  gulp.src(['src/@types/**/*']).pipe(gulp.dest('dist/@types'));
+  // gulp.src(['src/@types/**/*']).pipe(gulp.dest('dist/@types'));
   cb();
 });
 

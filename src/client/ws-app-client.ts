@@ -1,7 +1,6 @@
 import WebSocket from 'ws/index.js';
-import { AppClientType, ClientEvent, DevicePlatform } from '../@types/enum';
-import { requestId } from '../middlewares';
-import { Logger } from '../utils/log';
+import { AppClientType, ClientEvent } from '@/@types/enum';
+import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
 const log = new Logger('app-client:ws');
@@ -14,35 +13,7 @@ export class WsAppClient extends AppClient {
     super(id, option);
     this.type = AppClientType.WS;
     this.ws = option.ws;
-
     this.registerMessageListener();
-  }
-
-  public resumeApp() {
-    log.info('ws app client resume');
-    if (this.platform === DevicePlatform.Android) {
-      this.ws.send(
-        JSON.stringify({
-          id: requestId.create(),
-          method: 'TDFRuntime.resume',
-          params: {},
-        }),
-      );
-    }
-    this.ws.send(
-      JSON.stringify({
-        id: requestId.create(),
-        method: 'Debugger.disable',
-        params: {},
-      }),
-    );
-    this.ws.send(
-      JSON.stringify({
-        id: requestId.create(),
-        method: 'Runtime.disable',
-        params: {},
-      }),
-    );
   }
 
   protected registerMessageListener() {
@@ -51,7 +22,7 @@ export class WsAppClient extends AppClient {
       try {
         msgObj = JSON.parse(msg);
       } catch (e) {
-        log.error(`parse json error: ${msg}`);
+        log.error(`parse ws app client json message error: ${msg}`);
       }
 
       this.onMessage(msgObj).then((res) => {
@@ -63,13 +34,13 @@ export class WsAppClient extends AppClient {
 
     this.ws.on('close', (msg) => {
       this.isClosed = true;
+      log.info(`${this.id} ws app client closed.`);
       this.emit(ClientEvent.Close, msg);
     });
   }
 
-  protected sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
+  protected sendHandler(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     return new Promise((resolve, reject) => {
-      log.info(`ws send to app: '${JSON.stringify(msg)}'`);
       const msgStr = JSON.stringify(msg);
       this.ws.send(msgStr);
       this.requestPromiseMap.set(msg.id, { resolve, reject });

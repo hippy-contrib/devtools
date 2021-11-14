@@ -7,40 +7,6 @@
  *    v8: type, nameOrIndex, toNodeIndex
  * edge 是按 fromId 相同的顺序排列
  */
-
-type JscHeapSnapshot = {
-  version: number;
-  type: string;
-  nodes: number[];
-  edges: number[];
-  edgeTypes: string[];
-  edgeNames: string[];
-  nodeClassNames: string[];
-};
-
-type V8HeapSnapshot = {
-  snapshot: {
-    meta: {
-      node_fields: string[];
-      node_types: Array<string | Array<string>>;
-      edge_fields: string[];
-      edge_types: Array<string | Array<string>>;
-      trace_function_info_fields: string[];
-      trace_node_fields: string[];
-    };
-    node_count: number;
-    edge_count: number;
-    trace_function_count: number;
-  };
-  nodes: number[];
-  edges: number[];
-  trace_function_infos: [];
-  trace_tree: [];
-  samples: [];
-  locations: string[];
-  strings: string[];
-};
-
 const nodeFieldCount = 4;
 const nodeIdOffset = 0;
 const nodeSizeOffset = 1;
@@ -193,3 +159,36 @@ export default class HeapAdapter {
     };
   }
 }
+
+type JscHeapSnapshot = {
+  version: number;
+  type: string;
+  nodes: number[];
+  edges: number[];
+  edgeTypes: string[];
+  edgeNames: string[];
+  nodeClassNames: string[];
+};
+
+type V8HeapSnapshot = {
+  snapshot: {
+    meta: {
+      node_fields: string[];
+      node_types: Array<string | Array<string>>;
+      edge_fields: string[];
+      edge_types: Array<string | Array<string>>;
+      trace_function_info_fields: string[];
+      trace_node_fields: string[];
+    };
+    node_count: number;
+    edge_count: number;
+    trace_function_count: number;
+  };
+  nodes: number[];
+  edges: number[];
+  trace_function_infos: [];
+  trace_tree: [];
+  samples: [];
+  locations: string[];
+  strings: string[];
+};

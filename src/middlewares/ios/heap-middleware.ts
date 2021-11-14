@@ -1,7 +1,7 @@
 import { ChromeCommand, ChromeEvent, Ios100Command } from 'tdf-devtools-protocol/types';
 import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
-import HeapAdapter from './heap-adapter';
+import HeapAdapter from './adapter/heap-adapter';
 
 export const heapMiddleWareManager: MiddleWareManager = {
   upwardMiddleWareListMap: {},
@@ -12,7 +12,7 @@ export const heapMiddleWareManager: MiddleWareManager = {
         method: Ios100Command.HeapEnable,
         params: {},
       }).then((res) => {
-        console.log(`${Ios100Command.HeapEnable} res`, msg);
+        console.log(`${Ios100Command.HeapEnable} res: `, msg);
         const convertedRes = {
           id: (msg as Adapter.CDP.Req).id,
           method: msg.method,

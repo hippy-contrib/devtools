@@ -5,8 +5,8 @@
  *    - IWDP 通道：直接通过 IWDP get 接口拉取
  * 优先级：IWDP > tunnel > ws
  */
-import { add, remove } from '../utils/array';
-import { Logger } from '../utils/log';
+import { add, remove } from '@/utils/array';
+import { Logger } from '@/utils/log';
 
 const log = new Logger('ios-debug-target-manager');
 

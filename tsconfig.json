@@ -1,4 +1,7 @@
 {
+  "ts-node": {
+    "files": true
+  },
   "compilerOptions": {
     "rootDir": ".",
     "target": "es6",
@@ -25,5 +28,5 @@
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts", "package.json", "node_modules/tdf-devtools-protocol/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["!node_modules/tdf-devtools-protocol"]
 }

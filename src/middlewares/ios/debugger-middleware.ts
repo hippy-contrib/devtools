@@ -12,10 +12,7 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
       eventRes.params = {
         ...eventRes.params,
         hasSourceURL: !!eventRes.params.sourceURL,
-        // executionContextId: contextId.id,
-        // isLiveEdit: false,
         isModule: eventRes.params.module,
-        // sourceMapURL: '',
         scriptLanguage: 'JavaScript',
         url: eventRes.params.url || eventRes.params.sourceURL,
       };

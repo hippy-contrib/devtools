@@ -1,15 +1,14 @@
 import Router from 'koa-router';
 import request from 'request-promise';
-import { AppClientType, DevicePlatform, DevtoolsEnv } from 'src/@types/enum';
 import { v4 as uuidv4 } from 'uuid';
-import { StartServerArgv } from '../@types/app';
-import { ChromePageType, ClientRole } from '../@types/enum';
-import { DebugTarget } from '../@types/tunnel';
-import { getDebugTargetManager } from '../target-manager';
-import { appClientManager } from '../client';
-import { config } from '../config';
-import { Logger } from '../utils/log';
-import { makeUrl } from '../utils/url';
+import { AppClientType, DevicePlatform, DevtoolsEnv, ChromePageType, ClientRole } from '@/@types/enum';
+import { StartServerArgv } from '@/@types/app';
+import { DebugTarget } from '@/@types/tunnel';
+import { getDebugTargetManager } from '@/target-manager';
+import { appClientManager } from '@/client';
+import { config } from '@/config';
+import { Logger } from '@/utils/log';
+import { makeUrl } from '@/utils/url';
 
 const log = new Logger('chrome-inspect-router');
 
