@@ -1,5 +1,5 @@
 import color from 'color-normalize';
-import { ChromeCommand } from 'tdf-devtools-protocol/types';
+import { ChromeCommand } from 'tdf-devtools-protocol/dist/types';
 import { MiddleWareManager } from '../middleware-context';
 
 export const cssMiddleWareManager: MiddleWareManager = {

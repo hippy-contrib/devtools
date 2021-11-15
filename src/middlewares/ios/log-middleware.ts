@@ -1,4 +1,4 @@
-import { ChromeCommand, ChromeEvent, Ios100Event, Ios90Command } from 'tdf-devtools-protocol/types';
+import { ChromeCommand, ChromeEvent, Ios100Event, Ios90Command } from 'tdf-devtools-protocol/dist/types';
 import { MiddleWareManager } from '../middleware-context';
 
 export const logMiddleWareManager: MiddleWareManager = {

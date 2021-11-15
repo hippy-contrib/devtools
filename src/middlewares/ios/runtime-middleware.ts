@@ -1,4 +1,4 @@
-import { ChromeCommand, ChromeEvent, Ios90Command } from 'tdf-devtools-protocol/types';
+import { ChromeCommand, ChromeEvent, Ios90Command } from 'tdf-devtools-protocol/dist/types';
 import { contextId, requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
 import { lastScriptEval } from './debugger-middleware';

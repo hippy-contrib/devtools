@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { TdfCommand } from 'tdf-devtools-protocol/types';
+import { TdfCommand } from 'tdf-devtools-protocol/dist/types';
 import { config } from '@/config';
 import { MiddleWareManager } from '../middleware-context';
 

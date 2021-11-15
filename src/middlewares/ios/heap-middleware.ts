@@ -1,4 +1,4 @@
-import { ChromeCommand, ChromeEvent, Ios100Command } from 'tdf-devtools-protocol/types';
+import { ChromeCommand, ChromeEvent, Ios100Command } from 'tdf-devtools-protocol/dist/types';
 import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
 import HeapAdapter from './adapter/heap-adapter';

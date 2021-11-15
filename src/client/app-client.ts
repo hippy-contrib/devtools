@@ -1,5 +1,5 @@
 import WebSocket from 'ws/index.js';
-import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/types';
+import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
 import { AppClientType, ClientEvent, DevicePlatform, ERROR_CODE, MiddlewareType } from '@/@types/enum';
 import {
   defaultDownwardMiddleware,

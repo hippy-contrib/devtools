@@ -1,6 +1,6 @@
-import { TdfEvent } from 'tdf-devtools-protocol/types/enum-tdf-mapping';
+import { TdfEvent } from 'tdf-devtools-protocol/dist/types/enum-tdf-mapping';
 import colors from 'colors/safe';
-import { ChromeEvent } from 'tdf-devtools-protocol/types/enum-chrome-mapping';
+import { ChromeEvent } from 'tdf-devtools-protocol/dist/types/enum-chrome-mapping';
 import { MiddleWareManager } from '../middleware-context';
 
 export const tdfLogMiddleWareManager: MiddleWareManager = {
