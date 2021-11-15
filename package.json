@@ -51,7 +51,7 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "signale": "^1.4.0",
-    "tdf-devtools-protocol": "^0.0.34",
+    "tdf-devtools-protocol": "^0.0.35",
     "tslib": "^2.3.0",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
