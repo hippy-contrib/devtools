@@ -3,7 +3,7 @@ import { ChromeCommand } from 'tdf-devtools-protocol/dist/types';
 import { MiddleWareManager } from '../middleware-context';
 
 export const cssMiddleWareManager: MiddleWareManager = {
-  upwardMiddleWareListMap: {
+  downwardMiddleWareListMap: {
     [ChromeCommand.CSSGetMatchedStylesForNode]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
       commandRes.result.inlineStyle = CssDomain.conversionInlineStyle(commandRes.result.inlineStyle);
@@ -20,7 +20,7 @@ export const cssMiddleWareManager: MiddleWareManager = {
       return sendToDevtools(commandRes);
     },
   },
-  downwardMiddleWareListMap: {
+  upwardMiddleWareListMap: {
     [ChromeCommand.CSSSetStyleTexts]: ({ msg, sendToApp }) => {
       const req = msg as Adapter.CDP.Req;
       req.params.edits = req.params.edits.map((data) => {

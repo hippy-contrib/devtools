@@ -62,13 +62,11 @@ class DeviceManager extends EventEmitter {
           return;
         }
 
-        if (this.selectedIndex < 0) {
-          this.selectedIndex = 0;
-          const device = this.deviceList[this.selectedIndex];
-          const deviceId = device.deviceid;
-          log.info(`selectDevice ${deviceId}`);
-          selectDevice(deviceId);
-        }
+        this.selectedIndex = 0;
+        const device = this.deviceList[this.selectedIndex];
+        const deviceId = device.deviceid;
+        log.info(`selectDevice ${deviceId}`);
+        selectDevice(deviceId);
       } else {
         this.selectedIndex = -1;
       }

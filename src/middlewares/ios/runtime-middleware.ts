@@ -4,7 +4,7 @@ import { MiddleWareManager } from '../middleware-context';
 import { lastScriptEval } from './debugger-middleware';
 
 export const runtimeMiddleWareManager: MiddleWareManager = {
-  upwardMiddleWareListMap: {
+  downwardMiddleWareListMap: {
     [ChromeEvent.RuntimeExecutionContextCreated]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
       if (eventRes.params?.context) {
@@ -78,7 +78,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
       return sendToDevtools(msg);
     },
   },
-  downwardMiddleWareListMap: {
+  upwardMiddleWareListMap: {
     [ChromeCommand.RuntimeCompileScript]: ({ msg, sendToApp, sendToDevtools }) =>
       sendToApp({
         id: requestId.create(),

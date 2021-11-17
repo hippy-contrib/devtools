@@ -2,7 +2,7 @@ import { ChromeCommand, ChromeEvent, Ios100Event, Ios90Command } from 'tdf-devto
 import { MiddleWareManager } from '../middleware-context';
 
 export const logMiddleWareManager: MiddleWareManager = {
-  upwardMiddleWareListMap: {
+  downwardMiddleWareListMap: {
     [Ios100Event.ConsoleMessageAdded]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
       const { message } = eventRes.params;
@@ -49,7 +49,7 @@ export const logMiddleWareManager: MiddleWareManager = {
       });
     },
   },
-  downwardMiddleWareListMap: {
+  upwardMiddleWareListMap: {
     [ChromeCommand.LogClear]: ({ msg, sendToApp }) =>
       sendToApp({
         id: (msg as Adapter.CDP.Req).id,

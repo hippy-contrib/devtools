@@ -141,10 +141,9 @@ export class SocketServer extends DomainRegister {
         this.idWsMap.set(msgObj.id, ws);
         conn.appClientList.forEach((appClient) => {
           appClient.sendToApp(msgObj).catch((e) => {
-            if (e === ERROR_CODE.DOMAIN_FILTERED) {
-              return log.info('command is filtered');
+            if (e !== ERROR_CODE.DOMAIN_FILTERED) {
+              return log.error('%s app client send error: %j', appClient.type, e);
             }
-            log.error('app client send error: %j', e);
           });
         });
       });
@@ -186,11 +185,12 @@ export class SocketServer extends DomainRegister {
       ws.close();
       return log.info('invalid client role!');
     }
-    if (clientRole === ClientRole.Ios && platform === DevicePlatform.IOS) {
+    if (clientRole === ClientRole.Ios) {
       if (!contextName) {
         ws.close();
         return log.info('invalid ios connection, should request with contextName!');
       }
+      // iOS 这里以 contextName 作为 clientId，方便与 IWDP 获取到的调试列表做匹配
       clientId = contextName;
     }
 

@@ -12,6 +12,7 @@ import { CDP_DOMAIN_LIST, getDomain, DomainRegister } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
 import { composeMiddlewares } from '@/utils/middleware';
 
+const filteredLog = new Logger('filtered', 'yellow');
 const downwardLog = new Logger('↓↓↓', 'red');
 const upwardLog = new Logger('↑↑↑', 'green');
 
@@ -65,14 +66,14 @@ export abstract class AppClient extends DomainRegister {
    */
   public sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     if (!this.filter(msg)) {
-      upwardLog.info(`'${msg.method}' is filtered in app client type: ${this.type}`);
+      filteredLog.info(`'${msg.method}' is filtered in app client type: ${this.type}`);
       return Promise.reject(ERROR_CODE.DOMAIN_FILTERED);
     }
 
     const { method } = msg;
     this.msgIdMethodMap.set(msg.id, msg.method);
     const middlewareList = this.getMiddlewareList(MiddlewareType.Upward, method);
-    upwardLog.info(`'${msg.method}' middlewareLength: ${middlewareList.length}`);
+    // upwardLog.info(`'${msg.method}' middlewareLength: ${middlewareList.length}`);
     // 上行的具体协议交给中间件适配，然后分发到 app 端
     return composeMiddlewares(middlewareList)(this.makeContext(msg));
   }
@@ -138,11 +139,11 @@ export abstract class AppClient extends DomainRegister {
         if (!msg.id) {
           msg.id = requestId.create();
         }
-        upwardLog.info('%j', msg);
+        upwardLog.info('%s sendToApp %j', this.type, msg);
         return this.sendHandler(msg);
       },
       sendToDevtools: (msg: Adapter.CDP.Res) => {
-        downwardLog.info('%j %j', (msg as Adapter.CDP.CommandRes).id, msg.method);
+        downwardLog.info('%s sendToDevtools %s %s', this.type, (msg as Adapter.CDP.CommandRes).id, msg.method);
         return this.sendToDevtools(msg);
       },
     };

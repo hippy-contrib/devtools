@@ -5,7 +5,7 @@ import { config } from '@/config';
 import { MiddleWareManager } from '../middleware-context';
 
 export const tdfHeapMiddleWareManager: MiddleWareManager = {
-  upwardMiddleWareListMap: {
+  downwardMiddleWareListMap: {
     [TdfCommand.TDFMemoryGetHeapMeta]: async (ctx, next) => {
       try {
         if (!('id' in ctx.msg)) {
@@ -20,7 +20,7 @@ export const tdfHeapMiddleWareManager: MiddleWareManager = {
       }
     },
   },
-  downwardMiddleWareListMap: {
+  upwardMiddleWareListMap: {
     [TdfCommand.TDFMemoryFetchHeapCache]: async (ctx, next) => {
       try {
         if (!('id' in ctx.msg)) {

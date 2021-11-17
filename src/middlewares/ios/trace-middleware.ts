@@ -4,7 +4,7 @@ import { MiddleWareManager } from '../middleware-context';
 import TraceAdapter from './adapter/trace-adapter';
 
 export const traceMiddleWareManager: MiddleWareManager = {
-  upwardMiddleWareListMap: {
+  downwardMiddleWareListMap: {
     [Ios100Event.ScriptProfilerTrackingComplete]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
       console.log(`onPerformanceProfileCompleteEvent, msg = ${eventRes}`);
@@ -18,7 +18,7 @@ export const traceMiddleWareManager: MiddleWareManager = {
       });
     },
   },
-  downwardMiddleWareListMap: {
+  upwardMiddleWareListMap: {
     [ChromeCommand.TracingStart]: ({ sendToApp }) =>
       sendToApp({
         id: requestId.create(),

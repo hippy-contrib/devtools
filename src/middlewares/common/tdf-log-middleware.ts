@@ -4,7 +4,7 @@ import { ChromeEvent } from 'tdf-devtools-protocol/dist/types/enum-chrome-mappin
 import { MiddleWareManager } from '../middleware-context';
 
 export const tdfLogMiddleWareManager: MiddleWareManager = {
-  upwardMiddleWareListMap: {
+  downwardMiddleWareListMap: {
     [TdfEvent.TDFLogGetLog]: async (ctx) => {
       const eventRes = ctx.msg as Adapter.CDP.EventRes;
       const { params } = eventRes;
@@ -38,5 +38,5 @@ export const tdfLogMiddleWareManager: MiddleWareManager = {
       }
     },
   },
-  downwardMiddleWareListMap: {},
+  upwardMiddleWareListMap: {},
 };

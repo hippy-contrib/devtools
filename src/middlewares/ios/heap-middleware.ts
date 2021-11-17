@@ -4,8 +4,8 @@ import { MiddleWareManager } from '../middleware-context';
 import HeapAdapter from './adapter/heap-adapter';
 
 export const heapMiddleWareManager: MiddleWareManager = {
-  upwardMiddleWareListMap: {},
-  downwardMiddleWareListMap: {
+  downwardMiddleWareListMap: {},
+  upwardMiddleWareListMap: {
     [ChromeCommand.HeapProfilerEnable]: ({ msg, sendToApp, sendToDevtools }) =>
       sendToApp({
         id: requestId.create(),

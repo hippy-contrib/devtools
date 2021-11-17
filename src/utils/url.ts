@@ -8,6 +8,7 @@ export const parseWsUrl = (reqUrl: string) => {
   let platform = url.searchParams.get('platform') as DevicePlatform;
   const clientRole = url.searchParams.get('role') as ClientRole;
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
+  else if (clientRole === ClientRole.Ios) platform = DevicePlatform.IOS;
   return {
     clientId,
     targetId,

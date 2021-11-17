@@ -9,7 +9,7 @@ import { addEventListener, exit, getDeviceList, selectDevice, sendMsg, tunnelSta
 export { addEventListener, tunnelStart, getDeviceList, selectDevice, exit, sendMsg };
 
 const childProcessLog = new Logger('child-process');
-const log = new Logger('tunnel');
+const log = new Logger('tunnel', 'magenta');
 let proxyProcess;
 
 export const tunnelEmitter = new EventEmitter();
@@ -32,7 +32,6 @@ export const startTunnel = (
 ) => {
   addEventListener((event, data) => {
     try {
-      log.info(`receive tunnel event: ${event}`);
       if (event === TunnelEvent.ReceiveData) {
         tunnelEmitter.emit('message', data);
       } else {

@@ -6,7 +6,7 @@ import { MiddleWare, MiddleWareManager } from '../middleware-context';
 export let lastScriptEval;
 
 export const debuggerMiddleWareManager: MiddleWareManager = {
-  upwardMiddleWareListMap: {
+  downwardMiddleWareListMap: {
     [ChromeEvent.DebuggerScriptParsed]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
       eventRes.params = {
@@ -24,7 +24,7 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
     'Debugger.setBlackboxPatterns': sendEmptyResultToDevtools as MiddleWare,
     [Ios90Command.DebuggerSetPauseOnExceptions]: sendEmptyResultToDevtools as MiddleWare,
   },
-  downwardMiddleWareListMap: {
+  upwardMiddleWareListMap: {
     [ChromeCommand.DebuggerEnable]: ({ sendToApp, msg }) => {
       sendToApp({
         id: requestId.create(),
