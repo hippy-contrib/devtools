@@ -44,7 +44,7 @@ class DeviceManager extends EventEmitter {
     debugTargetManager.clearCustomTarget();
     for (const device of this.deviceList) {
       if (device.physicalstatus !== DeviceStatus.Disconnected) {
-        debugTargetManager.addCustomTarget(device.deviceid);
+        debugTargetManager.addCustomTarget(device.devicename);
       }
     }
     this.emit(DeviceManagerEvent.appDidConnect, this.getCurrent());

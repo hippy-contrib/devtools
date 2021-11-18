@@ -45,7 +45,11 @@ export class DebugTargetManager {
     const clientId = uuidv4();
     const rst: DebugTarget[] = [];
     let iosTargets;
-    if ([DevtoolsEnv.TDFCore].indexOf(cachedRouterArgv.env) !== -1) {
+    /**
+     * iOS TDFCore 没有 JSContext，IWDP检测不到，需要根据 appConnect 事件添加调试页面
+     * iOS Hippy 只能调试走 WS 通道的协议，也忽略 IWDP 获取到的页面列表
+     */
+    if ([DevtoolsEnv.TDFCore, DevtoolsEnv.Hippy].indexOf(cachedRouterArgv.env) !== -1) {
       iosTargets = getIosTargetsByManager({ host, port, wsPath, clientId });
     } else {
       iosTargets = await getIosTargetsByIWDP({ iwdpPort, host, port, wsPath, clientId });
@@ -171,6 +175,7 @@ const getTargets = ({ host, port, wsPath, clientId }: GetTargetsParams, platform
         ws: wsUrl,
         env: config.env,
       });
+      const title = platform === DevicePlatform.IOS ? targetId : 'Hippy debug tools for V8';
       return {
         id: targetId || clientId,
         clientId,
@@ -180,7 +185,7 @@ const getTargets = ({ host, port, wsPath, clientId }: GetTargetsParams, platform
         devtoolsFrontendUrl,
         devtoolsFrontendUrlCompat: devtoolsFrontendUrl,
         faviconUrl: 'http://res.imtt.qq.com/hippydoc/img/hippy-logo.ico',
-        title: 'Hippy debug tools for V8',
+        title,
         type: ChromePageType.Page,
         platform,
         url: '',

@@ -73,7 +73,11 @@ export class SocketServer extends DomainRegister {
   public selectDebugTarget(debugTarget: DebugTarget, ws?: WebSocket): AppClient[] {
     if (!debugTarget) return;
     this.debugTarget = debugTarget;
-    // ios 用 jsContext name 作为 appClientId，用来匹配 ws 通道和 IWDP 通道
+    /**
+     * ios 使用 title 作为 clientId，不同环境的 title 取值不同
+     * - hippy: title === contextName, title 需要和 IWDP 获取到的 contextName 匹配
+     * - TDFCore: title === deviceName, 只有 tunnel 通道
+     */
     const appClientId = debugTarget.platform === DevicePlatform.IOS ? debugTarget.title : debugTarget.id;
     if (!this.connectionMap.has(appClientId)) {
       this.connectionMap.set(appClientId, {
@@ -93,7 +97,7 @@ export class SocketServer extends DomainRegister {
 
       conn.appClientList = options
         .map(({ Ctor, ...option }: AppClientFullOptionOmicCtx) => {
-          log.info(`app client ${Ctor.name}`);
+          log.info(`use app client ${Ctor.name}`);
           const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
           const newOption: AppClientOption = {
             urlParsedContext,
@@ -102,7 +106,7 @@ export class SocketServer extends DomainRegister {
           if (Ctor.name === AppClientType.WS) {
             newOption.ws = conn.appWs;
             if (!newOption.ws) {
-              return log.info('no app ws connection, ignore WsAppClient.');
+              return log.error('no app ws connection, ignore WsAppClient.');
             }
           }
           return new Ctor(appClientId, newOption);
@@ -157,7 +161,7 @@ export class SocketServer extends DomainRegister {
         if (i !== -1) conn.devtoolsWsList.splice(i, 1);
       });
       ws.on('error', (e) => {
-        log.info('ws error %j', e);
+        log.error('ws error %j', e);
       });
     }
 
@@ -225,7 +229,7 @@ export class SocketServer extends DomainRegister {
         getDebugTargetManager(platform).removeWsTarget(ws.clientId);
       });
       ws.on('error', (e) => {
-        log.info('app ws error %j', e);
+        log.error('app ws error %j', e);
       });
     }
   }
