@@ -33,17 +33,17 @@ export class MemoryModel extends DBModel {
     }
   }
 
-  public async createPublisher() {
+  public async createPublisher(channel) {
     return {
-      publish: (channel, message) => this.emit(channel, message),
+      publish: (message) => this.emit(channel, message),
       disconnect: () => {},
     };
   }
 
-  public async createSubscriber() {
+  public async createSubscriber(channel) {
     return {
-      subscribe: (channel, cb) => this.on(channel, cb),
-      unsubscribe: (channel) => this.removeAllListeners(channel),
+      subscribe: (cb) => this.on(channel, cb),
+      unsubscribe: () => this.removeAllListeners(channel),
       disconnect: () => {},
     };
   }

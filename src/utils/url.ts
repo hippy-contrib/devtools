@@ -3,7 +3,7 @@ import { ClientRole, DevicePlatform } from '@/@types/enum';
 export const parseWsUrl = (reqUrl: string) => {
   const url = new URL(reqUrl, 'http://0.0.0.0');
   const clientId = url.searchParams.get('clientId');
-  const targetId = url.searchParams.get('targetId');
+  const devtoolsId = url.searchParams.get('devtoolsId');
   const contextName = url.searchParams.get('contextName');
   let platform = url.searchParams.get('platform') as DevicePlatform;
   const clientRole = url.searchParams.get('role') as ClientRole;
@@ -12,7 +12,7 @@ export const parseWsUrl = (reqUrl: string) => {
   else if (clientRole === ClientRole.Ios) platform = DevicePlatform.IOS;
   return {
     clientId,
-    targetId,
+    devtoolsId,
     platform,
     clientRole,
     pathname: url.pathname,

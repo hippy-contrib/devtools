@@ -94,3 +94,10 @@ export enum DBType {
   Redis = 'redis',
   Memory = 'memory',
 }
+
+export enum WinstonColor {
+  Magenta = 'magenta',
+  Red = 'red',
+  Green = 'green',
+  Yellow = 'yellow',
+}

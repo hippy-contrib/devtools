@@ -1,4 +1,3 @@
-import { androidDebugTargetManager, iosDebugTargetManager } from '@/target-manager';
 import { DevicePlatform } from '@/@types/enum';
 import { androidMiddleWareManager, iosMiddleWareManager } from '@/middlewares';
 import { AppClient, AppClientOption } from './app-client';
@@ -96,7 +95,6 @@ export const initVoltronEnv = () => {
  *    - jsc 实现的协议走 IWDP 通道
  */
 export const initTdfEnv = () => {
-  androidDebugTargetManager.useCustom = true;
   appClientManager.reset();
   appClientManager.addAndroidAppClientOption({
     useAllDomain: true,
@@ -126,8 +124,6 @@ export const initTdfEnv = () => {
  *  - ios：tunnel 通道
  */
 export const initTdfCoreEnv = () => {
-  androidDebugTargetManager.useCustom = true;
-  iosDebugTargetManager.useCustom = true;
   appClientManager.reset();
   appClientManager.addAndroidAppClientOption({
     useAllDomain: true,

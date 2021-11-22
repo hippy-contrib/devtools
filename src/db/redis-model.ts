@@ -47,12 +47,21 @@ export class RedisModel extends DBModel {
     return this.client.hDel(key, field);
   }
 
-  public createPublisher() {
-    return this.createClient();
+  public async createPublisher(channel) {
+    const client = await this.createClient();
+    return {
+      publish: (message: string) => client.publish(channel, message),
+      disconnect: () => client.disconnect,
+    };
   }
 
-  public createSubscriber() {
-    return this.createClient();
+  public async createSubscriber(channel) {
+    const client = await this.createClient();
+    return {
+      subscribe: (cb) => client.subscribe(channel, cb),
+      unsubscribe: () => client.unsubscribe(channel),
+      disconnect: () => client.disconnect,
+    };
   }
 
   private async createClient(): Promise<RedisClient> {

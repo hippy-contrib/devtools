@@ -1,48 +1,20 @@
-import Router from 'koa-router';
 import request from 'request-promise';
 import { v4 as uuidv4 } from 'uuid';
 import { AppClientType, DevicePlatform, ClientRole } from '@/@types/enum';
-import { StartServerArgv } from '@/@types/app';
-import { DebugTarget } from '@/@types/tunnel';
-import { model } from '@/db';
 import { config } from '@/config';
 import { Logger } from '@/utils/log';
 import { makeUrl } from '@/utils/url';
+import { model } from '@/db';
+import { DebugTarget } from '@/@types/debug-target';
 
-const log = new Logger('chrome-inspect-router');
-
-type RouterArgv = Pick<StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'env'>;
-let cachedRouterArgv = {} as unknown as RouterArgv;
-
-export const getChromeInspectRouter = (routerArgv: RouterArgv) => {
-  cachedRouterArgv = routerArgv;
-  const chromeInspectRouter = new Router();
-
-  chromeInspectRouter.get('/json/version', (ctx) => {
-    ctx.body = { Browser: 'Hippy/v1.0.0', 'Protocol-Version': '1.1' };
-  });
-
-  chromeInspectRouter.get('/json', async (ctx) => {
-    const rst = await DebugTargetManager.getDebugTargets();
-    ctx.body = rst;
-  });
-
-  chromeInspectRouter.get('/json/list', async (ctx) => {
-    const rst = await DebugTargetManager.getDebugTargets();
-    ctx.body = rst;
-  });
-
-  return chromeInspectRouter;
-};
+const log = new Logger('debug-targets-controller');
 
 export class DebugTargetManager {
   public static debugTargets: DebugTarget[] = [];
 
   public static getDebugTargets = async (): Promise<DebugTarget[]> => {
-    const { iwdpPort } = cachedRouterArgv;
-
+    const { iwdpPort } = global.appArgv;
     const [targets, iosPages] = await Promise.all([getTargetsByDB(), getIWDPPages({ iwdpPort })]);
-
     const iosTargets = [];
     targets.forEach((target) => {
       const pages = iosPages.filter(
@@ -56,24 +28,23 @@ export class DebugTargetManager {
           ...pages.map((iosPage) => {
             const matchRst = iosPage.title.match(/^HippyContext:\s(.*)$/);
             const bundleName = matchRst ? matchRst[1] : '';
-            const targetId = iosPage.webSocketDebuggerUrl;
-            const clientId = uuidv4();
+            const iwdpWsUrl = iosPage.webSocketDebuggerUrl;
+            const devtoolsId = uuidv4();
             const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
               platform: DevicePlatform.IOS,
-              clientId,
-              targetId,
+              iwdpWsUrl,
+              devtoolsId,
               role: ClientRole.Devtools,
             });
             const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
               remoteFrontend: true,
               experiments: true,
               ws: wsUrl,
-              env: config.env,
+              env: global.appArgv.env,
             });
             return {
               ...target,
               device: iosPage.device,
-              id: iosPage.webSocketDebuggerUrl,
               title: iosPage.title,
               bundleName,
               devtoolsFrontendUrl,
@@ -88,9 +59,9 @@ export class DebugTargetManager {
     return DebugTargetManager.debugTargets;
   };
 
-  public static async findTarget(id: string) {
+  public static async findDebugTarget(clientId: string) {
     const debugTargets = await DebugTargetManager.getDebugTargets();
-    return debugTargets.find((target) => target.id === id);
+    return debugTargets.find((target) => target.clientId === clientId);
   }
 }
 

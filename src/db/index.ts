@@ -5,7 +5,8 @@ export * from './debug-target';
 
 export let model;
 
-export const initModel = async (dbType: DBType) => {
+export const initModel = async () => {
+  const {dbType} = global.appArgv;
   if (dbType === DBType.Memory) model = new MemoryModel();
   if (dbType === DBType.Redis) model = new RedisModel();
   await model.init();

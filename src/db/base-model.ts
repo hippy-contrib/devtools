@@ -10,17 +10,6 @@ export abstract class DBModel extends EventEmitter {
    */
   public abstract upsert(key: string, field: string, value: string | Object);
   public abstract delete(key: string, field: string);
-  public abstract createPublisher(): Promise<Publisher>;
-  public abstract createSubscriber(): Promise<Subscriber>;
-}
-
-interface Publisher {
-  publish(channel: string, message: string);
-  disconnect();
-}
-
-interface Subscriber {
-  subscribe(channel: string, cb: (message: string) => void): void;
-  unsubscribe(channel: string): void;
-  disconnect();
+  public abstract createPublisher(channel: string): Promise<Publisher>;
+  public abstract createSubscriber(channel: string): Promise<Subscriber>;
 }

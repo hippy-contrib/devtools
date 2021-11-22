@@ -1,55 +1,40 @@
 import fs from 'fs';
-import path from 'path';
 import kill from 'kill-port';
 import Koa from 'koa';
-import cors from '@koa/cors';
-import serve from 'koa-static';
-import conditional from 'koa-conditional-get';
-import etag from 'koa-etag';
 import open from 'open';
 import { DevtoolsEnv } from '@/@types/enum';
-import { DebugTarget } from '@/@types/tunnel.d';
+import { DebugTarget } from '@/@types/debug-target';
 import { onExit, startAdbProxy, startIosProxy, startTunnel } from '@/child-process';
 import { initHippyEnv, initTdfEnv, initVoltronEnv, initTdfCoreEnv } from '@/client';
-import { config, setConfig } from '@/config';
-import { DebugTargetManager, getChromeInspectRouter } from '@/router/chrome-inspect-router';
 import { SocketServer } from '@/socket-server';
 import { Logger } from '@/utils/log';
-import { StartServerArgv } from '@/@types/app';
 import { initModel } from '@/db';
+import { DebugTargetManager } from '@/controller/debug-targets';
+import { createRouter } from '@/router';
 
 const log = new Logger('application');
 
 export class Application {
   public static isServerReady = false;
-  private static argv: StartServerArgv;
   private static server;
   private static socketServer: SocketServer;
 
-  public static async startServer(argv: StartServerArgv) {
-    log.info('start server argv: %j', argv);
+  public static async startServer() {
+    log.info('start server argv: %j', global.appArgv);
     const {
       host,
       port,
-      static: staticPath,
-      entry,
       iwdpPort,
       startAdb,
       startIWDP,
       clearAddrInUse,
       startTunnel: shouldStartTunnel,
-      env,
-      publicPath,
-      cachePath,
-      logPath,
       open: openChrome = false,
-    } = argv;
-    if (cachePath) setConfig('cachePath', cachePath);
-    if (logPath) setConfig('logPath', logPath);
-    Application.argv = argv;
+    } = global.appArgv;
+
     Application.init();
-    Application.setEnv(env as DevtoolsEnv);
-    initModel(argv.dbType);
+    Application.setEnv();
+    initModel();
 
     if (clearAddrInUse) {
       try {
@@ -62,21 +47,18 @@ export class Application {
     }
     return new Promise((resolve, reject) => {
       const app = new Koa();
-      app.use(cors());
-      app.use(conditional());
-      app.use(etag());
+      createRouter(app);
 
       Application.server = app.listen(port, host, async () => {
         log.info('start debug server.');
-        if (shouldStartTunnel) {
-          startTunnel(argv);
-        } else if (startIWDP) startIosProxy(argv);
-        if (startAdb) startAdbProxy(port);
+        if (shouldStartTunnel) startTunnel();
+        else if (startIWDP) startIosProxy();
+        if (startAdb) startAdbProxy();
+        if (openChrome) open(`http://localhost:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
 
         Application.socketServer = new SocketServer(Application.server);
         Application.socketServer.start();
         Application.isServerReady = true;
-        if (openChrome) open(`http://localhost:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
         resolve(null);
       });
 
@@ -84,37 +66,6 @@ export class Application {
         log.info('debug server is closed.');
         reject();
       });
-
-      app.use(async (ctx, next) => {
-        try {
-          await next();
-        } catch (e) {
-          log.error(`koa error: ${JSON.stringify(e)}`);
-          return (ctx.body = e.msg);
-        }
-      });
-
-      const chromeInspectRouter = getChromeInspectRouter(argv);
-      app.use(chromeInspectRouter.routes()).use(chromeInspectRouter.allowedMethods());
-
-      let servePath;
-      if (staticPath) {
-        servePath = path.resolve(staticPath);
-      } else {
-        servePath = path.resolve(path.dirname(entry));
-      }
-      log.info(`serve bundle: ${entry} \nserve folder: ${servePath}`);
-
-      app.use(
-        serve(servePath, {
-          setHeaders: (res, path) => {
-            if (/index\.bundle$/.test(path)) {
-              res.setHeader('Content-Type', 'application/javascript');
-            }
-          },
-        }),
-      );
-      app.use(serve(publicPath || path.join(__dirname, 'public')));
     });
   }
 
@@ -140,7 +91,7 @@ export class Application {
   }
 
   public static async selectDebugTarget(id: string) {
-    const debugTarget = await DebugTargetManager.findTarget(id);
+    const debugTarget = await DebugTargetManager.findDebugTarget(id);
     this.socketServer.selectDebugTarget(debugTarget);
   }
 
@@ -157,27 +108,31 @@ export class Application {
   }
 
   private static init() {
+    const { cachePath } = global.appArgv;
     try {
-      fs.rmSync(config.cachePath, { recursive: true });
+      fs.rmSync(cachePath, { recursive: true });
     } catch (e) {
       log.error('rm cache dir error: %j', e);
     }
-    return fs.promises.mkdir(config.cachePath, { recursive: true });
+    return fs.promises.mkdir(cachePath, { recursive: true });
   }
 
-  private static setEnv(env: DevtoolsEnv) {
-    setConfig('env', env);
-    if (env === DevtoolsEnv.Hippy) initHippyEnv();
-    else if (env === DevtoolsEnv.Voltron) initVoltronEnv();
-    else if (env === DevtoolsEnv.TDF) initTdfEnv();
-    else if (env === DevtoolsEnv.TDFCore) initTdfCoreEnv();
+  private static setEnv() {
+    const initFn = {
+      [DevtoolsEnv.Hippy]: initHippyEnv,
+      [DevtoolsEnv.Voltron]: initVoltronEnv,
+      [DevtoolsEnv.TDF]: initTdfEnv,
+      [DevtoolsEnv.TDFCore]: initTdfCoreEnv,
+    }[global.appArgv];
+    initFn();
   }
 }
 
+// 捕获程序退出
 process.on('exit', () => Application.stopServer(true));
-// catch ctrl c
+// 捕获 ctrl c
 process.on('SIGINT', () => Application.stopServer(true));
-// catch kill
+// 捕获 kill
 process.on('SIGTERM', () => Application.stopServer(true));
 
 process.on('unhandledRejection', (e) => {

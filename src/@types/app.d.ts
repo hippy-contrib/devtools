@@ -1,5 +1,5 @@
 import { DevtoolsEnv, DBType } from './enum';
-export interface StartServerArgv {
+export interface AppArgv {
   host: string;
   port: number;
   static: string;
@@ -13,8 +13,14 @@ export interface StartServerArgv {
   startTunnel: boolean;
   env: DevtoolsEnv;
   publicPath?: string;
-  cachePath?: string;
-  logPath?: string;
+  cachePath: string;
+  logPath: string;
   open: boolean;
   dbType: DBType;
+}
+
+declare namespace NodeJS {
+  interface Global {
+    appArgv: AppArgv;
+  }
 }

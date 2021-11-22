@@ -1,6 +1,6 @@
 import WebSocket from 'ws/index.js';
 import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
-import { AppClientType, ClientEvent, DevicePlatform, ERROR_CODE, MiddlewareType } from '@/@types/enum';
+import { AppClientType, ClientEvent, DevicePlatform, ERROR_CODE, MiddlewareType, WinstonColor } from '@/@types/enum';
 import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
@@ -12,9 +12,9 @@ import { CDP_DOMAIN_LIST, getDomain, DomainRegister } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
 import { composeMiddlewares } from '@/utils/middleware';
 
-const filteredLog = new Logger('filtered', 'yellow');
-const downwardLog = new Logger('↓↓↓', 'red');
-const upwardLog = new Logger('↑↑↑', 'green');
+const filteredLog = new Logger('filtered', WinstonColor.Yellow);
+const downwardLog = new Logger('↓↓↓', WinstonColor.Red);
+const upwardLog = new Logger('↑↑↑', WinstonColor.Green);
 
 /**
  * app client 通道，负责调试协议至 app 端的收发。目前包括三个通道：
@@ -33,6 +33,8 @@ export abstract class AppClient extends DomainRegister {
   public type: AppClientType;
   protected isClosed = false;
   protected platform: DevicePlatform;
+  protected publisher: Publisher;
+  protected subscriber: Subscriber;
   private middleWareManager: MiddleWareManager;
   private urlParsedContext: UrlParsedContext;
   private acceptDomains: string[] = CDP_DOMAIN_LIST;

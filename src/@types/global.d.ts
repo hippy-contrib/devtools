@@ -14,3 +14,14 @@ interface Addon {
 }
 
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+
+interface Publisher {
+  publish(message: string);
+  disconnect();
+}
+
+interface Subscriber {
+  subscribe(cb: (message: string) => void): void;
+  unsubscribe(): void;
+  disconnect();
+}

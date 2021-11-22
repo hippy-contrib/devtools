@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-/* eslint-disable import/first -- 在入口最前面注册别名，因此禁用掉此规则 */
+/* eslint-disable import/first -- 在入口最前面注册别名，后面的 import 才能使用别名 */
 import moduleAlias from 'module-alias';
 moduleAlias.addAliases({
   '@': __dirname,
   'package.json': '../package.json',
 });
+// eslint-disable-next-line import/order -- 在入口最前面注册别名，后面的 import 才能使用别名
+import path from 'path';
 import yargs from 'yargs';
 import { DevtoolsEnv, DBType } from '@/@types/enum';
 import { Application } from '@/app';
@@ -22,7 +24,7 @@ const { argv } = yargs
     type: 'string',
     default: DBType.Memory,
     choices: [DBType.Memory, DBType.Redis],
-    describe: 'Memory will use in memory db and mocked pub/sub emitter. othersize, will connect to remote redis server',
+    describe: 'Localhost debug server please select memory. Remote debug server please select redis.',
   })
   .option('entry', {
     type: 'string',
@@ -85,9 +87,13 @@ if (argv.version) {
 
 log.info('version: %s', version);
 
-Application.startServer({
+global.appArgv = {
   ...argv,
   startTunnel: true,
   startAdb: true,
   startIWDP: false,
-});
+  cachePath: path.join(__dirname, 'cache'),
+  logPath: path.join(__dirname, 'log'),
+};
+
+Application.startServer();

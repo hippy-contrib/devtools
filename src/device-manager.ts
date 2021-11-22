@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { DeviceManagerEvent, DeviceStatus } from '@/@types/enum';
-import { DeviceInfo } from '@/@types/tunnel';
+import { DeviceInfo } from '@/@types/device';
 import { getDeviceList, selectDevice } from '@/child-process/addon';
 import { Logger } from '@/utils/log';
 import { model, createTargetByTunnel } from '@/db';
@@ -44,7 +44,7 @@ class DeviceManager extends EventEmitter {
     for (const device of this.deviceList) {
       if (device.physicalstatus !== DeviceStatus.Disconnected) {
         const debugTarget = createTargetByTunnel(device);
-        model.upsert(config.redis.key, debugTarget.id, debugTarget);
+        model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
       }
     }
     this.emit(DeviceManagerEvent.appDidConnect, this.getCurrent());

@@ -1,12 +1,12 @@
 import WebSocket, { Server } from 'ws/index.js';
 import { ClientEvent, ClientRole, DevicePlatform, AppClientType, ERROR_CODE } from '@/@types/enum';
-import { DebugTarget } from '@/@types/tunnel';
 import { createTargetByWs, model } from '@/db';
 import { appClientManager } from '@/client';
 import { AppClient, AppClientOption } from '@/client/app-client';
 import { AppClientFullOptionOmicCtx } from '@/client/app-client-manager';
 import { debugTargetToUrlParsedContext } from '@/middlewares';
-import { DebugTargetManager } from '@/router/chrome-inspect-router';
+import { DebugTargetManager } from '@/controller/debug-targets';
+import { DebugTarget } from '@/@types/debug-target';
 import { DomainRegister } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
 import { parseWsUrl } from '@/utils/url';
@@ -15,7 +15,7 @@ import { config } from '@/config';
 const log = new Logger('socket-bridge');
 
 export class SocketServer extends DomainRegister {
-  // key: appClientId
+  // key: clientId
   private connectionMap: Map<string, Connection> = new Map();
   private wss: Server;
   private server;
@@ -37,7 +37,7 @@ export class SocketServer extends DomainRegister {
     wss.on('connection', this.onConnection.bind(this));
 
     wss.on('error', (e) => {
-      log.info('wss error: %j', e);
+      log.info(`wss error: ${JSON.stringify(e)}`);
     });
     wss.on('headers', (headers) => {
       log.info('wss headers: %j', headers);
@@ -79,10 +79,16 @@ export class SocketServer extends DomainRegister {
      */
     const appClientId = debugTarget.platform === DevicePlatform.IOS ? debugTarget.title : debugTarget.id;
     if (!this.connectionMap.has(appClientId)) {
+      const pubChannelId = `${ws.clientId}_down`;
+      const subChannelId = `${ws.clientId}_up`;
+      const subscriber = await model.createPublisher(pubChannelId);
+      const publisher = await model.createPublisher(subChannelId);
       this.connectionMap.set(appClientId, {
         appClientList: [],
         devtoolsWsList: [],
         appWs: undefined,
+        subscriber,
+        publisher,
       });
     }
     const conn = this.connectionMap.get(appClientId);
@@ -170,9 +176,9 @@ export class SocketServer extends DomainRegister {
   private async onConnection(ws, req) {
     log.info('on connection, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
-    const { clientRole, targetId, pathname, contextName } = wsUrlParams;
+    const { clientRole, pathname, contextName } = wsUrlParams;
     let { clientId } = wsUrlParams;
-    const debugTarget = await DebugTargetManager.findTarget(targetId);
+    const debugTarget = await DebugTargetManager.findDebugTarget(clientId);
     log.info('debug target: %j', debugTarget);
     log.info('%s connected!', clientRole);
 
@@ -208,20 +214,26 @@ export class SocketServer extends DomainRegister {
     } else {
       log.info('ws app client connected. %s', clientId);
       const debugTarget = createTargetByWs(wsUrlParams);
-      model.upsert(config.redis.key, debugTarget.id, debugTarget);
+      model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
       if (!this.connectionMap.has(clientId)) {
+        const pubChannelId = `${ws.clientId}_down`;
+        const subChannelId = `${ws.clientId}_up`;
+        const subscriber = await model.createPublisher(pubChannelId);
+        const publisher = await model.createPublisher(subChannelId);
         this.connectionMap.set(clientId, {
           appClientList: [],
           devtoolsWsList: [],
           appWs: ws,
+          publisher,
+          subscriber,
         });
       } else {
         const conn = this.connectionMap.get(clientId);
         conn.appWs = ws;
       }
       ws.on('close', () => {
-        log.info('ws app client disconnect. %s', debugTarget.id);
-        model.delete(config.redis.key, debugTarget.id);
+        log.info('ws app client disconnect. %s', debugTarget.clientId);
+        model.delete(config.redis.key, debugTarget.clientId);
         for (const [clientId, { appWs }] of this.connectionMap.entries()) {
           if (appWs === ws) {
             this.connectionMap.delete(clientId);
@@ -239,4 +251,6 @@ type Connection = {
   appClientList: AppClient[];
   devtoolsWsList: WebSocket[];
   appWs?: WebSocket;
+  publisher: Publisher;
+  subscriber: Subscriber;
 };

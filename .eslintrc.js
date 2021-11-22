@@ -38,7 +38,9 @@ module.exports = {
     // 自动启用es6语法和ES6全局变量
     es6: true,
   },
-  globals: {},
+  globals: {
+    appArgv: true,
+  },
   settings: {
     'import/resolver': {
       typescript: {
