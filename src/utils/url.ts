@@ -7,6 +7,7 @@ export const parseWsUrl = (reqUrl: string) => {
   const contextName = url.searchParams.get('contextName');
   let platform = url.searchParams.get('platform') as DevicePlatform;
   const clientRole = url.searchParams.get('role') as ClientRole;
+  const deviceName = url.searchParams.get('deviceName');
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
   else if (clientRole === ClientRole.Ios) platform = DevicePlatform.IOS;
   return {
@@ -16,8 +17,11 @@ export const parseWsUrl = (reqUrl: string) => {
     clientRole,
     pathname: url.pathname,
     contextName,
+    deviceName,
   };
 };
+
+export type WsUrlParams = ReturnType<typeof parseWsUrl>;
 
 export const makeUrl = (baseUrl: string, query: unknown) => {
   let fullUrl = baseUrl;

@@ -89,3 +89,8 @@ export enum MiddlewareType {
   Upward = 'upward',
   Downward = 'downward',
 }
+
+export enum DBType {
+  Redis = 'redis',
+  Memory = 'memory',
+}

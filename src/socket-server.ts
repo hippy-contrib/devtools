@@ -1,7 +1,7 @@
 import WebSocket, { Server } from 'ws/index.js';
 import { ClientEvent, ClientRole, DevicePlatform, AppClientType, ERROR_CODE } from '@/@types/enum';
 import { DebugTarget } from '@/@types/tunnel';
-import { getDebugTargetManager } from '@/target-manager';
+import { createTargetByWs, model } from '@/db';
 import { appClientManager } from '@/client';
 import { AppClient, AppClientOption } from '@/client/app-client';
 import { AppClientFullOptionOmicCtx } from '@/client/app-client-manager';
@@ -10,29 +10,28 @@ import { DebugTargetManager } from '@/router/chrome-inspect-router';
 import { DomainRegister } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
 import { parseWsUrl } from '@/utils/url';
+import { config } from '@/config';
 
 const log = new Logger('socket-bridge');
 
 export class SocketServer extends DomainRegister {
   // key: appClientId
   private connectionMap: Map<string, Connection> = new Map();
-  private wsPath: string;
   private wss: Server;
   private server;
   private debugTarget: DebugTarget;
   // key: req id
   private idWsMap: Map<number, WebSocket> = new Map();
 
-  constructor(server, { wsPath }) {
+  constructor(server) {
     super();
-    this.wsPath = wsPath;
     this.server = server;
   }
 
   public start() {
     const wss = new Server({
       server: this.server,
-      path: this.wsPath,
+      path: config.wsPath,
     });
     this.wss = wss;
     wss.on('connection', this.onConnection.bind(this));
@@ -170,14 +169,14 @@ export class SocketServer extends DomainRegister {
 
   private async onConnection(ws, req) {
     log.info('on connection, ws url: %s', req.url);
-    const ctx = parseWsUrl(req.url);
-    const { clientRole, targetId, pathname, contextName, platform } = ctx;
-    let { clientId } = ctx;
+    const wsUrlParams = parseWsUrl(req.url);
+    const { clientRole, targetId, pathname, contextName } = wsUrlParams;
+    let { clientId } = wsUrlParams;
     const debugTarget = await DebugTargetManager.findTarget(targetId);
-    log.info('page: %j', debugTarget);
+    log.info('debug target: %j', debugTarget);
     log.info('%s connected!', clientRole);
 
-    if (pathname !== this.wsPath) {
+    if (pathname !== config.wsPath) {
       ws.close();
       return log.info('invalid ws connection path!');
     }
@@ -208,7 +207,8 @@ export class SocketServer extends DomainRegister {
       this.selectDebugTarget(debugTarget, ws);
     } else {
       log.info('ws app client connected. %s', clientId);
-      getDebugTargetManager(platform).addWsTarget(clientId);
+      const debugTarget = createTargetByWs(wsUrlParams);
+      model.upsert(config.redis.key, debugTarget.id, debugTarget);
       if (!this.connectionMap.has(clientId)) {
         this.connectionMap.set(clientId, {
           appClientList: [],
@@ -220,13 +220,13 @@ export class SocketServer extends DomainRegister {
         conn.appWs = ws;
       }
       ws.on('close', () => {
-        log.info('ws app client disconnect. %s', clientId);
+        log.info('ws app client disconnect. %s', debugTarget.id);
+        model.delete(config.redis.key, debugTarget.id);
         for (const [clientId, { appWs }] of this.connectionMap.entries()) {
           if (appWs === ws) {
             this.connectionMap.delete(clientId);
           }
         }
-        getDebugTargetManager(platform).removeWsTarget(ws.clientId);
       });
       ws.on('error', (e) => {
         log.error('app ws error %j', e);

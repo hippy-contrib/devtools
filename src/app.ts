@@ -16,6 +16,7 @@ import { DebugTargetManager, getChromeInspectRouter } from '@/router/chrome-insp
 import { SocketServer } from '@/socket-server';
 import { Logger } from '@/utils/log';
 import { StartServerArgv } from '@/@types/app';
+import { initModel } from '@/db';
 
 const log = new Logger('application');
 
@@ -48,6 +49,7 @@ export class Application {
     Application.argv = argv;
     Application.init();
     Application.setEnv(env as DevtoolsEnv);
+    initModel(argv.dbType);
 
     if (clearAddrInUse) {
       try {
@@ -64,14 +66,14 @@ export class Application {
       app.use(conditional());
       app.use(etag());
 
-      Application.server = app.listen(port, host, () => {
+      Application.server = app.listen(port, host, async () => {
         log.info('start debug server.');
         if (shouldStartTunnel) {
           startTunnel(argv);
         } else if (startIWDP) startIosProxy(argv);
         if (startAdb) startAdbProxy(port);
 
-        Application.socketServer = new SocketServer(Application.server, argv);
+        Application.socketServer = new SocketServer(Application.server);
         Application.socketServer.start();
         Application.isServerReady = true;
         if (openChrome) open(`http://localhost:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
@@ -87,7 +89,7 @@ export class Application {
         try {
           await next();
         } catch (e) {
-          log.error('koa error: %j', e);
+          log.error(`koa error: ${JSON.stringify(e)}`);
           return (ctx.body = e.msg);
         }
       });
@@ -156,7 +158,7 @@ export class Application {
 
   private static init() {
     try {
-      fs.rmdirSync(config.cachePath, { recursive: true });
+      fs.rmSync(config.cachePath, { recursive: true });
     } catch (e) {
       log.error('rm cache dir error: %j', e);
     }
@@ -179,5 +181,5 @@ process.on('SIGINT', () => Application.stopServer(true));
 process.on('SIGTERM', () => Application.stopServer(true));
 
 process.on('unhandledRejection', (e) => {
-  log.error('unhandledRejection %j', e);
+  log.error(`unhandledRejection ${JSON.stringify(e)}`);
 });

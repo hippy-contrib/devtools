@@ -43,6 +43,7 @@ export class Logger {
     const label = this.color ? colors[this.color](this.label) : (colors as any).maps.random(this.label);
     this.loggerInstance = winston.createLogger({
       format: format.combine(
+        format.errors({ stack: true }),
         format.label({ label }),
         format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
         format.colorize(),

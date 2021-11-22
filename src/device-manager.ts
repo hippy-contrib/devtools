@@ -1,9 +1,10 @@
 import { EventEmitter } from 'events';
 import { DeviceManagerEvent, DeviceStatus } from '@/@types/enum';
 import { DeviceInfo } from '@/@types/tunnel';
-import { getDebugTargetManager } from '@/target-manager';
 import { getDeviceList, selectDevice } from '@/child-process/addon';
 import { Logger } from '@/utils/log';
+import { model, createTargetByTunnel } from '@/db';
+import { config } from '@/config';
 
 const log = new Logger('device-manager');
 
@@ -32,7 +33,7 @@ class DeviceManager extends EventEmitter {
     // state.selectedIndex = -1;
     const device = this.deviceList[0];
     if (!device) return;
-    getDebugTargetManager(device.platform).clearCustomTarget();
+    model.delete(config.redis.key, device.devicename);
     this.emit(DeviceManagerEvent.appDidDisConnect, this.getCurrent());
   }
 
@@ -40,11 +41,10 @@ class DeviceManager extends EventEmitter {
     this.isAppConnected = true;
     const device = this.deviceList[0];
     if (!device) return;
-    const debugTargetManager = getDebugTargetManager(device.platform);
-    debugTargetManager.clearCustomTarget();
     for (const device of this.deviceList) {
       if (device.physicalstatus !== DeviceStatus.Disconnected) {
-        debugTargetManager.addCustomTarget(device.devicename);
+        const debugTarget = createTargetByTunnel(device);
+        model.upsert(config.redis.key, debugTarget.id, debugTarget);
       }
     }
     this.emit(DeviceManagerEvent.appDidConnect, this.getCurrent());

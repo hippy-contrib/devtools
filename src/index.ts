@@ -6,7 +6,7 @@ moduleAlias.addAliases({
   'package.json': '../package.json',
 });
 import yargs from 'yargs';
-import { DevtoolsEnv } from '@/@types/enum';
+import { DevtoolsEnv, DBType } from '@/@types/enum';
 import { Application } from '@/app';
 import { Logger } from '@/utils/log';
 import { version } from 'package.json';
@@ -18,6 +18,12 @@ const { argv } = yargs
   .alias('h', 'help')
   .help()
   .version()
+  .option('dbType', {
+    type: 'string',
+    default: DBType.Memory,
+    choices: [DBType.Memory, DBType.Redis],
+    describe: 'Memory will use in memory db and mocked pub/sub emitter. othersize, will connect to remote redis server',
+  })
   .option('entry', {
     type: 'string',
     default: 'dist/dev/index.bundle',
@@ -81,7 +87,6 @@ log.info('version: %s', version);
 
 Application.startServer({
   ...argv,
-  wsPath: '/debugger-proxy',
   startTunnel: true,
   startAdb: true,
   startIWDP: false,

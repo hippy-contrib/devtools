@@ -22,9 +22,10 @@ export interface DebugTarget {
   webSocketDebuggerUrl: string;
   devtoolsFrontendUrlCompat?: string;
   platform: DevicePlatform;
-  appClientTypeList: AppClientType[];
+  appClientTypeList?: AppClientType[];
   type?: string;
   appId?: string;
+  deviceName: string;
   device?: {
     deviceId: string;
     deviceName: string;

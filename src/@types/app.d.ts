@@ -1,10 +1,9 @@
-import { DevtoolsEnv } from './enum';
+import { DevtoolsEnv, DBType } from './enum';
 export interface StartServerArgv {
   host: string;
   port: number;
   static: string;
   entry: string;
-  wsPath: string;
   iwdpPort: number;
   iwdpStartPort: number;
   iwdpEndPort: number;
@@ -17,4 +16,5 @@ export interface StartServerArgv {
   cachePath?: string;
   logPath?: string;
   open: boolean;
+  dbType: DBType;
 }

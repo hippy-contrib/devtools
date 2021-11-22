@@ -1,18 +1,17 @@
 import Router from 'koa-router';
 import request from 'request-promise';
 import { v4 as uuidv4 } from 'uuid';
-import { AppClientType, DevicePlatform, DevtoolsEnv, ChromePageType, ClientRole } from '@/@types/enum';
+import { AppClientType, DevicePlatform, ClientRole } from '@/@types/enum';
 import { StartServerArgv } from '@/@types/app';
 import { DebugTarget } from '@/@types/tunnel';
-import { getDebugTargetManager } from '@/target-manager';
-import { appClientManager } from '@/client';
+import { model } from '@/db';
 import { config } from '@/config';
 import { Logger } from '@/utils/log';
 import { makeUrl } from '@/utils/url';
 
 const log = new Logger('chrome-inspect-router');
 
-type RouterArgv = Pick<StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'wsPath' | 'env'>;
+type RouterArgv = Pick<StartServerArgv, 'host' | 'port' | 'iwdpPort' | 'env'>;
 let cachedRouterArgv = {} as unknown as RouterArgv;
 
 export const getChromeInspectRouter = (routerArgv: RouterArgv) => {
@@ -40,26 +39,53 @@ export class DebugTargetManager {
   public static debugTargets: DebugTarget[] = [];
 
   public static getDebugTargets = async (): Promise<DebugTarget[]> => {
-    // clientId 可以随意赋值，每个 ws 连过来时 clientId 不同即可
-    const { iwdpPort, host, port, wsPath } = cachedRouterArgv;
-    const clientId = uuidv4();
-    const rst: DebugTarget[] = [];
-    let iosTargets;
-    /**
-     * iOS TDFCore 没有 JSContext，IWDP检测不到，需要根据 appConnect 事件添加调试页面
-     * iOS Hippy 只能调试走 WS 通道的协议，也忽略 IWDP 获取到的页面列表
-     */
-    if ([DevtoolsEnv.TDFCore, DevtoolsEnv.Hippy].indexOf(cachedRouterArgv.env) !== -1) {
-      iosTargets = getIosTargetsByManager({ host, port, wsPath, clientId });
-    } else {
-      iosTargets = await getIosTargetsByIWDP({ iwdpPort, host, port, wsPath, clientId });
-    }
+    const { iwdpPort } = cachedRouterArgv;
 
-    const androidTargets = getAndroidTargets({ host, port, wsPath, clientId });
-    rst.push(...iosTargets);
-    rst.push(...androidTargets);
-    DebugTargetManager.debugTargets = rst;
-    return rst;
+    const [targets, iosPages] = await Promise.all([getTargetsByDB(), getIWDPPages({ iwdpPort })]);
+
+    const iosTargets = [];
+    targets.forEach((target) => {
+      const pages = iosPages.filter(
+        (iosPage) =>
+          (target.appClientTypeList[0] === AppClientType.WS && target.title === iosPage.title) ||
+          (target.appClientTypeList[0] === AppClientType.Tunnel && target.deviceName === iosPage.device.deviceName),
+      );
+      if (pages.length) {
+        (target as any).shouldRemove = true;
+        iosTargets.push(
+          ...pages.map((iosPage) => {
+            const matchRst = iosPage.title.match(/^HippyContext:\s(.*)$/);
+            const bundleName = matchRst ? matchRst[1] : '';
+            const targetId = iosPage.webSocketDebuggerUrl;
+            const clientId = uuidv4();
+            const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
+              platform: DevicePlatform.IOS,
+              clientId,
+              targetId,
+              role: ClientRole.Devtools,
+            });
+            const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
+              remoteFrontend: true,
+              experiments: true,
+              ws: wsUrl,
+              env: config.env,
+            });
+            return {
+              ...target,
+              device: iosPage.device,
+              id: iosPage.webSocketDebuggerUrl,
+              title: iosPage.title,
+              bundleName,
+              devtoolsFrontendUrl,
+              devtoolsFrontendUrlCompat: devtoolsFrontendUrl,
+              webSocketDebuggerUrl: `ws://${wsUrl}`,
+            };
+          }),
+        );
+      }
+    });
+    DebugTargetManager.debugTargets = targets.filter((target) => !(target as any).shouldRemove).concat(iosTargets);
+    return DebugTargetManager.debugTargets;
   };
 
   public static async findTarget(id: string) {
@@ -68,18 +94,14 @@ export class DebugTargetManager {
   }
 }
 
-/**
- * ios: 通过 IWDP 获取调试页面列表
- */
-const getIosTargetsByIWDP = async ({ iwdpPort, host, port, wsPath, clientId }): Promise<DebugTarget[]> => {
+const getIWDPPages = async ({ iwdpPort }): Promise<IWDPPage[]> => {
   try {
     const deviceList = await request({
       url: '/json',
       baseUrl: `http://127.0.0.1:${iwdpPort}`,
       json: true,
     });
-    const appClientTypeList = appClientManager.getIosAppClientOptions().map(({ Ctor }) => Ctor.name) as AppClientType[];
-    const debugTargets: DebugTarget[] =
+    const debugTargets: IWDPPage[] =
       (await Promise.all(
         deviceList.map(async (device) => {
           const port = device.url.match(/:(\d+)/)[1];
@@ -97,99 +119,11 @@ const getIosTargetsByIWDP = async ({ iwdpPort, host, port, wsPath, clientId }): 
           }
         }),
       )) || [];
-    return debugTargets.flat().map((debugTarget) => {
-      const targetId = debugTarget.webSocketDebuggerUrl;
-      const wsUrl = makeUrl(`${host}:${port}${wsPath}`, {
-        platform: DevicePlatform.IOS,
-        clientId,
-        targetId,
-        role: ClientRole.Devtools,
-      });
-      const devtoolsFrontendUrl = makeUrl(`http://localhost:${port}/front_end/inspector.html`, {
-        remoteFrontend: true,
-        experiments: true,
-        ws: wsUrl,
-        env: config.env,
-      });
-      const matchRst = debugTarget.title.match(/^HippyContext:\s(.*)$/);
-      const bundleName = matchRst ? matchRst[1] : '';
-      return {
-        ...debugTarget,
-        id: targetId,
-        clientId,
-        thumbnailUrl: '',
-        appClientTypeList,
-        description: debugTarget.title,
-        devtoolsFrontendUrl,
-        devtoolsFrontendUrlCompat: devtoolsFrontendUrl,
-        faviconUrl: bundleName ? 'http://res.imtt.qq.com/hippydoc/img/hippy-logo.ico' : '',
-        title: debugTarget.title,
-        bundleName,
-        type: ChromePageType.Page,
-        platform: DevicePlatform.IOS,
-        url: '',
-        webSocketDebuggerUrl: `ws://${wsUrl}`,
-      };
-    });
+    return debugTargets.flat();
   } catch (e) {
     log.error(e);
     return [];
   }
 };
 
-const getIosTargetsByManager = (params: GetTargetsParams): DebugTarget[] => getTargets(params, DevicePlatform.IOS);
-
-/**
- * android: 通过 androidDebugTargetManager 获取调试页面列表
- */
-
-const getAndroidTargets = (params: GetTargetsParams): DebugTarget[] => getTargets(params, DevicePlatform.Android);
-
-type GetTargetsParams = {
-  host: string;
-  port: number;
-  wsPath: string;
-  clientId: string;
-};
-
-const getTargets = ({ host, port, wsPath, clientId }: GetTargetsParams, platform: DevicePlatform): DebugTarget[] => {
-  const appClientOptionsFunction = {
-    [DevicePlatform.Android]: appClientManager.getAndroidAppClientOptions,
-    [DevicePlatform.IOS]: appClientManager.getIosAppClientOptions,
-  }[platform];
-  const appClientTypeList = appClientOptionsFunction
-    .call(appClientManager)
-    .map(({ Ctor }) => Ctor.name) as AppClientType[];
-  return getDebugTargetManager(platform)
-    .getTargetIdList()
-    .map((targetId) => {
-      const wsUrl = makeUrl(`${host}:${port}${wsPath}`, {
-        platform,
-        clientId,
-        targetId,
-        role: ClientRole.Devtools,
-      });
-      const devtoolsFrontendUrl = makeUrl(`http://localhost:${port}/front_end/inspector.html`, {
-        remoteFrontend: true,
-        experiments: true,
-        ws: wsUrl,
-        env: config.env,
-      });
-      const title = platform === DevicePlatform.IOS ? targetId : 'Hippy debug tools for V8';
-      return {
-        id: targetId || clientId,
-        clientId,
-        thumbnailUrl: '',
-        description: 'Hippy instance',
-        appClientTypeList,
-        devtoolsFrontendUrl,
-        devtoolsFrontendUrlCompat: devtoolsFrontendUrl,
-        faviconUrl: 'http://res.imtt.qq.com/hippydoc/img/hippy-logo.ico',
-        title,
-        type: ChromePageType.Page,
-        platform,
-        url: '',
-        webSocketDebuggerUrl: `ws://${wsUrl}`,
-      };
-    });
-};
+const getTargetsByDB = async (): Promise<Array<DebugTarget>> => await model.getAll(config.redis.key);
