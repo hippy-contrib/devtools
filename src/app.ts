@@ -11,6 +11,7 @@ import { Logger } from '@/utils/log';
 import { initModel } from '@/db';
 import { DebugTargetManager } from '@/controller/debug-targets';
 import { createRouter } from '@/router';
+import { config } from '@/config';
 
 const log = new Logger('application');
 
@@ -41,7 +42,7 @@ export class Application {
         await kill(port, 'tcp');
         await kill(iwdpPort, 'tcp');
       } catch (e) {
-        log.error('Address already in use!');
+        log.error('Address already in use! %s', (e as Error)?.stack);
         return process.exit(1);
       }
     }
@@ -54,7 +55,7 @@ export class Application {
         if (shouldStartTunnel) startTunnel();
         else if (startIWDP) startIosProxy();
         if (startAdb) startAdbProxy();
-        if (openChrome) open(`http://localhost:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
+        if (openChrome) open(`http://${host}:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
 
         Application.socketServer = new SocketServer(Application.server);
         Application.socketServer.start();
@@ -82,7 +83,7 @@ export class Application {
           process.exit(0);
         }, 100);
     } catch (e) {
-      log.error('stopServer error, %j', e);
+      log.error('stopServer error, %s', (e as Error)?.stack);
     }
   }
 
@@ -108,11 +109,11 @@ export class Application {
   }
 
   private static init() {
-    const { cachePath } = global.appArgv;
+    const { cachePath } = config;
     try {
       fs.rmSync(cachePath, { recursive: true });
     } catch (e) {
-      log.error('rm cache dir error: %j', e);
+      log.error('rm cache dir error: %s', (e as Error)?.stack);
     }
     return fs.promises.mkdir(cachePath, { recursive: true });
   }
@@ -123,7 +124,7 @@ export class Application {
       [DevtoolsEnv.Voltron]: initVoltronEnv,
       [DevtoolsEnv.TDF]: initTdfEnv,
       [DevtoolsEnv.TDFCore]: initTdfCoreEnv,
-    }[global.appArgv];
+    }[global.appArgv.env];
     initFn();
   }
 }
@@ -135,6 +136,6 @@ process.on('SIGINT', () => Application.stopServer(true));
 // 捕获 kill
 process.on('SIGTERM', () => Application.stopServer(true));
 
-process.on('unhandledRejection', (e) => {
-  log.error(`unhandledRejection ${JSON.stringify(e)}`);
+process.on('unhandledRejection', (e: Error) => {
+  log.error(`unhandledRejection %s`, e.stack);
 });

@@ -8,6 +8,8 @@
  */
 
 import { PH } from '@/@types/enum';
+import { Logger } from '@/utils/log';
+const log = new Logger('trace-adapter');
 interface JscFrame {
   sourceID: string;
   name: string;
@@ -144,7 +146,7 @@ export default class TraceAdapter {
     if (subTree && parentNode) {
       subTree.parent = parentNode;
       parentNode.children.push(subTree);
-    } else console.log("subTree doesn't exist!");
+    } else log.error("subTree doesn't exist!");
   }
 
   updateSampleNum(trace: JscTrace, prevTrace: JscTrace, end: number) {
@@ -164,7 +166,7 @@ export default class TraceAdapter {
         parentNode.endTs = trace.timestamp + sampleInterval;
         parentNode = parentNode.parent;
       } else {
-        console.log("update frame sample time error, parent node doesn't match!");
+        log.error("update frame sample time error, parent node doesn't match!");
       }
     }
   }

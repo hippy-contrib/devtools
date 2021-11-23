@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import { DebugTargetManager } from 'src/controller/debug-targets';
+import { DebugTargetManager } from '@/controller/debug-targets';
 
 export const getDebugTargetsRouter = () => {
   const router = new Router();

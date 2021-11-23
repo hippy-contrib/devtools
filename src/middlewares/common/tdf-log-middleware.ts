@@ -1,7 +1,10 @@
 import { TdfEvent } from 'tdf-devtools-protocol/dist/types/enum-tdf-mapping';
 import colors from 'colors/safe';
 import { ChromeEvent } from 'tdf-devtools-protocol/dist/types/enum-chrome-mapping';
+import { Logger } from '@/utils/log';
 import { MiddleWareManager } from '../middleware-context';
+
+const log = new Logger('tdf-log-middleware');
 
 export const tdfLogMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
@@ -33,7 +36,7 @@ export const tdfLogMiddleWareManager: MiddleWareManager = {
         });
         return Promise.resolve(firstLog);
       } catch (e) {
-        console.error(`${ChromeEvent.LogEntryAdded} failed!`, e);
+        log.error(`${ChromeEvent.LogEntryAdded} failed! %s`, (e as Error)?.stack);
         return Promise.reject(e);
       }
     },

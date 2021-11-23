@@ -40,7 +40,7 @@ export const enum ClientType {
 export enum ClientRole {
   Android = 'android_client',
   Devtools = 'devtools',
-  Ios = 'ios_client',
+  IOS = 'ios_client',
 }
 
 export const enum ClientEvent {
@@ -51,7 +51,7 @@ export const enum ClientEvent {
 export const enum AppClientType {
   Tunnel = 'TunnelAppClient',
   WS = 'WsAppClient',
-  IosProxy = 'IwdpAppClient',
+  IWDP = 'IwdpAppClient',
   Custom = 'custom',
 }
 

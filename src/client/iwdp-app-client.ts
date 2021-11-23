@@ -21,7 +21,7 @@ export class IwdpAppClient extends AppClient {
   constructor(url, option) {
     super(url, option);
     this.url = url;
-    this.type = AppClientType.IosProxy;
+    this.type = AppClientType.IWDP;
     this.connect();
     this.registerMessageListener();
   }
@@ -64,7 +64,7 @@ export class IwdpAppClient extends AppClient {
     });
 
     this.ws?.on('error', (e) => {
-      log.error('ios proxy client error: %j', e);
+      log.error('ios proxy client error: %s', e.stack);
     });
   }
 
@@ -93,7 +93,7 @@ export class IwdpAppClient extends AppClient {
     try {
       this.ws = new WebSocket(this.url);
     } catch (e) {
-      log.error('%j', e);
+      log.error('iwdp connect error: %s', (e as Error)?.stack);
     }
   }
 }

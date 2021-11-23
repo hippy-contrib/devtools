@@ -8,8 +8,8 @@ export const exec = (cmd: string, argv: any, options?: any) =>
     const cp = spawn(cmd, argv, options);
     cp.stdout.on('data', (msg: any) => log.info(msg.toString()));
     cp.stderr.on('data', (err: any) => log.error(err.toString()));
-    cp.on('error', (err: any) => {
-      log.error(err);
+    cp.on('error', (err: Error) => {
+      log.error('spawn child process error: %s', err.stack);
       reject(err);
     });
     cp.on('close', (code: any) => {

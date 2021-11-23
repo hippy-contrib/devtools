@@ -23,7 +23,7 @@ export class RedisModel extends DBModel {
         url: config.redis.url,
       });
       this.client.on('error', (e) => {
-        log.error('%j', e);
+        log.error('create redis client error: %s', e.stack);
       });
     }
   }

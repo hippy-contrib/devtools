@@ -6,14 +6,12 @@ moduleAlias.addAliases({
   'package.json': '../package.json',
 });
 // eslint-disable-next-line import/order -- 在入口最前面注册别名，后面的 import 才能使用别名
-import path from 'path';
 import yargs from 'yargs';
 import { DevtoolsEnv, DBType } from '@/@types/enum';
 import { Application } from '@/app';
 import { Logger } from '@/utils/log';
 import { version } from 'package.json';
 
-const log = new Logger('entry');
 const { argv } = yargs
   .alias('v', 'version')
   .describe('v', 'show version information')
@@ -85,15 +83,14 @@ if (argv.version) {
   yargs.version().exit(0, null);
 }
 
-log.info('version: %s', version);
-
 global.appArgv = {
   ...argv,
   startTunnel: true,
   startAdb: true,
   startIWDP: false,
-  cachePath: path.join(__dirname, 'cache'),
-  logPath: path.join(__dirname, 'log'),
 };
+
+const log = new Logger('entry');
+log.info('version: %s', version);
 
 Application.startServer();

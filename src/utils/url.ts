@@ -1,19 +1,13 @@
-import { ClientRole, DevicePlatform } from '@/@types/enum';
+import { ClientRole } from '@/@types/enum';
 
 export const parseWsUrl = (reqUrl: string) => {
   const url = new URL(reqUrl, 'http://0.0.0.0');
   const clientId = url.searchParams.get('clientId');
-  const devtoolsId = url.searchParams.get('devtoolsId');
   const contextName = url.searchParams.get('contextName');
-  let platform = url.searchParams.get('platform') as DevicePlatform;
   const clientRole = url.searchParams.get('role') as ClientRole;
   const deviceName = url.searchParams.get('deviceName');
-  if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
-  else if (clientRole === ClientRole.Ios) platform = DevicePlatform.IOS;
   return {
     clientId,
-    devtoolsId,
-    platform,
     clientRole,
     pathname: url.pathname,
     contextName,

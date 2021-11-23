@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { DeviceInfo } from '@/@types/device';
 import { ChromePageType, DevicePlatform, ClientRole, AppClientType } from '@/@types/enum';
 import { makeUrl, WsUrlParams } from '@/utils/url';
@@ -6,13 +5,10 @@ import { config } from '@/config';
 import { DebugTarget } from '@/@types/debug-target';
 
 export const createTargetByTunnel = (device: DeviceInfo): DebugTarget => {
-  const devtoolsId = uuidv4();
   // 通过 tunnel 创建的 target，暂时使用 devicename 作为调试对象id，后续终端重构后使用 targetCreated 事件抛出的 id
   const clientId = device.devicename;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
-    platform: device.platform,
     clientId,
-    devtoolsId,
     role: ClientRole.Devtools,
   });
   const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
@@ -42,12 +38,12 @@ export const createTargetByTunnel = (device: DeviceInfo): DebugTarget => {
 };
 
 export const createTargetByWs = (wsUrlParams: WsUrlParams): DebugTarget => {
-  const { clientId, platform, contextName, deviceName } = wsUrlParams;
-  const devtoolsId = uuidv4();
+  const { clientId, clientRole, contextName, deviceName } = wsUrlParams;
+  let platform;
+  if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
+  if (clientRole === ClientRole.IOS) platform = DevicePlatform.IOS;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
-    platform,
     clientId,
-    devtoolsId,
     role: ClientRole.Devtools,
   });
   const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
@@ -69,5 +65,31 @@ export const createTargetByWs = (wsUrlParams: WsUrlParams): DebugTarget => {
     type: ChromePageType.Page,
     deviceName,
     appClientTypeList: [AppClientType.WS],
+  };
+};
+
+export const createTargetByIwdpPage = (iwdpPage: IWDPPage): DebugTarget => {
+  const iwdpWsUrl = iwdpPage.webSocketDebuggerUrl;
+  const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
+    // iwdpWsUrl,
+    clientId: iwdpWsUrl,
+    role: ClientRole.Devtools,
+  });
+  return {
+    clientId: iwdpWsUrl,
+    iwdpWsUrl,
+    devtoolsFrontendUrl: iwdpPage.devtoolsFrontendUrl,
+    devtoolsFrontendUrlCompat: iwdpPage.devtoolsFrontendUrl,
+    title: iwdpPage.title,
+    thumbnailUrl: '',
+    url: '',
+    description: '',
+    webSocketDebuggerUrl: `ws://${wsUrl}`,
+    platform: DevicePlatform.IOS,
+    type: ChromePageType.Page,
+    deviceId: iwdpPage.device.deviceId,
+    deviceName: iwdpPage.device.deviceName,
+    deviceOSVersion: iwdpPage.device.deviceOSVersion,
+    appClientTypeList: [AppClientType.IWDP],
   };
 };

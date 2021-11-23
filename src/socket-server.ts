@@ -37,7 +37,7 @@ export class SocketServer extends DomainRegister {
     wss.on('connection', this.onConnection.bind(this));
 
     wss.on('error', (e) => {
-      log.info(`wss error: ${JSON.stringify(e)}`);
+      log.info(`wss error: %s`, e.stack);
     });
     wss.on('headers', (headers) => {
       log.info('wss headers: %j', headers);
@@ -67,31 +67,34 @@ export class SocketServer extends DomainRegister {
   }
 
   /**
+   * app 端连接过来时，添加 pub/sub
+   */
+  public addPubSub() {}
+
+  /**
    * 选择调试页面，为其搭建通道
    */
   public selectDebugTarget(debugTarget: DebugTarget, ws?: WebSocket): AppClient[] {
-    if (!debugTarget) return;
-    this.debugTarget = debugTarget;
     /**
      * ios 使用 title 作为 clientId，不同环境的 title 取值不同
      * - hippy: title === contextName, title 需要和 IWDP 获取到的 contextName 匹配
      * - TDFCore: title === deviceName, 只有 tunnel 通道
      */
-    const appClientId = debugTarget.platform === DevicePlatform.IOS ? debugTarget.title : debugTarget.id;
-    if (!this.connectionMap.has(appClientId)) {
-      const pubChannelId = `${ws.clientId}_down`;
-      const subChannelId = `${ws.clientId}_up`;
-      const subscriber = await model.createPublisher(pubChannelId);
-      const publisher = await model.createPublisher(subChannelId);
-      this.connectionMap.set(appClientId, {
+    const clientId = debugTarget.platform === DevicePlatform.IOS ? debugTarget.title : debugTarget.clientId;
+    if (!this.connectionMap.has(clientId)) {
+      // const pubChannelId = `${clientId}_down`;
+      // const subChannelId = `${clientId}_up`;
+      // const subscriber = await model.createPublisher(pubChannelId);
+      // const publisher = await model.createPublisher(subChannelId);
+      this.connectionMap.set(clientId, {
         appClientList: [],
         devtoolsWsList: [],
         appWs: undefined,
-        subscriber,
-        publisher,
+        subscriber: undefined,
+        publisher: undefined,
       });
     }
-    const conn = this.connectionMap.get(appClientId);
+    const conn = this.connectionMap.get(clientId);
     if (!conn.appClientList?.length) {
       let options;
       if (debugTarget.platform === DevicePlatform.Android) {
@@ -114,7 +117,7 @@ export class SocketServer extends DomainRegister {
               return log.error('no app ws connection, ignore WsAppClient.');
             }
           }
-          return new Ctor(appClientId, newOption);
+          return new Ctor(clientId, newOption);
         })
         .filter((v) => v);
     }
@@ -166,7 +169,7 @@ export class SocketServer extends DomainRegister {
         if (i !== -1) conn.devtoolsWsList.splice(i, 1);
       });
       ws.on('error', (e) => {
-        log.error('ws error %j', e);
+        log.error('ws error %s', e.stack);
       });
     }
 
@@ -177,7 +180,7 @@ export class SocketServer extends DomainRegister {
     log.info('on connection, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
     const { clientRole, pathname, contextName } = wsUrlParams;
-    let { clientId } = wsUrlParams;
+    const { clientId } = wsUrlParams;
     const debugTarget = await DebugTargetManager.findDebugTarget(clientId);
     log.info('debug target: %j', debugTarget);
     log.info('%s connected!', clientRole);
@@ -194,20 +197,19 @@ export class SocketServer extends DomainRegister {
       ws.close();
       return log.info('invalid client role!');
     }
-    if (clientRole === ClientRole.Ios) {
+    if (clientRole === ClientRole.IOS) {
       if (!contextName) {
         ws.close();
         return log.info('invalid ios connection, should request with contextName!');
       }
       // iOS 这里以 contextName 作为 clientId，方便与 IWDP 获取到的调试列表做匹配
-      clientId = contextName;
+      // clientId = contextName;
     }
 
     if (!clientId) {
       ws.close();
       return log.info('invalid ws connection!');
     }
-    ws.clientId = clientId;
 
     if (clientRole === ClientRole.Devtools) {
       this.selectDebugTarget(debugTarget, ws);
@@ -216,8 +218,8 @@ export class SocketServer extends DomainRegister {
       const debugTarget = createTargetByWs(wsUrlParams);
       model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
       if (!this.connectionMap.has(clientId)) {
-        const pubChannelId = `${ws.clientId}_down`;
-        const subChannelId = `${ws.clientId}_up`;
+        const pubChannelId = `${clientId}_down`;
+        const subChannelId = `${clientId}_up`;
         const subscriber = await model.createPublisher(pubChannelId);
         const publisher = await model.createPublisher(subChannelId);
         this.connectionMap.set(clientId, {
@@ -241,10 +243,17 @@ export class SocketServer extends DomainRegister {
         }
       });
       ws.on('error', (e) => {
-        log.error('app ws error %j', e);
+        log.error('app ws error %s', e.stack);
       });
     }
   }
+
+  /**
+   * 创建 pub sub，pipe msg to redis
+   */
+  private onDevtoolsConnection() {}
+
+  private onAppConnection() {}
 }
 
 type Connection = {

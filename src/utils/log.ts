@@ -2,6 +2,7 @@ import path from 'path';
 import util from 'util';
 import colors from 'colors/safe';
 import winston from 'winston';
+import { config } from '@/config';
 import 'winston-daily-rotate-file';
 
 export class Logger {
@@ -32,7 +33,7 @@ export class Logger {
 
   private initLoggerInstance() {
     const transport = new winston.transports.DailyRotateFile({
-      filename: path.join(global.appArgv.logPath, '%DATE%.log'),
+      filename: path.join(config.logPath, '%DATE%.log'),
       datePattern: 'YYYY-MM-DD-HH',
       zippedArchive: false,
       maxSize: '20m',

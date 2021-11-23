@@ -13,8 +13,6 @@ export interface AppArgv {
   startTunnel: boolean;
   env: DevtoolsEnv;
   publicPath?: string;
-  cachePath: string;
-  logPath: string;
   open: boolean;
   dbType: DBType;
 }

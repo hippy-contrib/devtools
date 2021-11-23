@@ -119,7 +119,7 @@ export abstract class AppClient extends DomainRegister {
       const middlewareList = this.getMiddlewareList(MiddlewareType.Downward, method);
       return composeMiddlewares(middlewareList)(this.makeContext(msg));
     } catch (e) {
-      console.error(`app client on message error: ${JSON.stringify(e)}`);
+      downwardLog.error(`app client on message error: %s`, (e as Error)?.stack);
       return Promise.reject(e);
     }
   }

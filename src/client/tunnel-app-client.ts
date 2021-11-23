@@ -32,7 +32,7 @@ export class TunnelAppClient extends AppClient {
           }
         });
       } catch (e) {
-        log.info(`parse tunnel response json failed. error: %j, \n msg: %j`, e, data);
+        log.info(`parse tunnel response json failed. error: %s, \n msg: %j`, (e as Error)?.stack, data);
       }
     });
   }

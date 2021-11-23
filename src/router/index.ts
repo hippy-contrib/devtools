@@ -19,7 +19,7 @@ export const createRouter = (app: Koa) => {
     try {
       await next();
     } catch (e) {
-      log.error(`koa error: ${JSON.stringify(e)}`);
+      log.error(`koa error: %s`, (e as Error)?.stack);
       return (ctx.body = (e as any).msg);
     }
   });
@@ -40,5 +40,5 @@ export const createRouter = (app: Koa) => {
       },
     }),
   );
-  app.use(serve(publicPath || path.join(__dirname, 'public')));
+  app.use(serve(publicPath || path.join(__dirname, '../public')));
 };
