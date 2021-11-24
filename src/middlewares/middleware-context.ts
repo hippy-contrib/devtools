@@ -1,4 +1,4 @@
-import { AppClientType, DevicePlatform, ClientRole } from '@/@types/enum';
+import { DevicePlatform } from '@/@types/enum';
 import { DebugTarget } from '@/@types/debug-target';
 
 export interface ContextBase {
@@ -9,11 +9,6 @@ export interface UrlParsedContext extends ContextBase {
   clientId: string;
   debugTarget: DebugTarget;
   platform: DevicePlatform;
-  appClientTypeList?: AppClientType[];
-  clientRole?: ClientRole;
-  bundleName?: string;
-  customDomains?: string[];
-  pathname?: string;
 }
 
 export interface MiddleWareContext extends UrlParsedContext {

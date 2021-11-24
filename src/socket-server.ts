@@ -1,27 +1,164 @@
 import WebSocket, { Server } from 'ws/index.js';
-import { ClientEvent, ClientRole, DevicePlatform, AppClientType, ERROR_CODE } from '@/@types/enum';
-import { createTargetByWs, model } from '@/db';
+import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
+import {
+  AppClientType,
+  ClientEvent,
+  ClientRole,
+  DevicePlatform,
+  ERROR_CODE,
+  InternalChannelEvent,
+  WinstonColor,
+} from '@/@types/enum';
+import { createTargetByWs, model, Publisher, Subscriber } from '@/db';
 import { appClientManager } from '@/client';
-import { AppClient, AppClientOption } from '@/client/app-client';
+import { AppClientOption } from '@/client/app-client';
 import { AppClientFullOptionOmicCtx } from '@/client/app-client-manager';
 import { debugTargetToUrlParsedContext } from '@/middlewares';
 import { DebugTargetManager } from '@/controller/debug-targets';
 import { DebugTarget } from '@/@types/debug-target';
 import { DomainRegister } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
-import { parseWsUrl } from '@/utils/url';
+import { parseWsUrl, WsUrlParams } from '@/utils/url';
 import { config } from '@/config';
+import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 
-const log = new Logger('socket-bridge');
+const log = new Logger('socket-bridge', WinstonColor.Cyan);
 
 export class SocketServer extends DomainRegister {
-  // key: clientId
-  private connectionMap: Map<string, Connection> = new Map();
+  /**
+   * key: clientId
+   */
+  private static channelMap: Map<
+    string,
+    {
+      downwardChannelSet: Set<string>;
+      // value: downward channelId
+      cmdMap: Map<number, string>;
+      // key: downward channelId
+      publisherMap: Map<string, typeof Publisher>;
+      internalPublisher: typeof Publisher;
+      subscriber: typeof Subscriber;
+    }
+  > = new Map();
+
+  private static debugTargets: Array<DebugTarget> = [];
+
+  /**
+   * 订阅 redis 消息。tunnel appConnect 或 app ws connection 时订阅
+   */
+  public static async subscribeRedis(debugTarget: DebugTarget, ws?: WebSocket) {
+    const { clientId } = debugTarget;
+    SocketServer.debugTargets.push(debugTarget);
+
+    if (!SocketServer.channelMap.has(clientId)) {
+      const upwardChannelId = createUpwardChannel(clientId, '*');
+      const internalChannelId = createInternalChannel(clientId, '*');
+      const subscriber = new Subscriber(upwardChannelId);
+      const internalPublisher = new Publisher(internalChannelId);
+      log.info('subscribe to redis channel %s', upwardChannelId);
+      SocketServer.channelMap.set(clientId, {
+        downwardChannelSet: new Set(),
+        cmdMap: new Map(),
+        publisherMap: new Map(),
+        subscriber,
+        internalPublisher,
+      });
+    }
+    const { downwardChannelSet, cmdMap, publisherMap, subscriber } = SocketServer.channelMap.get(clientId);
+
+    let options;
+    if (debugTarget.platform === DevicePlatform.Android) {
+      options = appClientManager.getAndroidAppClientOptions();
+    } else {
+      options = appClientManager.getIosAppClientOptions();
+    }
+
+    let appClientList = [];
+    appClientList = options
+      .map(({ Ctor, ...option }: AppClientFullOptionOmicCtx) => {
+        try {
+          log.info(`create app client ${Ctor.name}`);
+          const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
+          const newOption: AppClientOption = {
+            urlParsedContext,
+            ...option,
+            iwdpWsUrl: debugTarget.iwdpWsUrl,
+          };
+          if (Ctor.name === AppClientType.WS) {
+            newOption.ws = ws;
+          }
+          return new Ctor(clientId, newOption);
+        } catch (e) {
+          log.error('create app client error: %s', (e as Error)?.stack);
+        }
+      })
+      .filter((v) => v);
+
+    // 订阅上行消息
+    subscriber.pSubscribe((message, upwardChannelId) => {
+      log.info('on channel message, %s', upwardChannelId);
+      const msgObj: Adapter.CDP.Req = JSON.parse(message);
+      const downwardChannelId = upwardChannelId.replace(upwardSpliter, downwardSpliter);
+      cmdMap.set(msgObj.id, downwardChannelId);
+      downwardChannelSet.add(downwardChannelId);
+
+      appClientList.forEach((appClient) => {
+        appClient.sendToApp(msgObj).catch((e) => {
+          if (e !== ERROR_CODE.DOMAIN_FILTERED) {
+            return log.error('%s app client send error: %j', appClient.type, e);
+          }
+        });
+      });
+    });
+
+    // 发布下行消息
+    appClientList.forEach((appClient) => {
+      appClient.removeAllListeners(ClientEvent.Message);
+      appClient.on(ClientEvent.Message, async (msg: Adapter.CDP.Res) => {
+        const msgStr = JSON.stringify(msg);
+        if ('id' in msg) {
+          // 消息为 command，根据缓存的 cmdId 查找 downwardChannelId，只发布到该 channel
+          const commandRes = msg as Adapter.CDP.CommandRes;
+          const downwardChannelId = cmdMap.get(commandRes.id);
+          if (!publisherMap.has(downwardChannelId)) {
+            if (!downwardChannelId) return;
+            const publisher = new Publisher(downwardChannelId);
+            publisherMap.set(downwardChannelId, publisher);
+          }
+          const publisher = publisherMap.get(downwardChannelId);
+          publisher.publish(msgStr);
+        } else {
+          // event 无法确定来源，广播到所有 channel
+          Array.from(downwardChannelSet.values()).map(async (channelId) => {
+            if (!publisherMap.has(channelId)) {
+              const publisher = new Publisher(channelId);
+              publisherMap.set(channelId, publisher);
+            }
+            const publisher = publisherMap.get(channelId);
+            publisher.publish(msgStr);
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * 调试结束，清除缓存。appDisconnect, app ws close 时调用
+   */
+  public static async clean(clientId: string) {
+    const channelInfo = SocketServer.channelMap.get(clientId);
+    if (!channelInfo) return;
+    const { publisherMap, subscriber, internalPublisher } = channelInfo;
+    await internalPublisher.publish(InternalChannelEvent.WSClose);
+    await Promise.all(Array.from(publisherMap.values()).map((publisher) => publisher.disconnect()));
+    await subscriber.pUnsubscribe();
+    await subscriber.disconnect();
+    await internalPublisher.disconnect();
+    SocketServer.channelMap.delete(clientId);
+  }
+
   private wss: Server;
   private server;
-  private debugTarget: DebugTarget;
-  // key: req id
-  private idWsMap: Map<number, WebSocket> = new Map();
 
   constructor(server) {
     super();
@@ -37,7 +174,7 @@ export class SocketServer extends DomainRegister {
     wss.on('connection', this.onConnection.bind(this));
 
     wss.on('error', (e) => {
-      log.info(`wss error: %s`, e.stack);
+      log.error(`wss error: %s`, (e as Error)?.stack);
     });
     wss.on('headers', (headers) => {
       log.info('wss headers: %j', headers);
@@ -48,218 +185,171 @@ export class SocketServer extends DomainRegister {
   }
 
   public close() {
+    SocketServer.debugTargets.forEach((debugTarget) => {
+      model.delete(config.redis.key, debugTarget.clientId);
+    });
     this.wss.close(() => {
       log.info('close wss.');
     });
   }
 
-  public sendMessage(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
-    return new Promise((resolve, reject) => {
-      const appClientList = this.selectDebugTarget(this.debugTarget);
-      if (!appClientList) return reject(ERROR_CODE.NO_APP_CLIENT);
-      Promise.all(appClientList.map((appClient) => appClient.sendToApp(msg).catch(() => null))).then((resList) => {
-        const filtered = resList.filter((res) => res);
-        if (filtered?.length) {
-          return resolve(filtered[0]);
-        }
-      });
-    });
-  }
-
-  /**
-   * app 端连接过来时，添加 pub/sub
-   */
-  public addPubSub() {}
-
-  /**
-   * 选择调试页面，为其搭建通道
-   */
-  public selectDebugTarget(debugTarget: DebugTarget, ws?: WebSocket): AppClient[] {
-    /**
-     * ios 使用 title 作为 clientId，不同环境的 title 取值不同
-     * - hippy: title === contextName, title 需要和 IWDP 获取到的 contextName 匹配
-     * - TDFCore: title === deviceName, 只有 tunnel 通道
-     */
-    const clientId = debugTarget.platform === DevicePlatform.IOS ? debugTarget.title : debugTarget.clientId;
-    if (!this.connectionMap.has(clientId)) {
-      // const pubChannelId = `${clientId}_down`;
-      // const subChannelId = `${clientId}_up`;
-      // const subscriber = await model.createPublisher(pubChannelId);
-      // const publisher = await model.createPublisher(subChannelId);
-      this.connectionMap.set(clientId, {
-        appClientList: [],
-        devtoolsWsList: [],
-        appWs: undefined,
-        subscriber: undefined,
-        publisher: undefined,
-      });
-    }
-    const conn = this.connectionMap.get(clientId);
-    if (!conn.appClientList?.length) {
-      let options;
-      if (debugTarget.platform === DevicePlatform.Android) {
-        options = appClientManager.getAndroidAppClientOptions();
-      } else {
-        options = appClientManager.getIosAppClientOptions();
-      }
-
-      conn.appClientList = options
-        .map(({ Ctor, ...option }: AppClientFullOptionOmicCtx) => {
-          log.info(`use app client ${Ctor.name}`);
-          const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
-          const newOption: AppClientOption = {
-            urlParsedContext,
-            ...option,
-          };
-          if (Ctor.name === AppClientType.WS) {
-            newOption.ws = conn.appWs;
-            if (!newOption.ws) {
-              return log.error('no app ws connection, ignore WsAppClient.');
-            }
-          }
-          return new Ctor(clientId, newOption);
-        })
-        .filter((v) => v);
-    }
-    if (ws) conn.devtoolsWsList.push(ws);
-
-    // 绑定数据上行
-    conn.appClientList.forEach((appClient) => {
-      appClient.removeAllListeners(ClientEvent.Message);
-      appClient.on(ClientEvent.Message, (msg: Adapter.CDP.Res) => {
-        // 上行到监听器
-        this.triggerListerner(msg);
-        // 上行到devtools
-        if ('id' in msg) {
-          // command 上行到调用的 ws
-          const currentWs = this.idWsMap.get(msg.id);
-          if (!currentWs) return;
-          currentWs.send(JSON.stringify(msg));
-          this.idWsMap.delete(msg.id);
-        } else {
-          // event 无法判断是谁触发的，上行到每一个 ws。客户端如果不关心该事件，就不会注册监听，不会有影响。
-          conn.devtoolsWsList.forEach((ws) => {
-            ws.send(JSON.stringify(msg));
-          });
-        }
-      });
-    });
-
-    // 绑定数据下行
-    if (ws) {
-      ws.on('message', (msg: string) => {
-        // appClient 和 ws 是一对多的关系（插件会单独建立一个通道），所以appClient收到消息后需查询上行到哪个ws
-        const msgObj: Adapter.CDP.Req = JSON.parse(msg);
-        this.idWsMap.set(msgObj.id, ws);
-        conn.appClientList.forEach((appClient) => {
-          appClient.sendToApp(msgObj).catch((e) => {
-            if (e !== ERROR_CODE.DOMAIN_FILTERED) {
-              return log.error('%s app client send error: %j', appClient.type, e);
-            }
-          });
-        });
-      });
-
-      ws.on('close', () => {
-        log.info('devtools ws disconnect.');
-        conn.appClientList.forEach((appClient) => {
-          appClient.resumeApp();
-        });
-        const i = conn.devtoolsWsList.findIndex((v) => v === ws);
-        if (i !== -1) conn.devtoolsWsList.splice(i, 1);
-      });
-      ws.on('error', (e) => {
-        log.error('ws error %s', e.stack);
-      });
-    }
-
-    return conn.appClientList;
-  }
-
   private async onConnection(ws, req) {
     log.info('on connection, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
-    const { clientRole, pathname, contextName } = wsUrlParams;
-    const { clientId } = wsUrlParams;
-    const debugTarget = await DebugTargetManager.findDebugTarget(clientId);
-    log.info('debug target: %j', debugTarget);
-    log.info('%s connected!', clientRole);
-
-    if (pathname !== config.wsPath) {
-      ws.close();
-      return log.info('invalid ws connection path!');
-    }
-    if (clientRole === ClientRole.Devtools && !debugTarget) {
-      ws.close();
-      return log.info("debugTarget doesn't exist!");
-    }
-    if (!Object.values(ClientRole).includes(clientRole)) {
-      ws.close();
-      return log.info('invalid client role!');
-    }
-    if (clientRole === ClientRole.IOS) {
-      if (!contextName) {
-        ws.close();
-        return log.info('invalid ios connection, should request with contextName!');
-      }
-      // iOS 这里以 contextName 作为 clientId，方便与 IWDP 获取到的调试列表做匹配
-      // clientId = contextName;
-    }
-
-    if (!clientId) {
-      ws.close();
-      return log.info('invalid ws connection!');
-    }
-
+    const { clientRole, clientId } = wsUrlParams;
     if (clientRole === ClientRole.Devtools) {
-      this.selectDebugTarget(debugTarget, ws);
+      this.onDevtoolsConnection(ws, wsUrlParams);
     } else {
-      log.info('ws app client connected. %s', clientId);
-      const debugTarget = createTargetByWs(wsUrlParams);
-      model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
-      if (!this.connectionMap.has(clientId)) {
-        const pubChannelId = `${clientId}_down`;
-        const subChannelId = `${clientId}_up`;
-        const subscriber = await model.createPublisher(pubChannelId);
-        const publisher = await model.createPublisher(subChannelId);
-        this.connectionMap.set(clientId, {
-          appClientList: [],
-          devtoolsWsList: [],
-          appWs: ws,
-          publisher,
-          subscriber,
-        });
-      } else {
-        const conn = this.connectionMap.get(clientId);
-        conn.appWs = ws;
-      }
-      ws.on('close', () => {
-        log.info('ws app client disconnect. %s', debugTarget.clientId);
-        model.delete(config.redis.key, debugTarget.clientId);
-        for (const [clientId, { appWs }] of this.connectionMap.entries()) {
-          if (appWs === ws) {
-            this.connectionMap.delete(clientId);
-          }
-        }
-      });
-      ws.on('error', (e) => {
-        log.error('app ws error %s', e.stack);
-      });
+      this.onAppConnection(ws, wsUrlParams);
     }
+
+    /**
+     * ⚠️ 给 ws 添加事件监听前，不要执行异步操作
+     * 连接建立后，再判断是否合法，不合法则关闭
+     */
+    const debugTarget = await DebugTargetManager.findDebugTarget(clientId);
+    const isValid = await isConnectionValid(wsUrlParams, debugTarget);
+    if (!isValid) return ws.close();
   }
 
   /**
-   * 创建 pub sub，pipe msg to redis
+   * 将来自于 devtools 的 ws，通过 pub/sub 转发到 redis
    */
-  private onDevtoolsConnection() {}
+  private onDevtoolsConnection(ws: WebSocket, wsUrlParams: WsUrlParams) {
+    const { extensionName } = wsUrlParams;
+    const { clientId } = wsUrlParams;
+    const downwardChannelId = createDownwardChannel(clientId, extensionName);
+    const upwardChannelId = createUpwardChannel(clientId, extensionName);
+    const internalChannelId = createInternalChannel(clientId, extensionName);
+    log.info('devtools connected, subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
+    const downwardSubscriber = new Subscriber(downwardChannelId);
+    // internal channel 用于订阅 node 节点之间的事件，如 app ws close 时，通知 devtools ws close
+    const internalSubscriber = new Subscriber(internalChannelId);
+    const publisher = new Publisher(upwardChannelId);
+    downwardSubscriber.subscribe((msg: string) => {
+      ws.send(msg);
+    });
+    internalSubscriber.subscribe((msg: string) => {
+      if (msg === InternalChannelEvent.WSClose) {
+        log.warn('close devtools ws connection');
+        ws.close();
+        internalSubscriber.unsubscribe();
+        internalSubscriber.disconnect();
+      }
+    });
+    ws.on('message', (msg: string) => {
+      log.info('devtools msg: %s', msg);
+      publisher.publish(msg);
+    });
+    const onClose = async () => {
+      log.info('devtools ws disconnect. clientId: %s', clientId);
+      // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以直接用 ts 来 mock
+      const ts = 10000;
+      const resumeCommands = [
+        {
+          id: ts,
+          method: TdfCommand.TDFRuntimeResume,
+          params: {},
+        },
+        {
+          id: ts + 1,
+          method: ChromeCommand.DebuggerDisable,
+          params: {},
+        },
+        {
+          id: ts + 2,
+          method: ChromeCommand.RuntimeDisable,
+          params: {},
+        },
+      ];
+      await Promise.all(resumeCommands.map((command) => publisher.publish(command)));
+      publisher.disconnect();
+      downwardSubscriber.unsubscribe();
+      downwardSubscriber.disconnect();
+    };
+    ws.on('close', onClose);
+    // ws 标准规定 on error 后一定触发 on close，所以也要做清理
+    ws.on('error', (e) => {
+      log.error('devtools ws client error %s', e?.stack);
+      onClose();
+    });
+  }
 
-  private onAppConnection() {}
+  private async onAppConnection(ws: WebSocket, wsUrlParams: WsUrlParams) {
+    const { clientId, clientRole } = wsUrlParams;
+    log.info('ws app client connected. %s', clientId);
+    const platform = {
+      [ClientRole.Android]: DevicePlatform.Android,
+      [ClientRole.IOS]: DevicePlatform.IOS,
+    }[clientRole];
+    const useWS = appClientManager.useAppClientType(platform, AppClientType.WS);
+    if (!useWS) return log.warn('current env is %s, ignore ws connection', global.appArgv.env);
+
+    let debugTarget = createTargetByWs(wsUrlParams);
+    if (debugTarget.platform === DevicePlatform.IOS) {
+      const iosPages = await getIWDPPages(global.appArgv.iwdpPort);
+      debugTarget = patchIOSTarget(debugTarget, iosPages);
+    }
+    model.upsert(config.redis.key, clientId, debugTarget);
+    SocketServer.subscribeRedis(debugTarget, ws);
+
+    const onClose = () => {
+      log.info('ws app client disconnect. %s', clientId);
+      model.delete(config.redis.key, clientId);
+      SocketServer.clean(clientId);
+    };
+    ws.on('close', onClose);
+    ws.on('error', (e) => {
+      log.error('app ws error %s', e?.stack);
+      onClose();
+    });
+  }
 }
 
-type Connection = {
-  appClientList: AppClient[];
-  devtoolsWsList: WebSocket[];
-  appWs?: WebSocket;
-  publisher: Publisher;
-  subscriber: Subscriber;
+const isConnectionValid = async (wsUrlParams, debugTarget): Promise<boolean> => {
+  const { clientRole, pathname, contextName } = wsUrlParams;
+  const { clientId } = wsUrlParams;
+  log.info('clientRole: %s', clientRole);
+  if (clientRole === ClientRole.Devtools) log.info('isConnectionValid debug target: %j', debugTarget);
+
+  if (pathname !== config.wsPath) {
+    log.warn('invalid ws connection path!');
+    return false;
+  }
+  if (clientRole === ClientRole.Devtools && !debugTarget) {
+    log.warn("debugTarget doesn't exist!");
+    return false;
+  }
+  if (!Object.values(ClientRole).includes(clientRole)) {
+    log.warn('invalid client role!');
+    return false;
+  }
+  if (clientRole === ClientRole.IOS) {
+    if (!contextName) {
+      log.warn('invalid ios connection, should request with contextName!');
+      return false;
+    }
+  }
+
+  if (!clientId) {
+    log.warn('invalid ws connection!');
+    return false;
+  }
+  return true;
 };
+
+/**
+ * channel id 未加 devtoolsId，所以当开启多个 chrome-devtools 时，下行消息是广播到所有
+ * ws endpoint 的，体验上也不影响调试
+ */
+const downwardSpliter = '_down_';
+const upwardSpliter = '_up_';
+const internalSpliter = '_internal_';
+const createDownwardChannel = (clientId: string, extensionName?: string) =>
+  createChannel(clientId, extensionName, downwardSpliter);
+const createUpwardChannel = (clientId: string, extensionName?: string) =>
+  createChannel(clientId, extensionName, upwardSpliter);
+const createInternalChannel = (clientId: string, extensionName?: string) =>
+  createChannel(clientId, extensionName, internalSpliter);
+const createChannel = (clientId: string, extensionName?: string, spliter?: string) =>
+  `${clientId}${spliter}${extensionName || 'default'}`;

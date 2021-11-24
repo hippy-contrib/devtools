@@ -100,4 +100,11 @@ export enum WinstonColor {
   Red = 'red',
   Green = 'green',
   Yellow = 'yellow',
+  Cyan = 'cyan',
+  Blue = 'blue',
+  BgRed = 'bgRed',
+}
+
+export enum InternalChannelEvent {
+  WSClose = 'WSClose',
 }

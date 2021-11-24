@@ -1,4 +1,4 @@
-import { DevicePlatform } from '@/@types/enum';
+import { AppClientType, DevicePlatform } from '@/@types/enum';
 import { androidMiddleWareManager, iosMiddleWareManager } from '@/middlewares';
 import { AppClient, AppClientOption } from './app-client';
 import { IwdpAppClient } from './iwdp-app-client';
@@ -44,6 +44,15 @@ class AppClientManager {
   public reset() {
     this.androidAppClientOptionList = [];
     this.iosAppClientOptionList = [];
+  }
+
+  public useAppClientType(platform: DevicePlatform, type: AppClientType): boolean {
+    const getAppClientOptions = {
+      [DevicePlatform.Android]: this.getAndroidAppClientOptions,
+      [DevicePlatform.IOS]: this.getIosAppClientOptions,
+    }[platform];
+    const options: AppClientFullOptionOmicCtx[] = getAppClientOptions.call(this);
+    return Boolean(options.find((item) => item.Ctor.name === type));
   }
 }
 

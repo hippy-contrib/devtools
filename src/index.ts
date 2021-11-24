@@ -20,7 +20,7 @@ const { argv } = yargs
   .version()
   .option('dbType', {
     type: 'string',
-    default: DBType.Memory,
+    default: DBType.Redis,
     choices: [DBType.Memory, DBType.Redis],
     describe: 'Localhost debug server please select memory. Remote debug server please select redis.',
   })
@@ -35,7 +35,7 @@ const { argv } = yargs
   })
   .option('host', {
     type: 'string',
-    default: '0.0.0.0',
+    default: 'localhost',
     describe: 'The host the debug server will listen to',
   })
   .option('port', {
@@ -73,6 +73,26 @@ const { argv } = yargs
     default: DevtoolsEnv.Hippy,
     choices: [DevtoolsEnv.Hippy, DevtoolsEnv.Voltron, DevtoolsEnv.TDF, DevtoolsEnv.TDFCore],
   })
+  .option('useTunnel', {
+    type: 'boolean',
+    default: true,
+    describe: '',
+  })
+  .option('useIWDP', {
+    type: 'boolean',
+    default: false,
+    describe: '',
+  })
+  .option('useAdb', {
+    type: 'boolean',
+    default: true,
+    describe: '',
+  })
+  .option('isRemote', {
+    type: 'boolean',
+    default: false,
+    describe: '',
+  })
   .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`) as any;
 
 if (argv.help) {
@@ -83,12 +103,7 @@ if (argv.version) {
   yargs.version().exit(0, null);
 }
 
-global.appArgv = {
-  ...argv,
-  startTunnel: true,
-  startAdb: true,
-  startIWDP: false,
-};
+global.appArgv = argv;
 
 const log = new Logger('entry');
 log.info('version: %s', version);

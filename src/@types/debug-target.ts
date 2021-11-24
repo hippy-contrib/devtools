@@ -11,13 +11,10 @@ export interface DebugTarget {
   url: string;
   description: string;
   webSocketDebuggerUrl: string;
-  devtoolsFrontendUrlCompat?: string;
   platform: DevicePlatform;
-  appClientTypeList?: AppClientType[];
+  appClientTypeList: AppClientType[];
   type: string;
-  appId?: string;
   deviceName: string;
   deviceId?: string;
   deviceOSVersion?: string;
-  imei?: string;
 }

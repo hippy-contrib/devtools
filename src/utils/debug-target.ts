@@ -22,7 +22,6 @@ export const createTargetByTunnel = (device: DeviceInfo): DebugTarget => {
   return {
     clientId,
     devtoolsFrontendUrl,
-    devtoolsFrontendUrlCompat: devtoolsFrontendUrl,
     thumbnailUrl: '',
     title,
     url: '',
@@ -55,7 +54,6 @@ export const createTargetByWs = (wsUrlParams: WsUrlParams): DebugTarget => {
   return {
     clientId,
     devtoolsFrontendUrl,
-    devtoolsFrontendUrlCompat: devtoolsFrontendUrl,
     thumbnailUrl: '',
     title: contextName,
     url: '',
@@ -71,7 +69,6 @@ export const createTargetByWs = (wsUrlParams: WsUrlParams): DebugTarget => {
 export const createTargetByIwdpPage = (iwdpPage: IWDPPage): DebugTarget => {
   const iwdpWsUrl = iwdpPage.webSocketDebuggerUrl;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
-    // iwdpWsUrl,
     clientId: iwdpWsUrl,
     role: ClientRole.Devtools,
   });
@@ -79,7 +76,6 @@ export const createTargetByIwdpPage = (iwdpPage: IWDPPage): DebugTarget => {
     clientId: iwdpWsUrl,
     iwdpWsUrl,
     devtoolsFrontendUrl: iwdpPage.devtoolsFrontendUrl,
-    devtoolsFrontendUrlCompat: iwdpPage.devtoolsFrontendUrl,
     title: iwdpPage.title,
     thumbnailUrl: '',
     url: '',

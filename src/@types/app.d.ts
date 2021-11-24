@@ -7,14 +7,15 @@ export interface AppArgv {
   iwdpPort: number;
   iwdpStartPort: number;
   iwdpEndPort: number;
-  startAdb: boolean;
-  startIWDP: boolean;
   clearAddrInUse: boolean;
-  startTunnel: boolean;
   env: DevtoolsEnv;
   publicPath?: string;
   open: boolean;
   dbType: DBType;
+  useTunnel: boolean;
+  useIWDP: boolean;
+  useAdb: boolean;
+  isRemote: boolean;
 }
 
 declare namespace NodeJS {

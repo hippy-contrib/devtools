@@ -1,7 +1,5 @@
 import { AppClientType } from '@/@types/enum';
-import { sendMsg } from '@/child-process/addon';
 import { Logger } from '@/utils/log';
-import { tunnelEmitter } from '@/child-process';
 import { AppClient } from './app-client';
 
 const log = new Logger('app-client:tunnel');
@@ -16,24 +14,28 @@ export class TunnelAppClient extends AppClient {
   }
 
   protected registerMessageListener() {
-    tunnelEmitter.on('message', (data) => {
-      try {
-        const msgObject: Adapter.CDP.Res = JSON.parse(data);
-        if ('id' in msgObject) {
-          const requestPromise = this.requestPromiseMap.get(msgObject.id);
-          if (requestPromise) requestPromise.resolve(msgObject);
-        }
-        this.triggerListerner(msgObject);
-        this.onMessage(msgObject).then((res) => {
-          if (!('id' in msgObject)) return;
-          const requestPromise = this.requestPromiseMap.get(msgObject.id);
-          if (requestPromise) {
-            requestPromise.resolve(res);
+    import('../child-process/index').then(({ tunnelEmitter }) => {
+      // TODO tunnel 暂不支持多调试实例，这里暂时移除上一个实例的事件监听
+      tunnelEmitter.removeAllListeners('message');
+      tunnelEmitter.on('message', (data) => {
+        try {
+          const msgObject: Adapter.CDP.Res = JSON.parse(data);
+          if ('id' in msgObject) {
+            const requestPromise = this.requestPromiseMap.get(msgObject.id);
+            if (requestPromise) requestPromise.resolve(msgObject);
           }
-        });
-      } catch (e) {
-        log.info(`parse tunnel response json failed. error: %s, \n msg: %j`, (e as Error)?.stack, data);
-      }
+          this.triggerListerner(msgObject);
+          this.onMessage(msgObject).then((res) => {
+            if (!('id' in msgObject)) return;
+            const requestPromise = this.requestPromiseMap.get(msgObject.id);
+            if (requestPromise) {
+              requestPromise.resolve(res);
+            }
+          });
+        } catch (e) {
+          log.info(`parse tunnel response json failed. error: %s, \n msg: %j`, (e as Error)?.stack, data);
+        }
+      });
     });
   }
 
@@ -42,7 +44,9 @@ export class TunnelAppClient extends AppClient {
       if (msg.id) {
         this.requestPromiseMap.set(msg.id, { resolve, reject });
       }
-      sendMsg(JSON.stringify(msg));
+      import('../child-process/addon').then(({ sendMsg }) => {
+        sendMsg(JSON.stringify(msg));
+      });
     });
   }
 }

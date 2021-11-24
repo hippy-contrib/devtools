@@ -1,5 +1,4 @@
 import WebSocket from 'ws/index.js';
-import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
 import { AppClientType, ClientEvent, DevicePlatform, ERROR_CODE, MiddlewareType, WinstonColor } from '@/@types/enum';
 import {
   defaultDownwardMiddleware,
@@ -33,8 +32,6 @@ export abstract class AppClient extends DomainRegister {
   public type: AppClientType;
   protected isClosed = false;
   protected platform: DevicePlatform;
-  protected publisher: Publisher;
-  protected subscriber: Subscriber;
   private middleWareManager: MiddleWareManager;
   private urlParsedContext: UrlParsedContext;
   private acceptDomains: string[] = CDP_DOMAIN_LIST;
@@ -81,30 +78,6 @@ export abstract class AppClient extends DomainRegister {
   }
 
   /**
-   * devtools 断开连接，app 端恢复运行
-   */
-  public resumeApp() {
-    upwardLog.info(`${this.type} app client resume`);
-    if (this.platform === DevicePlatform.Android) {
-      this.sendToApp({
-        id: requestId.create(),
-        method: TdfCommand.TDFRuntimeResume,
-        params: {},
-      });
-    }
-    this.sendToApp({
-      id: requestId.create(),
-      method: ChromeCommand.DebuggerDisable,
-      params: {},
-    });
-    this.sendToApp({
-      id: requestId.create(),
-      method: ChromeCommand.RuntimeDisable,
-      params: {},
-    });
-  }
-
-  /**
    * 监听 app 端的调试协议，经过中间件适配后，发送至 devtools 端
    */
   protected onMessage(msg: Adapter.CDP.Res): Promise<Adapter.CDP.Res> {
@@ -145,7 +118,7 @@ export abstract class AppClient extends DomainRegister {
         return this.sendHandler(msg);
       },
       sendToDevtools: (msg: Adapter.CDP.Res) => {
-        downwardLog.info('%s sendToDevtools %s %s', this.type, (msg as Adapter.CDP.CommandRes).id, msg.method);
+        downwardLog.info('%s sendToDevtools %s %s', this.type, (msg as Adapter.CDP.CommandRes).id || '', msg.method);
         return this.sendToDevtools(msg);
       },
     };
@@ -189,6 +162,7 @@ export type AppClientOption = {
   acceptDomains?: string[];
   ignoreDomains?: string[];
   ws?: WebSocket;
+  iwdpWsUrl?: string;
   middleWareManager: MiddleWareManager;
   urlParsedContext: UrlParsedContext;
   platform: DevicePlatform;

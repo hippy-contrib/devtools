@@ -4,11 +4,10 @@ import Koa from 'koa';
 import open from 'open';
 import { DevtoolsEnv } from '@/@types/enum';
 import { DebugTarget } from '@/@types/debug-target';
-import { onExit, startAdbProxy, startIosProxy, startTunnel } from '@/child-process';
 import { initHippyEnv, initTdfEnv, initVoltronEnv, initTdfCoreEnv } from '@/client';
 import { SocketServer } from '@/socket-server';
 import { Logger } from '@/utils/log';
-import { initModel } from '@/db';
+import { initDbModel } from '@/db';
 import { DebugTargetManager } from '@/controller/debug-targets';
 import { createRouter } from '@/router';
 import { config } from '@/config';
@@ -26,16 +25,17 @@ export class Application {
       host,
       port,
       iwdpPort,
-      startAdb,
-      startIWDP,
+      useAdb,
+      useIWDP,
       clearAddrInUse,
-      startTunnel: shouldStartTunnel,
+      useTunnel,
       open: openChrome = false,
+      isRemote,
     } = global.appArgv;
 
     Application.init();
     Application.setEnv();
-    initModel();
+    initDbModel();
 
     if (clearAddrInUse) {
       try {
@@ -52,10 +52,21 @@ export class Application {
 
       Application.server = app.listen(port, host, async () => {
         log.info('start debug server.');
-        if (shouldStartTunnel) startTunnel();
-        else if (startIWDP) startIosProxy();
-        if (startAdb) startAdbProxy();
-        if (openChrome) open(`http://${host}:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
+        if (!isRemote) {
+          import('./child-process/index').then(({ startTunnel, startIWDP, startAdbProxy }) => {
+            if (useTunnel) startTunnel();
+            else if (useIWDP) startIWDP();
+            if (useAdb) startAdbProxy();
+          });
+
+          if (openChrome) {
+            try {
+              open(`http://${host}:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
+            } catch (e) {
+              log.error('open chrome failed, %s', (e as Error)?.stack);
+            }
+          }
+        }
 
         Application.socketServer = new SocketServer(Application.server);
         Application.socketServer.start();
@@ -87,21 +98,8 @@ export class Application {
     }
   }
 
-  public static exit() {
-    onExit();
-  }
-
-  public static async selectDebugTarget(id: string) {
-    const debugTarget = await DebugTargetManager.findDebugTarget(id);
-    this.socketServer.selectDebugTarget(debugTarget);
-  }
-
   public static getDebugTargets(): Promise<DebugTarget[]> {
     return DebugTargetManager.getDebugTargets();
-  }
-
-  public static sendMessage(msg: Adapter.CDP.Req) {
-    return Application.socketServer.sendMessage(msg);
   }
 
   public static registerDomainListener(domain, listener) {
@@ -111,7 +109,7 @@ export class Application {
   private static init() {
     const { cachePath } = config;
     try {
-      fs.rmSync(cachePath, { recursive: true });
+      fs.rmdirSync(cachePath, { recursive: true });
     } catch (e) {
       log.error('rm cache dir error: %s', (e as Error)?.stack);
     }
@@ -137,5 +135,5 @@ process.on('SIGINT', () => Application.stopServer(true));
 process.on('SIGTERM', () => Application.stopServer(true));
 
 process.on('unhandledRejection', (e: Error) => {
-  log.error(`unhandledRejection %s`, e.stack);
+  log.error(`unhandledRejection %s`, e?.stack);
 });

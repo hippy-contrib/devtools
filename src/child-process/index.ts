@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
 import { TunnelEvent, WinstonColor } from '@/@types/enum';
-import deviceManager from '@/device-manager';
+import { deviceManager } from '@/device-manager';
 import { Logger } from '@/utils/log';
 import { exec } from '@/utils/process';
 import { addEventListener, tunnelStart } from './addon';
@@ -17,6 +17,7 @@ export const startTunnel = (cb?) => {
   const { iwdpPort, iwdpStartPort, iwdpEndPort, adbPath } = global.appArgv;
   addEventListener((event, data) => {
     try {
+      if (event !== TunnelEvent.TunnelLog) log.info('tunnel event: %s', event);
       if (event === TunnelEvent.ReceiveData) {
         tunnelEmitter.emit('message', data);
       } else {
@@ -47,7 +48,7 @@ export const startTunnel = (cb?) => {
   tunnelStart(fullAdbPath, iwdpParams, iwdpPort);
 };
 
-export const startIosProxy = () => {
+export const startIWDP = () => {
   const { iwdpPort, iwdpStartPort, iwdpEndPort } = global.appArgv;
   proxyProcess = spawn(
     'ios_webkit_debug_proxy',
@@ -59,7 +60,7 @@ export const startIosProxy = () => {
   childProcessLog.info(`start IWDP on port ${iwdpPort}`);
 
   proxyProcess.on('error', (e) => {
-    childProcessLog.info('IWDP error: %s', e.stack);
+    childProcessLog.info('IWDP error: %s', e?.stack);
   });
   proxyProcess.on('close', (code) => {
     childProcessLog.info(`IWDP close with code: ${code}`);
@@ -75,7 +76,7 @@ export const startAdbProxy = () => {
       childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
       childProcessLog.info('Otherwise please check adb devices command working correctly');
       childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
-      childProcessLog.info('start adb reverse error: %s', e.stack);
+      childProcessLog.info('start adb reverse error: %s', e?.stack);
     });
 };
 

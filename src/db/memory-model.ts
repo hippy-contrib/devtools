@@ -43,7 +43,9 @@ export class MemoryModel extends DBModel {
   public async createSubscriber(channel) {
     return {
       subscribe: (cb) => this.on(channel, cb),
+      pSubscribe: (cb) => this.on(channel, cb),
       unsubscribe: () => this.removeAllListeners(channel),
+      pUnsubscribe: () => this.removeAllListeners(channel),
       disconnect: () => {},
     };
   }

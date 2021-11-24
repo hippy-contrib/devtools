@@ -6,12 +6,14 @@ export const parseWsUrl = (reqUrl: string) => {
   const contextName = url.searchParams.get('contextName');
   const clientRole = url.searchParams.get('role') as ClientRole;
   const deviceName = url.searchParams.get('deviceName');
+  const extensionName = url.searchParams.get('extensionName') || '';
   return {
     clientId,
     clientRole,
     pathname: url.pathname,
     contextName,
     deviceName,
+    extensionName,
   };
 };
 

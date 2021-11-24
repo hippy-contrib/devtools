@@ -1,10 +1,12 @@
 import { EventEmitter } from 'events';
-import { DeviceManagerEvent, DeviceStatus } from '@/@types/enum';
+import { AppClientType, DeviceManagerEvent, DevicePlatform, DeviceStatus } from '@/@types/enum';
 import { DeviceInfo } from '@/@types/device';
-import { getDeviceList, selectDevice } from '@/child-process/addon';
 import { Logger } from '@/utils/log';
 import { model, createTargetByTunnel } from '@/db';
 import { config } from '@/config';
+import { SocketServer } from '@/socket-server';
+import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
+import { appClientManager } from '@/client/app-client-manager';
 
 const log = new Logger('device-manager');
 
@@ -13,69 +15,63 @@ class DeviceManager extends EventEmitter {
   selectedIndex = -1;
   isAppConnected = false;
 
-  addDevice(device: DeviceInfo) {
-    if (!this.deviceList.find((item) => item.deviceid === device.deviceid)) {
-      this.deviceList.splice(this.deviceList.length - 1, 0, device);
-    }
-    this.emit(DeviceManagerEvent.addDevice, device);
-  }
-
-  removeDevice(device: DeviceInfo) {
-    const deviceIndex = this.deviceList.findIndex((item) => item.deviceid === device.deviceid);
-    if (deviceIndex > 0) {
-      this.deviceList.splice(deviceIndex, 1);
-    }
-    this.emit(DeviceManagerEvent.removeDevice, device);
-  }
-
-  appDidDisConnect() {
+  public appDidDisConnect() {
     this.isAppConnected = false;
     // state.selectedIndex = -1;
     const device = this.deviceList[0];
     if (!device) return;
     model.delete(config.redis.key, device.devicename);
+    SocketServer.clean(device.devicename);
     this.emit(DeviceManagerEvent.appDidDisConnect, this.getCurrent());
   }
 
-  appDidConnect() {
+  public async appDidConnect() {
     this.isAppConnected = true;
     const device = this.deviceList[0];
     if (!device) return;
     for (const device of this.deviceList) {
-      if (device.physicalstatus !== DeviceStatus.Disconnected) {
-        const debugTarget = createTargetByTunnel(device);
+      const useTunnel = appClientManager.useAppClientType(device.platform, AppClientType.Tunnel);
+      if (device.physicalstatus !== DeviceStatus.Disconnected && useTunnel) {
+        let debugTarget = createTargetByTunnel(device);
+        if (debugTarget.platform === DevicePlatform.IOS) {
+          const iosPages = await getIWDPPages(global.appArgv.iwdpPort);
+          debugTarget = patchIOSTarget(debugTarget, iosPages);
+        }
         model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
+        SocketServer.subscribeRedis(debugTarget);
       }
     }
     this.emit(DeviceManagerEvent.appDidConnect, this.getCurrent());
   }
 
-  getDeviceList() {
-    getDeviceList((devices: DeviceInfo[]) => {
-      log.info('getDeviceList: %j', devices);
+  public getDeviceList() {
+    import('./child-process/addon').then(({ getDeviceList, selectDevice }) => {
+      getDeviceList((devices: DeviceInfo[]) => {
+        log.info('getDeviceList: %j', devices);
 
-      this.deviceList = devices;
-      if (devices.length) {
-        const isDeviceDisconnect = devices[this.selectedIndex]?.physicalstatus === DeviceStatus.Disconnected;
-        if (isDeviceDisconnect) {
+        this.deviceList = devices;
+        if (devices.length) {
+          const isDeviceDisconnect = devices[this.selectedIndex]?.physicalstatus === DeviceStatus.Disconnected;
+          if (isDeviceDisconnect) {
+            this.selectedIndex = -1;
+            return;
+          }
+
+          this.selectedIndex = 0;
+          const device = this.deviceList[this.selectedIndex];
+          const deviceId = device.deviceid;
+          log.info(`selectDevice ${deviceId}`);
+          selectDevice(deviceId);
+        } else {
           this.selectedIndex = -1;
-          return;
         }
-
-        this.selectedIndex = 0;
-        const device = this.deviceList[this.selectedIndex];
-        const deviceId = device.deviceid;
-        log.info(`selectDevice ${deviceId}`);
-        selectDevice(deviceId);
-      } else {
-        this.selectedIndex = -1;
-      }
+      });
     });
   }
 
-  getCurrent() {
+  public getCurrent() {
     return this.deviceList[this.selectedIndex];
   }
 }
 
-export default new DeviceManager();
+export const deviceManager = new DeviceManager();

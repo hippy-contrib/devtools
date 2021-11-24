@@ -12,18 +12,22 @@ export class IwdpAppClient extends AppClient {
   private url: string;
   private ws: WebSocket;
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
-  private msgBuffer: {
+  private msgBuffer: Array<{
     msg: Adapter.CDP.Req;
     resolve: Adapter.Resolve<Adapter.CDP.Res>;
     reject: Adapter.Reject;
-  }[];
+  }> = [];
 
-  constructor(url, option) {
-    super(url, option);
-    this.url = url;
+  constructor(id, option) {
+    super(id, option);
+    this.url = option.iwdpWsUrl;
+    if (!this.url) {
+      const e = new Error('IwdpAppClient constructor option need iwdpWsUrl');
+      log.error('%s', e?.stack);
+      throw e;
+    }
     this.type = AppClientType.IWDP;
     this.connect();
-    this.registerMessageListener();
   }
 
   protected registerMessageListener() {
@@ -64,7 +68,7 @@ export class IwdpAppClient extends AppClient {
     });
 
     this.ws?.on('error', (e) => {
-      log.error('ios proxy client error: %s', e.stack);
+      log.error('ios proxy client error: %s', e?.stack);
     });
   }
 
@@ -92,8 +96,10 @@ export class IwdpAppClient extends AppClient {
 
     try {
       this.ws = new WebSocket(this.url);
+      this.registerMessageListener();
     } catch (e) {
       log.error('iwdp connect error: %s', (e as Error)?.stack);
+      throw e;
     }
   }
 }

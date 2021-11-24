@@ -13,6 +13,11 @@ export class WsAppClient extends AppClient {
     super(id, option);
     this.type = AppClientType.WS;
     this.ws = option.ws;
+    if (!this.ws) {
+      const e = new Error('WsAppClient constructor option need ws');
+      log.error('%s', e?.stack);
+      throw e;
+    }
     this.registerMessageListener();
   }
 
