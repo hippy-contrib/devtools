@@ -149,11 +149,11 @@ export class SocketServer extends DomainRegister {
     const channelInfo = SocketServer.channelMap.get(clientId);
     if (!channelInfo) return;
     const { publisherMap, subscriber, internalPublisher } = channelInfo;
-    await internalPublisher.publish(InternalChannelEvent.WSClose);
-    await Promise.all(Array.from(publisherMap.values()).map((publisher) => publisher.disconnect()));
-    await subscriber.pUnsubscribe();
-    await subscriber.disconnect();
-    await internalPublisher.disconnect();
+    internalPublisher.publish(InternalChannelEvent.WSClose);
+    // Promise.all(Array.from(publisherMap.values()).map((publisher) => publisher.disconnect()));
+    // subscriber.pUnsubscribe();
+    // subscriber.disconnect();
+    // internalPublisher.disconnect();
     SocketServer.channelMap.delete(clientId);
   }
 
@@ -226,9 +226,8 @@ export class SocketServer extends DomainRegister {
     // internal channel 用于订阅 node 节点之间的事件，如 app ws close 时，通知 devtools ws close
     const internalSubscriber = new Subscriber(internalChannelId);
     const publisher = new Publisher(upwardChannelId);
-    downwardSubscriber.subscribe((msg: string) => {
-      ws.send(msg);
-    });
+    downwardSubscriber.subscribe(ws.send.bind(ws));
+
     internalSubscriber.subscribe((msg: string) => {
       if (msg === InternalChannelEvent.WSClose) {
         log.warn('close devtools ws connection');

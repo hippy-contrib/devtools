@@ -35,7 +35,7 @@ export class Application {
 
     Application.init();
     Application.setEnv();
-    initDbModel();
+    await initDbModel();
 
     if (clearAddrInUse) {
       try {

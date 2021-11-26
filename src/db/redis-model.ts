@@ -1,3 +1,6 @@
+/**
+ * ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
+ */
 import { createClient } from 'redis';
 import { config } from '@/config';
 import { Logger } from '@/utils/log';
@@ -42,33 +45,6 @@ export class RedisModel extends DBModel {
   public async delete(key: string, field: string) {
     return this.client.hDel(key, field);
   }
-
-  public async createSubscriber(channel) {
-    if (!channel) {
-      const e = new Error('channelId should not be empty');
-      log.error('%s', e?.stack);
-      throw e;
-    }
-    const client = await this.createClient();
-    return {
-      subscribe: (cb) => client.subscribe(channel, cb),
-      pSubscribe: (cb) => client.pSubscribe(channel, cb),
-      unsubscribe: () => client.unsubscribe(channel),
-      pUnsubscribe: () => client.pUnsubscribe(channel),
-      disconnect: () => client.disconnect,
-    };
-  }
-
-  private async createClient(): Promise<RedisClient> {
-    const client: RedisClient = this.client.duplicate();
-    client.on('error', (e) => {
-      log.error('duplicate redis client error: %s', e?.stack);
-      console.error('duplicate redis client error', e);
-    });
-
-    await client.connect();
-    return client;
-  }
 }
 
 const createMyClient = (): RedisClient => {
@@ -107,7 +83,7 @@ export class RedisPublisher {
   }
 
   public disconnect() {
-    this.client.disconnect();
+    this.client.quit();
   }
 
   private realPublish(message: string | Adapter.CDP.Req) {
@@ -123,7 +99,9 @@ export class RedisPublisher {
 
   private async init() {
     await this.client.connect();
+    log.info('redis publisher client created, %s', this.channel);
     this.isConnected = true;
+    log.info('publish quequ message, length %s', this.quequ.length);
     this.quequ.forEach(this.realPublish.bind(this));
   }
 }
@@ -131,6 +109,8 @@ export class RedisPublisher {
 export class RedisSubscriber {
   private client: RedisClient;
   private channel: string;
+  private isConnected = false;
+  private operateQueue: Array<[Function, Function]> = [];
 
   constructor(channel: string) {
     if (!channel) {
@@ -143,10 +123,28 @@ export class RedisSubscriber {
     this.init();
   }
 
-  public subscribe = (cb) => this.client.subscribe(this.channel, cb);
-  public pSubscribe = (cb) => this.client.pSubscribe(this.channel, cb);
+  public subscribe(cb) {
+    if (this.isConnected) this.client.subscribe(this.channel, cb);
+    else this.operateQueue.push([this.subscribe, cb]);
+  }
+  public pSubscribe(cb) {
+    if (this.isConnected) this.client.pSubscribe(this.channel, cb);
+    else this.operateQueue.push([this.pSubscribe, cb]);
+  }
   public unsubscribe = () => this.client.unsubscribe(this.channel);
   public pUnsubscribe = () => this.client.pUnsubscribe(this.channel);
-  public disconnect = () => this.client.disconnect();
-  private init = () => this.client.connect();
+  public disconnect = () => this.client.quit();
+
+  private async init() {
+    if (this.isConnected) return;
+    await this.client.connect();
+    log.info('redis subscriber client created, %s', this.channel);
+    this.isConnected = true;
+    if (this.operateQueue) {
+      log.info('clear subscribe quequ, length %s', this.operateQueue.length);
+      this.operateQueue.forEach(([fn, cb]) => {
+        fn.call(this, cb);
+      });
+    }
+  }
 }
