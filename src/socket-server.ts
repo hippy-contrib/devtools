@@ -6,7 +6,7 @@ import {
   ClientEvent,
   ClientRole,
   DevicePlatform,
-  ERROR_CODE,
+  ErrorCode,
   InternalChannelEvent,
   WinstonColor,
 } from '@/@types/enum';
@@ -26,9 +26,9 @@ import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 const log = new Logger('socket-server', WinstonColor.Cyan);
 
 /**
- * ws 调试服务，支持远程调试（无线模式，ws通道）、本地调试（有线模式，tunnel数据通道）
+ * ws 调试服务，支持远程调试（无线模式，ws 通道）、本地调试（有线模式，tunnel 数据通道）
  * 通过 redis pub/sub 实现多点部署时的消息分发，上下行消息根据 clientId 来建立 redis channel 进行分发
- * 本地安装npm包部署时（单点部署），不存储redis，而是直接保存在内存中
+ * 本地安装 npm 包部署时（单点部署），不存储 redis，而是直接保存在内存中
  *
  * 设计方案： https://iwiki.woa.com/pages/viewpage.action?pageId=1222336167
  */
@@ -42,13 +42,13 @@ export class SocketServer extends DomainRegister {
       cmdIdChannelIdMap: Map<number, string>;
       // key: downward channelId
       publisherMap: Map<string, typeof Publisher>;
-      // 多个node节点之间通信的 publisher，用与当 app 端断连时，通知devtools端断开
+      // 多个 node 节点之间通信的 publisher，用与当 app 端断连时，通知 devtools 端断开
       internalPublisher: typeof Publisher;
       upwardSubscriber: typeof Subscriber;
     }
   > = new Map();
 
-  // 保存当前node节点所连接的调试对象，当服务关闭时清空缓存、优雅退出
+  // 保存当前 node 节点所连接的调试对象，当服务关闭时清理 redis 缓存、优雅退出
   private static debugTargets: Array<DebugTarget> = [];
 
   /**
@@ -60,7 +60,7 @@ export class SocketServer extends DomainRegister {
 
     if (!SocketServer.channelMap.has(clientId)) {
       const upwardChannelId = createUpwardChannel(clientId, '*');
-      const internalChannelId = createInternalChannel(clientId, '*');
+      const internalChannelId = createInternalChannel(clientId, '');
       const upwardSubscriber = new Subscriber(upwardChannelId);
       const internalPublisher = new Publisher(internalChannelId);
       log.info('subscribe to redis channel %s', upwardChannelId);
@@ -99,6 +99,7 @@ export class SocketServer extends DomainRegister {
           return new Ctor(clientId, newOption);
         } catch (e) {
           log.error('create app client error: %s', (e as Error)?.stack);
+          return null;
         }
       })
       .filter((v) => v);
@@ -118,7 +119,7 @@ export class SocketServer extends DomainRegister {
 
       appClientList.forEach((appClient) => {
         appClient.sendToApp(msgObj).catch((e) => {
-          if (e !== ERROR_CODE.DomainFiltered) {
+          if (e !== ErrorCode.DomainFiltered) {
             return log.error('%s app client send error: %j', appClient.type, e);
           }
         });
@@ -167,10 +168,13 @@ export class SocketServer extends DomainRegister {
     const { publisherMap, upwardSubscriber, internalPublisher } = channelInfo;
     internalPublisher.publish(InternalChannelEvent.WSClose);
     Array.from(publisherMap.values()).forEach((publisher) => publisher.disconnect());
-    upwardSubscriber.pUnsubscribe();
-    upwardSubscriber.disconnect();
-    internalPublisher.disconnect();
-    SocketServer.channelMap.delete(clientId);
+    // 稍作延迟，等处理完 InternalChannelEvent.WSClose 事件后再取消订阅
+    process.nextTick(() => {
+      upwardSubscriber.pUnsubscribe();
+      upwardSubscriber.disconnect();
+      internalPublisher.disconnect();
+      SocketServer.channelMap.delete(clientId);
+    });
   }
 
   private wss: WSServer;
@@ -235,7 +239,7 @@ export class SocketServer extends DomainRegister {
     const { extensionName, clientId } = wsUrlParams;
     const downwardChannelId = createDownwardChannel(clientId, extensionName);
     const upwardChannelId = createUpwardChannel(clientId, extensionName);
-    const internalChannelId = createInternalChannel(clientId, extensionName);
+    const internalChannelId = createInternalChannel(clientId, '');
     log.info('devtools connected, subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
     const downwardSubscriber = new Subscriber(downwardChannelId);
     // internal channel 用于订阅 node 节点之间的事件，如 app ws close 时，通知 devtools ws close

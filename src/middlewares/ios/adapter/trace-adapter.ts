@@ -1,9 +1,9 @@
 /**
- * jsc的trace数据结构： JscStack
- * jsc没1ms采样1次，JscTrace 表示一个采样点
+ * jsc 的 trace 数据结构： JscStack
+ * jsc 没 1ms 采样 1 次，JscTrace 表示一个采样点
  * JscFrame 表示当前采样点的调用栈，按叶节点到根节点排序
  *
- * v8的trace数据结构：V8Stack，是一个一维数组
+ * v8 的 trace 数据结构：V8Stack，是一个一维数组
  * 用 PH 值表示调用栈的开始结束
  */
 
@@ -58,7 +58,7 @@ interface JscTreeNode {
   endTs: number; // 采样结束时间
 }
 
-// 理论上1ms采样1次，实际在1ms左右，这里按理论值绘图
+// 理论上 1ms 采样 1 次，实际在 1ms 左右，这里按理论值绘图
 const sampleInterval = 0.001;
 const timeRatio = 1000000; // 单位：秒，转换为微秒，1s = 1000000 us
 
@@ -75,7 +75,7 @@ export default class TraceAdapter {
 
   private static getTraceEnd(trace: JscTrace, prevTrace: JscTrace) {
     const end = trace.stackFrames.length - 1;
-    // 两trace采样间隔1.5（含误差兼容）个 sampleInterval，认为是两棵树
+    // 两 trace 采样间隔 1.5（含误差兼容）个 sampleInterval，认为是两棵树
     if (trace.timestamp - prevTrace.timestamp > sampleInterval * 1.5) return end;
     if (!prevTrace?.stackFrames) return end;
 
@@ -122,7 +122,7 @@ export default class TraceAdapter {
   }
 
   /**
-   * 要保证每一个调用栈id唯一，同一行代码有可能执行多次，需要加采样时间戳
+   * 要保证每一个调用栈 id 唯一，同一行代码有可能执行多次，需要加采样时间戳
    */
   private static getFrameId(frame, ts) {
     return `${ts}-${frame.sourceID}-${frame.line}-${frame.column}`;
@@ -132,7 +132,7 @@ export default class TraceAdapter {
   private nodeMap: { [id: string]: JscTreeNode } = {};
 
   /**
-   * 将jsc的trace数据转为v8的trace数据
+   * 将 jsc 的 trace 数据转为 v8 的 trace 数据
    * @param json
    * @returns
    */
@@ -144,7 +144,7 @@ export default class TraceAdapter {
     for (const trace of traces) {
       if (lastTree) {
         const end = TraceAdapter.getTraceEnd(trace, prevTrace);
-        // 整个trace下的frame与前一帧没有共用的节点，说明该帧是一个新的调用栈，要构建为一颗单独的树
+        // 整个 trace 下的 frame 与前一帧没有共用的节点，说明该帧是一个新的调用栈，要构建为一颗单独的树
         if (end === trace.stackFrames.length - 1) {
           trees.push(lastTree);
           lastTree = this.buildTree(trace.stackFrames, trace.timestamp);
@@ -170,7 +170,7 @@ export default class TraceAdapter {
   }
 
   /**
-   * 将一个trace构建为一棵�
+   * 将一个 trace 构建为一棵�
    * @param trace
    * @returns
    */

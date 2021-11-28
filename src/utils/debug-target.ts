@@ -5,7 +5,7 @@ import { config } from '@/config';
 import { DebugTarget } from '@/@types/debug-target';
 
 export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
-  // 通过 tunnel 创建的 target，暂时使用 devicename 作为调试对象id，后续终端重构后使用 targetCreated 事件抛出的 id
+  // 通过 tunnel 创建的 target，暂时使用 devicename 作为调试对象 id，后续终端重构后使用 targetCreated 事件抛出的 id
   const clientId = device.devicename;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
     clientId,

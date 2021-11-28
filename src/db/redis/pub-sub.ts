@@ -12,7 +12,7 @@ export class RedisPublisher {
   private isConnected = false;
   private channel: string;
 
-  constructor(channel: string) {
+  public constructor(channel: string) {
     if (!channel) {
       const e = new Error('channelId should not be empty');
       log.error('%s', e?.stack);
@@ -58,7 +58,7 @@ export class RedisSubscriber {
   private isConnected = false;
   private operateQueue: Array<[Function, Function]> = [];
 
-  constructor(channel: string) {
+  public constructor(channel: string) {
     if (!channel) {
       const e = new Error('channelId should not be empty');
       log.error('%s', e?.stack);

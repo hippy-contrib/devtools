@@ -1,7 +1,7 @@
 class GlobalId {
   private globalId = 0;
 
-  constructor(private step: number = 1) {}
+  public constructor(private step: number = 1) {}
 
   public get id() {
     return this.globalId;

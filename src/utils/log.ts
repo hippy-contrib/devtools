@@ -10,7 +10,7 @@ export class Logger {
 
   private loggerInstance: winston.Logger;
 
-  constructor(private label: string = '', private color?: string) {
+  public constructor(private label: string = '', private color?: string) {
     this.initLoggerInstance();
   }
 

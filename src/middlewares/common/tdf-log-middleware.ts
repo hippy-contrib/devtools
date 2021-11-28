@@ -1,5 +1,5 @@
 import { TdfEvent } from 'tdf-devtools-protocol/dist/types/enum-tdf-mapping';
-import colors from 'colors/safe';
+import { blue, black } from 'colors/safe';
 import { ChromeEvent } from 'tdf-devtools-protocol/dist/types/enum-chrome-mapping';
 import { Logger } from '@/utils/log';
 import { MiddleWareManager } from '../middleware-context';
@@ -20,7 +20,7 @@ export const tdfLogMiddleWareManager: MiddleWareManager = {
           const consoleMessage = {
             source: 'other',
             level: 'info',
-            text: `${colors.blue(logPrefix)}${colors.black(log.message)}`,
+            text: `${blue(logPrefix)}${black(log.message)}`,
             lineNumber: log.line_number,
             timestamp: Date.now(),
             url: log.file_name,

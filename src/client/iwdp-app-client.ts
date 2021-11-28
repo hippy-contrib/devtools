@@ -18,7 +18,7 @@ export class IwdpAppClient extends AppClient {
     reject: Adapter.Reject;
   }> = [];
 
-  constructor(id, option) {
+  public constructor(id, option) {
     super(id, option);
     this.url = option.iwdpWsUrl;
     if (!this.url) {

@@ -7,7 +7,7 @@ const log = new Logger('app-client:tunnel');
 export class TunnelAppClient extends AppClient {
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
 
-  constructor(id, option) {
+  public constructor(id, option) {
     super(id, option);
     this.type = AppClientType.Tunnel;
     this.registerMessageListener();

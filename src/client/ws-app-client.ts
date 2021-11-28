@@ -9,7 +9,7 @@ export class WsAppClient extends AppClient {
   private ws: WebSocket;
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
 
-  constructor(id, option) {
+  public constructor(id, option) {
     super(id, option);
     this.type = AppClientType.WS;
     this.ws = option.ws;

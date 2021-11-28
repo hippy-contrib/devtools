@@ -57,9 +57,9 @@ export const cssMiddleWareManager: MiddleWareManager = {
 };
 
 class CssDomain {
-  static skipStyleList = ['backgroundImage', 'transform', 'shadowOffset'];
+  private static skipStyleList = ['backgroundImage', 'transform', 'shadowOffset'];
 
-  static intToRGBA(int32Color) {
+  public static intToRGBA(int32Color) {
     const int = int32Color << 0;
     const int32 = ((int << 8) | (int >>> 24)) >>> 0;
     const int8 = new Uint8Array(new Uint32Array([int32]).buffer).reverse();
@@ -70,19 +70,19 @@ class CssDomain {
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
 
-  static rgbaToInt(stringColor) {
+  public static rgbaToInt(stringColor) {
     const uint8 = color(stringColor, 'uint8');
     const int = Buffer.from(uint8).readUInt32BE(0);
     return ((int << 24) | (int >>> 8)) >>> 0;
   }
 
-  static skipStyle(styleName) {
+  public static skipStyle(styleName) {
     return CssDomain.skipStyleList.some(
       (name) => name.toString().trim().toLowerCase() === styleName.toString().trim().toLowerCase(),
     );
   }
 
-  static conversionInlineStyle(style) {
+  public static conversionInlineStyle(style) {
     let totalCSSText = '';
     style.cssProperties = style.cssProperties.reduce((ret, item) => {
       if (CssDomain.skipStyle(item.name)) return ret;
@@ -108,7 +108,7 @@ class CssDomain {
     return style;
   }
 
-  static conversionComputedStyle(style) {
+  public static conversionComputedStyle(style) {
     if (!style) return [];
     return style.reduce((ret, item) => {
       if (!CssDomain.skipStyle(item.name)) {
@@ -121,7 +121,7 @@ class CssDomain {
     }, []);
   }
 
-  static transformRGBA(colorText) {
+  public static transformRGBA(colorText) {
     return colorText.trim().replace(/^rgba?\(([^()]+)\)$/i, (s, p1) => {
       const flag = p1.includes(',') ? ',' : ' ';
       const channelList = p1.split(flag);

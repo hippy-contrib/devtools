@@ -10,7 +10,7 @@ export const getDomain = (method: string) => {
   let domain = method;
   const group = method.match(/^(\w+)(\.\w+)?$/);
   if (group) {
-    domain = group[1];
+    [, domain] = group;
   }
   return domain;
 };

@@ -6,7 +6,7 @@ export const config = {
   cachePath: path.join(__dirname, 'cache'),
   logPath: path.join(__dirname, 'log'),
   redis: {
-    // TODO 密钥由CI注入env
+    // TODO 密钥由 CI 注入 env
     // ‼️ redis-server 6 以下，username 需要置空
     url: 'redis://:tdf~jl80;-asd@gz-crs-a7miptxr.sql.tencentcdb.com:29804/0',
     // url: 'redis://:tdf~jl80;-asd@11.167.18.162:7760/0',

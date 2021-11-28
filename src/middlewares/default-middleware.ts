@@ -1,4 +1,4 @@
-import { PROTOCOL_ERROR_CODE } from '@/@types/enum';
+import { ProtocolErrorCode } from '@/@types/enum';
 import { MiddleWare } from './middleware-context';
 
 /**
@@ -34,7 +34,7 @@ export const sendFailResultToDevtools: MiddleWare = async ({ msg, sendToDevtools
     id: req.id,
     method: req.method,
     error: {
-      code: PROTOCOL_ERROR_CODE.ProtocolNotFound,
+      code: ProtocolErrorCode.ProtocolNotFound,
       message: `'${req.method}' wasn't found`,
     },
   });

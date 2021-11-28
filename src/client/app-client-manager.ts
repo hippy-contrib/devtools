@@ -98,7 +98,7 @@ export const initVoltronEnv = () => {
 /**
  * TDF
  *  - 安卓
- *    - tunnel通道
+ *    - tunnel 通道
  *  - ios
  *    - 自实现协议走 tunnel 通道
  *    - jsc 实现的协议走 IWDP 通道

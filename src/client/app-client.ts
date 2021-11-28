@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientType, ClientEvent, DevicePlatform, ERROR_CODE, MiddlewareType, WinstonColor } from '@/@types/enum';
+import { AppClientType, ClientEvent, DevicePlatform, ErrorCode, MiddlewareType, WinstonColor } from '@/@types/enum';
 import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
@@ -40,7 +40,7 @@ export abstract class AppClient extends DomainRegister {
   private useAllDomain = true;
   private msgIdMethodMap: Map<number, string> = new Map();
 
-  constructor(
+  public constructor(
     id,
     {
       useAllDomain = true,
@@ -67,7 +67,7 @@ export abstract class AppClient extends DomainRegister {
   public sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     if (!this.filter(msg)) {
       filteredLog.info(`'${msg.method}' is filtered in app client type: ${this.type}`);
-      return Promise.reject(ERROR_CODE.DomainFiltered);
+      return Promise.reject(ErrorCode.DomainFiltered);
     }
 
     const { method } = msg;
@@ -99,7 +99,7 @@ export abstract class AppClient extends DomainRegister {
   }
 
   private sendToDevtools(msg: Adapter.CDP.Res) {
-    if (!msg) return Promise.reject(ERROR_CODE.EmptyCommand);
+    if (!msg) return Promise.reject(ErrorCode.EmptyCommand);
     this.emit(ClientEvent.Message, msg);
     return Promise.resolve(msg);
   }

@@ -1,10 +1,12 @@
+// 扩展 eventemitter3 以支持 redis 的通配符
 import { EventEmitter } from '@/utils/event-emitter';
+
 const pubsub = new EventEmitter();
 
 export class MemoryPubSub extends EventEmitter {
   private channel: string;
 
-  constructor(channel: string) {
+  public constructor(channel: string) {
     super();
     this.channel = channel;
   }

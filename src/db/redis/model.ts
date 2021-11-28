@@ -16,7 +16,7 @@ export type RedisClient = ReturnType<typeof createClient>;
 export class RedisModel extends DBModel {
   public client;
 
-  constructor() {
+  public constructor() {
     super();
     if (!this.client) {
       this.client = createMyClient();

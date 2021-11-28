@@ -55,6 +55,9 @@ export const enum AppClientType {
   Custom = 'custom',
 }
 
+/**
+ * flamechart frame type
+ */
 export enum PH {
   Begin = 'B',
   End = 'E',
@@ -75,13 +78,13 @@ export enum ChromePageType {
   Node = 'node',
 }
 
-export const enum ERROR_CODE {
+export const enum ErrorCode {
   DomainFiltered = 1,
   NoAppClient = 2,
   EmptyCommand = 3,
 }
 
-export const enum PROTOCOL_ERROR_CODE {
+export const enum ProtocolErrorCode {
   ProtocolNotFound = -32601,
 }
 
