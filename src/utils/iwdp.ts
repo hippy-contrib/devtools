@@ -9,7 +9,7 @@ import { DebugTarget } from '@/@types/debug-target';
 const log = new Logger('iwdp-util');
 
 export const getIWDPPages = async (iwdpPort): Promise<IWDPPage[]> => {
-  if (!global.appArgv.useTunnel) return [];
+  if (!global.appArgv.useTunnel && !global.appArgv.useIWDP) return [];
   try {
     // iwdp 检查页面列表会稍有延迟，这里简单做下 sleep
     await sleep(250);
@@ -18,24 +18,7 @@ export const getIWDPPages = async (iwdpPort): Promise<IWDPPage[]> => {
       baseUrl: `http://127.0.0.1:${iwdpPort}`,
       json: true,
     });
-    const debugTargets: IWDPPage[] =
-      (await Promise.all(
-        deviceList.map(async (device) => {
-          const port = device.url.match(/:(\d+)/)[1];
-          try {
-            const targets = await request({
-              url: '/json',
-              baseUrl: `http://127.0.0.1:${port}`,
-              json: true,
-            });
-            targets.map((target) => (target.device = device));
-            return targets;
-          } catch (e) {
-            log.error(e);
-            return [];
-          }
-        }),
-      )) || [];
+    const debugTargets: IWDPPage[] = (await Promise.all(deviceList.map(getDeviceIWDPPages))) || [];
     return debugTargets.flat();
   } catch (e) {
     log.error('request IWDP pages error: %s', (e as Error).stack);
@@ -43,6 +26,9 @@ export const getIWDPPages = async (iwdpPort): Promise<IWDPPage[]> => {
   }
 };
 
+/**
+ * 用 IWDP 获取到的页面信息扩展 debugTarget
+ */
 export const patchIOSTarget = (debugTarget: DebugTarget, iosPages: Array<IWDPPage>): DebugTarget => {
   if (debugTarget.platform !== DevicePlatform.IOS) return debugTarget;
 
@@ -83,4 +69,20 @@ export const patchIOSTarget = (debugTarget: DebugTarget, iosPages: Array<IWDPPag
     devtoolsFrontendUrl,
     webSocketDebuggerUrl: `ws://${wsUrl}`,
   };
+};
+
+const getDeviceIWDPPages = async (device: IWDPDevice): Promise<IWDPPage[]> => {
+  const port = device.url.match(/:(\d+)/)[1];
+  try {
+    const targets: IWDPPage[] = await request({
+      url: '/json',
+      baseUrl: `http://127.0.0.1:${port}`,
+      json: true,
+    });
+    targets.map((target) => (target.device = device));
+    return targets;
+  } catch (e) {
+    log.error(e);
+    return [];
+  }
 };

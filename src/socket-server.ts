@@ -1,4 +1,5 @@
-import WebSocket, { Server } from 'ws/index.js';
+import { Server as HTTPServer, IncomingMessage } from 'http';
+import WebSocket, { Server as WSServer } from 'ws';
 import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
 import {
   AppClientType,
@@ -9,8 +10,8 @@ import {
   InternalChannelEvent,
   WinstonColor,
 } from '@/@types/enum';
-import { createTargetByWs, model, Publisher, Subscriber } from '@/db';
-import { appClientManager } from '@/client';
+import { createTargetByWsUrlParams, model, Publisher, Subscriber } from '@/db';
+import { appClientManager, AppClient } from '@/client';
 import { AppClientOption } from '@/client/app-client';
 import { AppClientFullOptionOmicCtx } from '@/client/app-client-manager';
 import { debugTargetToUrlParsedContext } from '@/middlewares';
@@ -18,29 +19,36 @@ import { DebugTargetManager } from '@/controller/debug-targets';
 import { DebugTarget } from '@/@types/debug-target';
 import { DomainRegister } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
-import { parseWsUrl, WsUrlParams } from '@/utils/url';
+import { parseWsUrl, WsUrlParams, AppWsUrlParams, DevtoolsWsUrlParams } from '@/utils/url';
 import { config } from '@/config';
 import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 
-const log = new Logger('socket-bridge', WinstonColor.Cyan);
+const log = new Logger('socket-server', WinstonColor.Cyan);
 
+/**
+ * ws 调试服务，支持远程调试（无线模式，ws通道）、本地调试（有线模式，tunnel数据通道）
+ * 通过 redis pub/sub 实现多点部署时的消息分发，上下行消息根据 clientId 来建立 redis channel 进行分发
+ * 本地安装npm包部署时（单点部署），不存储redis，而是直接保存在内存中
+ *
+ * 设计方案： https://iwiki.woa.com/pages/viewpage.action?pageId=1222336167
+ */
 export class SocketServer extends DomainRegister {
-  /**
-   * key: clientId
-   */
+  // 保存一个调试页面的缓存数据，key: clientId
   private static channelMap: Map<
     string,
     {
       downwardChannelSet: Set<string>;
-      // value: downward channelId
-      cmdMap: Map<number, string>;
+      // key: command id, value: downward channelId
+      cmdIdChannelIdMap: Map<number, string>;
       // key: downward channelId
       publisherMap: Map<string, typeof Publisher>;
+      // 多个node节点之间通信的 publisher，用与当 app 端断连时，通知devtools端断开
       internalPublisher: typeof Publisher;
-      subscriber: typeof Subscriber;
+      upwardSubscriber: typeof Subscriber;
     }
   > = new Map();
 
+  // 保存当前node节点所连接的调试对象，当服务关闭时清空缓存、优雅退出
   private static debugTargets: Array<DebugTarget> = [];
 
   /**
@@ -53,35 +61,36 @@ export class SocketServer extends DomainRegister {
     if (!SocketServer.channelMap.has(clientId)) {
       const upwardChannelId = createUpwardChannel(clientId, '*');
       const internalChannelId = createInternalChannel(clientId, '*');
-      const subscriber = new Subscriber(upwardChannelId);
+      const upwardSubscriber = new Subscriber(upwardChannelId);
       const internalPublisher = new Publisher(internalChannelId);
       log.info('subscribe to redis channel %s', upwardChannelId);
       SocketServer.channelMap.set(clientId, {
         downwardChannelSet: new Set(),
-        cmdMap: new Map(),
+        cmdIdChannelIdMap: new Map(),
         publisherMap: new Map(),
-        subscriber,
+        upwardSubscriber,
         internalPublisher,
       });
     }
-    const { downwardChannelSet, cmdMap, publisherMap, subscriber } = SocketServer.channelMap.get(clientId);
+    const { downwardChannelSet, cmdIdChannelIdMap, publisherMap, upwardSubscriber } =
+      SocketServer.channelMap.get(clientId);
 
-    let options;
+    let options: AppClientFullOptionOmicCtx[];
     if (debugTarget.platform === DevicePlatform.Android) {
       options = appClientManager.getAndroidAppClientOptions();
     } else {
       options = appClientManager.getIosAppClientOptions();
     }
 
-    let appClientList = [];
+    let appClientList: AppClient[] = [];
     appClientList = options
       .map(({ Ctor, ...option }: AppClientFullOptionOmicCtx) => {
         try {
           log.info(`create app client ${Ctor.name}`);
           const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
           const newOption: AppClientOption = {
-            urlParsedContext,
             ...option,
+            urlParsedContext,
             iwdpWsUrl: debugTarget.iwdpWsUrl,
           };
           if (Ctor.name === AppClientType.WS) {
@@ -94,17 +103,22 @@ export class SocketServer extends DomainRegister {
       })
       .filter((v) => v);
 
-    // 订阅上行消息
-    subscriber.pSubscribe((message, upwardChannelId) => {
+    // 订阅上行消息。由于可能存在多个 devtools client（如多个插件），所以这里应该用批量订阅 pSubscribe
+    upwardSubscriber.pSubscribe((message: string, upwardChannelId: string) => {
       log.info('on channel message, %s', upwardChannelId);
-      const msgObj: Adapter.CDP.Req = JSON.parse(message);
+      let msgObj: Adapter.CDP.Req;
+      try {
+        msgObj = JSON.parse(message);
+      } catch (e) {
+        log.error('%s channel message are invalid JSON, %s', upwardChannelId, message);
+      }
       const downwardChannelId = upwardChannelId.replace(upwardSpliter, downwardSpliter);
-      cmdMap.set(msgObj.id, downwardChannelId);
+      cmdIdChannelIdMap.set(msgObj.id, downwardChannelId);
       downwardChannelSet.add(downwardChannelId);
 
       appClientList.forEach((appClient) => {
         appClient.sendToApp(msgObj).catch((e) => {
-          if (e !== ERROR_CODE.DOMAIN_FILTERED) {
+          if (e !== ERROR_CODE.DomainFiltered) {
             return log.error('%s app client send error: %j', appClient.type, e);
           }
         });
@@ -117,19 +131,19 @@ export class SocketServer extends DomainRegister {
       appClient.on(ClientEvent.Message, async (msg: Adapter.CDP.Res) => {
         const msgStr = JSON.stringify(msg);
         if ('id' in msg) {
-          // 消息为 command，根据缓存的 cmdId 查找 downwardChannelId，只发布到该 channel
+          // 消息为 CommandRes，根据缓存的 cmdId 查找 downwardChannelId，只发布到该 channel
           const commandRes = msg as Adapter.CDP.CommandRes;
-          const downwardChannelId = cmdMap.get(commandRes.id);
+          const downwardChannelId = cmdIdChannelIdMap.get(commandRes.id);
+          if (!downwardChannelId) return;
           if (!publisherMap.has(downwardChannelId)) {
-            if (!downwardChannelId) return;
             const publisher = new Publisher(downwardChannelId);
             publisherMap.set(downwardChannelId, publisher);
           }
           const publisher = publisherMap.get(downwardChannelId);
           publisher.publish(msgStr);
         } else {
-          // event 无法确定来源，广播到所有 channel
-          Array.from(downwardChannelSet.values()).map(async (channelId) => {
+          // 消息类型为 EventRes，event 无法确定来源，广播到所有 channel
+          downwardChannelSet.forEach((channelId) => {
             if (!publisherMap.has(channelId)) {
               const publisher = new Publisher(channelId);
               publisherMap.set(channelId, publisher);
@@ -143,57 +157,59 @@ export class SocketServer extends DomainRegister {
   }
 
   /**
-   * 调试结束，清除缓存。appDisconnect, app ws close 时调用
+   * 调试结束，清除缓存
+   * appDisconnect, app ws close 时调用
    */
-  public static async clean(clientId: string) {
+  public static async cleanDebugTarget(clientId: string) {
+    model.delete(config.redis.key, clientId);
     const channelInfo = SocketServer.channelMap.get(clientId);
     if (!channelInfo) return;
-    const { publisherMap, subscriber, internalPublisher } = channelInfo;
+    const { publisherMap, upwardSubscriber, internalPublisher } = channelInfo;
     internalPublisher.publish(InternalChannelEvent.WSClose);
-    // Promise.all(Array.from(publisherMap.values()).map((publisher) => publisher.disconnect()));
-    // subscriber.pUnsubscribe();
-    // subscriber.disconnect();
-    // internalPublisher.disconnect();
+    Array.from(publisherMap.values()).forEach((publisher) => publisher.disconnect());
+    upwardSubscriber.pUnsubscribe();
+    upwardSubscriber.disconnect();
+    internalPublisher.disconnect();
     SocketServer.channelMap.delete(clientId);
   }
 
-  private wss: Server;
-  private server;
+  private wss: WSServer;
+  private server: HTTPServer | undefined;
 
-  constructor(server) {
+  constructor(server: HTTPServer) {
     super();
     this.server = server;
   }
 
   public start() {
-    const wss = new Server({
+    const wss = new WSServer({
       server: this.server,
       path: config.wsPath,
     });
     this.wss = wss;
     wss.on('connection', this.onConnection.bind(this));
 
-    wss.on('error', (e) => {
+    wss.on('error', (e: Error) => {
       log.error(`wss error: %s`, (e as Error)?.stack);
     });
-    wss.on('headers', (headers) => {
+    wss.on('headers', (headers: string[]) => {
       log.info('wss headers: %j', headers);
     });
-    wss.on('upgrade', (response) => {
+    wss.on('upgrade', (response: IncomingMessage) => {
       log.info('wss upgrade: %j', response);
     });
   }
 
   public close() {
     SocketServer.debugTargets.forEach((debugTarget) => {
-      model.delete(config.redis.key, debugTarget.clientId);
+      SocketServer.cleanDebugTarget(debugTarget.clientId);
     });
     this.wss.close(() => {
-      log.info('close wss.');
+      log.info('wss closed.');
     });
   }
 
-  private async onConnection(ws, req) {
+  private async onConnection(ws: WebSocket, req: IncomingMessage) {
     log.info('on connection, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
     const { clientRole, clientId } = wsUrlParams;
@@ -215,9 +231,8 @@ export class SocketServer extends DomainRegister {
   /**
    * 将来自于 devtools 的 ws，通过 pub/sub 转发到 redis
    */
-  private onDevtoolsConnection(ws: WebSocket, wsUrlParams: WsUrlParams) {
-    const { extensionName } = wsUrlParams;
-    const { clientId } = wsUrlParams;
+  private onDevtoolsConnection(ws: WebSocket, wsUrlParams: DevtoolsWsUrlParams) {
+    const { extensionName, clientId } = wsUrlParams;
     const downwardChannelId = createDownwardChannel(clientId, extensionName);
     const upwardChannelId = createUpwardChannel(clientId, extensionName);
     const internalChannelId = createInternalChannel(clientId, extensionName);
@@ -226,8 +241,8 @@ export class SocketServer extends DomainRegister {
     // internal channel 用于订阅 node 节点之间的事件，如 app ws close 时，通知 devtools ws close
     const internalSubscriber = new Subscriber(internalChannelId);
     const publisher = new Publisher(upwardChannelId);
-    downwardSubscriber.subscribe(ws.send.bind(ws));
 
+    downwardSubscriber.subscribe(ws.send.bind(ws));
     internalSubscriber.subscribe((msg: string) => {
       if (msg === InternalChannelEvent.WSClose) {
         log.warn('close devtools ws connection');
@@ -236,45 +251,45 @@ export class SocketServer extends DomainRegister {
         internalSubscriber.disconnect();
       }
     });
+
     ws.on('message', (msg: string) => {
-      log.info('devtools msg: %s', msg);
       publisher.publish(msg);
     });
-    const onClose = async () => {
+    const onClose = () => {
       log.info('devtools ws disconnect. clientId: %s', clientId);
-      // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以直接用 ts 来 mock
-      const ts = 10000;
+      // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
+      const mockId = -100000;
       const resumeCommands = [
         {
-          id: ts,
+          id: mockId,
           method: TdfCommand.TDFRuntimeResume,
           params: {},
         },
         {
-          id: ts + 1,
+          id: mockId - 1,
           method: ChromeCommand.DebuggerDisable,
           params: {},
         },
         {
-          id: ts + 2,
+          id: mockId - 2,
           method: ChromeCommand.RuntimeDisable,
           params: {},
         },
       ];
-      await Promise.all(resumeCommands.map((command) => publisher.publish(command)));
+      resumeCommands.map(publisher.publish.bind(publisher));
       publisher.disconnect();
       downwardSubscriber.unsubscribe();
       downwardSubscriber.disconnect();
     };
     ws.on('close', onClose);
     // ws 标准规定 on error 后一定触发 on close，所以也要做清理
-    ws.on('error', (e) => {
+    ws.on('error', (e: Error) => {
       log.error('devtools ws client error %s', e?.stack);
       onClose();
     });
   }
 
-  private async onAppConnection(ws: WebSocket, wsUrlParams: WsUrlParams) {
+  private async onAppConnection(ws: WebSocket, wsUrlParams: AppWsUrlParams) {
     const { clientId, clientRole } = wsUrlParams;
     log.info('ws app client connected. %s', clientId);
     const platform = {
@@ -284,7 +299,7 @@ export class SocketServer extends DomainRegister {
     const useWS = appClientManager.useAppClientType(platform, AppClientType.WS);
     if (!useWS) return log.warn('current env is %s, ignore ws connection', global.appArgv.env);
 
-    let debugTarget = createTargetByWs(wsUrlParams);
+    let debugTarget = createTargetByWsUrlParams(wsUrlParams);
     if (debugTarget.platform === DevicePlatform.IOS) {
       const iosPages = await getIWDPPages(global.appArgv.iwdpPort);
       debugTarget = patchIOSTarget(debugTarget, iosPages);
@@ -294,18 +309,17 @@ export class SocketServer extends DomainRegister {
 
     const onClose = () => {
       log.info('ws app client disconnect. %s', clientId);
-      model.delete(config.redis.key, clientId);
-      SocketServer.clean(clientId);
+      SocketServer.cleanDebugTarget(clientId);
     };
     ws.on('close', onClose);
-    ws.on('error', (e) => {
+    ws.on('error', (e: Error) => {
       log.error('app ws error %s', e?.stack);
       onClose();
     });
   }
 }
 
-const isConnectionValid = async (wsUrlParams, debugTarget): Promise<boolean> => {
+const isConnectionValid = async (wsUrlParams: WsUrlParams, debugTarget: DebugTarget): Promise<boolean> => {
   const { clientRole, pathname, contextName } = wsUrlParams;
   const { clientId } = wsUrlParams;
   log.info('clientRole: %s', clientRole);
@@ -316,18 +330,16 @@ const isConnectionValid = async (wsUrlParams, debugTarget): Promise<boolean> => 
     return false;
   }
   if (clientRole === ClientRole.Devtools && !debugTarget) {
-    log.warn("debugTarget doesn't exist!");
+    log.warn("debugTarget doesn't exist! %s", clientId);
     return false;
   }
   if (!Object.values(ClientRole).includes(clientRole)) {
     log.warn('invalid client role!');
     return false;
   }
-  if (clientRole === ClientRole.IOS) {
-    if (!contextName) {
-      log.warn('invalid ios connection, should request with contextName!');
-      return false;
-    }
+  if (clientRole === ClientRole.IOS && !contextName) {
+    log.warn('invalid ios connection, should request with contextName!');
+    return false;
   }
 
   if (!clientId) {
@@ -344,11 +356,15 @@ const isConnectionValid = async (wsUrlParams, debugTarget): Promise<boolean> => 
 const downwardSpliter = '_down_';
 const upwardSpliter = '_up_';
 const internalSpliter = '_internal_';
+
 const createDownwardChannel = (clientId: string, extensionName?: string) =>
   createChannel(clientId, extensionName, downwardSpliter);
+
 const createUpwardChannel = (clientId: string, extensionName?: string) =>
   createChannel(clientId, extensionName, upwardSpliter);
+
 const createInternalChannel = (clientId: string, extensionName?: string) =>
   createChannel(clientId, extensionName, internalSpliter);
+
 const createChannel = (clientId: string, extensionName?: string, spliter?: string) =>
   `${clientId}${spliter}${extensionName || 'default'}`;

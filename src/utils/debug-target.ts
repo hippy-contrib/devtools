@@ -1,10 +1,10 @@
 import { DeviceInfo } from '@/@types/device';
 import { ChromePageType, DevicePlatform, ClientRole, AppClientType } from '@/@types/enum';
-import { makeUrl, WsUrlParams } from '@/utils/url';
+import { makeUrl, AppWsUrlParams } from '@/utils/url';
 import { config } from '@/config';
 import { DebugTarget } from '@/@types/debug-target';
 
-export const createTargetByTunnel = (device: DeviceInfo): DebugTarget => {
+export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
   // 通过 tunnel 创建的 target，暂时使用 devicename 作为调试对象id，后续终端重构后使用 targetCreated 事件抛出的 id
   const clientId = device.devicename;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
@@ -36,7 +36,7 @@ export const createTargetByTunnel = (device: DeviceInfo): DebugTarget => {
   };
 };
 
-export const createTargetByWs = (wsUrlParams: WsUrlParams): DebugTarget => {
+export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTarget => {
   const { clientId, clientRole, contextName, deviceName } = wsUrlParams;
   let platform;
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;

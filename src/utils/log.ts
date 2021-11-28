@@ -40,7 +40,7 @@ export class Logger {
       maxFiles: '7d',
     });
     const { format } = winston;
-    const label = this.color ? colors[this.color](this.label) : (colors as any).maps.random(this.label);
+    const label = this.color ? colors[this.color](this.label) : colors.random(this.label);
     this.loggerInstance = winston.createLogger({
       format: format.combine(
         format.errors({ stack: true }),

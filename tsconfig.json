@@ -27,6 +27,6 @@
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts", "package.json", "node_modules/tdf-devtools-protocol/**/*"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts", "package.json", "node_modules/tdf-devtools-protocol/**/*", "src/utils/event-emitter.js"],
   "exclude": ["!node_modules/tdf-devtools-protocol"]
 }

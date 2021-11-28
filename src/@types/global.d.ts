@@ -12,5 +12,3 @@ interface Addon {
   sendMsg: (msg: string) => void;
   exit: () => void;
 }
-
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;

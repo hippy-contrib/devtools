@@ -1,4 +1,4 @@
-import WebSocket from 'ws/index.js';
+import WebSocket from 'ws';
 import { AppClientType, ClientEvent, DevicePlatform, ERROR_CODE, MiddlewareType, WinstonColor } from '@/@types/enum';
 import {
   defaultDownwardMiddleware,
@@ -6,6 +6,7 @@ import {
   MiddleWareManager,
   UrlParsedContext,
   requestId,
+  MiddleWareContext,
 } from '@/middlewares';
 import { CDP_DOMAIN_LIST, getDomain, DomainRegister } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
@@ -66,7 +67,7 @@ export abstract class AppClient extends DomainRegister {
   public sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     if (!this.filter(msg)) {
       filteredLog.info(`'${msg.method}' is filtered in app client type: ${this.type}`);
-      return Promise.reject(ERROR_CODE.DOMAIN_FILTERED);
+      return Promise.reject(ERROR_CODE.DomainFiltered);
     }
 
     const { method } = msg;
@@ -98,7 +99,7 @@ export abstract class AppClient extends DomainRegister {
   }
 
   private sendToDevtools(msg: Adapter.CDP.Res) {
-    if (!msg) return Promise.reject(ERROR_CODE.EMPTY_COMMAND);
+    if (!msg) return Promise.reject(ERROR_CODE.EmptyCommand);
     this.emit(ClientEvent.Message, msg);
     return Promise.resolve(msg);
   }
@@ -106,7 +107,7 @@ export abstract class AppClient extends DomainRegister {
   /**
    * 创建中间件上下文，中间件中通过调用 sendToApp, sendToDevtools 将调试协议分发到接收端
    */
-  private makeContext(msg: Adapter.CDP.Req | Adapter.CDP.Res) {
+  private makeContext(msg: Adapter.CDP.Req | Adapter.CDP.Res): MiddleWareContext {
     return {
       ...this.urlParsedContext,
       msg,

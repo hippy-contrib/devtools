@@ -13,11 +13,11 @@ export interface UrlParsedContext extends ContextBase {
 
 export interface MiddleWareContext extends UrlParsedContext {
   msg: Adapter.CDP.Req | Adapter.CDP.Res;
-  sendToApp: (msg: Adapter.CDP.Data) => Promise<Adapter.CDP.Res>;
-  sendToDevtools: (msg: Adapter.CDP.Data) => Promise<Adapter.CDP.Res>;
+  sendToApp: (msg: Adapter.CDP.Req) => Promise<Adapter.CDP.Res>;
+  sendToDevtools: (msg: Adapter.CDP.Res) => Promise<Adapter.CDP.Res>;
 }
 
-export type MiddleWare = (ctx: MiddleWareContext, next: () => Promise<Adapter.CDP.Res>) => Promise<Adapter.CDP.Res>;
+export type MiddleWare = (ctx: MiddleWareContext, next?: () => Promise<Adapter.CDP.Res>) => Promise<Adapter.CDP.Res>;
 
 export interface MiddleWareManager {
   upwardMiddleWareListMap?: { [k: string]: Array<MiddleWare> | MiddleWare };

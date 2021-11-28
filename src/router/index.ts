@@ -9,7 +9,7 @@ import { getDebugTargetsRouter } from '@/router/debug-targets';
 
 const log = new Logger('router');
 
-export const createRouter = (app: Koa) => {
+export const routeApp = (app: Koa) => {
   const { staticPath, entry, publicPath } = global.appArgv;
 
   app.use(cors());
@@ -20,7 +20,7 @@ export const createRouter = (app: Koa) => {
       await next();
     } catch (e) {
       log.error(`koa error: %s`, (e as Error)?.stack);
-      return (ctx.body = (e as any).msg);
+      return (ctx.body = (e as Error)?.stack);
     }
   });
 

@@ -17,7 +17,23 @@ export const parseWsUrl = (reqUrl: string) => {
   };
 };
 
-export type WsUrlParams = ReturnType<typeof parseWsUrl>;
+export type AppWsUrlParams = {
+  clientId: string;
+  clientRole: ClientRole;
+  pathname: string;
+  contextName?: string;
+  deviceName?: string;
+};
+
+export type DevtoolsWsUrlParams = {
+  clientId: string;
+  pathname: string;
+  clientRole: ClientRole;
+  extensionName: string;
+  contextName?: string;
+};
+
+export type WsUrlParams = AppWsUrlParams | DevtoolsWsUrlParams;
 
 export const makeUrl = (baseUrl: string, query: unknown) => {
   let fullUrl = baseUrl;

@@ -1,21 +1,21 @@
 declare namespace Adapter {
   type DomainListener = (msg: Adapter.CDP.Res) => void;
   declare namespace CDP {
-    interface Req {
+    interface Req<T = any> {
       id: number;
       method: string;
-      params: any;
+      params: T;
     }
 
-    interface EventRes {
+    interface EventRes<T = any> {
       method: string;
-      params: any;
+      params: T;
     }
 
     // CommanRes/ErrorRes 接口统一在 onMessage 时把 method 字段补充上去了
-    interface CommandRes {
+    interface CommandRes<T = any> {
       id: number;
-      result: any;
+      result: T;
       method: string;
     }
 
@@ -49,7 +49,7 @@ declare namespace Adapter {
   type ConnectionListMap<T> = Map<string, ConnectionList<T>>;
 
   type Resolve<T> = (value: T) => TResult1 | PromiseLike<TResult1>;
-  type Reject = (reason: any) => TResult2 | PromiseLike<TResult2>;
+  type Reject = (reason: unknown) => TResult2 | PromiseLike<TResult2>;
   type RequestPromiseMap = Map<
     string | number,
     {

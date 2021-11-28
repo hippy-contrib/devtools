@@ -8,10 +8,6 @@
  *        ├── Tunnel.node
  */
 
-// try {
 import addon from '@/build/Tunnel.node';
 global.addon = addon;
 export const { addEventListener, tunnelStart, getDeviceList, selectDevice, exit, sendMsg } = global.addon;
-// } catch (e) {
-//   console.error(e);
-// }

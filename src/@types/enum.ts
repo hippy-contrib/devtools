@@ -63,11 +63,11 @@ export enum PH {
 }
 
 export enum DeviceManagerEvent {
-  addDevice = 'addDevice',
-  removeDevice = 'removeDevice',
-  appDidDisConnect = 'appDidDisConnect',
-  appDidConnect = 'appDidConnect',
-  getDeviceList = 'getDeviceList',
+  AddDevice = 'addDevice',
+  RemoveDevice = 'removeDevice',
+  AppDidDisConnect = 'appDidDisConnect',
+  AppDidConnect = 'appDidConnect',
+  GetDeviceList = 'getDeviceList',
 }
 
 export enum ChromePageType {
@@ -76,9 +76,9 @@ export enum ChromePageType {
 }
 
 export const enum ERROR_CODE {
-  DOMAIN_FILTERED = 1,
-  NO_APP_CLIENT = 2,
-  EMPTY_COMMAND = 3,
+  DomainFiltered = 1,
+  NoAppClient = 2,
+  EmptyCommand = 3,
 }
 
 export const enum PROTOCOL_ERROR_CODE {
@@ -107,4 +107,10 @@ export enum WinstonColor {
 
 export enum InternalChannelEvent {
   WSClose = 'WSClose',
+}
+
+export enum ChromeLogLevel {
+  Info = 'info',
+  Error = 'error',
+  Log = 'log',
 }

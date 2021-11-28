@@ -1,13 +1,16 @@
 import { ChromeCommand, ChromeEvent, Ios100Command, Ios100Event } from 'tdf-devtools-protocol/dist/types';
+import { Logger } from '@/utils/log';
 import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
 import TraceAdapter from './adapter/trace-adapter';
+
+const log = new Logger('trace-middleware');
 
 export const traceMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [Ios100Event.ScriptProfilerTrackingComplete]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
-      console.log(`onPerformanceProfileCompleteEvent, msg = ${eventRes}`);
+      log.info(`onPerformanceProfileCompleteEvent, msg = ${eventRes}`);
       const traceAdapter = new TraceAdapter();
       const v8json = traceAdapter.jsc2v8(eventRes.params);
       return sendToDevtools({

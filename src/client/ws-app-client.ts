@@ -1,4 +1,4 @@
-import WebSocket from 'ws/index.js';
+import WebSocket from 'ws';
 import { AppClientType, ClientEvent } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
@@ -22,7 +22,7 @@ export class WsAppClient extends AppClient {
   }
 
   protected registerMessageListener() {
-    this.ws.on('message', (msg: string) => {
+    this.ws.on('message', async (msg: string) => {
       let msgObj: Adapter.CDP.Res;
       try {
         msgObj = JSON.parse(msg);
@@ -30,11 +30,10 @@ export class WsAppClient extends AppClient {
         log.error(`parse ws app client json message error: ${msg}`);
       }
 
-      this.onMessage(msgObj).then((res) => {
-        if (!('id' in msgObj)) return;
-        const requestPromise = this.requestPromiseMap.get(msgObj.id);
-        if (requestPromise) requestPromise.resolve(res);
-      });
+      const res = await this.onMessage(msgObj);
+      if (!('id' in msgObj)) return;
+      const requestPromise = this.requestPromiseMap.get(msgObj.id);
+      if (requestPromise) requestPromise.resolve(res);
     });
 
     this.ws.on('close', (msg) => {

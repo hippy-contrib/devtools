@@ -1,4 +1,4 @@
-import WebSocket from 'ws/index.js';
+import WebSocket from 'ws';
 import { AppClientType, ClientEvent } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
@@ -23,7 +23,7 @@ export class IwdpAppClient extends AppClient {
     this.url = option.iwdpWsUrl;
     if (!this.url) {
       const e = new Error('IwdpAppClient constructor option need iwdpWsUrl');
-      log.error('%s', e?.stack);
+      log.error('%s', e.stack);
       throw e;
     }
     this.type = AppClientType.IWDP;
@@ -31,23 +31,23 @@ export class IwdpAppClient extends AppClient {
   }
 
   protected registerMessageListener() {
-    this.ws?.on('message', (msg: string) => {
+    if (!this.ws) return;
+    this.ws.on('message', async (msg: string) => {
       let msgObj: Adapter.CDP.Res;
       try {
         msgObj = JSON.parse(msg);
       } catch (e) {
         log.error(`parse json error: ${msg}`);
       }
-      this.onMessage(msgObj).then((res) => {
-        if (!('id' in msgObj)) return;
-        const requestPromise = this.requestPromiseMap.get(msgObj.id);
-        if (requestPromise) {
-          requestPromise.resolve(res);
-        }
-      });
+      const res = await this.onMessage(msgObj);
+      if (!('id' in msgObj)) return;
+      const requestPromise = this.requestPromiseMap.get(msgObj.id);
+      if (requestPromise) {
+        requestPromise.resolve(res);
+      }
     });
 
-    this.ws?.on('open', () => {
+    this.ws.on('open', () => {
       log.info(`ios proxy client opened: ${this.url}`);
       for (const { msg, resolve, reject } of this.msgBuffer) {
         const msgStr = JSON.stringify(msg);
@@ -57,7 +57,7 @@ export class IwdpAppClient extends AppClient {
       this.msgBuffer = [];
     });
 
-    this.ws?.on('close', () => {
+    this.ws.on('close', () => {
       this.isClosed = true;
       this.emit(ClientEvent.Close);
 
@@ -67,7 +67,7 @@ export class IwdpAppClient extends AppClient {
       }
     });
 
-    this.ws?.on('error', (e) => {
+    this.ws.on('error', (e) => {
       log.error('ios proxy client error: %s', e?.stack);
     });
   }

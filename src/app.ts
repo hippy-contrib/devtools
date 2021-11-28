@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { Server as HTTPServer } from 'http';
 import kill from 'kill-port';
 import Koa from 'koa';
 import open from 'open';
@@ -9,68 +10,43 @@ import { SocketServer } from '@/socket-server';
 import { Logger } from '@/utils/log';
 import { initDbModel } from '@/db';
 import { DebugTargetManager } from '@/controller/debug-targets';
-import { createRouter } from '@/router';
+import { routeApp } from '@/router';
 import { config } from '@/config';
 
 const log = new Logger('application');
 
 export class Application {
-  public static isServerReady = false;
-  private static server;
+  private static server: HTTPServer;
   private static socketServer: SocketServer;
 
   public static async startServer() {
     log.info('start server argv: %j', global.appArgv);
-    const {
-      host,
-      port,
-      iwdpPort,
-      useAdb,
-      useIWDP,
-      clearAddrInUse,
-      useTunnel,
-      open: openChrome = false,
-      isRemote,
-    } = global.appArgv;
-
-    Application.init();
-    Application.setEnv();
-    await initDbModel();
-
-    if (clearAddrInUse) {
-      try {
-        await kill(port, 'tcp');
-        await kill(iwdpPort, 'tcp');
-      } catch (e) {
-        log.error('Address already in use! %s', (e as Error)?.stack);
-        return process.exit(1);
-      }
-    }
+    const { host, port, useAdb, useIWDP, useTunnel, open: openChrome, isRemote } = global.appArgv;
+    await Application.init();
     return new Promise((resolve, reject) => {
       const app = new Koa();
-      createRouter(app);
+      routeApp(app);
 
       Application.server = app.listen(port, host, async () => {
-        log.info('start debug server.');
+        log.info('start debug server success.');
         if (!isRemote) {
-          import('./child-process/index').then(({ startTunnel, startIWDP, startAdbProxy }) => {
-            if (useTunnel) startTunnel();
-            else if (useIWDP) startIWDP();
-            if (useAdb) startAdbProxy();
-          });
+          const { startTunnel, startIWDP, startAdbProxy } = await import('./child-process/index');
+          if (useTunnel) startTunnel();
+          else if (useIWDP) startIWDP();
+          if (useAdb) startAdbProxy();
 
           if (openChrome) {
+            const url = `http://${host}:${port}/extensions/home.html`;
             try {
-              open(`http://${host}:${port}/extensions/home.html`, { app: { name: open.apps.chrome } });
+              open(url, { app: { name: open.apps.chrome } });
             } catch (e) {
-              log.error('open chrome failed, %s', (e as Error)?.stack);
+              log.error('open %s by chrome failed, please open manually, %s', url, (e as Error)?.stack);
             }
           }
         }
 
         Application.socketServer = new SocketServer(Application.server);
         Application.socketServer.start();
-        Application.isServerReady = true;
         resolve(null);
       });
 
@@ -88,11 +64,7 @@ export class Application {
         Application.server.close();
         Application.server = null;
       }
-      Application.isServerReady = false;
-      if (exitProcess)
-        setTimeout(() => {
-          process.exit(0);
-        }, 100);
+      if (exitProcess) process.exit(0);
     } catch (e) {
       log.error('stopServer error, %s', (e as Error)?.stack);
     }
@@ -102,18 +74,31 @@ export class Application {
     return DebugTargetManager.getDebugTargets();
   }
 
-  public static registerDomainListener(domain, listener) {
+  public static registerDomainListener(domain: string, listener: Adapter.DomainListener) {
     Application.socketServer.registerDomainListener(domain, listener);
   }
 
-  private static init() {
+  private static async init() {
     const { cachePath } = config;
     try {
       fs.rmdirSync(cachePath, { recursive: true });
     } catch (e) {
       log.error('rm cache dir error: %s', (e as Error)?.stack);
     }
-    return fs.promises.mkdir(cachePath, { recursive: true });
+    await fs.promises.mkdir(cachePath, { recursive: true });
+    await initDbModel();
+    Application.setEnv();
+
+    const { port, iwdpPort, clearAddrInUse } = global.appArgv;
+    if (clearAddrInUse) {
+      try {
+        await kill(port, 'tcp');
+        await kill(iwdpPort, 'tcp');
+      } catch (e) {
+        log.error('Address %s %s already in use! %s', port, iwdpPort, (e as Error)?.stack);
+        return process.exit(1);
+      }
+    }
   }
 
   private static setEnv() {
@@ -134,6 +119,6 @@ process.on('SIGINT', () => Application.stopServer(true));
 // 捕获 kill
 process.on('SIGTERM', () => Application.stopServer(true));
 
-process.on('unhandledRejection', (e: Error) => {
-  log.error(`unhandledRejection %s`, e?.stack);
-});
+const logErr = (e: Error) => log.error(`unhandledRejection %s`, e?.stack);
+process.on('unhandledRejection', logErr);
+process.on('uncaughtexception', logErr);

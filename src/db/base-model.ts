@@ -1,9 +1,7 @@
-import { EventEmitter } from 'events';
-
 /**
  * 数据库基类，包含基础的增删查改接口，以及 pub/sub 接口
  */
-export abstract class DBModel extends EventEmitter {
+export abstract class DBModel {
   public abstract init();
   public abstract getAll(key: string);
   /**

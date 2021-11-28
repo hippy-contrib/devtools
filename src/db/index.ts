@@ -1,6 +1,8 @@
 import { DBType } from '@/@types/enum';
-import { MemoryModel } from './memory-model';
-import { redisModel, RedisPublisher, RedisSubscriber } from './redis-model';
+import { MemoryModel } from './memory/model';
+import { MemoryPubSub } from './memory/pub-sub';
+import { redisModel } from './redis/model';
+import { RedisPublisher, RedisSubscriber } from './redis/pub-sub';
 import { DBModel } from './base-model';
 export * from '../utils/debug-target';
 
@@ -12,6 +14,8 @@ export const initDbModel = async () => {
   const { dbType } = global.appArgv;
   if (dbType === DBType.Memory) {
     model = new MemoryModel();
+    Publisher = MemoryPubSub;
+    Subscriber = MemoryPubSub;
   }
   if (dbType === DBType.Redis) {
     model = redisModel;

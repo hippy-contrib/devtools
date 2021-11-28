@@ -79,25 +79,26 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
     },
   },
   upwardMiddleWareListMap: {
-    [ChromeCommand.RuntimeCompileScript]: ({ msg, sendToApp, sendToDevtools }) =>
-      sendToApp({
+    [ChromeCommand.RuntimeCompileScript]: async ({ msg, sendToApp, sendToDevtools }) => {
+      const eventRes = msg as Adapter.CDP.EventRes;
+      await sendToApp({
         id: requestId.create(),
         method: Ios90Command.RuntimeEvaluate,
         params: {
-          expression: (msg as any).params.expression,
-          contextId: (msg as any).params.executionContextId,
+          expression: eventRes.params.expression,
+          contextId: eventRes.params.executionContextId,
         },
-      }).then(() => {
-        const convertedRes = {
-          id: (msg as Adapter.CDP.Req).id,
-          method: msg.method,
-          result: {
-            scriptId: null,
-            exceptionDetails: null,
-          },
-        };
-        sendToDevtools(convertedRes);
-        return convertedRes;
-      }),
+      });
+      const convertedRes = {
+        id: (msg as Adapter.CDP.Req).id,
+        method: msg.method,
+        result: {
+          scriptId: null,
+          exceptionDetails: null,
+        },
+      };
+      sendToDevtools(convertedRes);
+      return convertedRes;
+    },
   },
 };

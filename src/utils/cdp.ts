@@ -1,53 +1,8 @@
 import { EventEmitter } from 'events';
+import { ChromeCommand } from 'tdf-devtools-protocol/types';
+import { uniq } from 'lodash';
 
-export const CDP_DOMAIN_LIST = [
-  'Accessibility',
-  'Animation',
-  'ApplicationCache',
-  'Audits',
-  'BackgroundService',
-  'Browser',
-  'CSS',
-  'CacheStorage',
-  'Cast',
-  'DOM',
-  'DOMDebugger',
-  'DOMSnapshot',
-  'DOMStorage',
-  'Database',
-  'DeviceOrientation',
-  'Emulation',
-  'HeadlessExperimental',
-  'IO',
-  'IndexedDB',
-  'Input',
-  'Inspector',
-  'LayerTree',
-  'Log',
-  'Memory',
-  'Network',
-  'Overlay',
-  'Page',
-  'Performance',
-  'PerformanceTimeline',
-  'Security',
-  'ServiceWorker',
-  'Storage',
-  'SystemInfo',
-  'Target',
-  'Tethering',
-  'Tracing',
-  'Fetch',
-  'WebAudio',
-  'WebAuthn',
-  'Media',
-  'Console',
-  'Debugger',
-  'HeapProfiler',
-  'Profiler',
-  'Runtime',
-  'Schema',
-];
+export const CDP_DOMAIN_LIST = uniq(Object.values(ChromeCommand).map((command) => command.split('.')[0]));
 
 export const isCdpDomains = (domain) => CDP_DOMAIN_LIST.indexOf(domain) !== -1;
 

@@ -17,7 +17,9 @@ export const startTunnel = (cb?) => {
   const { iwdpPort, iwdpStartPort, iwdpEndPort, adbPath } = global.appArgv;
   addEventListener((event, data) => {
     try {
-      if (event !== TunnelEvent.TunnelLog) log.info('tunnel event: %s', event);
+      if (event !== TunnelEvent.TunnelLog) {
+        log.info('tunnel event: %s', event);
+      }
       if (event === TunnelEvent.ReceiveData) {
         tunnelEmitter.emit('message', data);
       } else {
@@ -31,8 +33,8 @@ export const startTunnel = (cb?) => {
           deviceManager.appDidConnect();
         } else if (event === TunnelEvent.AppDisconnect) {
           deviceManager.appDidDisConnect();
-        } else if (event === TunnelEvent.TunnelLog) {
-          if (data) log.info(data);
+        } else if (event === TunnelEvent.TunnelLog && data) {
+          log.info(data);
         }
 
         if (cb) cb(event, data);
@@ -67,17 +69,18 @@ export const startIWDP = () => {
   });
 };
 
-export const startAdbProxy = () => {
+export const startAdbProxy = async () => {
   const { port } = global.appArgv;
   const adbPath = path.join(__dirname, '../build/adb');
-  exec(adbPath, ['reverse', '--remove-all'])
-    .then(() => exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]))
-    .catch((e: Error) => {
-      childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
-      childProcessLog.info('Otherwise please check adb devices command working correctly');
-      childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
-      childProcessLog.info('start adb reverse error: %s', e?.stack);
-    });
+  try {
+    await exec(adbPath, ['reverse', '--remove-all']);
+    await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
+  } catch (e) {
+    childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
+    childProcessLog.info('Otherwise please check adb devices command working correctly');
+    childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
+    childProcessLog.info('start adb reverse error: %s', (e as Error)?.stack);
+  }
 };
 
 export const onExit = () => {

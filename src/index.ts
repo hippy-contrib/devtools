@@ -5,7 +5,6 @@ moduleAlias.addAliases({
   '@': __dirname,
   'package.json': '../package.json',
 });
-// eslint-disable-next-line import/order -- 在入口最前面注册别名，后面的 import 才能使用别名
 import yargs from 'yargs';
 import { DevtoolsEnv, DBType } from '@/@types/enum';
 import { Application } from '@/app';
@@ -14,7 +13,6 @@ import { version } from 'package.json';
 
 const { argv } = yargs
   .alias('v', 'version')
-  .describe('v', 'show version information')
   .alias('h', 'help')
   .help()
   .version()
@@ -46,7 +44,7 @@ const { argv } = yargs
   .option('open', {
     type: 'boolean',
     default: true,
-    descript: 'auto open chrome debug page',
+    descript: 'Auto open chrome debug page',
   })
   .option('verbose', {
     type: 'boolean',
@@ -76,34 +74,34 @@ const { argv } = yargs
   .option('useTunnel', {
     type: 'boolean',
     default: true,
-    describe: '',
+    describe: 'Whether enable tunnal, which is a c++ addon for connecting app by USB',
   })
   .option('useIWDP', {
     type: 'boolean',
     default: false,
-    describe: '',
+    describe: 'Whether enable IWDP, which is for iOS device debug in USB mode',
   })
   .option('useAdb', {
     type: 'boolean',
     default: true,
-    describe: '',
+    describe: 'Whether start adb reverse',
   })
   .option('isRemote', {
     type: 'boolean',
     default: false,
-    describe: '',
+    describe: 'Whether use remote debug',
   })
-  .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`) as any;
+  .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`);
 
-if (argv.help) {
-  yargs.showHelp().exit(0, null);
-}
+type Argv = typeof argv & {
+  version: string;
+  help: string;
+};
+const fullArgv = argv as Argv;
+if (fullArgv.help) yargs.showHelp().exit(0, null);
+if (fullArgv.version) yargs.version().exit(0, null);
 
-if (argv.version) {
-  yargs.version().exit(0, null);
-}
-
-global.appArgv = argv;
+global.appArgv = fullArgv;
 
 const log = new Logger('entry');
 log.info('version: %s', version);

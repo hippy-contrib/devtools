@@ -13,29 +13,28 @@ export class TunnelAppClient extends AppClient {
     this.registerMessageListener();
   }
 
-  protected registerMessageListener() {
-    import('../child-process/index').then(({ tunnelEmitter }) => {
-      // TODO tunnel 暂不支持多调试实例，这里暂时移除上一个实例的事件监听
-      tunnelEmitter.removeAllListeners('message');
-      tunnelEmitter.on('message', (data) => {
-        try {
-          const msgObject: Adapter.CDP.Res = JSON.parse(data);
-          if ('id' in msgObject) {
-            const requestPromise = this.requestPromiseMap.get(msgObject.id);
-            if (requestPromise) requestPromise.resolve(msgObject);
-          }
-          this.triggerListerner(msgObject);
-          this.onMessage(msgObject).then((res) => {
-            if (!('id' in msgObject)) return;
-            const requestPromise = this.requestPromiseMap.get(msgObject.id);
-            if (requestPromise) {
-              requestPromise.resolve(res);
-            }
-          });
-        } catch (e) {
-          log.info(`parse tunnel response json failed. error: %s, \n msg: %j`, (e as Error)?.stack, data);
-        }
-      });
+  protected async registerMessageListener() {
+    const { tunnelEmitter } = await import('../child-process/index');
+    // TODO tunnel 暂不支持多调试实例，这里暂时移除上一个实例的事件监听
+    tunnelEmitter.removeAllListeners('message');
+    tunnelEmitter.on('message', async (data) => {
+      let msgObject: Adapter.CDP.Res;
+      try {
+        msgObject = JSON.parse(data);
+      } catch (e) {
+        return log.info(`parse tunnel response json failed. error: %s, \n msg: %j`, (e as Error)?.stack, data);
+      }
+      if ('id' in msgObject) {
+        const requestPromise = this.requestPromiseMap.get(msgObject.id);
+        if (requestPromise) requestPromise.resolve(msgObject);
+      }
+      this.triggerListerner(msgObject);
+      const res = await this.onMessage(msgObject);
+      if (!('id' in msgObject)) return;
+      const requestPromise = this.requestPromiseMap.get(msgObject.id);
+      if (requestPromise) {
+        requestPromise.resolve(res);
+      }
     });
   }
 

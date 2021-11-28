@@ -6,10 +6,12 @@ interface IWDPPage {
   url: string;
   webSocketDebuggerUrl: string;
   appId: string;
-  device: {
-    deviceId: string;
-    deviceName: string;
-    deviceOSVersion: string;
-    url: string;
-  };
+  device: IWDPDevice;
+}
+
+interface IWDPDevice {
+  deviceId: string;
+  deviceName: string;
+  deviceOSVersion: string;
+  url: string;
 }

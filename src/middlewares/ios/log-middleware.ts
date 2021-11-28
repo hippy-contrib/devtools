@@ -1,4 +1,5 @@
 import { ChromeCommand, ChromeEvent, Ios100Event, Ios90Command } from 'tdf-devtools-protocol/dist/types';
+import { ChromeLogLevel } from '@/@types/enum';
 import { MiddleWareManager } from '../middleware-context';
 
 export const logMiddleWareManager: MiddleWareManager = {
@@ -8,19 +9,12 @@ export const logMiddleWareManager: MiddleWareManager = {
       const { message } = eventRes.params;
       let type;
       if (message.type === 'log') {
-        switch (message.level) {
-          case 'log':
-            type = 'info';
-            break;
-          case 'info':
-            type = 'info';
-            break;
-          case 'error':
-            type = 'error';
-            break;
-          default:
-            type = 'info';
-        }
+        type = {
+          [ChromeLogLevel.Info]: ChromeLogLevel.Info,
+          [ChromeLogLevel.Log]: ChromeLogLevel.Info,
+          [ChromeLogLevel.Error]: ChromeLogLevel.Error,
+        }[message.level];
+        if (!type) type = ChromeLogLevel.Info;
       } else {
         type = message.type;
       }
@@ -59,7 +53,7 @@ export const logMiddleWareManager: MiddleWareManager = {
     [ChromeCommand.LogDisable]: ({ msg, sendToApp }) =>
       sendToApp({
         id: (msg as Adapter.CDP.Req).id,
-        method: 'Console.disable',
+        method: Ios90Command.ConsoleDisable,
         params: {},
       }),
     [ChromeCommand.LogEnable]: ({ msg, sendToApp, sendToDevtools }) => {

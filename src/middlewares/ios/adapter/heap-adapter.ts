@@ -37,68 +37,68 @@ const v8NodeFieldCount = 5;
 // const v8EdgeFieldCount = 3;
 
 export default class HeapAdapter {
-  jsc2v8(json: JscHeapSnapshot): V8HeapSnapshot {
+  public static jsc2v8(json: JscHeapSnapshot): V8HeapSnapshot {
     const { nodes, nodeClassNames, edges, edgeNames } = json;
-
     const nodeCount = nodes.length / nodeFieldCount;
     const edgeCount = edges.length / edgeFieldCount;
     const v8Nodes = new Array(nodeCount * v8NodeFieldCount).fill(0);
     const v8Edges = [];
-    const nodeIdToIndex = new Map(); // <id> => index in _nodes
+    // key: id, value: index in _nodes
+    const nodeIdToIndex = new Map();
 
-    let m = 0;
-    for (let i = 0; i < nodes.length; i += nodeFieldCount) {
-      const flags = nodes[i + nodeFlagsOffset];
+    let v8NodeIndex = 0;
+    for (let jscNodeIndex = 0; jscNodeIndex < nodes.length; jscNodeIndex += nodeFieldCount) {
+      const flags = nodes[jscNodeIndex + nodeFlagsOffset];
       // const internal = flags & internalFlagMask ? true : false;
       const isObjectType = !!(flags & objectTypeMask);
       let type;
       if (isObjectType) type = objectNodeTypeIndex;
       else type = nativeNodeTypeIndex;
 
-      nodeIdToIndex.set(nodes[i], m);
+      nodeIdToIndex.set(nodes[jscNodeIndex], v8NodeIndex);
 
       // type
-      v8Nodes[m] = type;
-      m += 1;
+      v8Nodes[v8NodeIndex] = type;
+      v8NodeIndex += 1;
       // name
-      v8Nodes[m] = nodes[i + nodeClassNameOffset];
-      m += 1;
+      v8Nodes[v8NodeIndex] = nodes[jscNodeIndex + nodeClassNameOffset];
+      v8NodeIndex += 1;
       // id
-      v8Nodes[m] = nodes[i + nodeIdOffset];
-      m += 1;
+      v8Nodes[v8NodeIndex] = nodes[jscNodeIndex + nodeIdOffset];
+      v8NodeIndex += 1;
       // size
-      v8Nodes[m] = nodes[i + nodeSizeOffset];
-      m += 1;
+      v8Nodes[v8NodeIndex] = nodes[jscNodeIndex + nodeSizeOffset];
+      v8NodeIndex += 1;
       // edge count
-      v8Nodes[m] = nodeNoEdgeValue;
-      m += 1;
+      v8Nodes[v8NodeIndex] = nodeNoEdgeValue;
+      v8NodeIndex += 1;
     }
 
     const nodeIdEdgeMap = new Map();
     let prevFromId = edges[edgeFromIdOffset];
     let prevEdgeIndex = 0;
-    for (let i = 0; i < edges.length; i += edgeFieldCount) {
-      const fromId = edges[i + edgeFromIdOffset];
+    for (let edgeIndex = 0; edgeIndex < edges.length; edgeIndex += edgeFieldCount) {
+      const fromId = edges[edgeIndex + edgeFromIdOffset];
       if (prevFromId !== fromId) {
-        const edgeCount = (i - prevEdgeIndex) / edgeFieldCount;
+        const edgeCount = (edgeIndex - prevEdgeIndex) / edgeFieldCount;
         v8Nodes[nodeIdToIndex.get(prevFromId) + nodeEdgeCountOffset] = edgeCount;
         prevFromId = fromId;
-        prevEdgeIndex = i;
+        prevEdgeIndex = edgeIndex;
       }
       if (!nodeIdEdgeMap.has(fromId)) nodeIdEdgeMap.set(fromId, []);
-      const edgeType = edgeTypeMap[edges[i + edgeTypeOffset]];
-      const toNodeIndex = nodeIdToIndex.get(edges[i + edgeToIdOffset]);
-      nodeIdEdgeMap.get(fromId).push(edgeType, edges[i + edgeDataOffset], toNodeIndex);
+      const edgeType = edgeTypeMap[edges[edgeIndex + edgeTypeOffset]];
+      const toNodeIndex = nodeIdToIndex.get(edges[edgeIndex + edgeToIdOffset]);
+      nodeIdEdgeMap.get(fromId).push(edgeType, edges[edgeIndex + edgeDataOffset], toNodeIndex);
     }
 
-    for (let i = 0; i < nodes.length; i += nodeFieldCount) {
-      const nodeId = nodes[i + nodeIdOffset];
+    for (let jscNodeIndex = 0; jscNodeIndex < nodes.length; jscNodeIndex += nodeFieldCount) {
+      const nodeId = nodes[jscNodeIndex + nodeIdOffset];
       const edges = nodeIdEdgeMap.get(nodeId);
       if (edges?.length) v8Edges.push(...edges);
     }
 
     return {
-      ...this.getV8Meta({
+      ...HeapAdapter.getV8Meta({
         nodeCount,
         edgeCount,
       }),
@@ -112,7 +112,7 @@ export default class HeapAdapter {
     };
   }
 
-  getV8Meta({ nodeCount, edgeCount }) {
+  private static getV8Meta({ nodeCount, edgeCount }) {
     return {
       snapshot: {
         meta: {
@@ -144,7 +144,7 @@ export default class HeapAdapter {
           ],
           edge_fields: ['type', 'name_or_index', 'to_node'],
           edge_types: [
-            // ["Internal", "Property", "Index", "Variable"],
+            // ['Internal', 'Property', 'Index', 'Variable'],
             ['context', 'element', 'property', 'internal', 'hidden', 'shortcut', 'weak'],
             'string_or_number',
             'node',
