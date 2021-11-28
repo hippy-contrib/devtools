@@ -18,7 +18,7 @@ const { argv } = yargs
   .version()
   .option('dbType', {
     type: 'string',
-    default: DBType.Redis,
+    default: DBType.Memory,
     choices: [DBType.Memory, DBType.Redis],
     describe: 'Localhost debug server please select memory. Remote debug server please select redis.',
   })

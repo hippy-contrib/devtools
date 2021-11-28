@@ -15,6 +15,7 @@ export const routeApp = (app: Koa) => {
   app.use(cors());
   app.use(conditional());
   app.use(etag());
+
   app.use(async (ctx, next) => {
     try {
       await next();
@@ -31,6 +32,7 @@ export const routeApp = (app: Koa) => {
   if (staticPath) servePath = path.resolve(staticPath);
   else servePath = path.resolve(path.dirname(entry));
   log.info(`serve bundle: ${entry}; serve folder: ${servePath}`);
+
   app.use(
     serve(servePath, {
       setHeaders: (res, path) => {
