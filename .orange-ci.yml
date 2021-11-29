@@ -125,8 +125,8 @@ master:
         title: "publish devtools-debug-server"
       runner:
         network: devnet
-      # ifModify:
-      #   - src/**
+      ifModify:
+        - src/**
       services:
         - docker
       stages:
