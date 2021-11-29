@@ -1,5 +1,4 @@
-
-feature/remote-debug:
+master:
   review:
     - stages:
       - name: CR 通过后自动合并
@@ -57,8 +56,8 @@ feature/remote-debug:
         title: "publish devtools-debug-server"
       runner:
         network: devnet
-      # ifModify:
-      #   - src/**
+      ifModify:
+        - src/**
       stages:
         - name: npm i
           script: npm install --registry=https://mirrors.tencent.com/npm/
@@ -79,14 +78,12 @@ feature/remote-debug:
           type: git:commit
           options:
             commitMessage: 'version: publish new version'
-        - name: push version
-          script: git push
-        # - name: notify npm publish
-        #   type: wework:message
-        #   options:
-        #     robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
-        #     message: |
-        #       > npm 包已发布
-        #       > 　
-        #       > published by ${ORANGE_BUILD_USER}
+        - name: notify npm publish
+          type: wework:message
+          options:
+            robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+            message: |
+              > npm 包已发布
+              > 　
+              > published by ${ORANGE_BUILD_USER}
 
