@@ -25,7 +25,7 @@ publish-npm: &publish-npm
     options:
       robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
       message: |
-        > npm 包已发布
+        > npm 包已发布，版本号： ${VERSION}
         > 　
         > published by ${ORANGE_BUILD_USER}
 
@@ -62,12 +62,12 @@ deploy-debug-server: &deploy-debug-server
     options:
       robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
       message: |
-        > debug-server stke 已部署
+        > debug-server stke 已部署，版本号： ${VERSION}
         > 　
         > deployed by ${ORANGE_BUILD_USER}
 
 
-feature/remote-debug:
+master:
   review:
     - stages:
       - name: CR 通过后自动合并
