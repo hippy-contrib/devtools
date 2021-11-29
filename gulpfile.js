@@ -15,11 +15,7 @@ gulp.task('compile', () =>
   gulp.src(['src/**/*.ts']).pipe(ts.createProject('tsconfig.json')()).pipe(gulp.dest('dist/')),
 );
 
-gulp.task('copy-resource', (cb) => {
-  gulp.src(['src/build/**/*']).pipe(gulp.dest('dist/build'));
-  gulp.src(['src/public/**/*']).pipe(gulp.dest('dist/public'));
-  cb();
-});
+gulp.task('copy-resource', () => gulp.src(['src/**/*', '!src/**/*.ts']).pipe(gulp.dest('dist')));
 
 gulp.task('clean', () => Promise.all([rimrafAsync('dist'), rimrafAsync('src/cache')]));
 

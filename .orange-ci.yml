@@ -1,4 +1,5 @@
-master:
+
+feature/remote-debug:
   review:
     - stages:
       - name: CR 通过后自动合并
@@ -52,70 +53,12 @@ master:
               > from ${ORANGE_BUILD_USER}
   push:
     - name: push流水线
-      ifModify:
-        - src/**
-      stages:
-        # 更新 issue 状态为已解决并关闭，对应 EPC 考核中的 开发完成时间点
-        - name: update issue
-          type: git:issueUpdate
-          options:
-            state: close
-            acceptance: resolved
-        - name: create version branch
-          type: git:create-branch
-          options:
-            ref: ${ORANGE_BRANCH}
-            branchName: version/${ORANGE_BUILD_ID}
-
-$:
-  tag_push:
-    - name: tag push 流水线
-      label:
-        type: RELEASE
-      git:
-        dotGit: true
-
-      stages:
-        # 自动生成 CHANGELOG.md
-        - name: changelog
-          type: git:changeLog
-          options:
-            filename: CHANGELOG.md
-            target: master
-          exports:
-            latestChangeLog: LATEST_CHANGE_LOG
-
-        # 更新 release 的描述，release 如不存在会自动创建
-        - name: upload release
-          type: git:release
-          options:
-            description: ${LATEST_CHANGE_LOG}
-
-        # 更新 issue 状态，增加标签，对应 EPC 考核中的 lead time 结束时间点
-        - name: update issue
-          type: git:issueUpdate
-          options:
-            fromText: ${LATEST_CHANGE_LOG}
-            label:
-              add: 需求已接收
-            when:
-              label: feature
-
-        # 将自己的工蜂 private token 注入
-        - name: get git token
-          type: git:set-token
-          imports: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/git-token.yml
-          options:
-            token: ${TGIT_PERSONAL_ACCESS_TOKEN}
-            name: sicilyliu
-            email: sicilyliu@tencent.com
-
-version/*:
-  push:
-    - wework: 
-        title: Publish debug-server-next
-      docker:
-        image: node:12
+      wework:
+        title: "publish devtools-debug-server"
+      runner:
+        network: devnet
+      # ifModify:
+      #   - src/**
       stages:
         - name: npm i
           script: npm install --registry=https://mirrors.tencent.com/npm/
@@ -128,7 +71,7 @@ version/*:
         - name: npm publish
           image: plugins/npm
           envFrom: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/npm-token.yml
-          settings: &publish-settings
+          settings:
             token: $NPM_TOKEN
             email: $EMAIL
             fail_on_version_conflict: true
@@ -136,19 +79,14 @@ version/*:
           type: git:commit
           options:
             commitMessage: 'version: publish new version'
-        - name: create mr
-          if: |
-            [ "${MR_TARGET_BRANCH}" != "none" ]
-          type: git:make-mr
-          options:
-            target: master
-            title: 版本号修改
-            reviewers: $ORANGE_BUILD_USER
-        - name: notify npm publish
-          type: wework:message
-          options:
-            robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
-            message: |
-              > npm 包已发布
-              > 　
-              > published by ${ORANGE_BUILD_USER}
+        - name: push version
+          script: git push
+        # - name: notify npm publish
+        #   type: wework:message
+        #   options:
+        #     robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+        #     message: |
+        #       > npm 包已发布
+        #       > 　
+        #       > published by ${ORANGE_BUILD_USER}
+

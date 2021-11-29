@@ -15,7 +15,7 @@ export class MemoryPubSub extends EventEmitter {
     let msgStr: string;
     if (typeof message !== 'string') msgStr = JSON.stringify(message);
     else msgStr = message;
-    pubsub.emit(this.channel, msgStr);
+    pubsub.emit(this.channel, msgStr, null, null, null, null);
   }
 
   public subscribe(cb) {

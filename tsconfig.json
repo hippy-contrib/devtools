@@ -10,6 +10,7 @@
     "jsx": "preserve",
     "importHelpers": true,
     "resolveJsonModule": true,
+    "allowJs": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "noImplicitAny": false,

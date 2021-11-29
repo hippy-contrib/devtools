@@ -1,8 +1,10 @@
 import { EventEmitter } from 'events';
-import { ChromeCommand } from 'tdf-devtools-protocol/types';
+import { ChromeCommand } from 'tdf-devtools-protocol/dist/types';
 import { uniq } from 'lodash';
 
-export const CDP_DOMAIN_LIST = uniq(Object.values(ChromeCommand).map((command) => command.split('.')[0]));
+export const CDP_DOMAIN_LIST = uniq(
+  (Object.values(ChromeCommand) as string[]).map((command: string) => command.split('.')[0]),
+);
 
 export const isCdpDomains = (domain) => CDP_DOMAIN_LIST.indexOf(domain) !== -1;
 
