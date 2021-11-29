@@ -3,7 +3,7 @@ import { EventEmitter } from '@/utils/event-emitter';
 
 const pubsub = new EventEmitter();
 
-export class MemoryPubSub extends EventEmitter {
+export class MemoryPubSub extends EventEmitter implements Publisher, Subscriber {
   private channel: string;
 
   public constructor(channel: string) {

@@ -3,6 +3,7 @@ import { ChromePageType, DevicePlatform, ClientRole, AppClientType } from '@/@ty
 import { makeUrl, AppWsUrlParams } from '@/utils/url';
 import { config } from '@/config';
 import { DebugTarget } from '@/@types/debug-target';
+import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 
 export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
   // 通过 tunnel 创建的 target，暂时使用 devicename 作为调试对象 id，后续终端重构后使用 targetCreated 事件抛出的 id
@@ -67,14 +68,14 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
 };
 
 export const createTargetByIwdpPage = (iwdpPage: IWDPPage): DebugTarget => {
-  const iwdpWsUrl = iwdpPage.webSocketDebuggerUrl;
+  const iWDPWsUrl = iwdpPage.webSocketDebuggerUrl;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
-    clientId: iwdpWsUrl,
+    clientId: iWDPWsUrl,
     role: ClientRole.Devtools,
   });
   return {
-    clientId: iwdpWsUrl,
-    iwdpWsUrl,
+    clientId: iWDPWsUrl,
+    iWDPWsUrl,
     devtoolsFrontendUrl: iwdpPage.devtoolsFrontendUrl,
     title: iwdpPage.title,
     thumbnailUrl: '',
@@ -88,4 +89,15 @@ export const createTargetByIwdpPage = (iwdpPage: IWDPPage): DebugTarget => {
     deviceOSVersion: iwdpPage.device.deviceOSVersion,
     appClientTypeList: [AppClientType.IWDP],
   };
+};
+
+/**
+ * 补充完整 debugTarget 信息
+ */
+export const patchDebugTarget = async (debugTarget: DebugTarget) => {
+  if (debugTarget.platform === DevicePlatform.IOS) {
+    const iOSPages = await getIWDPPages(global.appArgv.iWDPPort);
+    return patchIOSTarget(debugTarget, iOSPages);
+  }
+  return debugTarget;
 };

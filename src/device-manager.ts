@@ -1,47 +1,36 @@
-import { EventEmitter } from 'events';
-import { AppClientType, DeviceManagerEvent, DevicePlatform, DeviceStatus } from '@/@types/enum';
+import { AppClientType, DeviceStatus } from '@/@types/enum';
 import { DeviceInfo } from '@/@types/device';
 import { Logger } from '@/utils/log';
-import { model } from '@/db';
-import { createTargetByDeviceInfo } from '@/utils/debug-target';
+import { getDBOperator } from '@/db';
+import { createTargetByDeviceInfo, patchDebugTarget } from '@/utils/debug-target';
 import { config } from '@/config';
 import { SocketServer } from '@/socket-server';
-import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 import { appClientManager } from '@/client/app-client-manager';
 
 const log = new Logger('device-manager');
 
-class DeviceManager extends EventEmitter {
+class DeviceManager {
   private deviceList: DeviceInfo[] = [];
-  private selectedIndex = -1;
-  private isAppConnected = false;
 
-  public appDidDisConnect() {
-    this.isAppConnected = false;
+  public onAppDisconnect() {
     const device = this.deviceList[0];
     if (!device) return;
-    // tunnel 通道创建的 debugTarget 的 clientId 为 devicename
+    // 通过 tunnel 通道创建的 debugTarget 的 clientId 为 devicename
     SocketServer.cleanDebugTarget(device.devicename);
-    this.emit(DeviceManagerEvent.AppDidDisConnect, this.getCurrent());
   }
 
-  public async appDidConnect() {
-    this.isAppConnected = true;
+  public async onAppConnect() {
     const device = this.deviceList[0];
     if (!device) return;
-    for (const device of this.deviceList) {
-      const useTunnel = appClientManager.useAppClientType(device.platform, AppClientType.Tunnel);
-      if (device.physicalstatus !== DeviceStatus.Disconnected && useTunnel) {
-        let debugTarget = createTargetByDeviceInfo(device);
-        if (debugTarget.platform === DevicePlatform.IOS) {
-          const iosPages = await getIWDPPages(global.appArgv.iwdpPort);
-          debugTarget = patchIOSTarget(debugTarget, iosPages);
-        }
-        model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
-        SocketServer.subscribeRedis(debugTarget);
-      }
+
+    const useTunnel = appClientManager.useAppClientType(device.platform, AppClientType.Tunnel);
+    if (device.physicalstatus === DeviceStatus.Connected && useTunnel) {
+      let debugTarget = createTargetByDeviceInfo(device);
+      debugTarget = await patchDebugTarget(debugTarget);
+      const { model } = getDBOperator();
+      model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
+      SocketServer.subscribeRedis(debugTarget);
     }
-    this.emit(DeviceManagerEvent.AppDidConnect, this.getCurrent());
   }
 
   public async getDeviceList() {
@@ -51,26 +40,16 @@ class DeviceManager extends EventEmitter {
       log.info('getDeviceList: %j', devices);
       this.deviceList = devices;
       if (devices.length) {
-        const isDeviceDisconnect = devices[this.selectedIndex]?.physicalstatus === DeviceStatus.Disconnected;
-        if (isDeviceDisconnect) {
-          this.selectedIndex = -1;
-          return;
-        }
+        const isDeviceDisconnect = devices[0].physicalstatus === DeviceStatus.Disconnected;
+        if (isDeviceDisconnect) return;
 
-        this.selectedIndex = 0;
-        const device = this.deviceList[this.selectedIndex];
+        // 目前暂不支持多设备连接，所以默认选择第一个设备
+        const device = this.deviceList[0];
         const deviceId = device.deviceid;
         log.info(`selectDevice ${deviceId}`);
-        // 目前暂不支持多设备连接，所以默认选择第一个设备
         selectDevice(deviceId);
-      } else {
-        this.selectedIndex = -1;
       }
     });
-  }
-
-  public getCurrent() {
-    return this.deviceList[this.selectedIndex];
   }
 }
 

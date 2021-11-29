@@ -1,4 +1,4 @@
-import { ChromeCommand, ChromeEvent, Ios100Command } from 'tdf-devtools-protocol/dist/types';
+import { ChromeCommand, ChromeEvent, IOS100Command } from 'tdf-devtools-protocol/dist/types';
 import { Logger } from '@/utils/log';
 import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
@@ -12,10 +12,10 @@ export const heapMiddleWareManager: MiddleWareManager = {
     [ChromeCommand.HeapProfilerEnable]: async ({ msg, sendToApp, sendToDevtools }) => {
       const res = await sendToApp({
         id: requestId.create(),
-        method: Ios100Command.HeapEnable,
+        method: IOS100Command.HeapEnable,
         params: {},
       });
-      log.info(`${Ios100Command.HeapEnable} res: `, msg);
+      log.info(`${IOS100Command.HeapEnable} res: `, msg);
       const convertedRes = {
         id: (msg as Adapter.CDP.Req).id,
         method: msg.method,
@@ -27,7 +27,7 @@ export const heapMiddleWareManager: MiddleWareManager = {
     [ChromeCommand.HeapProfilerDisable]: ({ sendToApp }) =>
       sendToApp({
         id: requestId.create(),
-        method: Ios100Command.HeapDisable,
+        method: IOS100Command.HeapDisable,
         params: {},
       }),
     [ChromeCommand.HeapProfilerTakeHeapSnapshot]: async ({ msg, sendToApp, sendToDevtools }) => {
@@ -35,14 +35,12 @@ export const heapMiddleWareManager: MiddleWareManager = {
       const { reportProgress } = req.params;
       const res = await sendToApp({
         id: requestId.create(),
-        method: Ios100Command.HeapSnapshot,
+        method: IOS100Command.HeapSnapshot,
         params: {},
       });
       const commandRes = res as Adapter.CDP.CommandRes;
-      const { snapshotData } = commandRes.result;
-      const snapshot = JSON.parse(snapshotData);
-      const v8snapshot = HeapAdapter.jsc2v8(snapshot);
-      const wholeChunk = JSON.stringify(v8snapshot);
+      const snapshot = JSON.parse(commandRes.result.snapshotData);
+      const wholeChunk = JSON.stringify(HeapAdapter.jsc2v8(snapshot));
       if (reportProgress)
         sendToDevtools({
           method: ChromeEvent.HeapProfilerReportHeapSnapshotProgress,
@@ -69,7 +67,7 @@ export const heapMiddleWareManager: MiddleWareManager = {
     [ChromeCommand.HeapProfilerCollectGarbage]: ({ sendToApp }) =>
       sendToApp({
         id: requestId.create(),
-        method: Ios100Command.HeapGc,
+        method: IOS100Command.HeapGc,
         params: {},
       }),
   },

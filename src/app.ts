@@ -3,9 +3,8 @@ import { Server as HTTPServer } from 'http';
 import kill from 'kill-port';
 import Koa from 'koa';
 import open from 'open';
-import { DevtoolsEnv } from '@/@types/enum';
 import { DebugTarget } from '@/@types/debug-target';
-import { initHippyEnv, initTdfEnv, initVoltronEnv, initTdfCoreEnv } from '@/client';
+import { initAppClient } from '@/client';
 import { SocketServer } from '@/socket-server';
 import { Logger } from '@/utils/log';
 import { initDbModel } from '@/db';
@@ -87,28 +86,18 @@ export class Application {
     }
     await fs.promises.mkdir(cachePath, { recursive: true });
     await initDbModel();
-    Application.setEnv();
+    initAppClient();
 
-    const { port, iwdpPort, clearAddrInUse } = global.appArgv;
+    const { port, iWDPPort, clearAddrInUse } = global.appArgv;
     if (clearAddrInUse) {
       try {
         await kill(port, 'tcp');
-        await kill(iwdpPort, 'tcp');
+        await kill(iWDPPort, 'tcp');
       } catch (e) {
-        log.error('Address %s %s already in use! %s', port, iwdpPort, (e as Error)?.stack);
+        log.error('Address %s %s already in use! %s', port, iWDPPort, (e as Error)?.stack);
         return process.exit(1);
       }
     }
-  }
-
-  private static setEnv() {
-    const initFn = {
-      [DevtoolsEnv.Hippy]: initHippyEnv,
-      [DevtoolsEnv.Voltron]: initVoltronEnv,
-      [DevtoolsEnv.TDF]: initTdfEnv,
-      [DevtoolsEnv.TDFCore]: initTdfCoreEnv,
-    }[global.appArgv.env];
-    initFn();
   }
 }
 

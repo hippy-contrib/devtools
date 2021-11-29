@@ -1,4 +1,9 @@
 import { ClientRole } from '@/@types/enum';
+import { Logger } from '@/utils/log';
+import { config } from '@/config';
+import { DebugTarget } from '@/@types/debug-target';
+
+const log = new Logger('url-utils');
 
 export const parseWsUrl = (reqUrl: string) => {
   const url = new URL(reqUrl, 'http://0.0.0.0');
@@ -15,6 +20,36 @@ export const parseWsUrl = (reqUrl: string) => {
     deviceName,
     extensionName,
   };
+};
+
+export const isConnectionValid = (wsUrlParams: WsUrlParams, debugTarget: DebugTarget): boolean => {
+  const { clientRole, pathname, contextName } = wsUrlParams;
+  const { clientId } = wsUrlParams;
+  log.info('clientRole: %s', clientRole);
+  if (clientRole === ClientRole.Devtools) log.info('isConnectionValid debug target: %j', debugTarget);
+
+  if (pathname !== config.wsPath) {
+    log.warn('invalid ws connection path!');
+    return false;
+  }
+  if (clientRole === ClientRole.Devtools && !debugTarget) {
+    log.warn("debugTarget doesn't exist! %s", clientId);
+    return false;
+  }
+  if (!Object.values(ClientRole).includes(clientRole)) {
+    log.warn('invalid client role!');
+    return false;
+  }
+  if (clientRole === ClientRole.IOS && !contextName) {
+    log.warn('invalid iOS connection, should request with contextName!');
+    return false;
+  }
+
+  if (!clientId) {
+    log.warn('invalid ws connection!');
+    return false;
+  }
+  return true;
 };
 
 export type AppWsUrlParams = {
@@ -39,13 +74,15 @@ export const makeUrl = (baseUrl: string, query: unknown) => {
   let fullUrl = baseUrl;
 
   const keys = Object.keys(query);
-  for (let i = 0; i < keys.length; i++) {
+  for (const [i, key] of keys.entries()) {
     if (i === 0) {
-      if (fullUrl.indexOf('?') === -1) fullUrl += '?';
+      if (fullUrl.indexOf('?') === -1) {
+        fullUrl += '?';
+      }
     } else {
       fullUrl += '&';
     }
-    fullUrl += `${keys[i]}=${encodeURIComponent(query[keys[i]])}`;
+    fullUrl += `${key}=${encodeURIComponent(query[key])}`;
   }
   return fullUrl;
 };

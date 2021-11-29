@@ -6,9 +6,9 @@ import { redisModel, RedisClient } from './model';
 
 const log = new Logger('redis-pub-sub');
 
-export class RedisPublisher {
+export class RedisPublisher implements Publisher {
   private client: RedisClient;
-  private quequ: Array<string | Adapter.CDP.Req> = [];
+  private queue: Array<string | Adapter.CDP.Req> = [];
   private isConnected = false;
   private channel: string;
 
@@ -25,7 +25,7 @@ export class RedisPublisher {
 
   public publish(message: string | Adapter.CDP.Req) {
     if (this.isConnected) this.realPublish(message);
-    else this.quequ.push(message);
+    else this.queue.push(message);
   }
 
   public disconnect() {
@@ -33,9 +33,7 @@ export class RedisPublisher {
   }
 
   private realPublish(message: string | Adapter.CDP.Req) {
-    let msgStr: string;
-    if (typeof message !== 'string') msgStr = JSON.stringify(message);
-    else msgStr = message;
+    const msgStr = typeof message !== 'string' ? JSON.stringify(message) : message;
     try {
       this.client.publish(this.channel, msgStr);
     } catch (e) {
@@ -47,12 +45,12 @@ export class RedisPublisher {
     await this.client.connect();
     log.info('redis publisher client created, %s', this.channel);
     this.isConnected = true;
-    log.info('publish quequ message, length %s', this.quequ.length);
-    this.quequ.forEach(this.realPublish.bind(this));
+    log.info('publish queue message, length %s', this.queue.length);
+    this.queue.forEach(this.realPublish.bind(this));
   }
 }
 
-export class RedisSubscriber {
+export class RedisSubscriber implements Subscriber {
   private client: RedisClient;
   private channel: string;
   private isConnected = false;
@@ -87,7 +85,7 @@ export class RedisSubscriber {
     log.info('redis subscriber client created, %s', this.channel);
     this.isConnected = true;
     if (this.operateQueue) {
-      log.info('clear subscribe quequ, length %s', this.operateQueue.length);
+      log.info('clear subscribe queue, length %s', this.operateQueue.length);
       this.operateQueue.forEach(([fn, cb]) => {
         fn.call(this, cb);
       });

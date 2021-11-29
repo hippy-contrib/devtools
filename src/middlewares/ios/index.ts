@@ -9,7 +9,7 @@ import { logMiddleWareManager } from './log-middleware';
 import { runtimeMiddleWareManager } from './runtime-middleware';
 import { traceMiddleWareManager } from './trace-middleware';
 
-export const iosMiddleWareManager: MiddleWareManager = merge(
+export const iOSMiddleWareManager: MiddleWareManager = merge(
   {},
   tdfHeapMiddleWareManager,
   tdfLogMiddleWareManager,

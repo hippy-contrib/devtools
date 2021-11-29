@@ -3,7 +3,7 @@ import { DevicePlatform, AppClientType } from './enum';
 export interface DebugTarget {
   // 和 bundleName 一一对应，reload 时终端也尽量保持不变
   clientId: string;
-  iwdpWsUrl?: string;
+  iWDPWsUrl?: string;
   devtoolsFrontendUrl: string;
   faviconUrl?: string;
   thumbnailUrl: string;

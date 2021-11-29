@@ -163,7 +163,7 @@ export type AppClientOption = {
   acceptDomains?: string[];
   ignoreDomains?: string[];
   ws?: WebSocket;
-  iwdpWsUrl?: string;
+  iWDPWsUrl?: string;
   middleWareManager: MiddleWareManager;
   urlParsedContext: UrlParsedContext;
   platform: DevicePlatform;

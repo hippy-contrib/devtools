@@ -6,9 +6,15 @@ import { RedisPublisher, RedisSubscriber } from './redis/pub-sub';
 import { DBModel } from './base-model';
 export * from '../utils/debug-target';
 
-export let model: DBModel;
-export let Publisher;
-export let Subscriber;
+let model: DBModel;
+let Publisher;
+let Subscriber;
+
+export const getDBOperator = () => ({
+  model,
+  Publisher,
+  Subscriber,
+});
 
 export const initDbModel = async () => {
   const { dbType } = global.appArgv;

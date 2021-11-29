@@ -1,6 +1,3 @@
-/**
- * ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
- */
 import { createClient } from 'redis';
 import { config } from '@/config';
 import { Logger } from '@/utils/log';
@@ -25,6 +22,7 @@ export class RedisModel extends DBModel {
 
   public async init() {
     try {
+      // ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
       await this.client.connect();
     } catch (e) {
       log.error('connect redis failed: %s', (e as Error).stack);
@@ -58,14 +56,18 @@ export class RedisModel extends DBModel {
 }
 
 const createMyClient = (): RedisClient => {
-  const client = createClient({ url: config.redis.url }) as RedisClient;
-  client.on('error', (e) => {
-    log.error('create redis client error: %s', e?.stack);
-  });
-  client.on('connect', log.error.bind(log));
-  client.on('warning', log.error.bind(log));
-  client.on('ready', log.error.bind(log));
-  return client;
+  try {
+    const client = createClient({ url: config.redis.url }) as RedisClient;
+    client.on('error', (e) => {
+      log.error('create redis client error: %s', e?.stack);
+    });
+    client.on('connect', log.error.bind(log));
+    client.on('warning', log.error.bind(log));
+    client.on('ready', log.error.bind(log));
+    return client;
+  } catch (e) {
+    return null;
+  }
 };
 
 export const redisModel = new RedisModel();

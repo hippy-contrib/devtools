@@ -14,7 +14,7 @@ let proxyProcess;
 export const tunnelEmitter = new EventEmitter();
 
 export const startTunnel = (cb?) => {
-  const { iwdpPort, iwdpStartPort, iwdpEndPort, adbPath } = global.appArgv;
+  const { iWDPPort, iwdpStartPort, iwdpEndPort, adbPath } = global.appArgv;
   addEventListener((event, data) => {
     try {
       if (event !== TunnelEvent.TunnelLog) {
@@ -30,9 +30,9 @@ export const startTunnel = (cb?) => {
             startAdbProxy();
           }
         } else if (event === TunnelEvent.AppConnect) {
-          deviceManager.appDidConnect();
+          deviceManager.onAppConnect();
         } else if (event === TunnelEvent.AppDisconnect) {
-          deviceManager.appDidDisConnect();
+          deviceManager.onAppDisconnect();
         } else if (event === TunnelEvent.TunnelLog && data) {
           log.info(data);
         }
@@ -46,20 +46,20 @@ export const startTunnel = (cb?) => {
 
   let fullAdbPath = adbPath;
   fullAdbPath ??= path.join(__dirname, '../build/adb');
-  const iwdpParams = ['--no-frontend', `--config=null:${iwdpPort},:${iwdpStartPort}-${iwdpEndPort}`];
-  tunnelStart(fullAdbPath, iwdpParams, iwdpPort);
+  const iwdpParams = ['--no-frontend', `--config=null:${iWDPPort},:${iwdpStartPort}-${iwdpEndPort}`];
+  tunnelStart(fullAdbPath, iwdpParams, iWDPPort);
 };
 
 export const startIWDP = () => {
-  const { iwdpPort, iwdpStartPort, iwdpEndPort } = global.appArgv;
+  const { iWDPPort, iwdpStartPort, iwdpEndPort } = global.appArgv;
   proxyProcess = spawn(
     'ios_webkit_debug_proxy',
-    ['--no-frontend', `--config=null:${iwdpPort},:${iwdpStartPort}-${iwdpEndPort}`],
+    ['--no-frontend', `--config=null:${iWDPPort},:${iwdpStartPort}-${iwdpEndPort}`],
     { detached: false },
   );
   proxyProcess.unref();
 
-  childProcessLog.info(`start IWDP on port ${iwdpPort}`);
+  childProcessLog.info(`start IWDP on port ${iWDPPort}`);
 
   proxyProcess.on('error', (e) => {
     childProcessLog.info('IWDP error: %s', e?.stack);

@@ -15,9 +15,11 @@ gulp.task('compile', () =>
   gulp.src(['src/**/*.ts']).pipe(ts.createProject('tsconfig.json')()).pipe(gulp.dest('dist/')),
 );
 
-gulp.task('copy-resource', () => gulp.src(['src/**/*', '!src/**/*.ts']).pipe(gulp.dest('dist')));
+gulp.task('copy-resource', () =>
+  gulp.src(['src/**/*', '!src/.env', '!src/**/*.ts'], { allowEmpty: true }).pipe(gulp.dest('dist')),
+);
 
-gulp.task('clean', () => Promise.all([rimrafAsync('dist'), rimrafAsync('src/cache')]));
+gulp.task('clean', () => Promise.all([rimrafAsync('dist'), rimrafAsync('src/cache'), rimrafAsync('src/log')]));
 
 function rimrafAsync(fpath) {
   return new Promise((resolve, reject) => {

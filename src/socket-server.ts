@@ -10,7 +10,7 @@ import {
   InternalChannelEvent,
   WinstonColor,
 } from '@/@types/enum';
-import { createTargetByWsUrlParams, model, Publisher, Subscriber } from '@/db';
+import { createTargetByWsUrlParams, getDBOperator } from '@/db';
 import { appClientManager, AppClient } from '@/client';
 import { AppClientOption } from '@/client/app-client';
 import { AppClientFullOptionOmicCtx } from '@/client/app-client-manager';
@@ -19,10 +19,32 @@ import { DebugTargetManager } from '@/controller/debug-targets';
 import { DebugTarget } from '@/@types/debug-target';
 import { DomainRegister } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
-import { parseWsUrl, WsUrlParams, AppWsUrlParams, DevtoolsWsUrlParams } from '@/utils/url';
+import { parseWsUrl, isConnectionValid, AppWsUrlParams, DevtoolsWsUrlParams } from '@/utils/url';
+import { patchDebugTarget } from '@/utils/debug-target';
 import { config } from '@/config';
-import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 
+const downwardSpliter = '_down_';
+const upwardSpliter = '_up_';
+const internalSpliter = '_internal_';
+// 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
+const mockCmdId = -100000;
+const resumeCommands = [
+  {
+    id: mockCmdId,
+    method: TdfCommand.TDFRuntimeResume,
+    params: {},
+  },
+  {
+    id: mockCmdId - 1,
+    method: ChromeCommand.DebuggerDisable,
+    params: {},
+  },
+  {
+    id: mockCmdId - 2,
+    method: ChromeCommand.RuntimeDisable,
+    params: {},
+  },
+];
 const log = new Logger('socket-server', WinstonColor.Cyan);
 
 /**
@@ -41,10 +63,10 @@ export class SocketServer extends DomainRegister {
       // key: command id, value: downward channelId
       cmdIdChannelIdMap: Map<number, string>;
       // key: downward channelId
-      publisherMap: Map<string, typeof Publisher>;
+      publisherMap: Map<string, Publisher>;
       // 多个 node 节点之间通信的 publisher，用与当 app 端断连时，通知 devtools 端断开
-      internalPublisher: typeof Publisher;
-      upwardSubscriber: typeof Subscriber;
+      internalPublisher: Publisher;
+      upwardSubscriber: Subscriber;
     }
   > = new Map();
 
@@ -58,6 +80,7 @@ export class SocketServer extends DomainRegister {
     const { clientId } = debugTarget;
     SocketServer.debugTargets.push(debugTarget);
 
+    const { Subscriber, Publisher } = getDBOperator();
     if (!SocketServer.channelMap.has(clientId)) {
       const upwardChannelId = createUpwardChannel(clientId, '*');
       const internalChannelId = createInternalChannel(clientId, '');
@@ -74,13 +97,7 @@ export class SocketServer extends DomainRegister {
     }
     const { downwardChannelSet, cmdIdChannelIdMap, publisherMap, upwardSubscriber } =
       SocketServer.channelMap.get(clientId);
-
-    let options: AppClientFullOptionOmicCtx[];
-    if (debugTarget.platform === DevicePlatform.Android) {
-      options = appClientManager.getAndroidAppClientOptions();
-    } else {
-      options = appClientManager.getIosAppClientOptions();
-    }
+    const options: AppClientFullOptionOmicCtx[] = appClientManager.getAppClientOptions(debugTarget.platform);
 
     let appClientList: AppClient[] = [];
     appClientList = options
@@ -91,11 +108,12 @@ export class SocketServer extends DomainRegister {
           const newOption: AppClientOption = {
             ...option,
             urlParsedContext,
-            iwdpWsUrl: debugTarget.iwdpWsUrl,
+            iWDPWsUrl: debugTarget.iWDPWsUrl,
           };
           if (Ctor.name === AppClientType.WS) {
             newOption.ws = ws;
           }
+          // Ctor 为构造器
           return new Ctor(clientId, newOption);
         } catch (e) {
           log.error('create app client error: %s', (e as Error)?.stack);
@@ -162,6 +180,7 @@ export class SocketServer extends DomainRegister {
    * appDisconnect, app ws close 时调用
    */
   public static async cleanDebugTarget(clientId: string) {
+    const { model } = getDBOperator();
     model.delete(config.redis.key, clientId);
     const channelInfo = SocketServer.channelMap.get(clientId);
     if (!channelInfo) return;
@@ -228,7 +247,7 @@ export class SocketServer extends DomainRegister {
      * 连接建立后，再判断是否合法，不合法则关闭
      */
     const debugTarget = await DebugTargetManager.findDebugTarget(clientId);
-    const isValid = await isConnectionValid(wsUrlParams, debugTarget);
+    const isValid = isConnectionValid(wsUrlParams, debugTarget);
     if (!isValid) return ws.close();
   }
 
@@ -236,6 +255,7 @@ export class SocketServer extends DomainRegister {
    * 将来自于 devtools 的 ws，通过 pub/sub 转发到 redis
    */
   private onDevtoolsConnection(ws: WebSocket, wsUrlParams: DevtoolsWsUrlParams) {
+    const { Subscriber, Publisher } = getDBOperator();
     const { extensionName, clientId } = wsUrlParams;
     const downwardChannelId = createDownwardChannel(clientId, extensionName);
     const upwardChannelId = createUpwardChannel(clientId, extensionName);
@@ -261,25 +281,6 @@ export class SocketServer extends DomainRegister {
     });
     const onClose = () => {
       log.info('devtools ws disconnect. clientId: %s', clientId);
-      // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
-      const mockId = -100000;
-      const resumeCommands = [
-        {
-          id: mockId,
-          method: TdfCommand.TDFRuntimeResume,
-          params: {},
-        },
-        {
-          id: mockId - 1,
-          method: ChromeCommand.DebuggerDisable,
-          params: {},
-        },
-        {
-          id: mockId - 2,
-          method: ChromeCommand.RuntimeDisable,
-          params: {},
-        },
-      ];
       resumeCommands.map(publisher.publish.bind(publisher));
       publisher.disconnect();
       downwardSubscriber.unsubscribe();
@@ -304,10 +305,8 @@ export class SocketServer extends DomainRegister {
     if (!useWS) return log.warn('current env is %s, ignore ws connection', global.appArgv.env);
 
     let debugTarget = createTargetByWsUrlParams(wsUrlParams);
-    if (debugTarget.platform === DevicePlatform.IOS) {
-      const iosPages = await getIWDPPages(global.appArgv.iwdpPort);
-      debugTarget = patchIOSTarget(debugTarget, iosPages);
-    }
+    debugTarget = await patchDebugTarget(debugTarget);
+    const { model } = getDBOperator();
     model.upsert(config.redis.key, clientId, debugTarget);
     SocketServer.subscribeRedis(debugTarget, ws);
 
@@ -323,44 +322,10 @@ export class SocketServer extends DomainRegister {
   }
 }
 
-const isConnectionValid = async (wsUrlParams: WsUrlParams, debugTarget: DebugTarget): Promise<boolean> => {
-  const { clientRole, pathname, contextName } = wsUrlParams;
-  const { clientId } = wsUrlParams;
-  log.info('clientRole: %s', clientRole);
-  if (clientRole === ClientRole.Devtools) log.info('isConnectionValid debug target: %j', debugTarget);
-
-  if (pathname !== config.wsPath) {
-    log.warn('invalid ws connection path!');
-    return false;
-  }
-  if (clientRole === ClientRole.Devtools && !debugTarget) {
-    log.warn("debugTarget doesn't exist! %s", clientId);
-    return false;
-  }
-  if (!Object.values(ClientRole).includes(clientRole)) {
-    log.warn('invalid client role!');
-    return false;
-  }
-  if (clientRole === ClientRole.IOS && !contextName) {
-    log.warn('invalid ios connection, should request with contextName!');
-    return false;
-  }
-
-  if (!clientId) {
-    log.warn('invalid ws connection!');
-    return false;
-  }
-  return true;
-};
-
 /**
- * channel id 未加 devtoolsId，所以当开启多个 chrome-devtools 时，下行消息是广播到所有
+ * channel id 暂时未加 devtoolsId，所以当开启多个 chrome-devtools 时，下行消息是广播到所有
  * ws endpoint 的，体验上也不影响调试
  */
-const downwardSpliter = '_down_';
-const upwardSpliter = '_up_';
-const internalSpliter = '_internal_';
-
 const createDownwardChannel = (clientId: string, extensionName?: string) =>
   createChannel(clientId, extensionName, downwardSpliter);
 

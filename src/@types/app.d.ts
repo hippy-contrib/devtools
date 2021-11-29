@@ -4,7 +4,7 @@ export interface AppArgv {
   port: number;
   static: string;
   entry: string;
-  iwdpPort: number;
+  iWDPPort: number;
   iwdpStartPort: number;
   iwdpEndPort: number;
   clearAddrInUse: boolean;

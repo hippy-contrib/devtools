@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 /* eslint-disable import/first -- 在入口最前面注册别名，后面的 import 才能使用别名 */
+import path from 'path';
 import moduleAlias from 'module-alias';
 moduleAlias.addAliases({
   '@': __dirname,
   'package.json': '../package.json',
 });
 import yargs from 'yargs';
+import dotenv from 'dotenv';
+const config = dotenv.config({ path: path.join(__dirname, './.env') });
+console.log(config);
 import { DevtoolsEnv, DBType } from '@/@types/enum';
 import { Application } from '@/app';
 import { Logger } from '@/utils/log';
@@ -51,17 +55,17 @@ const { argv } = yargs
     default: false,
     describe: 'Output error details',
   })
-  .option('iwdpPort', {
+  .option('iWDPPort', {
     type: 'number',
     default: 9000,
     describe: 'Device list port of ios_webkit_debug_proxy',
   })
-  .option('iwdpStartPort', {
+  .option('iWDPStartPort', {
     type: 'number',
     default: 9200,
     describe: 'Start device port of ios_webkit_debug_proxy',
   })
-  .option('iwdpEndPort', {
+  .option('iWDPEndPort', {
     type: 'number',
     default: 9300,
     describe: 'End device port of ios_webkit_debug_proxy',
@@ -74,7 +78,7 @@ const { argv } = yargs
   .option('useTunnel', {
     type: 'boolean',
     default: true,
-    describe: 'Whether enable tunnal, which is a c++ addon for connecting app by USB',
+    describe: 'Whether enable tunnel, which is a c++ addon for connecting app by USB',
   })
   .option('useIWDP', {
     type: 'boolean',

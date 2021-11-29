@@ -93,8 +93,6 @@ export default class TraceAdapter {
       else {
         return i;
       }
-
-      // if (frame.sourceID === '-1') continue;
     }
     return -1;
   }
@@ -133,8 +131,6 @@ export default class TraceAdapter {
 
   /**
    * 将 jsc 的 trace 数据转为 v8 的 trace 数据
-   * @param json
-   * @returns
    */
   public jsc2v8(json: JscStack): V8Stack {
     const traces = json.samples.stackTraces;
@@ -170,9 +166,7 @@ export default class TraceAdapter {
   }
 
   /**
-   * 将一个 trace 构建为一棵�
-   * @param trace
-   * @returns
+   * 将一个 trace 构建为一棵 🌲
    */
   private buildTree(frames: JscFrame[], ts: number): JscTreeNode {
     let child;
@@ -196,8 +190,6 @@ export default class TraceAdapter {
   /**
    * 将 trace 下的 frames [0, end] 范围内构建为子树，并追加到父节点下
    * end + 1 后的节点，是原有树共用的节点，更新器 sampleNum 值
-   * @param tree
-   * @param trace
    */
   private appendToTree(trace: JscTrace, prevTrace: JscTrace, end: number) {
     const frames = trace.stackFrames.slice(0, end + 1);

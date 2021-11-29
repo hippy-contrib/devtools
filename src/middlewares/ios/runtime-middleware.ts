@@ -1,7 +1,8 @@
-import { ChromeCommand, ChromeEvent, Ios90Command } from 'tdf-devtools-protocol/dist/types';
+import { ChromeCommand, ChromeEvent } from 'tdf-devtools-protocol/dist/types/enum-chrome-mapping';
+import { IOS90Command } from 'tdf-devtools-protocol/dist/types/enum-ios-9.0-mapping';
 import { contextId, requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
-import { lastScriptEval } from './debugger-middleware';
+import { getLastScriptEval } from './debugger-middleware';
 
 export const runtimeMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
@@ -24,6 +25,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
       return sendToDevtools(eventRes);
     },
     [ChromeCommand.RuntimeEvaluate]: ({ msg, sendToDevtools }) => {
+      const lastScriptEval = getLastScriptEval();
       const commandRes = msg as Adapter.CDP.CommandRes;
       if (commandRes.result?.wasThrown) {
         commandRes.result.result.subtype = 'error';
@@ -54,10 +56,11 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
     [ChromeCommand.RuntimeGetProperties]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes;
       const newPropertyDescriptors = [];
-      for (let i = 0; i < commandRes.result?.properties?.length; i += 1) {
-        if (commandRes.result.properties[i].isOwn || commandRes.result.properties[i].nativeGetter) {
-          commandRes.result.properties[i].isOwn = true;
-          newPropertyDescriptors.push(commandRes.result.properties[i]);
+      const properties = commandRes.result?.properties || [];
+      for (let i = 0; i < properties?.length; i += 1) {
+        if (properties[i].isOwn || properties[i].nativeGetter) {
+          properties[i].isOwn = true;
+          newPropertyDescriptors.push(properties[i]);
         }
       }
       commandRes.result.result = null;
@@ -83,7 +86,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
       const eventRes = msg as Adapter.CDP.EventRes;
       await sendToApp({
         id: requestId.create(),
-        method: Ios90Command.RuntimeEvaluate,
+        method: IOS90Command.RuntimeEvaluate,
         params: {
           expression: eventRes.params.expression,
           contextId: eventRes.params.executionContextId,

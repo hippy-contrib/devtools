@@ -1,5 +1,5 @@
 import color from 'color-normalize';
-import { ChromeCommand } from 'tdf-devtools-protocol/dist/types';
+import { ChromeCommand } from 'tdf-devtools-protocol/dist/types/enum-chrome-mapping';
 import { MiddleWareManager } from '../middleware-context';
 
 export const cssMiddleWareManager: MiddleWareManager = {
@@ -22,6 +22,7 @@ export const cssMiddleWareManager: MiddleWareManager = {
   },
   upwardMiddleWareListMap: {
     [ChromeCommand.CSSSetStyleTexts]: ({ msg, sendToApp }) => {
+      // 类型收窄
       const req = msg as Adapter.CDP.Req;
       req.params.edits = req.params.edits.map((data) => {
         const textList = data.text
@@ -32,7 +33,7 @@ export const cssMiddleWareManager: MiddleWareManager = {
             const styleItems = styleItem.split(':');
             const [name] = styleItems;
             let [, ...values] = styleItems;
-            if (!CssDomain.skipStyle(name)) {
+            if (!CssDomain.shouldSkipStyle(name)) {
               if (name.toLowerCase().includes('color')) {
                 const rgba = CssDomain.transformRGBA(values[0]);
                 values = [CssDomain.rgbaToInt(rgba)];
@@ -76,7 +77,7 @@ class CssDomain {
     return ((int << 24) | (int >>> 8)) >>> 0;
   }
 
-  public static skipStyle(styleName) {
+  public static shouldSkipStyle(styleName) {
     return CssDomain.skipStyleList.some(
       (name) => name.toString().trim().toLowerCase() === styleName.toString().trim().toLowerCase(),
     );
@@ -85,7 +86,7 @@ class CssDomain {
   public static conversionInlineStyle(style) {
     let totalCSSText = '';
     style.cssProperties = style.cssProperties.reduce((ret, item) => {
-      if (CssDomain.skipStyle(item.name)) return ret;
+      if (CssDomain.shouldSkipStyle(item.name)) return ret;
 
       const cssText = `${item.name}: ${item.value}`;
       if (item.name.toLowerCase().includes('color')) {
@@ -111,7 +112,7 @@ class CssDomain {
   public static conversionComputedStyle(style) {
     if (!style) return [];
     return style.reduce((ret, item) => {
-      if (!CssDomain.skipStyle(item.name)) {
+      if (!CssDomain.shouldSkipStyle(item.name)) {
         if (item.name.toLowerCase().includes('color')) {
           item.value = CssDomain.intToRGBA(parseInt(item.value, 10));
         }
@@ -121,6 +122,9 @@ class CssDomain {
     }, []);
   }
 
+  /**
+   * alpha 百分比转为小数点形式
+   */
   public static transformRGBA(colorText) {
     return colorText.trim().replace(/^rgba?\(([^()]+)\)$/i, (s, p1) => {
       const flag = p1.includes(',') ? ',' : ' ';

@@ -3,7 +3,7 @@ import { AppClientType, ClientEvent } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
-const log = new Logger('app-client:iwdp');
+const log = new Logger('app-client:IWDP');
 
 /**
  * IWDP 调试通道，通过 ws client 与 IWDP server 建立连接
@@ -20,9 +20,9 @@ export class IwdpAppClient extends AppClient {
 
   public constructor(id, option) {
     super(id, option);
-    this.url = option.iwdpWsUrl;
+    this.url = option.iWDPWsUrl;
     if (!this.url) {
-      const e = new Error('IwdpAppClient constructor option need iwdpWsUrl');
+      const e = new Error('IwdpAppClient constructor option need iWDPWsUrl');
       log.error('%s', e.stack);
       throw e;
     }
@@ -98,7 +98,7 @@ export class IwdpAppClient extends AppClient {
       this.ws = new WebSocket(this.url);
       this.registerMessageListener();
     } catch (e) {
-      log.error('iwdp connect error: %s', (e as Error)?.stack);
+      log.error('IWDP connect error: %s', (e as Error)?.stack);
       throw e;
     }
   }

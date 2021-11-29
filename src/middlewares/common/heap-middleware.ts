@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { TdfCommand } from 'tdf-devtools-protocol/dist/types';
+import { TdfCommand } from 'tdf-devtools-protocol/dist/types/enum-tdf-mapping';
 import { config } from '@/config';
 import { Logger } from '@/utils/log';
 import { MiddleWareManager } from '../middleware-context';

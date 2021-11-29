@@ -1,10 +1,10 @@
-import { ChromeCommand, ChromeEvent, Ios100Event, Ios90Command } from 'tdf-devtools-protocol/dist/types';
+import { ChromeCommand, ChromeEvent, IOS100Event, IOS90Command } from 'tdf-devtools-protocol/dist/types';
 import { ChromeLogLevel } from '@/@types/enum';
 import { MiddleWareManager } from '../middleware-context';
 
 export const logMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
-    [Ios100Event.ConsoleMessageAdded]: ({ msg, sendToDevtools }) => {
+    [IOS100Event.ConsoleMessageAdded]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
       const { message } = eventRes.params;
       let type;
@@ -53,7 +53,7 @@ export const logMiddleWareManager: MiddleWareManager = {
     [ChromeCommand.LogDisable]: ({ msg, sendToApp }) =>
       sendToApp({
         id: (msg as Adapter.CDP.Req).id,
-        method: Ios90Command.ConsoleDisable,
+        method: IOS90Command.ConsoleDisable,
         params: {},
       }),
     [ChromeCommand.LogEnable]: ({ msg, sendToApp, sendToDevtools }) => {
@@ -64,7 +64,7 @@ export const logMiddleWareManager: MiddleWareManager = {
       });
       return sendToApp({
         id: (msg as Adapter.CDP.Req).id,
-        method: Ios90Command.ConsoleEnable,
+        method: IOS90Command.ConsoleEnable,
         params: {},
       });
     },

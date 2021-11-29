@@ -1,3 +1,8 @@
+/**
+ * 缩写说明：
+ *  IWDP: ios webkit debug proxy
+ *  CDP: chrome debug protocol
+ */
 import request from 'request-promise';
 import { AppClientType, ClientRole, DevicePlatform } from '@/@types/enum';
 import { config } from '@/config';
@@ -6,16 +11,16 @@ import { Logger } from '@/utils/log';
 import { sleep } from '@/utils/timer';
 import { DebugTarget } from '@/@types/debug-target';
 
-const log = new Logger('iwdp-util');
+const log = new Logger('IWDP-util');
 
-export const getIWDPPages = async (iwdpPort): Promise<IWDPPage[]> => {
+export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
   if (!global.appArgv.useTunnel && !global.appArgv.useIWDP) return [];
   try {
-    // iwdp 检查页面列表会稍有延迟，这里简单做下 sleep
+    // IWDP 检查页面列表会稍有延迟，这里简单做下 sleep
     await sleep(250);
     const deviceList = await request({
       url: '/json',
-      baseUrl: `http://127.0.0.1:${iwdpPort}`,
+      baseUrl: `http://127.0.0.1:${iWDPPort}`,
       json: true,
     });
     const debugTargets: IWDPPage[] = (await Promise.all(deviceList.map(getDeviceIWDPPages))) || [];
@@ -29,23 +34,20 @@ export const getIWDPPages = async (iwdpPort): Promise<IWDPPage[]> => {
 /**
  * 用 IWDP 获取到的页面信息扩展 debugTarget
  */
-export const patchIOSTarget = (debugTarget: DebugTarget, iosPages: Array<IWDPPage>): DebugTarget => {
+export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPage>): DebugTarget => {
   if (debugTarget.platform !== DevicePlatform.IOS) return debugTarget;
 
-  const iosPagesWithFlag = iosPages as Array<IWDPPage & { shouldRemove?: boolean }>;
-  const iosPage = iosPagesWithFlag.find(
-    (iosPage) =>
-      (debugTarget.appClientTypeList[0] === AppClientType.WS && debugTarget.title === iosPage.title) ||
+  const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
+  const iOSPage = iOSPagesWithFlag.find(
+    (iOSPage) =>
+      (debugTarget.appClientTypeList[0] === AppClientType.WS && debugTarget.title === iOSPage.title) ||
       (debugTarget.appClientTypeList[0] === AppClientType.Tunnel &&
-        debugTarget.deviceName === iosPage.device.deviceName),
+        debugTarget.deviceName === iOSPage.device.deviceName),
   );
-  if (!iosPage) return debugTarget;
+  if (!iOSPage) return debugTarget;
 
-  // TODO 有副作用，待优化
-  iosPage.shouldRemove = true;
-  // const matchRst = iosPage.title.match(/^HippyContext:\s(.*)$/);
-  // const bundleName = matchRst ? matchRst[1] : '';
-  const iwdpWsUrl = iosPage.webSocketDebuggerUrl;
+  iOSPage.shouldRemove = true;
+  const iWDPWsUrl = iOSPage.webSocketDebuggerUrl;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
     clientId: debugTarget.clientId,
     role: ClientRole.Devtools,
@@ -60,12 +62,12 @@ export const patchIOSTarget = (debugTarget: DebugTarget, iosPages: Array<IWDPPag
   if (appClientTypeList.indexOf(AppClientType.IWDP) === -1) appClientTypeList.push(AppClientType.IWDP);
   return {
     ...debugTarget,
-    iwdpWsUrl,
+    iWDPWsUrl,
     appClientTypeList,
-    deviceName: iosPage.device.deviceName,
-    deviceId: iosPage.device.deviceId,
-    deviceOSVersion: iosPage.device.deviceOSVersion,
-    title: iosPage.title,
+    deviceName: iOSPage.device.deviceName,
+    deviceId: iOSPage.device.deviceId,
+    deviceOSVersion: iOSPage.device.deviceOSVersion,
+    title: iOSPage.title,
     devtoolsFrontendUrl,
     webSocketDebuggerUrl: `ws://${wsUrl}`,
   };
@@ -82,7 +84,7 @@ const getDeviceIWDPPages = async (device: IWDPDevice): Promise<IWDPPage[]> => {
     targets.map((target) => (target.device = device));
     return targets;
   } catch (e) {
-    log.error(e);
+    log.error('getDeviceIWDPPages error, %s', (e as Error)?.stack);
     return [];
   }
 };

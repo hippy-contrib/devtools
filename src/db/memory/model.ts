@@ -7,10 +7,6 @@ import { DBModel } from '../base-model';
 export class MemoryModel extends DBModel {
   private static db: Map<string, Map<string, unknown>> = new Map();
 
-  public constructor() {
-    super();
-  }
-
   public async init() {}
 
   public getAll(key) {
@@ -28,8 +24,6 @@ export class MemoryModel extends DBModel {
 
   public delete(key: string, field: string) {
     const hashMap = MemoryModel.db.get(key);
-    if (hashMap) {
-      hashMap.delete(field);
-    }
+    hashMap?.delete(field);
   }
 }
