@@ -6,7 +6,9 @@ publish-npm: &publish-npm
   - name: build
     script: npm run build
   - name: patch version
-    script: npm version patch
+    script: VERSION=$(npm version patch) && echo -n $VERSION
+    exports:
+      stdout: VERSION
   - name: npm publish
     image: plugins/npm
     envFrom: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/npm-token.yml
