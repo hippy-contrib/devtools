@@ -1,4 +1,71 @@
-master:
+publish-npm: &publish-npm
+  - name: npm i
+    script: npm install --registry=https://mirrors.tencent.com/npm/
+  - name: set npm orign
+    script: npm config set registry https://registry.npmjs.org
+  - name: build
+    script: npm run build
+  - name: patch version
+    script: npm version patch
+  - name: npm publish
+    image: plugins/npm
+    envFrom: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/npm-token.yml
+    settings:
+      token: $NPM_TOKEN
+      email: $EMAIL
+      fail_on_version_conflict: true
+  - name: commit change
+    type: git:commit
+    options:
+      commitMessage: 'version: publish new version'
+  - name: notify npm publish
+    type: wework:message
+    options:
+      robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+      message: |
+        > npm 包已发布
+        > 　
+        > published by ${ORANGE_BUILD_USER}
+
+build-docker-image: &build-docker-image
+  - name: docker login
+    imports: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/csighub-token.yml
+    script: echo -n $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin csighub.tencentyun.com
+  - name: docker tag
+    script: echo -n csighub.tencentyun.com/chestershen/devtools-debug-server:${VERSION}
+    envExport: 
+      info: DOCKER_TAG
+  - name: docker build
+    imports: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/redis-token.yml
+    script: docker build --build-arg REDIS_PWD=$REDIS_PWD --build-arg REDIS_PRIVATE_HOST=$REDIS_PRIVATE_HOST --build-arg REDIS_PRIVATE_PORT=$REDIS_PRIVATE_PORT -t ${DOCKER_TAG} .
+  - name: docker push
+    script: docker push ${DOCKER_TAG}
+  - name: echo docker version
+    script: echo $DOCKER_TAG
+
+deploy-debug-server: &deploy-debug-server
+  - name: auto upgrade
+    type: stke:update
+    options:
+      kind: statefulsetplus
+      projectName: prjlw4gg
+      namespaces: ns-prjlw4gg-1491408-production
+      clusterId: cls-5vzjheeo	
+      resourceIns: tdf-devtools-debug-server
+      name: tdf-devtools-debug-server
+      image: ${DOCKER_TAG}
+      sync: true
+  - name: notify stke upgrade
+    type: wework:message
+    options:
+      robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+      message: |
+        > debug-server stke 已部署
+        > 　
+        > published by ${ORANGE_BUILD_USER}
+
+
+feature/remote-debug:
   review:
     - stages:
       - name: CR 通过后自动合并
@@ -56,34 +123,11 @@ master:
         title: "publish devtools-debug-server"
       runner:
         network: devnet
-      ifModify:
-        - src/**
+      # ifModify:
+      #   - src/**
+      services:
+        - docker
       stages:
-        - name: npm i
-          script: npm install --registry=https://mirrors.tencent.com/npm/
-        - name: set npm orign
-          script: npm config set registry https://registry.npmjs.org
-        - name: build
-          script: npm run build
-        - name: patch version
-          script: npm version patch
-        - name: npm publish
-          image: plugins/npm
-          envFrom: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/npm-token.yml
-          settings:
-            token: $NPM_TOKEN
-            email: $EMAIL
-            fail_on_version_conflict: true
-        - name: commit change
-          type: git:commit
-          options:
-            commitMessage: 'version: publish new version'
-        - name: notify npm publish
-          type: wework:message
-          options:
-            robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
-            message: |
-              > npm 包已发布
-              > 　
-              > published by ${ORANGE_BUILD_USER}
-
+        - *publish-npm
+        - *build-docker-image
+        - *deploy-debug-server
