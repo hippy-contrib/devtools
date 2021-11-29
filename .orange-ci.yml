@@ -64,7 +64,7 @@ deploy-debug-server: &deploy-debug-server
       message: |
         > debug-server stke 已部署
         > 　
-        > published by ${ORANGE_BUILD_USER}
+        > deployed by ${ORANGE_BUILD_USER}
 
 
 feature/remote-debug:
