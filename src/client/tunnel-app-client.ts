@@ -14,10 +14,10 @@ export class TunnelAppClient extends AppClient {
   }
 
   protected async registerMessageListener() {
-    const { tunnelEmitter } = await import('../child-process/index');
+    const { tunnelEmitter, TUNNEL_EVENT } = await import('../child-process/index');
     // TODO tunnel 暂不支持多调试实例，这里暂时移除上一个实例的事件监听
-    tunnelEmitter.removeAllListeners('message');
-    tunnelEmitter.on('message', async (data) => {
+    tunnelEmitter.removeAllListeners(TUNNEL_EVENT);
+    tunnelEmitter.on(TUNNEL_EVENT, async (data) => {
       let msgObject: Adapter.CDP.Res;
       try {
         msgObject = JSON.parse(data);
@@ -28,7 +28,6 @@ export class TunnelAppClient extends AppClient {
         const requestPromise = this.requestPromiseMap.get(msgObject.id);
         if (requestPromise) requestPromise.resolve(msgObject);
       }
-      this.triggerListerner(msgObject);
       const res = await this.onMessage(msgObject);
       if (!('id' in msgObject)) return;
       const requestPromise = this.requestPromiseMap.get(msgObject.id);

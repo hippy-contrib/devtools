@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import WebSocket from 'ws';
 import { AppClientType, AppClientEvent, DevicePlatform, ErrorCode, MiddlewareType, WinstonColor } from '@/@types/enum';
 import {
@@ -8,7 +9,7 @@ import {
   requestId,
   MiddleWareContext,
 } from '@/middlewares';
-import { CDP_DOMAIN_LIST, getDomain, DomainRegister } from '@/utils/cdp';
+import { CDP_DOMAIN_LIST, getDomain } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
 import { composeMiddlewares } from '@/utils/middleware';
 
@@ -16,19 +17,18 @@ const filteredLog = new Logger('filtered', WinstonColor.Yellow);
 const downwardLog = new Logger('↓↓↓', WinstonColor.Red);
 const upwardLog = new Logger('↑↑↑', WinstonColor.Green);
 
+export interface AppClient {
+  on(event: AppClientEvent.Close, listener: () => void): this;
+  on(event: AppClientEvent.Message, listener: (message: Adapter.CDP.Res) => void): this;
+}
+
 /**
- * app client 通道，负责调试协议至 app 端的收发。目前包括三个通道：
+ * app client 通道，负责调试协议至 app 端的收发。目前包括三个通道，分包由三个子类实现：
  *    - tunnel 通道：c++ addon 实现
  *    - ws 通道：手Q采用此通道
  *    - IWDP 通道：TDF iOS 采用此通道
- *
- * 对外接口：
- *  on:
- *      message       : app response
- *      close         : app 断连后触发，需通知 devtools 也断连
- *  sendToApp         : send command to app
  **/
-export abstract class AppClient extends DomainRegister {
+export abstract class AppClient extends EventEmitter {
   public id: string;
   public type: AppClientType;
   protected isClosed = false;

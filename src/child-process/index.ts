@@ -11,6 +11,7 @@ const childProcessLog = new Logger('child-process');
 const log = new Logger('tunnel', WinstonColor.Magenta);
 let proxyProcess;
 
+export const TUNNEL_EVENT = 'message';
 export const tunnelEmitter = new EventEmitter();
 
 export const startTunnel = (cb?) => {
@@ -21,7 +22,7 @@ export const startTunnel = (cb?) => {
         log.info('tunnel event: %s', event);
       }
       if (event === TunnelEvent.ReceiveData) {
-        tunnelEmitter.emit('message', data);
+        tunnelEmitter.emit(TUNNEL_EVENT, data);
       } else {
         if ([TunnelEvent.RemoveDevice, TunnelEvent.AddDevice].indexOf(event) !== -1) {
           deviceManager.getDeviceList();

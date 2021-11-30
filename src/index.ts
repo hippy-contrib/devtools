@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable import/first -- 在入口最前面注册别名，后面的 import 才能使用别名 */
+/* eslint-disable import/first -- 本文件禁用，要在入口最前面注册别名，后面的 import 才能使用别名；另外要先加载 dotenv，才能创建 redis 连接 */
 import path from 'path';
 import moduleAlias from 'module-alias';
 moduleAlias.addAliases({

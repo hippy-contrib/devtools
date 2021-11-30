@@ -36,10 +36,10 @@ export class WsAppClient extends AppClient {
       if (requestPromise) requestPromise.resolve(res);
     });
 
-    this.ws.on('close', (msg) => {
+    this.ws.on('close', () => {
       this.isClosed = true;
       log.info(`${this.id} ws app client closed.`);
-      this.emit(AppClientEvent.Close, msg);
+      this.emit(AppClientEvent.Close);
     });
   }
 
