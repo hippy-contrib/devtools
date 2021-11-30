@@ -5,8 +5,8 @@ export interface AppArgv {
   static: string;
   entry: string;
   iWDPPort: number;
-  iwdpStartPort: number;
-  iwdpEndPort: number;
+  iWDPStartPort: number;
+  iWDPEndPort: number;
   clearAddrInUse: boolean;
   env: DevtoolsEnv;
   publicPath?: string;

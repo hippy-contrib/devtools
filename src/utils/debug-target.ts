@@ -67,8 +67,8 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
   };
 };
 
-export const createTargetByIwdpPage = (iwdpPage: IWDPPage): DebugTarget => {
-  const iWDPWsUrl = iwdpPage.webSocketDebuggerUrl;
+export const createTargetByIwdpPage = (iWDPPage: IWDPPage): DebugTarget => {
+  const iWDPWsUrl = iWDPPage.webSocketDebuggerUrl;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
     clientId: iWDPWsUrl,
     role: ClientRole.Devtools,
@@ -76,17 +76,17 @@ export const createTargetByIwdpPage = (iwdpPage: IWDPPage): DebugTarget => {
   return {
     clientId: iWDPWsUrl,
     iWDPWsUrl,
-    devtoolsFrontendUrl: iwdpPage.devtoolsFrontendUrl,
-    title: iwdpPage.title,
+    devtoolsFrontendUrl: iWDPPage.devtoolsFrontendUrl,
+    title: iWDPPage.title,
     thumbnailUrl: '',
     url: '',
     description: '',
     webSocketDebuggerUrl: `ws://${wsUrl}`,
     platform: DevicePlatform.IOS,
     type: ChromePageType.Page,
-    deviceId: iwdpPage.device.deviceId,
-    deviceName: iwdpPage.device.deviceName,
-    deviceOSVersion: iwdpPage.device.deviceOSVersion,
+    deviceId: iWDPPage.device.deviceId,
+    deviceName: iWDPPage.device.deviceName,
+    deviceOSVersion: iWDPPage.device.deviceOSVersion,
     appClientTypeList: [AppClientType.IWDP],
   };
 };

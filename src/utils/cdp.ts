@@ -1,3 +1,6 @@
+/**
+ * cdp: chrome debug protocol
+ */
 import { EventEmitter } from 'events';
 import { ChromeCommand } from 'tdf-devtools-protocol/dist/types';
 import { uniq } from 'lodash';

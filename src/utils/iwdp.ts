@@ -20,6 +20,7 @@ export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
     await sleep(250);
     const deviceList = await request({
       url: '/json',
+      // IWDP 必定是本地启动的服务，因为必须通过 USB 连接才能检测到设备
       baseUrl: `http://127.0.0.1:${iWDPPort}`,
       json: true,
     });
@@ -81,7 +82,7 @@ const getDeviceIWDPPages = async (device: IWDPDevice): Promise<IWDPPage[]> => {
       baseUrl: `http://127.0.0.1:${port}`,
       json: true,
     });
-    targets.map((target) => (target.device = device));
+    targets.forEach((target) => (target.device = device));
     return targets;
   } catch (e) {
     log.error('getDeviceIWDPPages error, %s', (e as Error)?.stack);

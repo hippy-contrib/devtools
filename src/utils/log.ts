@@ -1,14 +1,12 @@
 import path from 'path';
 import util from 'util';
-import colors from 'colors/safe';
-import winston from 'winston';
+import colors, { random } from 'colors/safe';
+import { Logger as WinstonLogger, transports, format, createLogger } from 'winston';
 import { config } from '@/config';
 import 'winston-daily-rotate-file';
 
 export class Logger {
-  static debugMap = {};
-
-  private loggerInstance: winston.Logger;
+  private loggerInstance: WinstonLogger;
 
   public constructor(private label: string = '', private color?: string) {
     this.initLoggerInstance();
@@ -32,16 +30,15 @@ export class Logger {
   }
 
   private initLoggerInstance() {
-    const transport = new winston.transports.DailyRotateFile({
+    const transport = new transports.DailyRotateFile({
       filename: path.join(config.logPath, '%DATE%.log'),
       datePattern: 'YYYY-MM-DD-HH',
       zippedArchive: false,
       maxSize: '20m',
       maxFiles: '7d',
     });
-    const { format } = winston;
-    const label = this.color ? colors[this.color](this.label) : colors.random(this.label);
-    this.loggerInstance = winston.createLogger({
+    const label = this.color ? colors[this.color](this.label) : random(this.label);
+    this.loggerInstance = createLogger({
       format: format.combine(
         format.errors({ stack: true }),
         format.label({ label }),
@@ -49,7 +46,7 @@ export class Logger {
         format.colorize(),
         format.printf(({ level, message, label, timestamp }) => `${timestamp} ${label} ${level} ${message}`),
       ),
-      transports: [transport, new winston.transports.Console()],
+      transports: [transport, new transports.Console()],
     });
   }
 }

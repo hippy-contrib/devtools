@@ -7,7 +7,7 @@ const log = new Logger('redis-model');
 export type RedisClient = ReturnType<typeof createClient>;
 
 /**
- * 封装 redis 的增删查改和 pub/sub 接口（注：value 统一存储为 hashmap 格式）
+ * 封装 redis 的增删查改接口（注：value 统一存储为 hashmap 格式）
  * 线上环境多机部署时用此模型
  */
 export class RedisModel extends DBModel {

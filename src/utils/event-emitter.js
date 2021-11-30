@@ -1,5 +1,5 @@
 /**
- * copy 自 eventemitter3，修改以支持 redis 风格的通配符
+ * 本文件 copy 自 eventemitter3，修改以支持 redis 风格的通配符
  */
 
 'use strict';
@@ -176,19 +176,18 @@ EventEmitter.prototype.listenerCount = function listenerCount(event) {
 EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
   const evt = prefix ? prefix + event : event;
 
-  let len = arguments.length;
-  const listeners = this._events[evt] || [];
-  if (listeners.length === 0)
+  const len = arguments.length;
+  let listeners = this._events[evt];
+  if (!listeners)
     for (const [curEvent, curListeners] of Object.entries(this._events)) {
       const regexp = new RegExp(curEvent.replace('*', '.*'));
       if (regexp.test(evt)) {
-        listeners.push(curListeners);
+        listeners = curListeners;
         a2 = event;
-        len += 1;
       }
     }
 
-  if (!listeners && !listeners.length) return false;
+  if (!listeners) return false;
 
   let args;
   let i;

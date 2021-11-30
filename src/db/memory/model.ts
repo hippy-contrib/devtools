@@ -1,7 +1,7 @@
 import { DBModel } from '../base-model';
 
 /**
- * 封装数据增删查改以及 pub/sub 接口，数据统一存储为 redis hashmap 类型
+ * 封装数据增删查改，数据统一存储为 redis hashmap 类型
  * 本地开发或单机部署时用此模型，数据保存在内存中
  */
 export class MemoryModel extends DBModel {

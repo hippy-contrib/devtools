@@ -30,6 +30,7 @@ export class Application {
         log.info('start debug server success.');
         if (!isRemote) {
           const { startTunnel, startIWDP, startAdbProxy } = await import('./child-process/index');
+          log.warn('动态 import ()', typeof startTunnel);
           if (useTunnel) startTunnel();
           else if (useIWDP) startIWDP();
           if (useAdb) startAdbProxy();
@@ -71,10 +72,6 @@ export class Application {
 
   public static getDebugTargets(): Promise<DebugTarget[]> {
     return DebugTargetManager.getDebugTargets();
-  }
-
-  public static registerDomainListener(domain: string, listener: Adapter.DomainListener) {
-    Application.socketServer.registerDomainListener(domain, listener);
   }
 
   private static async init() {

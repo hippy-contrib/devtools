@@ -3,7 +3,7 @@ import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 import { getDBOperator } from '@/db';
 import { createTargetByIwdpPage } from '@/utils/debug-target';
 import { DebugTarget } from '@/@types/debug-target';
-import { DevicePlatform } from 'src/@types/enum';
+import { DevicePlatform } from '@/@types/enum';
 
 export class DebugTargetManager {
   public static debugTargets: DebugTarget[] = [];

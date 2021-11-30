@@ -28,9 +28,10 @@ export class RedisPublisher implements Publisher {
     else this.queue.push(message);
   }
 
-  public disconnect() {
-    this.client.quit();
-  }
+  /**
+   * 暂写作空实现，redis 进入 PubSub mode 后，不能发送其他任何指令
+   */
+  public disconnect() {}
 
   private realPublish(message: string | Adapter.CDP.Req) {
     const msgStr = typeof message !== 'string' ? JSON.stringify(message) : message;
@@ -71,13 +72,20 @@ export class RedisSubscriber implements Subscriber {
     if (this.isConnected) this.client.subscribe(this.channel, cb);
     else this.operateQueue.push([this.subscribe, cb]);
   }
+
   public pSubscribe(cb) {
     if (this.isConnected) this.client.pSubscribe(this.channel, cb);
     else this.operateQueue.push([this.pSubscribe, cb]);
   }
+
   public unsubscribe = () => this.client.unsubscribe(this.channel);
+
   public pUnsubscribe = () => this.client.pUnsubscribe(this.channel);
-  public disconnect = () => this.client.quit();
+
+  /**
+   * 暂写作空实现，redis 进入 PubSub mode 后，不能发送其他任何指令
+   */
+  public disconnect = () => {};
 
   private async init() {
     if (this.isConnected) return;

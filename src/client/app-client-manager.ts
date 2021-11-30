@@ -14,7 +14,7 @@ class AppClientManager {
 
   public getAppClientOptions(platform: DevicePlatform) {
     if (platform === DevicePlatform.Android) return this.androidAppClientOptionList;
-    if ((platform = DevicePlatform.IOS)) return this.iOSAppClientOptionList;
+    if (platform === DevicePlatform.IOS) return this.iOSAppClientOptionList;
   }
 
   public addIOSAppClientOption(appClientOption: AppClientFullOptionOmicCtx) {
@@ -26,7 +26,7 @@ class AppClientManager {
     this.iOSAppClientOptionList = [];
   }
 
-  public useAppClientType(platform: DevicePlatform, type: AppClientType): boolean {
+  public shouldUseAppClientType(platform: DevicePlatform, type: AppClientType): boolean {
     const options: AppClientFullOptionOmicCtx[] = this.getAppClientOptions(platform);
     return Boolean(options.find((item) => item.Ctor.name === type));
   }

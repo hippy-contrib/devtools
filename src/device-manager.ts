@@ -4,8 +4,8 @@ import { Logger } from '@/utils/log';
 import { getDBOperator } from '@/db';
 import { createTargetByDeviceInfo, patchDebugTarget } from '@/utils/debug-target';
 import { config } from '@/config';
-import { SocketServer } from '@/socket-server';
 import { appClientManager } from '@/client/app-client-manager';
+import { cleanDebugTarget, subscribeRedis } from '@/controller/pub-sub-manager';
 
 const log = new Logger('device-manager');
 
@@ -16,20 +16,20 @@ class DeviceManager {
     const device = this.deviceList[0];
     if (!device) return;
     // 通过 tunnel 通道创建的 debugTarget 的 clientId 为 devicename
-    SocketServer.cleanDebugTarget(device.devicename);
+    cleanDebugTarget(device.devicename);
   }
 
   public async onAppConnect() {
     const device = this.deviceList[0];
     if (!device) return;
 
-    const useTunnel = appClientManager.useAppClientType(device.platform, AppClientType.Tunnel);
+    const useTunnel = appClientManager.shouldUseAppClientType(device.platform, AppClientType.Tunnel);
     if (device.physicalstatus === DeviceStatus.Connected && useTunnel) {
       let debugTarget = createTargetByDeviceInfo(device);
       debugTarget = await patchDebugTarget(debugTarget);
       const { model } = getDBOperator();
       model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
-      SocketServer.subscribeRedis(debugTarget);
+      subscribeRedis(debugTarget);
     }
   }
 
