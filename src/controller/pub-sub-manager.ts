@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientType, ClientEvent, ErrorCode, InternalChannelEvent, WinstonColor } from '@/@types/enum';
+import { AppClientType, AppClientEvent, ErrorCode, InternalChannelEvent, WinstonColor } from '@/@types/enum';
 import { getDBOperator } from '@/db';
 import { appClientManager, AppClient } from '@/client';
 import { AppClientOption } from '@/client/app-client';
@@ -62,8 +62,8 @@ export const subscribeRedis = async (debugTarget: DebugTarget, ws?: WebSocket) =
 
   // 发布下行消息
   appClientList.forEach((appClient) => {
-    appClient.removeAllListeners(ClientEvent.Message);
-    appClient.on(ClientEvent.Message, async (msg: Adapter.CDP.Res) => {
+    appClient.removeAllListeners(AppClientEvent.Message);
+    appClient.on(AppClientEvent.Message, async (msg: Adapter.CDP.Res) => {
       const msgStr = JSON.stringify(msg);
       const { Publisher } = getDBOperator();
       if ('id' in msg) {

@@ -10,12 +10,11 @@ export const composeMiddlewares = (middlewareList: MiddleWare[]): MiddleWare => 
   }
 
   return (context, next?) => {
-    // last called middleware
-    let index = -1;
+    let lastMiddlewareIndex = -1;
     return dispatch(0);
-    function dispatch(i) {
-      if (i <= index) return Promise.reject(new Error('next() called multiple times'));
-      index = i;
+    function dispatch(i: number) {
+      if (i <= lastMiddlewareIndex) return Promise.reject(new Error('next() called multiple times'));
+      lastMiddlewareIndex = i;
       let fn = middlewareList[i];
       if (i === middlewareList.length) fn = next;
       if (!fn) return Promise.resolve();

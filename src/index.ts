@@ -8,8 +8,7 @@ moduleAlias.addAliases({
 });
 import yargs from 'yargs';
 import dotenv from 'dotenv';
-const config = dotenv.config({ path: path.join(__dirname, './.env') });
-console.log(config);
+dotenv.config({ path: path.join(__dirname, './.env') });
 import { DevtoolsEnv, DBType } from '@/@types/enum';
 import { Application } from '@/app';
 import { Logger } from '@/utils/log';

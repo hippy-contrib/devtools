@@ -67,7 +67,7 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
   };
 };
 
-export const createTargetByIwdpPage = (iWDPPage: IWDPPage): DebugTarget => {
+export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
   const iWDPWsUrl = iWDPPage.webSocketDebuggerUrl;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
     clientId: iWDPWsUrl,

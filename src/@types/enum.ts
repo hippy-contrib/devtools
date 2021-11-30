@@ -26,7 +26,7 @@ export const TunnelEvent = {
 };
 
 export const enum DebuggerProtocolType {
-  Unkonwn,
+  Unknown,
   CDP,
   DAP,
 }
@@ -43,7 +43,7 @@ export enum ClientRole {
   IOS = 'ios_client',
 }
 
-export const enum ClientEvent {
+export const enum AppClientEvent {
   Message = 'message',
   Close = 'close',
 }
@@ -51,8 +51,7 @@ export const enum ClientEvent {
 export const enum AppClientType {
   Tunnel = 'TunnelAppClient',
   WS = 'WsAppClient',
-  IWDP = 'IwdpAppClient',
-  Custom = 'custom',
+  IWDP = 'IWDPAppClient',
 }
 
 /**

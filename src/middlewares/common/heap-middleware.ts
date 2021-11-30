@@ -7,18 +7,16 @@ import { MiddleWareManager } from '../middleware-context';
 
 const log = new Logger('tdf-heap-middleware');
 
-// TODO 文件路径 加clientId
+// TODO 暂只缓存本地。后续缓存到 redis，或者容器外部挂载数据卷
 export const tdfHeapMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
-    [TdfCommand.TDFMemoryGetHeapMeta]: async (ctx, next) => {
+    [TdfCommand.TDFMemoryGetHeapMeta]: async ({ msg, sendToDevtools }) => {
       try {
-        if (!('id' in ctx.msg)) {
-          return next();
-        }
+        const commandRes = msg as Adapter.CDP.CommandRes<ProtocolTdf.TDFMemory.GetHeapMetaResponse>;
         const { cachePath } = config;
-        const fpath = path.join(cachePath, `${ctx.msg.id}.json`);
-        await fs.promises.writeFile(fpath, JSON.stringify(ctx.msg));
-        return ctx.sendToDevtools(ctx.msg as Adapter.CDP.Res);
+        const fpath = path.join(cachePath, `${commandRes.id}.json`);
+        await fs.promises.writeFile(fpath, JSON.stringify(commandRes));
+        return sendToDevtools(commandRes);
       } catch (e) {
         log.error('write heap failed! %s', (e as Error)?.stack);
         return Promise.reject(e);
@@ -26,19 +24,16 @@ export const tdfHeapMiddleWareManager: MiddleWareManager = {
     },
   },
   upwardMiddleWareListMap: {
-    [TdfCommand.TDFMemoryFetchHeapCache]: async (ctx, next) => {
+    [TdfCommand.TDFMemoryFetchHeapCache]: async ({ msg, sendToDevtools }) => {
       try {
-        if (!('id' in ctx.msg)) {
-          return next();
-        }
-        const req = ctx.msg as Adapter.CDP.Req;
+        const req = msg as Adapter.CDP.Req<ProtocolTdf.TDFMemory.FetchHeapCacheRequest>;
         const { cachePath } = config;
         const fpath = path.join(cachePath, `${req.params.id}.json`);
         const cacheMsgStr = await fs.promises.readFile(fpath, 'utf8');
         const cacheMsg: Adapter.CDP.CommandRes = JSON.parse(cacheMsgStr);
-        return ctx.sendToDevtools({
-          id: ctx.msg.id,
-          method: ctx.msg.method,
+        return sendToDevtools({
+          id: req.id,
+          method: req.method,
           result: cacheMsg.result,
         });
       } catch (e) {

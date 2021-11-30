@@ -1,6 +1,7 @@
 declare namespace Adapter {
   type DomainListener = (msg: Adapter.CDP.Res) => void;
   declare namespace CDP {
+    // 具体的协议体类型，中间件注册时从 tdf-devtools-protocol 中引入
     interface Req<T = any> {
       id: number;
       method: string;

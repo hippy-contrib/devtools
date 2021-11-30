@@ -31,14 +31,13 @@ export const heapMiddleWareManager: MiddleWareManager = {
         params: {},
       }),
     [ChromeCommand.HeapProfilerTakeHeapSnapshot]: async ({ msg, sendToApp, sendToDevtools }) => {
-      const req = msg as Adapter.CDP.Req;
+      const req = msg as Adapter.CDP.Req<ProtocolChrome.HeapProfiler.TakeHeapSnapshotRequest>;
       const { reportProgress } = req.params;
-      const res = await sendToApp({
+      const commandRes = (await sendToApp({
         id: requestId.create(),
         method: IOS100Command.HeapSnapshot,
         params: {},
-      });
-      const commandRes = res as Adapter.CDP.CommandRes;
+      })) as Adapter.CDP.CommandRes<ProtocolIOS100.Heap.SnapshotResponse>;
       const snapshot = JSON.parse(commandRes.result.snapshotData);
       const wholeChunk = JSON.stringify(HeapAdapter.jsc2v8(snapshot));
       if (reportProgress)

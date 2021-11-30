@@ -1,7 +1,7 @@
 import { androidMiddleWareManager, iOSMiddleWareManager } from '@/middlewares';
 import { DevicePlatform, DevtoolsEnv } from '@/@types/enum';
 import { appClientManager } from './app-client-manager';
-import { IwdpAppClient } from './iwdp-app-client';
+import { IWDPAppClient } from './iwdp-app-client';
 import { TunnelAppClient } from './tunnel-app-client';
 import { WsAppClient } from './ws-app-client';
 
@@ -45,7 +45,7 @@ const initHippyEnv = () => {
     useAllDomain: false,
     ignoreDomains: customDomains,
     middleWareManager: iOSMiddleWareManager,
-    Ctor: IwdpAppClient,
+    Ctor: IWDPAppClient,
     platform: DevicePlatform.IOS,
   });
   appClientManager.addIOSAppClientOption({
@@ -85,7 +85,7 @@ const initTdfEnv = () => {
     useAllDomain: false,
     ignoreDomains: customDomains,
     middleWareManager: iOSMiddleWareManager,
-    Ctor: IwdpAppClient,
+    Ctor: IWDPAppClient,
     platform: DevicePlatform.IOS,
   });
   appClientManager.addIOSAppClientOption({

@@ -1,4 +1,5 @@
 import { DevtoolsEnv, DBType } from './enum';
+
 export interface AppArgv {
   host: string;
   port: number;

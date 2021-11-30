@@ -8,8 +8,8 @@ const log = new Logger('tdf-log-middleware');
 
 export const tdfLogMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
-    [TdfEvent.TDFLogGetLog]: async (ctx) => {
-      const eventRes = ctx.msg as Adapter.CDP.EventRes;
+    [TdfEvent.TDFLogGetLog]: async ({ msg, sendToDevtools }) => {
+      const eventRes = msg as Adapter.CDP.EventRes<ProtocolTdf.TDFLog.GetLogEvent>;
       const { params } = eventRes;
       try {
         let firstLog;
@@ -32,7 +32,7 @@ export const tdfLogMiddleWareManager: MiddleWareManager = {
             },
           };
           firstLog ??= event;
-          ctx.sendToDevtools(event);
+          sendToDevtools(event);
         });
         return Promise.resolve(firstLog);
       } catch (e) {

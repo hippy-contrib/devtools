@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientType, ClientEvent } from '@/@types/enum';
+import { AppClientType, AppClientEvent } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
@@ -39,7 +39,7 @@ export class WsAppClient extends AppClient {
     this.ws.on('close', (msg) => {
       this.isClosed = true;
       log.info(`${this.id} ws app client closed.`);
-      this.emit(ClientEvent.Close, msg);
+      this.emit(AppClientEvent.Close, msg);
     });
   }
 

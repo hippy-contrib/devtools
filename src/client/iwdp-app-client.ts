@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientType, ClientEvent } from '@/@types/enum';
+import { AppClientType, AppClientEvent } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
@@ -8,7 +8,7 @@ const log = new Logger('app-client:IWDP');
 /**
  * IWDP 调试通道，通过 ws client 与 IWDP server 建立连接
  */
-export class IwdpAppClient extends AppClient {
+export class IWDPAppClient extends AppClient {
   private url: string;
   private ws: WebSocket;
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
@@ -22,7 +22,7 @@ export class IwdpAppClient extends AppClient {
     super(id, option);
     this.url = option.iWDPWsUrl;
     if (!this.url) {
-      const e = new Error('IwdpAppClient constructor option need iWDPWsUrl');
+      const e = new Error('IWDPAppClient constructor option need iWDPWsUrl');
       log.error('%s', e.stack);
       throw e;
     }
@@ -59,7 +59,7 @@ export class IwdpAppClient extends AppClient {
 
     this.ws.on('close', () => {
       this.isClosed = true;
-      this.emit(ClientEvent.Close);
+      this.emit(AppClientEvent.Close);
 
       const e = new Error('ws closed');
       for (const requestPromise of this.requestPromiseMap.values()) {

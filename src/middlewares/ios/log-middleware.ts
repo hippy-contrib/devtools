@@ -5,7 +5,7 @@ import { MiddleWareManager } from '../middleware-context';
 export const logMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [IOS100Event.ConsoleMessageAdded]: ({ msg, sendToDevtools }) => {
-      const eventRes = msg as Adapter.CDP.EventRes;
+      const eventRes = msg as Adapter.CDP.EventRes<ProtocolIOS100.Console.MessageAddedEvent>;
       const { message } = eventRes.params;
       let type;
       if (message.type === 'log') {
@@ -19,14 +19,15 @@ export const logMiddleWareManager: MiddleWareManager = {
         type = message.type;
       }
 
-      const consoleMessage = {
-        source: message.source,
+      const consoleMessage: ProtocolChrome.Log.LogEntry = {
+        // 这里自动生成的类型没有定义 enum，而是用的联合类型，导致类型不同，所以使用 any 转换
+        source: message.source as any,
         level: type,
         text: message.text,
         lineNumber: message.line,
         timestamp: new Date().getTime(),
         url: message.url,
-        args: message.parameters,
+        args: message.parameters as unknown as ProtocolChrome.Runtime.RemoteObject[],
         stackTrace: message.stackTrace
           ? {
               callFrames: message.stackTrace,

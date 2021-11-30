@@ -1,7 +1,7 @@
 import { config } from '@/config';
 import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 import { getDBOperator } from '@/db';
-import { createTargetByIwdpPage } from '@/utils/debug-target';
+import { createTargetByIWDPPage } from '@/utils/debug-target';
 import { DebugTarget } from '@/@types/debug-target';
 import { DevicePlatform } from '@/@types/enum';
 
@@ -18,7 +18,7 @@ export class DebugTargetManager {
     });
     // 追加 IWDP 获取到的 h5 页面
     const h5Pages = iOSPagesWithFlag.filter((iOSPage) => !iOSPage.shouldRemove);
-    DebugTargetManager.debugTargets = targets.concat(h5Pages.map(createTargetByIwdpPage));
+    DebugTargetManager.debugTargets = targets.concat(h5Pages.map(createTargetByIWDPPage));
     return DebugTargetManager.debugTargets;
   };
 

@@ -7,7 +7,9 @@ import { getLastScriptEval } from './debugger-middleware';
 export const runtimeMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [ChromeEvent.RuntimeExecutionContextCreated]: ({ msg, sendToDevtools }) => {
-      const eventRes = msg as Adapter.CDP.EventRes;
+      const eventRes = msg as Adapter.CDP.EventRes<
+        ProtocolIOS90.Runtime.ExecutionContextCreatedEvent & ProtocolChrome.Runtime.ExecutionContextCreatedEvent
+      >;
       if (eventRes.params?.context) {
         if (!eventRes.params.context.origin) {
           eventRes.params.context.origin = eventRes.params.context.name;
@@ -26,16 +28,19 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
     },
     [ChromeCommand.RuntimeEvaluate]: ({ msg, sendToDevtools }) => {
       const lastScriptEval = getLastScriptEval();
-      const commandRes = msg as Adapter.CDP.CommandRes;
+      const commandRes = msg as Adapter.CDP.CommandRes<
+        ProtocolIOS90.Runtime.EvaluateResponse & ProtocolChrome.Runtime.EvaluateResponse
+      >;
       if (commandRes.result?.wasThrown) {
         commandRes.result.result.subtype = 'error';
         commandRes.result.exceptionDetails = {
+          exceptionId: 1,
           text: commandRes.result.result.description,
           url: '',
           scriptId: lastScriptEval,
-          line: 1,
-          column: 0,
-          stack: {
+          lineNumber: 1,
+          columnNumber: 0,
+          stackTrace: {
             callFrames: [
               {
                 functionName: '',

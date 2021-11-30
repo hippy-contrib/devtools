@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientType, ClientEvent, DevicePlatform, ErrorCode, MiddlewareType, WinstonColor } from '@/@types/enum';
+import { AppClientType, AppClientEvent, DevicePlatform, ErrorCode, MiddlewareType, WinstonColor } from '@/@types/enum';
 import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
@@ -100,7 +100,7 @@ export abstract class AppClient extends DomainRegister {
 
   private sendToDevtools(msg: Adapter.CDP.Res) {
     if (!msg) return Promise.reject(ErrorCode.EmptyCommand);
-    this.emit(ClientEvent.Message, msg);
+    this.emit(AppClientEvent.Message, msg);
     return Promise.resolve(msg);
   }
 

@@ -30,7 +30,6 @@ export class Application {
         log.info('start debug server success.');
         if (!isRemote) {
           const { startTunnel, startIWDP, startAdbProxy } = await import('./child-process/index');
-          log.warn('动态 import ()', typeof startTunnel);
           if (useTunnel) startTunnel();
           else if (useIWDP) startIWDP();
           if (useAdb) startAdbProxy();
