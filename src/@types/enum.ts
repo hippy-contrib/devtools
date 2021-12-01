@@ -16,14 +16,14 @@ export const enum DeviceStatus {
   Disconnected = '2',
 }
 
-export const TunnelEvent = {
-  AddDevice: 'tunnel_add_device',
-  RemoveDevice: 'tunnel_remove_device',
-  AppConnect: 'tunnel_app_connect',
-  AppDisconnect: 'tunnel_app_disconnect',
-  ReceiveData: 'tunnel_recv_data',
-  TunnelLog: 'tunnel_log',
-};
+export enum TunnelEvent {
+  AddDevice = 'tunnel_add_device',
+  RemoveDevice = 'tunnel_remove_device',
+  AppConnect = 'tunnel_app_connect',
+  AppDisconnect = 'tunnel_app_disconnect',
+  ReceiveData = 'tunnel_recv_data',
+  TunnelLog = 'tunnel_log',
+}
 
 export const enum DebuggerProtocolType {
   Unknown,
@@ -31,7 +31,7 @@ export const enum DebuggerProtocolType {
   DAP,
 }
 
-export const enum ClientType {
+export enum ClientType {
   App = 'app',
   Devtools = 'devtools',
   Unknown = 'unknown',

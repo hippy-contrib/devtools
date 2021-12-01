@@ -5,3 +5,4 @@ oci-log.log
 log
 **/*.js.map
 .env
+coverage

@@ -7,6 +7,9 @@ import { DBModel } from '../base-model';
 export class MemoryModel extends DBModel {
   private static db: Map<string, Map<string, unknown>> = new Map();
 
+  /**
+   * 本地无需做初始化，暂写作空实现
+   */
   public async init() {}
 
   public getAll(key) {

@@ -5,7 +5,7 @@ declare namespace NodeJS {
 }
 
 interface Addon {
-  addEventListener: (event: string, data: TunnelData) => void;
+  addEventListener: (event: string, data: unknown) => void;
   tunnelStart: (adbPath: string, iWDPParams: string) => void;
   getDeviceList: (cb: (devices: Array<DeviceInfo>) => void) => void;
   selectDevice: (deviceId: string) => void;

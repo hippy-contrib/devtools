@@ -22,13 +22,13 @@ export class TunnelAppClient extends AppClient {
       try {
         msgObject = JSON.parse(data);
       } catch (e) {
-        return log.info(`parse tunnel response json failed. error: %s, \n msg: %j`, (e as Error)?.stack, data);
+        return log.info('parse tunnel response json failed. error: %s, \n msg: %j', (e as Error)?.stack, data);
       }
       if ('id' in msgObject) {
         const requestPromise = this.requestPromiseMap.get(msgObject.id);
         if (requestPromise) requestPromise.resolve(msgObject);
       }
-      const res = await this.onMessage(msgObject);
+      const res = await this.downwardMessageHandler(msgObject);
       if (!('id' in msgObject)) return;
       const requestPromise = this.requestPromiseMap.get(msgObject.id);
       if (requestPromise) {

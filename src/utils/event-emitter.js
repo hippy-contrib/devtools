@@ -178,14 +178,17 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
 
   const len = arguments.length;
   let listeners = this._events[evt];
-  if (!listeners)
+  if (!listeners) {
     for (const [curEvent, curListeners] of Object.entries(this._events)) {
       const regexp = new RegExp(curEvent.replace('*', '.*'));
+      // 这里支持 redis 的通配符 '*'，并 emit 第二个参数为 channelId
       if (regexp.test(evt)) {
         listeners = curListeners;
         a2 = event;
+        arguments[2] = event;
       }
     }
+  }
 
   if (!listeners) return false;
 

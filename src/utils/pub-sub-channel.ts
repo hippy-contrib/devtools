@@ -5,6 +5,7 @@
 const downwardSpliter = '_down_';
 const upwardSpliter = '_up_';
 const internalSpliter = '_internal_';
+const defaultExtensionName = 'default';
 
 export const createDownwardChannel = (clientId: string, extensionName?: string) =>
   createChannel(clientId, extensionName, downwardSpliter);
@@ -19,4 +20,4 @@ export const upwardChannelToDownwardChannel = (upwardChannelId: string) =>
   upwardChannelId.replace(upwardSpliter, downwardSpliter);
 
 const createChannel = (clientId: string, extensionName?: string, spliter?: string) =>
-  `${clientId}${spliter}${extensionName || 'default'}`;
+  `${clientId}${spliter}${extensionName || defaultExtensionName}`;

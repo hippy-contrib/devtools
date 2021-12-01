@@ -8,6 +8,7 @@ import {
   UrlParsedContext,
   requestId,
   MiddleWareContext,
+  MiddleWare,
 } from '@/middlewares';
 import { CDP_DOMAIN_LIST, getDomain } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
@@ -23,9 +24,9 @@ export interface AppClient {
 }
 
 /**
- * app client 通道，负责调试协议至 app 端的收发。目前包括三个通道，分包由三个子类实现：
+ * app client 通道，负责调试协议至 app 端的收发。目前包括三个通道，分别由三个子类实现：
  *    - tunnel 通道：c++ addon 实现
- *    - ws 通道：手Q采用此通道
+ *    - ws 通道：手 Q 采用此通道
  *    - IWDP 通道：TDF iOS 采用此通道
  **/
 export abstract class AppClient extends EventEmitter {
@@ -62,7 +63,7 @@ export abstract class AppClient extends EventEmitter {
   }
 
   /**
-   * 调试协议上行发送至 app 端
+   * 调试协议经过中间件的适配后，上行发送至 app 端
    */
   public sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     if (!this.filter(msg)) {
@@ -73,15 +74,14 @@ export abstract class AppClient extends EventEmitter {
     const { method } = msg;
     this.msgIdMethodMap.set(msg.id, msg.method);
     const middlewareList = this.getMiddlewareList(MiddlewareType.Upward, method);
-    // upwardLog.info(`'${msg.method}' middlewareLength: ${middlewareList.length}`);
-    // 上行的具体协议交给中间件适配，然后分发到 app 端
-    return composeMiddlewares(middlewareList)(this.makeContext(msg));
+    // 上行的具体协议的处理交给中间件去适配，最后分发到 app 端
+    return this.middlewareMessageHandler(middlewareList, msg);
   }
 
   /**
-   * 监听 app 端的调试协议，经过中间件适配后，发送至 devtools 端
+   * 下行协议适配 handler
    */
-  protected onMessage(msg: Adapter.CDP.Res): Promise<Adapter.CDP.Res> {
+  protected downwardMessageHandler(msg: Adapter.CDP.Res): Promise<Adapter.CDP.Res> {
     try {
       if ('id' in msg) {
         const method = this.msgIdMethodMap.get(msg.id);
@@ -91,24 +91,19 @@ export abstract class AppClient extends EventEmitter {
 
       const { method } = msg;
       const middlewareList = this.getMiddlewareList(MiddlewareType.Downward, method);
-      return composeMiddlewares(middlewareList)(this.makeContext(msg));
+      return this.middlewareMessageHandler(middlewareList, msg);
     } catch (e) {
       downwardLog.error(`app client on message error: %s`, (e as Error)?.stack);
       return Promise.reject(e);
     }
   }
 
-  private sendToDevtools(msg: Adapter.CDP.Res) {
-    if (!msg) return Promise.reject(ErrorCode.EmptyCommand);
-    this.emit(AppClientEvent.Message, msg);
-    return Promise.resolve(msg);
-  }
-
   /**
-   * 创建中间件上下文，中间件中通过调用 sendToApp, sendToDevtools 将调试协议分发到接收端
+   * 通过中间件处理上下行消息
    */
-  private makeContext(msg: Adapter.CDP.Req | Adapter.CDP.Res): MiddleWareContext {
-    return {
+  private middlewareMessageHandler(middlewareList: MiddleWare[], msg: Adapter.CDP.Res | Adapter.CDP.Req) {
+    // 创建中间件上下文，中间件中可以通过调用 sendToApp, sendToDevtools 将调试协议分发到接收端
+    const middlewareContext: MiddleWareContext = {
       ...this.urlParsedContext,
       msg,
       sendToApp: (msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> => {
@@ -120,9 +115,19 @@ export abstract class AppClient extends EventEmitter {
       },
       sendToDevtools: (msg: Adapter.CDP.Res) => {
         downwardLog.info('%s sendToDevtools %s %s', this.type, (msg as Adapter.CDP.CommandRes).id || '', msg.method);
-        return this.sendToDevtools(msg);
+        return this.emitMessageToDevtools(msg);
       },
     };
+    return composeMiddlewares(middlewareList)(middlewareContext);
+  }
+
+  /**
+   * 协议下行发送至 devtools 端
+   */
+  private emitMessageToDevtools(msg: Adapter.CDP.Res) {
+    if (!msg) return Promise.reject(ErrorCode.EmptyCommand);
+    this.emit(AppClientEvent.Message, msg);
+    return Promise.resolve(msg);
   }
 
   /**
@@ -141,6 +146,9 @@ export abstract class AppClient extends EventEmitter {
     return isAcceptDomain;
   }
 
+  /**
+   * 根据调试协议查询注册的中间件列表
+   */
   private getMiddlewareList(type: MiddlewareType, method: string) {
     let middlewareList = {
       [MiddlewareType.Upward]: this.middleWareManager.upwardMiddleWareListMap,
@@ -155,6 +163,10 @@ export abstract class AppClient extends EventEmitter {
    * 每个通道的消息发送方式不同，需要子类实现实现
    */
   protected abstract sendHandler(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res>;
+
+  /**
+   * AppClient 子类收到消息后，需调用父类的 downwardMessageHandler
+   */
   protected abstract registerMessageListener(): void;
 }
 

@@ -27,7 +27,7 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
     [IOS90Command.DebuggerSetPauseOnExceptions]: sendEmptyResultToDevtools as MiddleWare,
   },
   upwardMiddleWareListMap: {
-    [ChromeCommand.DebuggerEnable]: ({ sendToApp, msg }) => {
+    [ChromeCommand.DebuggerEnable]: async ({ sendToApp, msg }) => {
       sendToApp({
         id: requestId.create(),
         method: ChromeCommand.DebuggerSetBreakpointsActive,
@@ -35,23 +35,23 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
       });
       return sendToApp(msg as Adapter.CDP.Req);
     },
-    [ChromeCommand.DebuggerSetBlackboxPatterns]: ({ msg, sendToDevtools }) => {
+    [ChromeCommand.DebuggerSetBlackboxPatterns]: async ({ msg, sendToDevtools }) => {
       const res = {
         id: (msg as Adapter.CDP.Req).id,
         method: msg.method,
         result: {},
       };
       sendToDevtools(res);
-      return Promise.resolve(res);
+      return res;
     },
-    [ChromeCommand.RuntimeSetAsyncCallStackDepth]: ({ msg, sendToDevtools }) => {
+    [ChromeCommand.RuntimeSetAsyncCallStackDepth]: async ({ msg, sendToDevtools }) => {
       const res = {
         id: (msg as Adapter.CDP.Req).id,
         method: msg.method,
         result: true,
       };
       sendToDevtools(res);
-      return Promise.resolve(res);
+      return res;
     },
   },
 };

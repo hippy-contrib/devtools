@@ -1,6 +1,6 @@
 {
   "name": "debug-server-next",
-  "version": "3.0.130",
+  "version": "3.0.140",
   "description": "Dev server for hippy-core.",
   "repository": "https://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server",
   "homepage": "http://hippyjs.org",
@@ -12,10 +12,10 @@
   },
   "scripts": {
     "start": "nodemon --exec \"npm run dev\"",
-    "dev": "cross-env DEBUG=*,-koa-router,-koa-send TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts",
-    "dev:gamecenter": "cross-env DEBUG=*,-koa-router TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts --entry=src/public/game-center/index.bundle",
+    "dev": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts",
+    "dev:gamecenter": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts --entry=src/public/game-center/index.bundle",
     "build": "npx gulp",
-    "test": "npx jest",
+    "test": "npx jest --silent --coverage",
     "lint": "npx eslint --fix --ext .js,.ts ./src"
   },
   "nodemonConfig": {
@@ -41,11 +41,8 @@
     "eventemitter3": "^4.0.7",
     "kill-port": "^1.6.1",
     "koa": "^2.13.1",
-    "koa-compress": "^5.1.0",
-    "koa-conditional-get": "^3.0.0",
-    "koa-etag": "^4.0.0",
     "koa-router": "^10.0.0",
-    "koa-static": "^5.0.0",
+    "koa-static-cache": "^5.1.4",
     "lodash": "^4.17.21",
     "module-alias": "^2.2.2",
     "open": "^8.4.0",

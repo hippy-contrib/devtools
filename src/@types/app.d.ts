@@ -10,7 +10,6 @@ export interface AppArgv {
   iWDPEndPort: number;
   clearAddrInUse: boolean;
   env: DevtoolsEnv;
-  publicPath?: string;
   open: boolean;
   dbType: DBType;
   useTunnel: boolean;

@@ -5,13 +5,16 @@ import { getDBOperator } from '@/db';
 import { createTargetByDeviceInfo, patchDebugTarget } from '@/utils/debug-target';
 import { config } from '@/config';
 import { appClientManager } from '@/client/app-client-manager';
-import { cleanDebugTarget, subscribeRedis } from '@/controller/pub-sub-manager';
+import { cleanDebugTarget, subscribeCommand } from '@/controller/pub-sub-manager';
 
 const log = new Logger('device-manager');
 
 class DeviceManager {
   private deviceList: DeviceInfo[] = [];
 
+  /**
+   * app 断连，清理调试对象
+   */
   public onAppDisconnect() {
     const device = this.deviceList[0];
     if (!device) return;
@@ -19,6 +22,9 @@ class DeviceManager {
     cleanDebugTarget(device.devicename);
   }
 
+  /**
+   * app 连接，添加调试对象，并订阅上行调试指令
+   */
   public async onAppConnect() {
     const device = this.deviceList[0];
     if (!device) return;
@@ -29,14 +35,17 @@ class DeviceManager {
       debugTarget = await patchDebugTarget(debugTarget);
       const { model } = getDBOperator();
       model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
-      subscribeRedis(debugTarget);
+      subscribeCommand(debugTarget);
     }
   }
 
+  /**
+   * 查询 USB 连接的设备列表
+   */
   public async getDeviceList() {
     // ⚠️ addon 目前只有 mac 版本，远程调试部署时不用加载 addon，故采用动态加载
-    const { getDeviceList, selectDevice } = await import('./child-process/addon');
-    getDeviceList((devices: DeviceInfo[]) => {
+    const { getDeviceList: getDeviceListByTunnel, selectDevice } = await import('./child-process/addon');
+    getDeviceListByTunnel((devices: DeviceInfo[]) => {
       log.info('getDeviceList: %j', devices);
       this.deviceList = devices;
       if (devices.length) {

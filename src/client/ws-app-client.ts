@@ -30,7 +30,7 @@ export class WsAppClient extends AppClient {
         log.error(`parse ws app client json message error: ${msg}`);
       }
 
-      const res = await this.onMessage(msgObj);
+      const res = await this.downwardMessageHandler(msgObj);
       if (!('id' in msgObj)) return;
       const requestPromise = this.requestPromiseMap.get(msgObj.id);
       if (requestPromise) requestPromise.resolve(res);

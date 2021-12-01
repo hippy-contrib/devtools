@@ -13,28 +13,20 @@ export const tdfLogMiddleWareManager: MiddleWareManager = {
       const { params } = eventRes;
       try {
         let firstLog;
-        params.log.forEach((log) => {
-          const timestamp = `${new Date(Math.floor(log.timestamp / 1000000)).toLocaleString()}(${log.timestamp})`; // 换算为毫秒， 1毫秒 = 1000000纳秒
-          const logPrefixTemp = `[${timestamp}] [${log.level}] [${log.source}] `;
-          const logPrefix = log.module ? `${logPrefixTemp}[${log.module}] ` : `${logPrefixTemp}`;
-          const consoleMessage = {
-            source: 'other',
-            level: 'info',
-            text: `${blue(logPrefix)}${black(log.message)}`,
-            lineNumber: log.line_number,
-            timestamp: Date.now(),
-            url: log.file_name,
-          };
-          const event = {
-            method: ChromeEvent.LogEntryAdded,
-            params: {
-              entry: consoleMessage,
-            },
-          };
-          firstLog ??= event;
-          sendToDevtools(event);
-        });
-        return Promise.resolve(firstLog);
+        await Promise.all(
+          params.log.map((log) => {
+            const event = {
+              method: ChromeEvent.LogEntryAdded,
+              params: {
+                entry: convertTDFLogToChromeLog(log),
+              },
+            };
+
+            firstLog ??= event;
+            return sendToDevtools(event);
+          }),
+        );
+        return firstLog;
       } catch (e) {
         log.error(`${ChromeEvent.LogEntryAdded} failed! %s`, (e as Error)?.stack);
         return Promise.reject(e);
@@ -42,4 +34,21 @@ export const tdfLogMiddleWareManager: MiddleWareManager = {
     },
   },
   upwardMiddleWareListMap: {},
+};
+
+const convertTDFLogToChromeLog = (log: ProtocolTdf.TDFLog.LogInfo): ProtocolChrome.Log.LogEntry => {
+  // app 端回包单位为纳秒，需换算为毫秒， 1 毫秒 = 1000000 纳秒
+  const timestamp = `${new Date(Math.floor(log.timestamp / 1000000)).toLocaleString()}(${log.timestamp})`;
+  const logPrefixTemp = `[${timestamp}] [${log.level}] [${log.source}] `;
+  const logPrefix = log.module ? `${logPrefixTemp}[${log.module}] ` : `${logPrefixTemp}`;
+  const consoleMessage = {
+    // 脚本生成的类型声明使用了联合类型，为了方便处理直接转为 any
+    source: 'other' as any,
+    level: 'info' as any,
+    text: `${blue(logPrefix)}${black(log.message)}`,
+    lineNumber: log.line_number,
+    timestamp: Date.now(),
+    url: log.file_name,
+  };
+  return consoleMessage;
 };

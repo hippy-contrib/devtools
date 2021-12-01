@@ -5,6 +5,9 @@ import { config } from '@/config';
 import { DebugTarget } from '@/@types/debug-target';
 import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 
+/**
+ * 通过 device 信息创建调试对象
+ */
 export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
   // 通过 tunnel 创建的 target，暂时使用 devicename 作为调试对象 id，后续终端重构后使用 targetCreated 事件抛出的 id
   const clientId = device.devicename;
@@ -37,6 +40,9 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
   };
 };
 
+/**
+ * 通过 ws 连接 url 创建调试对象
+ */
 export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTarget => {
   const { clientId, clientRole, contextName, deviceName } = wsUrlParams;
   let platform;
@@ -67,16 +73,25 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
   };
 };
 
+/**
+ * 通过 IWDP 获取到的页面创建调试对象
+ */
 export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
   const iWDPWsUrl = iWDPPage.webSocketDebuggerUrl;
   const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
     clientId: iWDPWsUrl,
     role: ClientRole.Devtools,
   });
+  const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
+    remoteFrontend: true,
+    experiments: true,
+    ws: wsUrl,
+    env: global.appArgv.env,
+  });
   return {
     clientId: iWDPWsUrl,
     iWDPWsUrl,
-    devtoolsFrontendUrl: iWDPPage.devtoolsFrontendUrl,
+    devtoolsFrontendUrl,
     title: iWDPPage.title,
     thumbnailUrl: '',
     url: '',
@@ -92,7 +107,8 @@ export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
 };
 
 /**
- * 补充完整 debugTarget 信息
+ * 补充完整 debugTarget 信息。
+ * 当 iOS 根据 device 创建出调试对象时，用 IWDP 获取到的额外信息加以补充
  */
 export const patchDebugTarget = async (debugTarget: DebugTarget) => {
   if (debugTarget.platform === DevicePlatform.IOS) {

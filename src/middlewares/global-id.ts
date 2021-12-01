@@ -13,5 +13,12 @@ class GlobalId {
   }
 }
 
+/**
+ * 全局调试协议 request command id
+ */
 export const requestId = new GlobalId(-1);
+
+/**
+ * 全局 js 执行上下文 id
+ */
 export const contextId = new GlobalId();

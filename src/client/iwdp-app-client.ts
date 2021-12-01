@@ -14,7 +14,7 @@ export class IWDPAppClient extends AppClient {
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
   private msgBuffer: Array<{
     msg: Adapter.CDP.Req;
-    resolve: Adapter.Resolve<Adapter.CDP.Res>;
+    resolve: Adapter.Resolve;
     reject: Adapter.Reject;
   }> = [];
 
@@ -39,7 +39,7 @@ export class IWDPAppClient extends AppClient {
       } catch (e) {
         log.error(`parse json error: ${msg}`);
       }
-      const res = await this.onMessage(msgObj);
+      const res = await this.downwardMessageHandler(msgObj);
       if (!('id' in msgObj)) return;
       const requestPromise = this.requestPromiseMap.get(msgObj.id);
       if (requestPromise) {

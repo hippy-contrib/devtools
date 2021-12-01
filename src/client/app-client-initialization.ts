@@ -7,10 +7,10 @@ import { WsAppClient } from './ws-app-client';
 
 export const initAppClient = () => {
   const initFn = {
-    [DevtoolsEnv.Hippy]: initHippyEnv,
-    [DevtoolsEnv.Voltron]: initVoltronEnv,
-    [DevtoolsEnv.TDF]: initTdfEnv,
-    [DevtoolsEnv.TDFCore]: initTdfCoreEnv,
+    [DevtoolsEnv.Hippy]: initHippyAppClient,
+    [DevtoolsEnv.Voltron]: initVoltronAppClient,
+    [DevtoolsEnv.TDF]: initTDFAppClient,
+    [DevtoolsEnv.TDFCore]: initTdfCoreAppClient,
   }[global.appArgv.env];
   initFn();
 };
@@ -33,8 +33,8 @@ const customDomains = [
  *  - 安卓走 ws 通道
  *  - iOS 走 IWDP + ws 通道
  */
-const initHippyEnv = () => {
-  appClientManager.reset();
+const initHippyAppClient = () => {
+  appClientManager.clear();
   appClientManager.addAndroidAppClientOption({
     useAllDomain: true,
     middleWareManager: androidMiddleWareManager,
@@ -60,9 +60,9 @@ const initHippyEnv = () => {
 /**
  * voltron，暂时与 hippy 一致
  */
-const initVoltronEnv = () => {
-  appClientManager.reset();
-  initHippyEnv();
+const initVoltronAppClient = () => {
+  appClientManager.clear();
+  initHippyAppClient();
 };
 
 /**
@@ -73,8 +73,8 @@ const initVoltronEnv = () => {
  *    - 自实现协议走 tunnel 通道
  *    - jsc 实现的协议走 IWDP 通道
  */
-const initTdfEnv = () => {
-  appClientManager.reset();
+const initTDFAppClient = () => {
+  appClientManager.clear();
   appClientManager.addAndroidAppClientOption({
     useAllDomain: true,
     middleWareManager: androidMiddleWareManager,
@@ -102,8 +102,8 @@ const initTdfEnv = () => {
  *  - 安卓：tunnel 通道
  *  - ios：tunnel 通道
  */
-const initTdfCoreEnv = () => {
-  appClientManager.reset();
+const initTdfCoreAppClient = () => {
+  appClientManager.clear();
   appClientManager.addAndroidAppClientOption({
     useAllDomain: true,
     middleWareManager: androidMiddleWareManager,

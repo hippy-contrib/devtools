@@ -8,7 +8,7 @@ describe('ios trace 适配器', () => {
     const dest = path.join(__dirname, '../__mock__/converted-v8-trace.json');
     const data = await fs.promises.readFile(src);
     const jscJson = JSON.parse(data.toString());
-    debugger;
+
     const traceAdapter = new TraceAdapter();
     const v8Json = traceAdapter.jsc2v8(jscJson);
     await fs.promises.writeFile(dest, JSON.stringify(v8Json));

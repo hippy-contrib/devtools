@@ -11,6 +11,15 @@ export type RedisClient = ReturnType<typeof createClient>;
  * 线上环境多机部署时用此模型
  */
 export class RedisModel extends DBModel {
+  private static instance: RedisModel;
+
+  public static getInstance() {
+    if (!RedisModel.instance) {
+      RedisModel.instance = new RedisModel();
+    }
+    return RedisModel.instance;
+  }
+
   public client;
 
   public constructor() {
@@ -20,6 +29,9 @@ export class RedisModel extends DBModel {
     }
   }
 
+  /**
+   * 初始化数据库连接
+   */
   public async init() {
     try {
       // ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
@@ -29,6 +41,9 @@ export class RedisModel extends DBModel {
     }
   }
 
+  /**
+   * 查询 hashmap 的所有 value
+   */
   public async getAll(key) {
     const hashmap: Record<string, string> = await this.client.hGetAll(key);
     return Object.values(hashmap)
@@ -56,18 +71,12 @@ export class RedisModel extends DBModel {
 }
 
 const createMyClient = (): RedisClient => {
-  try {
-    const client = createClient({ url: config.redis.url }) as RedisClient;
-    client.on('error', (e) => {
-      log.error('create redis client error: %s', e?.stack);
-    });
-    client.on('connect', log.error.bind(log));
-    client.on('warning', log.error.bind(log));
-    client.on('ready', log.error.bind(log));
-    return client;
-  } catch (e) {
-    return null;
-  }
+  const client = createClient({ url: config.redis.url }) as RedisClient;
+  client.on('error', (e) => {
+    log.error('create redis client error: %s', e?.stack);
+  });
+  client.on('connect', log.error.bind(log));
+  client.on('warning', log.error.bind(log));
+  client.on('ready', log.error.bind(log));
+  return client;
 };
-
-export const redisModel = new RedisModel();

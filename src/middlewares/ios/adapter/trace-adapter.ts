@@ -203,7 +203,7 @@ export default class TraceAdapter {
       subTree.parent = parentNode;
       parentNode.children.push(subTree);
     } else {
-      log.error("subTree doesn't exist!");
+      log.error('subTree not exist!');
     }
   }
 
@@ -226,7 +226,7 @@ export default class TraceAdapter {
         parentNode.endTs = trace.timestamp + sampleInterval;
         parentNode = parentNode.parent;
       } else {
-        log.error("update frame sample time error, parent node doesn't match!");
+        log.error('update frame sample time error, parent node not match!');
       }
     }
   }

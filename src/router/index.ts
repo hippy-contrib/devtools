@@ -1,8 +1,6 @@
 import path from 'path';
 import cors from '@koa/cors';
-import serve from 'koa-static';
-import conditional from 'koa-conditional-get';
-import etag from 'koa-etag';
+import staticCache from 'koa-static-cache';
 import Koa from 'koa';
 import { Logger } from '@/utils/log';
 import { getDebugTargetsRouter } from '@/router/debug-targets';
@@ -10,17 +8,15 @@ import { getDebugTargetsRouter } from '@/router/debug-targets';
 const log = new Logger('router');
 
 export const routeApp = (app: Koa) => {
-  const { staticPath, entry, publicPath } = global.appArgv;
+  const { staticPath, entry } = global.appArgv;
 
   app.use(cors());
-  app.use(conditional());
-  app.use(etag());
 
   app.use(async (ctx, next) => {
     try {
       await next();
     } catch (e) {
-      log.error(`koa error: %s`, (e as Error)?.stack);
+      log.error('koa error: %s', (e as Error)?.stack);
       return (ctx.body = (e as Error)?.stack);
     }
   });
@@ -33,14 +29,17 @@ export const routeApp = (app: Koa) => {
   else servePath = path.resolve(path.dirname(entry));
   log.info(`serve bundle: ${entry}; serve folder: ${servePath}`);
 
+  const defaultStaicOption = {
+    buffer: false,
+    dynamic: true,
+  };
+  // bundle 静态资源，禁用缓存
+  app.use(staticCache(servePath, defaultStaicOption));
+  // devtools 静态资源，优先强缓存，强缓存过期后协商缓存
   app.use(
-    serve(servePath, {
-      setHeaders: (res, path) => {
-        if (/index\.bundle$/.test(path)) {
-          res.setHeader('Content-Type', 'application/javascript');
-        }
-      },
+    staticCache(path.join(__dirname, '../public'), {
+      ...defaultStaicOption,
+      maxAge: 60 * 60,
     }),
   );
-  app.use(serve(publicPath || path.join(__dirname, '../public')));
 };

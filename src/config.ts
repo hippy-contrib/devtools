@@ -1,6 +1,6 @@
 import path from 'path';
 
-export const config = {
+export const config: Config = {
   domain: 'localhost:38989',
   wsPath: '/debugger-proxy',
   cachePath: path.join(__dirname, 'cache'),
@@ -11,3 +11,14 @@ export const config = {
     key: 'tdf:debugtargets',
   },
 };
+
+interface Config {
+  domain: string;
+  wsPath: string;
+  cachePath: string;
+  logPath: string;
+  redis: {
+    url: string;
+    key: string;
+  };
+}

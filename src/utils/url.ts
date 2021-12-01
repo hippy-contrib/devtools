@@ -5,53 +5,6 @@ import { DebugTarget } from '@/@types/debug-target';
 
 const log = new Logger('url-utils');
 
-export const parseWsUrl = (reqUrl: string) => {
-  const url = new URL(reqUrl, 'http://0.0.0.0');
-  const clientId = url.searchParams.get('clientId');
-  const contextName = url.searchParams.get('contextName');
-  const clientRole = url.searchParams.get('role') as ClientRole;
-  const deviceName = url.searchParams.get('deviceName');
-  const extensionName = url.searchParams.get('extensionName') || '';
-  return {
-    clientId,
-    clientRole,
-    pathname: url.pathname,
-    contextName,
-    deviceName,
-    extensionName,
-  };
-};
-
-export const isConnectionValid = (wsUrlParams: WsUrlParams, debugTarget: DebugTarget): boolean => {
-  const { clientRole, pathname, contextName } = wsUrlParams;
-  const { clientId } = wsUrlParams;
-  log.info('clientRole: %s', clientRole);
-  if (clientRole === ClientRole.Devtools) log.info('isConnectionValid debug target: %j', debugTarget);
-
-  if (pathname !== config.wsPath) {
-    log.warn('invalid ws connection path!');
-    return false;
-  }
-  if (clientRole === ClientRole.Devtools && !debugTarget) {
-    log.warn("debugTarget doesn't exist! %s", clientId);
-    return false;
-  }
-  if (!Object.values(ClientRole).includes(clientRole)) {
-    log.warn('invalid client role!');
-    return false;
-  }
-  if (clientRole === ClientRole.IOS && !contextName) {
-    log.warn('invalid iOS connection, should request with contextName!');
-    return false;
-  }
-
-  if (!clientId) {
-    log.warn('invalid ws connection!');
-    return false;
-  }
-  return true;
-};
-
 export type AppWsUrlParams = {
   clientId: string;
   clientRole: ClientRole;
@@ -70,6 +23,62 @@ export type DevtoolsWsUrlParams = {
 
 export type WsUrlParams = AppWsUrlParams | DevtoolsWsUrlParams;
 
+/**
+ * 解析 ws 连接的 url 参数
+ */
+export const parseWsUrl = (reqUrl: string): WsUrlParams => {
+  const url = new URL(reqUrl, 'http://0.0.0.0');
+  const clientId = url.searchParams.get('clientId');
+  const contextName = url.searchParams.get('contextName');
+  const clientRole = url.searchParams.get('role') as ClientRole;
+  const deviceName = url.searchParams.get('deviceName');
+  const extensionName = url.searchParams.get('extensionName') || '';
+  return {
+    clientId,
+    clientRole,
+    pathname: url.pathname,
+    contextName,
+    deviceName,
+    extensionName,
+  };
+};
+
+/**
+ * 根据 ws url 参数判断连接是否合法，如果是 devtools 来源的 ws 连接，必须存在调试对象
+ */
+export const isConnectionValid = (wsUrlParams: WsUrlParams, debugTarget: DebugTarget): boolean => {
+  const { clientRole, pathname, contextName } = wsUrlParams;
+  const { clientId } = wsUrlParams;
+  log.info('clientRole: %s', clientRole);
+  if (clientRole === ClientRole.Devtools) log.info('isConnectionValid debug target: %j', debugTarget);
+
+  if (pathname !== config.wsPath) {
+    log.warn('invalid ws connection path!');
+    return false;
+  }
+  if (clientRole === ClientRole.Devtools && !debugTarget) {
+    log.warn('debugTarget not exist! %s', clientId);
+    return false;
+  }
+  if (!Object.values(ClientRole).includes(clientRole)) {
+    log.warn('invalid client role!');
+    return false;
+  }
+  if (clientRole === ClientRole.IOS && !contextName) {
+    log.warn('invalid iOS connection, should request with contextName!');
+    return false;
+  }
+
+  if (!clientId) {
+    log.warn('invalid ws connection!');
+    return false;
+  }
+  return true;
+};
+
+/**
+ * 根据 query 对象创建 url
+ */
 export const makeUrl = (baseUrl: string, query: unknown) => {
   let fullUrl = baseUrl;
 

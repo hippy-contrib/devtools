@@ -8,18 +8,18 @@ import { exec } from '@/utils/process';
 import { addEventListener, tunnelStart } from './addon';
 
 const childProcessLog = new Logger('child-process');
-const log = new Logger('tunnel', WinstonColor.Magenta);
+const tunnelLog = new Logger('tunnel', WinstonColor.Magenta);
 let proxyProcess;
 
 export const TUNNEL_EVENT = 'message';
 export const tunnelEmitter = new EventEmitter();
 
-export const startTunnel = (cb?) => {
+export const startTunnel = (cb?: StartTunnelCallback) => {
   const { iWDPPort, iWDPStartPort, iWDPEndPort, adbPath } = global.appArgv;
-  addEventListener((event, data) => {
+  addEventListener((event: TunnelEvent, data: unknown) => {
     try {
       if (event !== TunnelEvent.TunnelLog) {
-        log.info('tunnel event: %s', event);
+        tunnelLog.info('tunnel event: %s', event);
       }
       if (event === TunnelEvent.ReceiveData) {
         tunnelEmitter.emit(TUNNEL_EVENT, data);
@@ -35,13 +35,13 @@ export const startTunnel = (cb?) => {
         } else if (event === TunnelEvent.AppDisconnect) {
           deviceManager.onAppDisconnect();
         } else if (event === TunnelEvent.TunnelLog && data) {
-          log.info(data);
+          tunnelLog.info(data);
         }
 
         if (cb) cb(event, data);
       }
     } catch (e) {
-      log.error(`handle tunnel event error: %s`, (e as Error)?.stack);
+      tunnelLog.error('handle tunnel event error: %s', (e as Error)?.stack);
     }
   });
 
@@ -63,10 +63,10 @@ export const startIWDP = () => {
   childProcessLog.info(`start IWDP on port ${iWDPPort}`);
 
   proxyProcess.on('error', (e) => {
-    childProcessLog.info('IWDP error: %s', e?.stack);
+    childProcessLog.error('IWDP error: %s', e?.stack);
   });
   proxyProcess.on('close', (code) => {
-    childProcessLog.info(`IWDP close with code: ${code}`);
+    childProcessLog.warn(`IWDP close with code: ${code}`);
   });
 };
 
@@ -77,19 +77,18 @@ export const startAdbProxy = async () => {
     await exec(adbPath, ['reverse', '--remove-all']);
     await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
   } catch (e) {
-    childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
-    childProcessLog.info('Otherwise please check adb devices command working correctly');
-    childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
-    childProcessLog.info('start adb reverse error: %s', (e as Error)?.stack);
+    childProcessLog.warn('Port reverse failed, For iOS app log.info only just ignore the message.');
+    childProcessLog.warn('Otherwise please check adb devices command working correctly');
+    childProcessLog.warn(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
+    childProcessLog.warn('start adb reverse error: %s', (e as Error)?.stack);
   }
 };
 
-export const onExit = () => {
+export const killChildProcess = () => {
   if (!proxyProcess) return;
-  childProcessLog.info('on log.info server exit, do some clean...');
+  childProcessLog.warn('on log.info server exit, do some clean...');
   proxyProcess?.kill('SIGKILL');
   proxyProcess = null;
 };
-process.on('exit', onExit);
-process.on('SIGINT', onExit);
-process.on('SIGTERM', onExit);
+
+type StartTunnelCallback = (event: TunnelEvent, data: unknown) => void;

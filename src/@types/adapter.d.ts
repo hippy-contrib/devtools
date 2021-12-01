@@ -32,25 +32,10 @@ declare namespace Adapter {
     type Res = EventRes | CommandRes | ErrorRes;
     type Data = Req | Res;
   }
-  declare namespace IWDP {}
-  declare namespace Client {}
 
-  type RegisterDomainListener = (domain: string, callback: Adapter.DomainListener) => void;
+  type Resolve = (value: Adapter.CDP.Res | PromiseLike<Adapter.CDP.Res>) => void;
+  type Reject = (reason?: any) => void;
 
-  type Channel = {
-    sendMessage: (msg: Adapter.CDP.Req) => void;
-    registerDomainListener: RegisterDomainListener;
-  };
-
-  type Connection<T> = {
-    ws: T;
-    customDomains: string[];
-  };
-  type ConnectionList = Connection[];
-  type ConnectionListMap<T> = Map<string, ConnectionList<T>>;
-
-  type Resolve<T> = (value: T) => TResult1 | PromiseLike<TResult1>;
-  type Reject = (reason: unknown) => TResult2 | PromiseLike<TResult2>;
   type RequestPromiseMap = Map<
     string | number,
     {

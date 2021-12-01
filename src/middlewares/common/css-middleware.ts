@@ -7,17 +7,17 @@ export const cssMiddleWareManager: MiddleWareManager = {
     [ChromeCommand.CSSGetMatchedStylesForNode]: ({ msg, sendToDevtools }) => {
       // 类型收窄
       const commandRes = msg as Adapter.CDP.CommandRes<ProtocolIOS90.CSS.GetInlineStylesForNodeResponse>;
-      commandRes.result.inlineStyle = CssDomain.conversionInlineStyle(commandRes.result.inlineStyle);
+      commandRes.result.inlineStyle = CssDomainAdapter.conversionInlineStyle(commandRes.result.inlineStyle);
       return sendToDevtools(commandRes);
     },
     [ChromeCommand.CSSGetComputedStyleForNode]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes<ProtocolIOS90.CSS.GetComputedStyleForNodeResponse>;
-      commandRes.result.computedStyle = CssDomain.conversionComputedStyle(commandRes.result.computedStyle);
+      commandRes.result.computedStyle = CssDomainAdapter.conversionComputedStyle(commandRes.result.computedStyle);
       return sendToDevtools(commandRes);
     },
     [ChromeCommand.CSSSetStyleTexts]: ({ msg, sendToDevtools }) => {
       const commandRes = msg as Adapter.CDP.CommandRes<ProtocolChrome.CSS.SetStyleTextsResponse>;
-      commandRes.result.styles = commandRes.result.styles.map((style) => CssDomain.conversionInlineStyle(style));
+      commandRes.result.styles = commandRes.result.styles.map((style) => CssDomainAdapter.conversionInlineStyle(style));
       return sendToDevtools(commandRes);
     },
   },
@@ -33,10 +33,10 @@ export const cssMiddleWareManager: MiddleWareManager = {
             const styleItems = styleItem.split(':');
             const [name] = styleItems;
             let [, ...values] = styleItems;
-            if (!CssDomain.shouldSkipStyle(name)) {
+            if (!CssDomainAdapter.shouldSkipStyle(name)) {
               if (name.toLowerCase().includes('color')) {
-                const rgba = CssDomain.transformRGBA(values[0]);
-                values = [String(CssDomain.rgbaToInt(rgba))];
+                const rgba = CssDomainAdapter.transformRGBA(values[0]);
+                values = [String(CssDomainAdapter.rgbaToInt(rgba))];
               }
               ret.push(`${name}: ${values.join(':').trim()}`);
             }
@@ -57,7 +57,7 @@ export const cssMiddleWareManager: MiddleWareManager = {
   },
 };
 
-class CssDomain {
+class CssDomainAdapter {
   private static skipStyleList = ['backgroundImage', 'transform', 'shadowOffset'];
 
   public static intToRGBA(int32Color: number): string {
@@ -78,7 +78,7 @@ class CssDomain {
   }
 
   public static shouldSkipStyle(styleName: string): boolean {
-    return CssDomain.skipStyleList.some(
+    return CssDomainAdapter.skipStyleList.some(
       (name) => name.toString().trim().toLowerCase() === styleName.toString().trim().toLowerCase(),
     );
   }
@@ -86,11 +86,11 @@ class CssDomain {
   public static conversionInlineStyle(style: ProtocolIOS90.CSS.CSSStyle): ProtocolChrome.CSS.CSSStyle {
     let totalCSSText = '';
     style.cssProperties = style.cssProperties.reduce((ret, item) => {
-      if (CssDomain.shouldSkipStyle(item.name)) return ret;
+      if (CssDomainAdapter.shouldSkipStyle(item.name)) return ret;
 
       const cssText = `${item.name}: ${item.value}`;
       if (item.name.toLowerCase().includes('color')) {
-        item.value = CssDomain.intToRGBA(parseInt(item.value, 10));
+        item.value = CssDomainAdapter.intToRGBA(parseInt(item.value, 10));
       }
       item.range = {
         ...item.range,
@@ -114,9 +114,9 @@ class CssDomain {
   ): ProtocolChrome.CSS.CSSComputedStyleProperty[] {
     if (!style) return [];
     return style.reduce((ret, item) => {
-      if (!CssDomain.shouldSkipStyle(item.name)) {
+      if (!CssDomainAdapter.shouldSkipStyle(item.name)) {
         if (item.name.toLowerCase().includes('color')) {
-          item.value = CssDomain.intToRGBA(parseInt(item.value, 10));
+          item.value = CssDomainAdapter.intToRGBA(parseInt(item.value, 10));
         }
         ret.push(item);
       }
@@ -125,7 +125,7 @@ class CssDomain {
   }
 
   /**
-   * alpha 百分比转为小数点形式
+   * rgba 中 alpha 百分比转为小数点形式
    */
   public static transformRGBA(colorText: string): string {
     return colorText.trim().replace(/^rgba?\(([^()]+)\)$/i, (s, p1) => {

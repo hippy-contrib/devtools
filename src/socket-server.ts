@@ -5,7 +5,7 @@ import { AppClientType, ClientRole, DevicePlatform, InternalChannelEvent, Winsto
 import { getDBOperator } from '@/db';
 import { appClientManager } from '@/client';
 import { DebugTargetManager } from '@/controller/debug-targets';
-import { subscribeRedis, cleanDebugTarget, cleanAllDebugTargets } from '@/controller/pub-sub-manager';
+import { subscribeCommand, cleanDebugTarget, cleanAllDebugTargets } from '@/controller/pub-sub-manager';
 import { Logger } from '@/utils/log';
 import { createDownwardChannel, createUpwardChannel, createInternalChannel } from '@/utils/pub-sub-channel';
 import { parseWsUrl, isConnectionValid, AppWsUrlParams, DevtoolsWsUrlParams } from '@/utils/url';
@@ -34,7 +34,7 @@ const resumeCommands = [
 const log = new Logger('socket-server', WinstonColor.Cyan);
 
 /**
- * ws 调试服务，支持远程调试（无线模式，ws 通道）、本地调试（有线模式，tunnel 数据通道）
+ * ws 调试服务，支持远程调试（无线模式，使用 ws 通道）、本地调试（有线模式，使用 tunnel 数据通道）
  * 通过 redis pub/sub 实现多点部署时的消息分发，上下行消息根据 clientId 来建立 redis channel 进行分发
  * 本地安装 npm 包部署时（单点部署），不存储 redis，而是直接保存在内存中
  *
@@ -48,6 +48,9 @@ export class SocketServer {
     this.server = server;
   }
 
+  /**
+   * 开启调试服务
+   */
   public start() {
     const wss = new WSServer({
       server: this.server,
@@ -57,7 +60,7 @@ export class SocketServer {
     wss.on('connection', this.onConnection.bind(this));
 
     wss.on('error', (e: Error) => {
-      log.error(`wss error: %s`, (e as Error)?.stack);
+      log.error('wss error: %s', (e as Error)?.stack);
     });
     wss.on('headers', (headers: string[]) => {
       log.info('wss headers: %j', headers);
@@ -67,6 +70,9 @@ export class SocketServer {
     });
   }
 
+  /**
+   * 关闭调试服务，并清理当前节点连接的调试对象缓存
+   */
   public close() {
     cleanAllDebugTargets();
     this.wss.close(() => {
@@ -79,7 +85,7 @@ export class SocketServer {
     const wsUrlParams = parseWsUrl(req.url);
     const { clientRole, clientId } = wsUrlParams;
     if (clientRole === ClientRole.Devtools) {
-      this.onDevtoolsConnection(ws, wsUrlParams);
+      this.onDevtoolsConnection(ws, wsUrlParams as DevtoolsWsUrlParams);
     } else {
       this.onAppConnection(ws, wsUrlParams);
     }
@@ -108,9 +114,10 @@ export class SocketServer {
     // internal channel 用于订阅 node 节点之间的事件，如 app ws close 时，通知 devtools ws close
     const internalSubscriber = new Subscriber(internalChannelId);
     const publisher = new Publisher(upwardChannelId);
-
+    downwardSubscriber.unsubscribe();
+    internalSubscriber.unsubscribe();
     downwardSubscriber.subscribe(ws.send.bind(ws));
-    internalSubscriber.subscribe((msg: string) => {
+    internalSubscriber.subscribe((msg) => {
       if (msg === InternalChannelEvent.WSClose) {
         log.warn('close devtools ws connection');
         ws.close();
@@ -119,20 +126,26 @@ export class SocketServer {
       }
     });
 
-    ws.on('message', publisher.publish.bind(publisher));
+    ws.on('message', (msg) => publisher.publish(msg.toString()));
     const onClose = (e?: Error) => {
-      if (e) log.error('devtools ws client error %s', e?.stack);
+      if (e) log.error('devtools ws client error %s', e?.stack || e);
       log.info('devtools ws disconnect. clientId: %s', clientId);
       resumeCommands.map(publisher.publish.bind(publisher));
-      publisher.disconnect();
-      downwardSubscriber.unsubscribe();
-      downwardSubscriber.disconnect();
+      // 延时等 publisher 发布完成
+      process.nextTick(() => {
+        publisher.disconnect();
+        downwardSubscriber.unsubscribe();
+        downwardSubscriber.disconnect();
+      });
     };
     ws.on('close', onClose);
     // ws 标准规定 on error 后一定触发 on close，所以也要做清理
     ws.on('error', onClose);
   }
 
+  /**
+   * app ws 连接，创建调试对象，并订阅上行调试消息
+   */
   private async onAppConnection(ws: WebSocket, wsUrlParams: AppWsUrlParams) {
     const { clientId, clientRole } = wsUrlParams;
     log.info('ws app client connected. %s', clientId);
@@ -148,7 +161,7 @@ export class SocketServer {
     debugTarget = await patchDebugTarget(debugTarget);
     const { model } = getDBOperator();
     model.upsert(config.redis.key, clientId, debugTarget);
-    subscribeRedis(debugTarget, ws);
+    subscribeCommand(debugTarget, ws);
 
     const onClose = (e?: Error) => {
       if (e) log.error('app ws error %s', e?.stack);

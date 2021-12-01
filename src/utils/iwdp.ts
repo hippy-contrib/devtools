@@ -13,6 +13,9 @@ import { DebugTarget } from '@/@types/debug-target';
 
 const log = new Logger('IWDP-util');
 
+/**
+ * 获取所有 usb 连接设备的 IWDP 页面列表
+ */
 export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
   if (!global.appArgv.useTunnel && !global.appArgv.useIWDP) return [];
   try {
@@ -27,7 +30,7 @@ export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
     const debugTargets: IWDPPage[] = (await Promise.all(deviceList.map(getDeviceIWDPPages))) || [];
     return debugTargets.flat();
   } catch (e) {
-    log.error('request IWDP pages error: %s', (e as Error).stack);
+    log.warn('request IWDP pages error');
     return [];
   }
 };
@@ -74,6 +77,9 @@ export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPag
   };
 };
 
+/**
+ * 获取一台设备的 IWDP 页面列表
+ */
 const getDeviceIWDPPages = async (device: IWDPDevice): Promise<IWDPPage[]> => {
   const port = device.url.match(/:(\d+)/)[1];
   try {

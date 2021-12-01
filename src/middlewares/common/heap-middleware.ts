@@ -7,7 +7,7 @@ import { MiddleWareManager } from '../middleware-context';
 
 const log = new Logger('tdf-heap-middleware');
 
-// TODO 暂只缓存本地。后续缓存到 redis，或者容器外部挂载数据卷
+// TODO 暂只缓存本地，本地单节点部署无问题。后续缓存到 redis，或者容器外部挂载数据卷
 export const tdfHeapMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [TdfCommand.TDFMemoryGetHeapMeta]: async ({ msg, sendToDevtools }) => {
