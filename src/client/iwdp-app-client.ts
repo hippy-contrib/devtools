@@ -22,8 +22,9 @@ export class IWDPAppClient extends AppClient {
     super(id, option);
     this.url = option.iWDPWsUrl;
     if (!this.url) {
-      const e = new Error('IWDPAppClient constructor option need iWDPWsUrl');
-      log.error('%s', e.stack);
+      const e = new Error(
+        'IWDPAppClient constructor option need iWDPWsUrl, if you are debug iOS without USB, please ignore this error.',
+      );
       throw e;
     }
     this.type = AppClientType.IWDP;

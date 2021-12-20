@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { Server as HTTPServer } from 'http';
+import path from 'path';
 import kill from 'kill-port';
 import Koa from 'koa';
-import open from 'open';
 import { initAppClient } from '@/client';
 import { SocketServer } from '@/socket-server';
 import { Logger } from '@/utils/log';
@@ -20,30 +20,33 @@ let socketServer: SocketServer;
 export const startServer = async () => {
   log.info('start server argv: %j', global.appArgv);
   await init();
-  const { host, port, useAdb, useIWDP, useTunnel, open: openChrome, isRemote } = global.appArgv;
+  const { host, port, isRemote } = global.appArgv;
   const app = new Koa();
   routeApp(app);
 
   server = app.listen(port, host, async () => {
     log.info('start debug server success.');
+    let startAdbProxy;
     if (!isRemote) {
-      const { startTunnel, startIWDP, startAdbProxy } = await import('./child-process/index');
-      if (useTunnel) startTunnel();
-      else if (useIWDP) startIWDP();
-      if (useAdb) startAdbProxy();
+      const childProcesFn = await import('./child-process/index');
+      const { startTunnel, startChrome } = childProcesFn;
+      startAdbProxy = childProcesFn.startAdbProxy;
 
-      if (openChrome) {
-        const url = `http://${host}:${port}/extensions/home.html`;
-        try {
-          open(url, { app: { name: open.apps.chrome } });
-        } catch (e) {
-          log.error('open %s by chrome failed, please open manually, %s', url, (e as Error)?.stack);
-        }
-      }
+      startTunnel();
+      startAdbProxy();
+      startChrome();
     }
 
     socketServer = new SocketServer(server);
     socketServer.start();
+
+    const webpackConfig = await getWebpackConfig(global.appArgv.config);
+    const hmrPort = webpackConfig.devServer?.port || 38988;
+    if (hmrPort && webpackConfig) {
+      global.appArgv.hmrPort = hmrPort;
+      if (startAdbProxy) startAdbProxy();
+      startWebpackDevServer(webpackConfig);
+    }
   });
 
   server.on('close', () => {
@@ -92,3 +95,23 @@ const init = async () => {
     }
   }
 };
+
+async function startWebpackDevServer(webpackConfig) {
+  if (!webpackConfig) return;
+
+  const WebpackDevServer = (await import('./webpack-dev-server/lib/Server')).default;
+  const Webpack = (await import('webpack')).default;
+  const compiler = Webpack(webpackConfig);
+  const webpackDevServer = new WebpackDevServer(webpackConfig.devServer, compiler);
+  await webpackDevServer.start();
+}
+
+async function getWebpackConfig(configPath) {
+  let webpackConfig;
+  const webpackConfigPath = path.resolve(process.cwd(), configPath);
+  log.info('webpack config path: ', webpackConfigPath);
+  if (configPath && fs.existsSync(webpackConfigPath)) {
+    webpackConfig = await import(webpackConfigPath);
+  }
+  return webpackConfig.default;
+}

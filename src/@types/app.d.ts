@@ -3,6 +3,7 @@ import { DevtoolsEnv, DBType } from './enum';
 export interface AppArgv {
   host: string;
   port: number;
+  hmrPort: number;
   static: string;
   entry: string;
   iWDPPort: number;
@@ -12,10 +13,8 @@ export interface AppArgv {
   env: DevtoolsEnv;
   open: boolean;
   dbType: DBType;
-  useTunnel: boolean;
-  useIWDP: boolean;
-  useAdb: boolean;
   isRemote: boolean;
+  config: string;
 }
 
 declare namespace NodeJS {

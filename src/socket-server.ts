@@ -126,7 +126,9 @@ export class SocketServer {
       }
     });
 
-    ws.on('message', (msg) => publisher.publish(msg.toString()));
+    ws.on('message', (msg) => {
+      publisher.publish(msg.toString());
+    });
     const onClose = (e?: Error) => {
       if (e) log.error('devtools ws client error %s', e?.stack || e);
       log.info('devtools ws disconnect. clientId: %s', clientId);

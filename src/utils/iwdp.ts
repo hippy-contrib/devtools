@@ -17,7 +17,7 @@ const log = new Logger('IWDP-util');
  * 获取所有 usb 连接设备的 IWDP 页面列表
  */
 export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
-  if (!global.appArgv.useTunnel && !global.appArgv.useIWDP) return [];
+  if (global.appArgv.isRemote) return [];
   try {
     // IWDP 检查页面列表会稍有延迟，这里简单做下 sleep
     await sleep(250);

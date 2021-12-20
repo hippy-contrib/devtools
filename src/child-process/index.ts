@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
+import open from 'open';
 import { TunnelEvent, WinstonColor } from '@/@types/enum';
 import { deviceManager } from '@/device-manager';
 import { Logger } from '@/utils/log';
@@ -71,16 +72,30 @@ export const startIWDP = () => {
 };
 
 export const startAdbProxy = async () => {
-  const { port } = global.appArgv;
+  const { port, hmrPort } = global.appArgv;
   const adbPath = path.join(__dirname, '../build/adb');
   try {
     await exec(adbPath, ['reverse', '--remove-all']);
     await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
+    if (hmrPort) await exec(adbPath, ['reverse', `tcp:${hmrPort}`, `tcp:${hmrPort}`]);
   } catch (e) {
-    childProcessLog.warn('Port reverse failed, For iOS app log.info only just ignore the message.');
-    childProcessLog.warn('Otherwise please check adb devices command working correctly');
-    childProcessLog.warn(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
-    childProcessLog.warn('start adb reverse error: %s', (e as Error)?.stack);
+    childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
+    childProcessLog.info('Otherwise please check adb devices command working correctly');
+    childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
+    if (hmrPort) childProcessLog.info(`type 'adb reverse tcp:${hmrPort} tcp:${hmrPort}' retry!`);
+    childProcessLog.info('start adb reverse error: %s', (e as Error)?.stack);
+  }
+};
+
+export const startChrome = async () => {
+  const { host, port, open: openChrome } = global.appArgv;
+  if (openChrome) {
+    const url = `http://${host}:${port}/extensions/home.html`;
+    try {
+      open(url, { app: { name: open.apps.chrome } });
+    } catch (e) {
+      childProcessLog.error('open %s by chrome failed, please open manually, %s', url, (e as Error)?.stack);
+    }
   }
 };
 

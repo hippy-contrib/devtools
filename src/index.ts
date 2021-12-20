@@ -18,6 +18,7 @@ import './process-handler';
 const { argv } = yargs
   .alias('v', 'version')
   .alias('h', 'help')
+  .alias('c', 'config')
   .help()
   .version()
   .option('dbType', {
@@ -55,6 +56,11 @@ const { argv } = yargs
     default: false,
     describe: 'Output error details',
   })
+  .option('config', {
+    type: 'string',
+    default: '',
+    describe: 'webpack config file',
+  })
   .option('iWDPPort', {
     type: 'number',
     default: 9000,
@@ -74,21 +80,6 @@ const { argv } = yargs
     type: 'string',
     default: DevtoolsEnv.Hippy,
     choices: [DevtoolsEnv.Hippy, DevtoolsEnv.Voltron, DevtoolsEnv.TDF, DevtoolsEnv.TDFCore],
-  })
-  .option('useTunnel', {
-    type: 'boolean',
-    default: true,
-    describe: 'Whether enable tunnel, which is a c++ addon for connecting app by USB',
-  })
-  .option('useIWDP', {
-    type: 'boolean',
-    default: false,
-    describe: 'Whether enable IWDP, which is for iOS device debug in USB mode',
-  })
-  .option('useAdb', {
-    type: 'boolean',
-    default: true,
-    describe: 'Whether start adb reverse',
   })
   .option('isRemote', {
     type: 'boolean',
