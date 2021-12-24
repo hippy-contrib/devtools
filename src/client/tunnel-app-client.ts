@@ -9,6 +9,9 @@ export class TunnelAppClient extends AppClient {
 
   public constructor(id, option) {
     super(id, option);
+    if (typeof global.addon?.sendMsg === 'undefined') {
+      throw new Error('tunnel does not imported.');
+    }
     this.type = AppClientType.Tunnel;
     this.registerMessageListener();
   }
@@ -42,9 +45,7 @@ export class TunnelAppClient extends AppClient {
       if (msg.id) {
         this.requestPromiseMap.set(msg.id, { resolve, reject });
       }
-      import('../child-process/addon').then(({ sendMsg }) => {
-        sendMsg(JSON.stringify(msg));
-      });
+      global.addon.sendMsg(JSON.stringify(msg));
     });
   }
 }

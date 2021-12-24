@@ -9,6 +9,7 @@ import { Logger } from '@/utils/log';
 import { initDbModel } from '@/db';
 import { routeApp } from '@/router';
 import { config } from '@/config';
+import { importTunnel } from '@/child-process/import-addon';
 
 const log = new Logger('application');
 let server: HTTPServer;
@@ -78,8 +79,9 @@ const init = async () => {
   try {
     fs.rmdirSync(cachePath, { recursive: true });
   } catch (e) {
-    log.warn('rm cache dir error: %s', (e as Error)?.stack);
+    log.error('rm cache dir error: %s', (e as Error)?.stack);
   }
+  await importTunnel();
   await fs.promises.mkdir(cachePath, { recursive: true });
   await initDbModel();
   initAppClient();

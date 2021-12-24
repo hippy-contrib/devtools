@@ -1,12 +1,13 @@
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
+import os from 'os';
 import open from 'open';
-import { TunnelEvent, WinstonColor } from '@/@types/enum';
+import { TunnelEvent, WinstonColor, OSType } from '@/@types/enum';
 import { deviceManager } from '@/device-manager';
 import { Logger } from '@/utils/log';
 import { exec } from '@/utils/process';
-import { addEventListener, tunnelStart } from './addon';
+import { StartTunnelOption } from './addon-api';
 
 const childProcessLog = new Logger('child-process');
 const tunnelLog = new Logger('tunnel', WinstonColor.Magenta);
@@ -16,8 +17,7 @@ export const TUNNEL_EVENT = 'message';
 export const tunnelEmitter = new EventEmitter();
 
 export const startTunnel = (cb?: StartTunnelCallback) => {
-  const { iWDPPort, iWDPStartPort, iWDPEndPort, adbPath } = global.appArgv;
-  addEventListener((event: TunnelEvent, data: unknown) => {
+  global.addon.addEventListener((event: TunnelEvent, data: unknown) => {
     try {
       if (event !== TunnelEvent.TunnelLog) {
         tunnelLog.info('tunnel event: %s', event);
@@ -45,11 +45,7 @@ export const startTunnel = (cb?: StartTunnelCallback) => {
       tunnelLog.error('handle tunnel event error: %s', (e as Error)?.stack);
     }
   });
-
-  let fullAdbPath = adbPath;
-  fullAdbPath ??= path.join(__dirname, '../build/adb');
-  const iWDPParams = ['--no-frontend', `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`];
-  tunnelStart(fullAdbPath, iWDPParams, iWDPPort);
+  global.addon.tunnelStart(getTunnelOption());
 };
 
 export const startIWDP = () => {
@@ -73,7 +69,11 @@ export const startIWDP = () => {
 
 export const startAdbProxy = async () => {
   const { port, hmrPort } = global.appArgv;
-  const adbPath = path.join(__dirname, '../build/adb');
+  const adbRelatePath = {
+    [OSType.Darwin]: '../build/mac/adb',
+    [OSType.Windows]: '../build/win/adb.exe',
+  }[os.type()];
+  const adbPath = path.join(__dirname, adbRelatePath);
   try {
     await exec(adbPath, ['reverse', '--remove-all']);
     await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
@@ -107,3 +107,34 @@ export const killChildProcess = () => {
 };
 
 type StartTunnelCallback = (event: TunnelEvent, data: unknown) => void;
+
+function getTunnelOption(): StartTunnelOption {
+  const { iWDPPort, iWDPStartPort, iWDPEndPort } = global.appArgv;
+  const iWDPParams = ['--no-frontend', `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`];
+  let tunnelOption;
+  if (os.type() === OSType.Darwin) {
+    tunnelOption = {
+      adb_path: path.join(__dirname, '../build/mac/adb'),
+      iwdp: {
+        iwdp_params: iWDPParams,
+        iwdp_listen_port: iWDPPort,
+      },
+      only_use_iwdp: 0,
+    };
+  }
+  if (os.type() === OSType.Windows) {
+    tunnelOption = {
+      adb_path: path.join(__dirname, '../build/win/adb.exe'),
+      iwdp: {
+        iwdp_params: iWDPParams,
+        iwdp_listen_port: iWDPPort,
+        iwdp_path: path.join(__dirname, '../build/win/iwdp1.8.8/ios_webkit_debug_proxy.exe'),
+      },
+      only_use_iwdp: 1,
+      iproxy_path: path.join(__dirname, '../build/win/idevice/iproxy.exe'),
+      idevice_info_path: path.join(__dirname, '../build/win/idevice/ideviceinfo.exe'),
+    };
+  }
+  childProcessLog.info('tunnel option: %j', tunnelOption);
+  return tunnelOption;
+}

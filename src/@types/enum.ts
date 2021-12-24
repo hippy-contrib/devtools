@@ -16,7 +16,7 @@ export const enum DeviceStatus {
   Disconnected = '2',
 }
 
-export enum TunnelEvent {
+export const enum TunnelEvent {
   AddDevice = 'tunnel_add_device',
   RemoveDevice = 'tunnel_remove_device',
   AppConnect = 'tunnel_app_connect',
@@ -115,4 +115,10 @@ export enum ChromeLogLevel {
   Info = 'info',
   Error = 'error',
   Log = 'log',
+}
+
+export enum OSType {
+  Darwin = 'Darwin',
+  Linux = 'Linux',
+  Windows = 'Windows_NT',
 }

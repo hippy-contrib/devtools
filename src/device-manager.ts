@@ -43,9 +43,7 @@ class DeviceManager {
    * 查询 USB 连接的设备列表
    */
   public async getDeviceList() {
-    // ⚠️ addon 目前只有 mac 版本，远程调试部署时不用加载 addon，故采用动态加载
-    const { getDeviceList: getDeviceListByTunnel, selectDevice } = await import('./child-process/addon');
-    getDeviceListByTunnel((devices: DeviceInfo[]) => {
+    global.addon.getDeviceList((devices: DeviceInfo[]) => {
       log.info('getDeviceList: %j', devices);
       this.deviceList = devices;
       if (devices.length) {
@@ -56,7 +54,7 @@ class DeviceManager {
         const device = this.deviceList[0];
         const deviceId = device.deviceid;
         log.info(`selectDevice ${deviceId}`);
-        selectDevice(deviceId);
+        global.addon.selectDevice(deviceId);
       }
     });
   }
