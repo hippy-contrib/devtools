@@ -1,6 +1,6 @@
 import { Logger } from '@/utils/log';
 import { killChildProcess } from '@/child-process';
-import { stopServer } from './app';
+import { stopServer } from './app-debug';
 
 const log = new Logger('process-handler');
 const onExit = (...arg) => {

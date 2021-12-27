@@ -1,24 +1,21 @@
 import fs from 'fs';
-import { Server as HTTPServer } from 'http';
 import path from 'path';
-import kill from 'kill-port';
-import Koa from 'koa';
-import { initAppClient } from '@/client';
-import { SocketServer } from '@/socket-server';
 import { Logger } from '@/utils/log';
-import { initDbModel } from '@/db';
-import { routeApp } from '@/router';
-import { config } from '@/config';
 
-export async function startWebpackDevServer(config) {
+const log = new Logger('app-dev-server');
+
+export async function startWebpackDevServer() {
+  const { config } = global.debugAppArgv;
   const webpackConfig = await getWebpackConfig(config);
-  const hmrPort = webpackConfig.devServer?.port || 38988;
-  if (hmrPort && webpackConfig) {
-    global.appArgv.hmrPort = hmrPort;
-    startAdbProxy();
+  if (!webpackConfig) {
+    log.error('you must config webpack.config file path to start webpack-dev-server!');
+    return process.exit(0);
   }
+  const hmrPort = webpackConfig.devServer?.port || 38988;
+  global.debugAppArgv.hmrPort = hmrPort;
 
-  if (!webpackConfig) return;
+  const { startAdbProxy } = await import('./child-process/index');
+  startAdbProxy();
 
   const WebpackDevServer = (await import('./webpack-dev-server/lib/Server')).default;
   const Webpack = (await import('webpack')).default;
@@ -34,5 +31,6 @@ async function getWebpackConfig(configPath) {
   if (configPath && fs.existsSync(webpackConfigPath)) {
     webpackConfig = await import(webpackConfigPath);
   }
-  return webpackConfig.default;
+  log.info('webpackConfig %j', webpackConfig);
+  return webpackConfig?.default || webpackConfig;
 }

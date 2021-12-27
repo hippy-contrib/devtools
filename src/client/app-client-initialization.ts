@@ -11,7 +11,7 @@ export const initAppClient = () => {
     [DevtoolsEnv.Voltron]: initVoltronAppClient,
     [DevtoolsEnv.TDF]: initTDFAppClient,
     [DevtoolsEnv.TDFCore]: initTdfCoreAppClient,
-  }[global.appArgv.env];
+  }[global.debugAppArgv.env];
   initFn();
 };
 

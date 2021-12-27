@@ -23,7 +23,7 @@ export const getDBOperator = () => ({
  * 初始化数据库环境
  */
 export const initDbModel = async () => {
-  const { dbType } = global.appArgv;
+  const { dbType } = global.debugAppArgv;
   if (dbType === DBType.Memory) {
     model = new MemoryModel();
     Publisher = MemoryPubSub;

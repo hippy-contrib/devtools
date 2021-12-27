@@ -6,4 +6,4 @@ log
 **/*.js.map
 .env
 coverage
-webpack-dev-server/client
+src/webpack-dev-server/client

@@ -10,8 +10,8 @@ import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
 import { DevtoolsEnv, DBType } from '@/@types/enum';
-import { startServer } from '@/app';
 import { Logger } from '@/utils/log';
+import { startServer } from '@/app-debug';
 import { version } from 'package.json';
 import './process-handler';
 
@@ -96,7 +96,7 @@ const fullArgv = argv as Argv;
 if (fullArgv.help) yargs.showHelp().exit(0, null);
 if (fullArgv.version) yargs.version().exit(0, null);
 
-global.appArgv = fullArgv;
+global.debugAppArgv = fullArgv;
 
 const log = new Logger('entry');
 log.info('version: %s', version);

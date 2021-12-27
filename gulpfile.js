@@ -36,3 +36,5 @@ function rimrafAsync(fpath) {
 }
 
 gulp.task('default', gulp.series(['clean', 'mkdir', 'compile', 'copy-resource']));
+
+gulp.task('watch', () => gulp.watch('src/**/*', 'compile'));

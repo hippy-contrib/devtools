@@ -49,7 +49,7 @@ export const startTunnel = (cb?: StartTunnelCallback) => {
 };
 
 export const startIWDP = () => {
-  const { iWDPPort, iWDPStartPort, iWDPEndPort } = global.appArgv;
+  const { iWDPPort, iWDPStartPort, iWDPEndPort } = global.debugAppArgv;
   proxyProcess = spawn(
     'ios_webkit_debug_proxy',
     ['--no-frontend', `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`],
@@ -68,27 +68,26 @@ export const startIWDP = () => {
 };
 
 export const startAdbProxy = async () => {
-  const { port, hmrPort } = global.appArgv;
+  const { port, hmrPort } = global.debugAppArgv;
   const adbRelatePath = {
     [OSType.Darwin]: '../build/mac/adb',
     [OSType.Windows]: '../build/win/adb.exe',
   }[os.type()];
   const adbPath = path.join(__dirname, adbRelatePath);
   try {
-    await exec(adbPath, ['reverse', '--remove-all']);
-    await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
+    if (port) await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
     if (hmrPort) await exec(adbPath, ['reverse', `tcp:${hmrPort}`, `tcp:${hmrPort}`]);
   } catch (e) {
     childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
-    childProcessLog.info('Otherwise please check adb devices command working correctly');
-    childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
+    childProcessLog.info(`Otherwise please check 'adb devices' command working correctly`);
+    if (port) childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
     if (hmrPort) childProcessLog.info(`type 'adb reverse tcp:${hmrPort} tcp:${hmrPort}' retry!`);
     childProcessLog.info('start adb reverse error: %s', (e as Error)?.stack);
   }
 };
 
 export const startChrome = async () => {
-  const { host, port, open: openChrome } = global.appArgv;
+  const { host, port, open: openChrome } = global.debugAppArgv;
   if (openChrome) {
     const url = `http://${host}:${port}/extensions/home.html`;
     try {
@@ -109,7 +108,7 @@ export const killChildProcess = () => {
 type StartTunnelCallback = (event: TunnelEvent, data: unknown) => void;
 
 function getTunnelOption(): StartTunnelOption {
-  const { iWDPPort, iWDPStartPort, iWDPEndPort } = global.appArgv;
+  const { iWDPPort, iWDPStartPort, iWDPEndPort } = global.debugAppArgv;
   const iWDPParams = ['--no-frontend', `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`];
   let tunnelOption;
   if (os.type() === OSType.Darwin) {

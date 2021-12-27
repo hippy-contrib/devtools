@@ -9,14 +9,14 @@ moduleAlias.addAliases({
 import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
-import { startServer } from '@/app';
+import { startWebpackDevServer } from '@/app-dev';
 import { Logger } from '@/utils/log';
 import { version } from 'package.json';
 import './process-handler';
 
 const { argv } = yargs
   .alias('v', 'version')
-  .describe('v', 'show version information')
+  .describe('v', 'show version information ')
   .alias('h', 'help')
   .alias('c', 'config')
   .demand('config')
@@ -25,7 +25,7 @@ const { argv } = yargs
   .option('config', {
     type: 'string',
     default: '',
-    describe: 'webpack config file',
+    describe: 'webpack config file ',
   })
   .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`);
 
@@ -37,10 +37,9 @@ const fullArgv = argv as Argv;
 if (fullArgv.help) yargs.showHelp().exit(0, null);
 if (fullArgv.version) yargs.version().exit(0, null);
 
-global.appArgv = fullArgv;
+global.debugAppArgv = fullArgv;
 
 const log = new Logger('entry');
 log.info('version: %s', version);
 
-startServer();
-
+startWebpackDevServer();

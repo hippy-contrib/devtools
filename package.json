@@ -7,15 +7,17 @@
   "author": "chestershen@tencent.com",
   "license": "Apache-2.0",
   "bin": {
-    "hippy-debug": "dist/index.js",
-    "debug-server": "dist/index.js"
+    "hippy-debug": "dist/index-debug.js",
+    "debug-server": "dist/index-debug.js",
+    "hippy-dev": "dist/index-dev.js"
   },
   "scripts": {
     "start": "nodemon --exec \"npm run dev\"",
-    "dev": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts",
-    "dev:gamecenter": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index.ts --entry=src/public/game-center/index.bundle",
+    "hippy:debug": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index-debug.ts",
+    "hippy:dev": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index-dev.ts",
     "build": "npm run build:webpack-dev-server && npx gulp",
     "build:webpack-dev-server": "cd src/webpack-dev-server && rimraf ./client/* && babel client-src/ --out-dir client/ --ignore \"client-src/webpack.config.js\" --ignore \"client-src/modules\" && webpack --config client-src/webpack.config.js",
+    "watch": "gulp watch",
     "postinstall": "npm run build",
     "test": "npx jest --silent --coverage",
     "lint": "npx eslint --fix --ext .js,.ts ./src"

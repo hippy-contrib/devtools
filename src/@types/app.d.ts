@@ -1,6 +1,6 @@
 import { DevtoolsEnv, DBType } from './enum';
 
-export interface AppArgv {
+export interface DebugAppArgv {
   host: string;
   port: number;
   hmrPort: number;
@@ -14,11 +14,15 @@ export interface AppArgv {
   open: boolean;
   dbType: DBType;
   isRemote: boolean;
+}
+
+export interface DevAppArgv {
   config: string;
 }
 
 declare namespace NodeJS {
   interface Global {
-    appArgv: AppArgv;
+    debugAppArgv: DebugAppArgv;
+    devAppArgv: DevAppArgv;
   }
 }

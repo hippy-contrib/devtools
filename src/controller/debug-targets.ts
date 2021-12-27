@@ -13,7 +13,7 @@ export class DebugTargetManager {
    * 查询所有连接的调试对象
    */
   public static getDebugTargets = async (): Promise<DebugTarget[]> => {
-    const { iWDPPort } = global.appArgv;
+    const { iWDPPort } = global.debugAppArgv;
     const { model } = getDBOperator();
     const [targets, iOSPages] = await Promise.all([model.getAll(config.redis.key), getIWDPPages(iWDPPort)]);
     const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;

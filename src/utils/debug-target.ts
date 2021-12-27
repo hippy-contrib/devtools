@@ -19,7 +19,7 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
     remoteFrontend: true,
     experiments: true,
     ws: wsUrl,
-    env: global.appArgv.env,
+    env: global.debugAppArgv.env,
   });
   const title = device.platform === DevicePlatform.IOS ? clientId : 'Hippy debug tools for V8';
 
@@ -56,7 +56,7 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
     remoteFrontend: true,
     experiments: true,
     ws: wsUrl,
-    env: global.appArgv.env,
+    env: global.debugAppArgv.env,
   });
   return {
     clientId,
@@ -86,7 +86,7 @@ export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
     remoteFrontend: true,
     experiments: true,
     ws: wsUrl,
-    env: global.appArgv.env,
+    env: global.debugAppArgv.env,
   });
   return {
     clientId: iWDPWsUrl,
@@ -112,7 +112,7 @@ export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
  */
 export const patchDebugTarget = async (debugTarget: DebugTarget) => {
   if (debugTarget.platform === DevicePlatform.IOS) {
-    const iOSPages = await getIWDPPages(global.appArgv.iWDPPort);
+    const iOSPages = await getIWDPPages(global.debugAppArgv.iWDPPort);
     return patchIOSTarget(debugTarget, iOSPages);
   }
   return debugTarget;

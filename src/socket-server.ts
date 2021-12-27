@@ -156,7 +156,7 @@ export class SocketServer {
       [ClientRole.IOS]: DevicePlatform.IOS,
     }[clientRole];
     const useWS = appClientManager.shouldUseAppClientType(platform, AppClientType.WS);
-    if (!useWS) return log.warn('current env is %s, ignore ws connection', global.appArgv.env);
+    if (!useWS) return log.warn('current env is %s, ignore ws connection', global.debugAppArgv.env);
 
     let debugTarget = createTargetByWsUrlParams(wsUrlParams);
     // app ws 添加监听前可以执行异步操作，因为 app 建立连接后不会主动发送任何消息

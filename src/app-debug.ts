@@ -1,6 +1,5 @@
 import fs from 'fs';
 import { Server as HTTPServer } from 'http';
-import path from 'path';
 import kill from 'kill-port';
 import Koa from 'koa';
 import { initAppClient } from '@/client';
@@ -11,7 +10,7 @@ import { routeApp } from '@/router';
 import { config } from '@/config';
 import { importTunnel } from '@/child-process/import-addon';
 
-const log = new Logger('application');
+const log = new Logger('app-debug-server');
 let server: HTTPServer;
 let socketServer: SocketServer;
 
@@ -19,9 +18,9 @@ let socketServer: SocketServer;
  * 开启调试服务
  */
 export const startServer = async () => {
-  log.info('start server argv: %j', global.appArgv);
+  log.info('start server argv: %j', global.debugAppArgv);
   await init();
-  const { host, port, isRemote } = global.appArgv;
+  const { host, port, isRemote } = global.debugAppArgv;
   const app = new Koa();
   routeApp(app);
 
@@ -40,14 +39,6 @@ export const startServer = async () => {
 
     socketServer = new SocketServer(server);
     socketServer.start();
-
-    const webpackConfig = await getWebpackConfig(global.appArgv.config);
-    const hmrPort = webpackConfig.devServer?.port || 38988;
-    if (hmrPort && webpackConfig) {
-      global.appArgv.hmrPort = hmrPort;
-      if (startAdbProxy) startAdbProxy();
-      startWebpackDevServer(webpackConfig);
-    }
   });
 
   server.on('close', () => {
@@ -86,7 +77,7 @@ const init = async () => {
   await initDbModel();
   initAppClient();
 
-  const { port, iWDPPort, clearAddrInUse } = global.appArgv;
+  const { port, iWDPPort, clearAddrInUse } = global.debugAppArgv;
   if (clearAddrInUse) {
     try {
       await kill(port, 'tcp');
@@ -97,23 +88,3 @@ const init = async () => {
     }
   }
 };
-
-async function startWebpackDevServer(webpackConfig) {
-  if (!webpackConfig) return;
-
-  const WebpackDevServer = (await import('./webpack-dev-server/lib/Server')).default;
-  const Webpack = (await import('webpack')).default;
-  const compiler = Webpack(webpackConfig);
-  const webpackDevServer = new WebpackDevServer(webpackConfig.devServer, compiler);
-  await webpackDevServer.start();
-}
-
-async function getWebpackConfig(configPath) {
-  let webpackConfig;
-  const webpackConfigPath = path.resolve(process.cwd(), configPath);
-  log.info('webpack config path: ', webpackConfigPath);
-  if (configPath && fs.existsSync(webpackConfigPath)) {
-    webpackConfig = await import(webpackConfigPath);
-  }
-  return webpackConfig.default;
-}

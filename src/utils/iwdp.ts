@@ -17,7 +17,7 @@ const log = new Logger('IWDP-util');
  * 获取所有 usb 连接设备的 IWDP 页面列表
  */
 export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
-  if (global.appArgv.isRemote) return [];
+  if (global.debugAppArgv.isRemote) return [];
   try {
     // IWDP 检查页面列表会稍有延迟，这里简单做下 sleep
     await sleep(250);
@@ -60,7 +60,7 @@ export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPag
     remoteFrontend: true,
     experiments: true,
     ws: wsUrl,
-    env: global.appArgv.env,
+    env: global.debugAppArgv.env,
   });
   const { appClientTypeList } = debugTarget;
   if (appClientTypeList.indexOf(AppClientType.IWDP) === -1) appClientTypeList.push(AppClientType.IWDP);
