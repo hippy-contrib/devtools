@@ -2,16 +2,19 @@ import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
 import os from 'os';
+import fs from 'fs';
 import open from 'open';
 import { TunnelEvent, WinstonColor, OSType } from '@/@types/enum';
 import { deviceManager } from '@/device-manager';
 import { Logger } from '@/utils/log';
 import { exec } from '@/utils/process';
+import { config } from '@/config';
 import { StartTunnelOption } from './addon-api';
 
 const childProcessLog = new Logger('child-process');
 const tunnelLog = new Logger('tunnel', WinstonColor.Magenta);
 let proxyProcess;
+let hmrPort;
 
 export const TUNNEL_EVENT = 'message';
 export const tunnelEmitter = new EventEmitter();
@@ -68,7 +71,15 @@ export const startIWDP = () => {
 };
 
 export const startAdbProxy = async () => {
-  const { port, hmrPort } = global.debugAppArgv;
+  if (!hmrPort) {
+    try {
+      const data = fs.readFileSync(config.hmrPortPath);
+      hmrPort = data.toString();
+    } catch (e) {
+      childProcessLog.warn('hmrPort file does not exist.');
+    }
+  }
+  const { port } = global.debugAppArgv || {};
   const adbRelatePath = {
     [OSType.Darwin]: '../build/mac/adb',
     [OSType.Windows]: '../build/win/adb.exe',

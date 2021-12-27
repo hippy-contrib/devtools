@@ -4,6 +4,7 @@ const fs = require('fs');
 const gulp = require('gulp');
 const ts = require('gulp-typescript');
 const rimraf = require('rimraf');
+const chmod = require('gulp-chmod');
 
 gulp.task('mkdir', (cb) => {
   fs.mkdirSync('./dist/cache', { recursive: true });
@@ -17,6 +18,10 @@ gulp.task('compile', () =>
 
 gulp.task('copy-resource', () =>
   gulp.src(['src/**/*', '!src/.env', '!src/**/*.ts'], { allowEmpty: true }).pipe(gulp.dest('dist')),
+);
+
+gulp.task('chmod', () =>
+  gulp.src(['dist/index-debug.js', 'dist/index-dev.js']).pipe(chmod(0o755)).pipe(gulp.dest('dist')),
 );
 
 gulp.task('clean', () => Promise.all([rimrafAsync('dist'), rimrafAsync('src/cache'), rimrafAsync('src/log')]));
@@ -35,6 +40,6 @@ function rimrafAsync(fpath) {
   });
 }
 
-gulp.task('default', gulp.series(['clean', 'mkdir', 'compile', 'copy-resource']));
+gulp.task('default', gulp.series(['clean', 'mkdir', 'compile', 'copy-resource', 'chmod']));
 
-gulp.task('watch', () => gulp.watch('src/**/*', 'compile'));
+gulp.task('watch', () => gulp.watch('src/**/*', gulp.series(['compile', 'copy-resource', 'chmod'])));

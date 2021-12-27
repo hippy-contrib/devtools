@@ -32,14 +32,13 @@ const { argv } = yargs
 type Argv = typeof argv & {
   version: string;
   help: string;
+  config: string;
 };
 const fullArgv = argv as Argv;
 if (fullArgv.help) yargs.showHelp().exit(0, null);
 if (fullArgv.version) yargs.version().exit(0, null);
 
-global.debugAppArgv = fullArgv;
-
 const log = new Logger('entry');
 log.info('version: %s', version);
 
-startWebpackDevServer();
+startWebpackDevServer(fullArgv.config);
