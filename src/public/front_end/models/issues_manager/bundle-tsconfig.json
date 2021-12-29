@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/models/issues_manager"},"files":["../../../../../../chrome-devtools/front_end/models/issues_manager/issues_manager.ts"],"references":[{"path":"./issues_manager-tsconfig.json"}]}

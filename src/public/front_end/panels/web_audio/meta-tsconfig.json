@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/web_audio"},"files":["../../../../../../chrome-devtools/front_end/panels/web_audio/web_audio-meta.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}

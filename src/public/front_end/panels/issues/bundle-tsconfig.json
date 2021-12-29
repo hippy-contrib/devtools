@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/issues"},"files":["../../../../../../chrome-devtools/front_end/panels/issues/issues.ts"],"references":[{"path":"./issues-tsconfig.json"}]}

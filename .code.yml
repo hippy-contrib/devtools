@@ -1,0 +1,3 @@
+source:
+  auto_generate_source:
+    filepath_regex: ["/src/public"]

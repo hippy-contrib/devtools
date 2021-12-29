@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/core/host"},"files":["../../../../../../chrome-devtools/front_end/core/host/host.ts"],"references":[{"path":"./host-tsconfig.json"}]}

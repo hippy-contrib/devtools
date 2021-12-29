@@ -1,0 +1,135 @@
+publish-npm: &publish-npm
+  - name: npm i
+    script: npm install --registry=https://mirrors.tencent.com/npm/
+  - name: set npm orign
+    script: npm config set registry https://registry.npmjs.org
+  - name: build
+    script: npm run build
+  - name: patch version
+    script: VERSION=$(npm version patch) && echo -n $VERSION
+    exports:
+      stdout: VERSION
+  - name: npm publish
+    image: plugins/npm
+    envFrom: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/npm-token.yml
+    settings:
+      token: $NPM_TOKEN
+      email: $EMAIL
+      fail_on_version_conflict: true
+  - name: commit change
+    type: git:commit
+    options:
+      commitMessage: 'version: publish new version'
+  - name: notify npm publish
+    type: wework:message
+    options:
+      robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+      message: |
+        > npm 包已发布，版本号： ${VERSION}
+        > 　
+        > published by ${ORANGE_BUILD_USER}
+
+build-docker-image: &build-docker-image
+  - name: docker login
+    imports: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/csighub-token.yml
+    script: echo -n $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin csighub.tencentyun.com
+  - name: docker tag
+    script: echo -n csighub.tencentyun.com/chestershen/devtools-debug-server:${VERSION}
+    envExport: 
+      info: DOCKER_TAG
+  - name: docker build
+    imports: https://git.woa.com/gcd/social-private-key/blob/master/tdf-devtools/redis-token.yml
+    script: docker build --build-arg REDIS_PWD=$REDIS_PWD --build-arg REDIS_PRIVATE_HOST=$REDIS_PRIVATE_HOST --build-arg REDIS_PRIVATE_PORT=$REDIS_PRIVATE_PORT -t ${DOCKER_TAG} .
+  - name: docker push
+    script: docker push ${DOCKER_TAG}
+  - name: echo docker version
+    script: echo $DOCKER_TAG
+
+deploy-debug-server: &deploy-debug-server
+  - name: auto upgrade
+    type: stke:update
+    options:
+      kind: statefulsetplus
+      projectName: prjlw4gg
+      namespaces: ns-prjlw4gg-1491408-production
+      clusterId: cls-5vzjheeo	
+      resourceIns: tdf-devtools-debug-server
+      name: tdf-devtools-debug-server
+      image: ${DOCKER_TAG}
+      sync: true
+  - name: notify stke upgrade
+    type: wework:message
+    options:
+      robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+      message: |
+        > debug-server stke 已部署，版本号： ${VERSION}
+        > 　
+        > deployed by ${ORANGE_BUILD_USER}
+
+
+master:
+  review:
+    - stages:
+      - name: CR 通过后自动合并
+        type: git:automerge
+        options:
+          mergeType: rebase
+          removeSourceBranch: true
+          ignoreAssignee: true
+        exports:
+          reviewedBy: REVIEWED_BY
+      - name: notify
+        type: wework:message
+        options:
+          robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+          chatId: wrkSFfCgAAjWlVtrYwk5xNzuRwijAv_Q
+          visibleToUser: ${ORANGE_BUILD_USER}
+          message: |
+            > CR 通过后自动合并 <@${ORANGE_BUILD_USER}>
+            > 　
+            > ${ORANGE_MERGE_REQUEST_TITLE}
+            > [${ORANGE_EVENT_URL}](${ORANGE_EVENT_URL})
+            >
+            > ${REVIEWED_BY}
+  merge_request:
+    - name: MR流水线
+      runner:
+        network: devnet
+      stages:
+        # 提交注释检查
+        - name: commit lint
+          type: epc:commit-lint
+        - name: 代码安全审计
+          type: security:code-scan
+          options:
+            sourcePath: src
+            ignoreFolder: src/public
+        # 代码规范检查
+        - name: eslint-config-tencent
+          script: "tnpm install && tnpm run lint"
+        # 发送到 CR 专用群
+        - name: notify
+          type: wework:message
+          options:
+            robot: 25dcf80a-ff7c-422c-9b5b-1951cee42f4c
+            message: |
+              > 发送到 CR 专用群
+              > 　
+              > ${ORANGE_MERGE_REQUEST_TITLE}
+              > [${ORANGE_EVENT_URL}](${ORANGE_EVENT_URL})
+              > 　
+              > from ${ORANGE_BUILD_USER}
+  push:
+    - name: push流水线
+      wework:
+        title: "publish devtools-debug-server"
+      runner:
+        network: devnet
+      ifModify:
+        - src/**
+      services:
+        - docker
+      stages:
+        - *publish-npm
+        - *build-docker-image
+        - *deploy-debug-server

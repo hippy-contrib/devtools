@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/timeline"},"files":["../../../../../../chrome-devtools/front_end/panels/timeline/timeline.ts"],"references":[{"path":"./timeline-tsconfig.json"}]}

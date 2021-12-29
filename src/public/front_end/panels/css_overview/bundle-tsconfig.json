@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/css_overview"},"files":["../../../../../../chrome-devtools/front_end/panels/css_overview/css_overview.ts"],"references":[{"path":"./css_overview-tsconfig.json"}]}
