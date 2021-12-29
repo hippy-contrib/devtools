@@ -53,7 +53,8 @@ export const startTunnel = (cb?: StartTunnelCallback) => {
 };
 
 export const startIWDP = () => {
-  const { iWDPPort, iWDPStartPort, iWDPEndPort } = global.debugAppArgv;
+  const { iWDPPort } = global.debugAppArgv;
+  const { iWDPStartPort, iWDPEndPort } = config;
   proxyProcess = spawn(
     'ios_webkit_debug_proxy',
     ['--no-frontend', `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`],
@@ -120,7 +121,8 @@ export const killChildProcess = () => {
 type StartTunnelCallback = (event: TunnelEvent, data: unknown) => void;
 
 function getTunnelOption(): StartTunnelOption {
-  const { iWDPPort, iWDPStartPort, iWDPEndPort } = global.debugAppArgv;
+  const { iWDPPort } = global.debugAppArgv;
+  const { iWDPStartPort, iWDPEndPort } = config;
   const iWDPParams = ['--no-frontend', `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`];
   let tunnelOption;
   if (os.type() === OSType.Darwin) {

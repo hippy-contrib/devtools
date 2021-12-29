@@ -9,24 +9,17 @@ moduleAlias.addAliases({
 import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
-import { DevtoolsEnv, DBType } from '@/@types/enum';
+import { DevtoolsEnv } from '@/@types/enum';
 import { Logger } from '@/utils/log';
-import { startServer } from '@/app-debug';
+import { startDebugServer } from '@/app-debug';
 import { version } from 'package.json';
 import './process-handler';
 
 const { argv } = yargs
   .alias('v', 'version')
   .alias('h', 'help')
-  .alias('c', 'config')
   .help()
   .version()
-  .option('dbType', {
-    type: 'string',
-    default: DBType.Memory,
-    choices: [DBType.Memory, DBType.Redis],
-    describe: 'Localhost debug server please select memory. Remote debug server please select redis.',
-  })
   .option('entry', {
     type: 'string',
     default: 'dist/dev/index.bundle',
@@ -56,35 +49,15 @@ const { argv } = yargs
     default: false,
     describe: 'Output error details',
   })
-  .option('config', {
-    type: 'string',
-    default: '',
-    describe: 'webpack config file',
-  })
   .option('iWDPPort', {
     type: 'number',
     default: 9000,
     describe: 'Device list port of ios_webkit_debug_proxy',
   })
-  .option('iWDPStartPort', {
-    type: 'number',
-    default: 9200,
-    describe: 'Start device port of ios_webkit_debug_proxy',
-  })
-  .option('iWDPEndPort', {
-    type: 'number',
-    default: 9300,
-    describe: 'End device port of ios_webkit_debug_proxy',
-  })
   .option('env', {
     type: 'string',
     default: DevtoolsEnv.Hippy,
     choices: [DevtoolsEnv.Hippy, DevtoolsEnv.Voltron, DevtoolsEnv.TDF, DevtoolsEnv.TDFCore],
-  })
-  .option('isRemote', {
-    type: 'boolean',
-    default: false,
-    describe: 'Whether use remote debug',
   })
   .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`);
 
@@ -101,4 +74,4 @@ global.debugAppArgv = fullArgv;
 const log = new Logger('entry');
 log.info('version: %s', version);
 
-startServer();
+startDebugServer();

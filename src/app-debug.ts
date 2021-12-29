@@ -18,17 +18,17 @@ let socketServer: SocketServer;
 /**
  * 开启调试服务
  */
-export const startServer = async () => {
+export const startDebugServer = async () => {
   log.info('start server argv: %j', global.debugAppArgv);
   await init();
-  const { host, port, isRemote } = global.debugAppArgv;
+  const { host, port } = global.debugAppArgv;
   const app = new Koa();
   routeApp(app);
 
   server = app.listen(port, host, async () => {
     log.info('start debug server success.');
     let startAdbProxy;
-    if (!isRemote) {
+    if (process.env.IS_REMOTE !== 'true') {
       const childProcesFn = await import('./child-process/index');
       const { startTunnel, startChrome } = childProcesFn;
       startAdbProxy = childProcesFn.startAdbProxy;
@@ -71,7 +71,7 @@ const init = async () => {
   try {
     fs.rmdirSync(cachePath, { recursive: true });
   } catch (e) {
-    log.error('rm cache dir error: %s', (e as Error)?.stack);
+    log.warn('rm cache dir error');
   }
   await importTunnel();
   await fs.promises.mkdir(cachePath, { recursive: true });

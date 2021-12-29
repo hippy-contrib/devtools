@@ -9,7 +9,7 @@ moduleAlias.addAliases({
 import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
-import { startWebpackDevServer } from '@/app-dev';
+import { webpack, getWebpackConfig } from '@/app-dev';
 import { Logger } from '@/utils/log';
 import { version } from 'package.json';
 import './process-handler';
@@ -41,4 +41,7 @@ if (fullArgv.version) yargs.version().exit(0, null);
 const log = new Logger('entry');
 log.info('version: %s', version);
 
-startWebpackDevServer(fullArgv.config);
+(async () => {
+  const webpackConfig = await getWebpackConfig(fullArgv.config);
+  webpack(webpackConfig);
+})();

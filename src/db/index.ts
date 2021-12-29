@@ -1,4 +1,3 @@
-import { DBType } from '@/@types/enum';
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
 import { MemoryModel } from './memory/model';
 import { MemoryPubSub } from './memory/pub-sub';
@@ -23,16 +22,14 @@ export const getDBOperator = () => ({
  * 初始化数据库环境
  */
 export const initDbModel = async () => {
-  const { dbType } = global.debugAppArgv;
-  if (dbType === DBType.Memory) {
-    model = new MemoryModel();
-    Publisher = MemoryPubSub;
-    Subscriber = MemoryPubSub;
-  }
-  if (dbType === DBType.Redis) {
+  if (process.env.IS_REMOTE === 'true') {
     model = new RedisModel();
     Publisher = RedisPublisher;
     Subscriber = RedisSubscriber;
+  } else {
+    model = new MemoryModel();
+    Publisher = MemoryPubSub;
+    Subscriber = MemoryPubSub;
   }
   await model.init();
   return model;
