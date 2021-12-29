@@ -9,8 +9,9 @@ import { initDbModel } from '@/db';
 import { routeApp } from '@/router';
 import { config } from '@/config';
 import { importTunnel } from '@/child-process/import-addon';
+import { WinstonColor } from '@/@types/enum';
 
-const log = new Logger('app-debug-server');
+const log = new Logger('app-debug-server', WinstonColor.Yellow);
 let server: HTTPServer;
 let socketServer: SocketServer;
 

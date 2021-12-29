@@ -1,10 +1,9 @@
 import { config } from '@/config';
 import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 import { getDBOperator } from '@/db';
-import { createTargetByIWDPPage } from '@/utils/debug-target';
 import { DebugTarget } from '@/@types/debug-target';
 import { DevicePlatform } from '@/@types/enum';
-import { subscribeByIWDP } from './pub-sub-manager';
+import { updateIWDPAppClient } from './pub-sub-manager';
 
 export class DebugTargetManager {
   public static debugTargets: DebugTarget[] = [];
@@ -16,16 +15,20 @@ export class DebugTargetManager {
     const { iWDPPort } = global.debugAppArgv;
     const { model } = getDBOperator();
     const [targets, iOSPages] = await Promise.all([model.getAll(config.redis.key), getIWDPPages(iWDPPort)]);
-    const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
     targets.forEach((target, i) => {
-      if (target.platform === DevicePlatform.IOS) targets[i] = patchIOSTarget(target, iOSPages);
+      if (target.platform === DevicePlatform.IOS) {
+        targets[i] = patchIOSTarget(target, iOSPages);
+        updateIWDPAppClient(targets[i]);
+      }
     });
     // 追加 IWDP 获取到的 h5 页面
-    const h5Pages = iOSPagesWithFlag.filter((iOSPage) => !iOSPage.shouldRemove);
-    const h5DebugTargets = h5Pages.map(createTargetByIWDPPage);
-    subscribeByIWDP(h5DebugTargets);
-    DebugTargetManager.debugTargets = targets.concat(h5DebugTargets);
-    return DebugTargetManager.debugTargets;
+    // const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
+    // const h5Pages = iOSPagesWithFlag.filter((iOSPage) => !iOSPage.shouldRemove);
+    // const h5DebugTargets = h5Pages.map(createTargetByIWDPPage);
+    // subscribeByIWDP(h5DebugTargets);
+    // DebugTargetManager.debugTargets = targets.concat(h5DebugTargets);
+    DebugTargetManager.debugTargets = targets;
+    return targets;
   };
 
   /**

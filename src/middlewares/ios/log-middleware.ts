@@ -10,9 +10,10 @@ export const logMiddleWareManager: MiddleWareManager = {
       let type;
       if (message.type === 'log') {
         type = {
+          log: ChromeLogLevel.Info,
           [ChromeLogLevel.Info]: ChromeLogLevel.Info,
-          [ChromeLogLevel.Log]: ChromeLogLevel.Info,
           [ChromeLogLevel.Error]: ChromeLogLevel.Error,
+          [ChromeLogLevel.Warning]: ChromeLogLevel.Warning,
         }[message.level];
         if (!type) type = ChromeLogLevel.Info;
       } else {
@@ -43,6 +44,12 @@ export const logMiddleWareManager: MiddleWareManager = {
         },
       });
     },
+    [IOS90Command.ConsoleEnable]: ({ msg, sendToDevtools }) =>
+      sendToDevtools({
+        id: (msg as Adapter.CDP.Req).id,
+        method: ChromeCommand.LogEnable,
+        result: {},
+      }),
   },
   upwardMiddleWareListMap: {
     [ChromeCommand.LogClear]: ({ msg, sendToApp }) =>
@@ -57,17 +64,11 @@ export const logMiddleWareManager: MiddleWareManager = {
         method: IOS90Command.ConsoleDisable,
         params: {},
       }),
-    [ChromeCommand.LogEnable]: ({ msg, sendToApp, sendToDevtools }) => {
-      sendToDevtools({
-        id: (msg as Adapter.CDP.Req).id,
-        method: msg.method,
-        result: {},
-      });
-      return sendToApp({
+    [ChromeCommand.LogEnable]: ({ msg, sendToApp }) =>
+      sendToApp({
         id: (msg as Adapter.CDP.Req).id,
         method: IOS90Command.ConsoleEnable,
         params: {},
-      });
-    },
+      }),
   },
 };

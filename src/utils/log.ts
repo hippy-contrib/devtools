@@ -1,14 +1,22 @@
 import path from 'path';
 import util from 'util';
-import colors, { random } from 'colors/safe';
+import colors from 'colors/safe';
 import { Logger as WinstonLogger, transports, format, createLogger } from 'winston';
+import { lowerFirst, uniq, random } from 'lodash';
+import { WinstonColor } from '@/@types/enum';
 import { config } from '@/config';
 import 'winston-daily-rotate-file';
 
 export class Logger {
+  protected logFilename;
   private loggerInstance: WinstonLogger;
+  private label: string;
+  private color: string;
 
-  public constructor(private label: string = '', private color?: string) {
+  public constructor(label = '', color?: string, logFilename?: string) {
+    this.label = label;
+    this.color = color || getRandomColor();
+    this.logFilename = logFilename || '%DATE%.log';
     this.initLoggerInstance();
   }
 
@@ -31,13 +39,13 @@ export class Logger {
 
   private initLoggerInstance() {
     const transport = new transports.DailyRotateFile({
-      filename: path.join(config.logPath, '%DATE%.log'),
+      filename: path.join(config.logPath, this.logFilename),
       datePattern: 'YYYY-MM-DD-HH',
       zippedArchive: false,
       maxSize: '20m',
       maxFiles: '7d',
     });
-    const label = this.color ? colors[this.color](this.label) : random(this.label);
+    const label = colors[this.color](this.label);
     this.loggerInstance = createLogger({
       format: format.combine(
         format.errors({ stack: true }),
@@ -49,4 +57,17 @@ export class Logger {
       transports: [transport, new transports.Console()],
     });
   }
+}
+
+export class TunnelLogger extends Logger {
+  public constructor(label = '', color?: string, logFilename?: string) {
+    super(label, color, logFilename || '%DATE%.tunnel.log');
+  }
+}
+
+export class UserLogger extends Logger {}
+
+const winstonColors = uniq(Object.values(WinstonColor).map(lowerFirst));
+function getRandomColor() {
+  return winstonColors[random(winstonColors.length - 1)];
 }

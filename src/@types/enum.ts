@@ -98,13 +98,24 @@ export enum DBType {
 }
 
 export enum WinstonColor {
-  Magenta = 'magenta',
+  BgRed = 'bgRed',
+  Black = 'black',
   Red = 'red',
   Green = 'green',
   Yellow = 'yellow',
-  Cyan = 'cyan',
   Blue = 'blue',
-  BgRed = 'bgRed',
+  Magenta = 'magenta',
+  Cyan = 'cyan',
+  White = 'white',
+  Gray = 'gray',
+  Grey = 'grey',
+  BrightRed = 'brightRed',
+  BrightGreen = 'brightGreen',
+  BrightYellow = 'brightYellow',
+  BrightBlue = 'brightBlue',
+  BrightMagenta = 'brightMagenta',
+  BrightCyan = 'brightCyan',
+  BrightWhite = 'brightWhite',
 }
 
 export enum InternalChannelEvent {
@@ -114,7 +125,8 @@ export enum InternalChannelEvent {
 export enum ChromeLogLevel {
   Info = 'info',
   Error = 'error',
-  Log = 'log',
+  Verbose = 'verbose',
+  Warning = 'warning'
 }
 
 export enum OSType {

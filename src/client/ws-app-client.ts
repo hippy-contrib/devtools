@@ -20,13 +20,17 @@ export class WsAppClient extends AppClient {
     this.registerMessageListener();
   }
 
+  public destroy() {
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.close();
+  }
+
   protected registerMessageListener() {
     this.ws.on('message', async (msg: string) => {
       let msgObj: Adapter.CDP.Res;
       try {
         msgObj = JSON.parse(msg);
       } catch (e) {
-        log.error(`parse ws app client json message error: ${msg}`);
+        log.error(`parse WsAppClient json message error: ${msg}`);
       }
 
       const res = await this.downwardMessageHandler(msgObj);
@@ -37,7 +41,7 @@ export class WsAppClient extends AppClient {
 
     this.ws.on('close', () => {
       this.isClosed = true;
-      log.info(`${this.id} ws app client closed.`);
+      log.info(`${this.id} WsAppClient closed.`);
       this.emit(AppClientEvent.Close);
     });
   }

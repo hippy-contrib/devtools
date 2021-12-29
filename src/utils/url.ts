@@ -1,9 +1,9 @@
-import { ClientRole } from '@/@types/enum';
+import { ClientRole, WinstonColor } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { config } from '@/config';
 import { DebugTarget } from '@/@types/debug-target';
 
-const log = new Logger('url-utils');
+const log = new Logger('url-utils', WinstonColor.Gray);
 
 export type AppWsUrlParams = {
   clientId: string;

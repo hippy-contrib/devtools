@@ -1,6 +1,6 @@
 {
   "name": "debug-server-next",
-  "version": "3.0.148",
+  "version": "3.0.149",
   "description": "Dev server for hippy-core.",
   "repository": "https://git.woa.com/TencentDynamicFramework/DevTools/devtools-debug-server",
   "homepage": "http://hippyjs.org",
@@ -18,7 +18,6 @@
     "build": "npm run build:webpack-dev-server && npx gulp",
     "build:webpack-dev-server": "cd src/webpack-dev-server && rimraf ./client/* && babel client-src/ --out-dir client/ --ignore \"client-src/webpack.config.js\" --ignore \"client-src/modules\" && webpack --config client-src/webpack.config.js",
     "watch": "gulp watch",
-    "postinstall": "npm run build",
     "test": "npx jest --silent --coverage",
     "lint": "npx eslint --fix --ext .js,.ts ./src"
   },

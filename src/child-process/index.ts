@@ -6,13 +6,14 @@ import fs from 'fs';
 import open from 'open';
 import { TunnelEvent, WinstonColor, OSType } from '@/@types/enum';
 import { deviceManager } from '@/device-manager';
-import { Logger } from '@/utils/log';
+import { Logger, TunnelLogger } from '@/utils/log';
 import { exec } from '@/utils/process';
 import { config } from '@/config';
 import { StartTunnelOption } from './addon-api';
 
-const childProcessLog = new Logger('child-process');
-const tunnelLog = new Logger('tunnel', WinstonColor.Magenta);
+const childProcessLog = new Logger('child-process', WinstonColor.Magenta);
+const tunnelLog = new TunnelLogger('tunnel', WinstonColor.BrightRed);
+const tunnelEventLog = new Logger('tunnel-event', WinstonColor.BrightCyan);
 let proxyProcess;
 let hmrPort;
 
@@ -23,7 +24,7 @@ export const startTunnel = (cb?: StartTunnelCallback) => {
   global.addon.addEventListener((event: TunnelEvent, data: unknown) => {
     try {
       if (event !== TunnelEvent.TunnelLog) {
-        tunnelLog.info('tunnel event: %s', event);
+        tunnelEventLog.info('tunnel event: %s', event);
       }
       if (event === TunnelEvent.ReceiveData) {
         tunnelEmitter.emit(TUNNEL_EVENT, data);

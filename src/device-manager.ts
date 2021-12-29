@@ -26,16 +26,23 @@ class DeviceManager {
    * app 连接，添加调试对象，并订阅上行调试指令
    */
   public async onAppConnect() {
+    log.info('app connect, %j', this.deviceList);
     const device = this.deviceList[0];
-    if (!device) return;
+    if (!device) return log.warn('no device connect!');
 
     const useTunnel = appClientManager.shouldUseAppClientType(device.platform, AppClientType.Tunnel);
+    log.info('useTunnel %j, is connected %j', useTunnel, device.physicalstatus === DeviceStatus.Connected);
     if (device.physicalstatus === DeviceStatus.Connected && useTunnel) {
-      let debugTarget = createTargetByDeviceInfo(device);
-      debugTarget = await patchDebugTarget(debugTarget);
-      const { model } = getDBOperator();
-      model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
-      subscribeCommand(debugTarget);
+      try {
+        let debugTarget = createTargetByDeviceInfo(device);
+        debugTarget = await patchDebugTarget(debugTarget);
+        const { model } = getDBOperator();
+        log.info('before upsert model %j', debugTarget);
+        model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
+        subscribeCommand(debugTarget);
+      } catch (e) {
+        log.info('app connect e, %j, %j', (e as any)?.stack, e);
+      }
     }
   }
 

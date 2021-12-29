@@ -20,7 +20,7 @@ export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
   if (global.debugAppArgv.isRemote) return [];
   try {
     // IWDP 检查页面列表会稍有延迟，这里简单做下 sleep
-    await sleep(250);
+    await sleep(800);
     const deviceList = await request({
       url: '/json',
       // IWDP 必定是本地启动的服务，因为必须通过 USB 连接才能检测到设备
@@ -28,7 +28,7 @@ export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
       json: true,
     });
     const debugTargets: IWDPPage[] = (await Promise.all(deviceList.map(getDeviceIWDPPages))) || [];
-    return debugTargets.flat();
+    return debugTargets.flat().filter(iWDPPagesFilter);
   } catch (e) {
     log.warn('request IWDP pages error');
     return [];
@@ -95,3 +95,6 @@ const getDeviceIWDPPages = async (device: IWDPDevice): Promise<IWDPPage[]> => {
     return [];
   }
 };
+
+const iWDPPagesFilter = (iWDPPage: IWDPPage) =>
+  /^HippyContext/.test(iWDPPage.title) && !/\(delete\)/.test(iWDPPage.title);

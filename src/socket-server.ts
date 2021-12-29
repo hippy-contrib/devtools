@@ -150,7 +150,7 @@ export class SocketServer {
    */
   private async onAppConnection(ws: WebSocket, wsUrlParams: AppWsUrlParams) {
     const { clientId, clientRole } = wsUrlParams;
-    log.info('ws app client connected. %s', clientId);
+    log.info('WsAppClient connected. %s', clientId);
     const platform = {
       [ClientRole.Android]: DevicePlatform.Android,
       [ClientRole.IOS]: DevicePlatform.IOS,
@@ -166,8 +166,8 @@ export class SocketServer {
     subscribeCommand(debugTarget, ws);
 
     const onClose = (e?: Error) => {
-      if (e) log.error('app ws error %s', e?.stack);
-      log.info('ws app client disconnect. %s', clientId);
+      if (e) log.error('app ws error %j %j', e?.stack, e);
+      log.info('WsAppClient disconnect. %s', clientId);
       cleanDebugTarget(clientId);
     };
     ws.on('close', onClose);

@@ -1,17 +1,19 @@
 import WebSocket from 'ws';
-import { AppClientType, AppClientEvent } from '@/@types/enum';
+import { AppClientType, AppClientEvent, WinstonColor } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
-const log = new Logger('app-client:IWDP');
+const log = new Logger('app-client:IWDP', WinstonColor.BrightBlue);
 
 /**
  * IWDP 调试通道，通过 ws client 与 IWDP server 建立连接
  */
 export class IWDPAppClient extends AppClient {
-  private url: string;
+  public url: string;
   private ws: WebSocket;
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
+  private isConnecting = false;
+  private pingTimer;
   private msgBuffer: Array<{
     msg: Adapter.CDP.Req;
     resolve: Adapter.Resolve;
@@ -31,25 +33,31 @@ export class IWDPAppClient extends AppClient {
     this.connect();
   }
 
+  public destroy() {
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.close();
+  }
+
   protected registerMessageListener() {
     if (!this.ws) return;
     this.ws.on('message', async (msg: string) => {
       let msgObj: Adapter.CDP.Res;
       try {
         msgObj = JSON.parse(msg);
+        const res = await this.downwardMessageHandler(msgObj);
+        if (!('id' in msgObj)) return;
+        const requestPromise = this.requestPromiseMap.get(msgObj.id);
+        if (requestPromise) {
+          requestPromise.resolve(res);
+        }
       } catch (e) {
-        log.error(`parse json error: ${msg}`);
-      }
-      const res = await this.downwardMessageHandler(msgObj);
-      if (!('id' in msgObj)) return;
-      const requestPromise = this.requestPromiseMap.get(msgObj.id);
-      if (requestPromise) {
-        requestPromise.resolve(res);
+        log.error(`IWDPAppClient parse json error: ${msg}`);
       }
     });
 
     this.ws.on('open', () => {
-      log.info(`ios proxy client opened: ${this.url}`);
+      this.isConnecting = false;
+      this.startPing();
+      log.info(`IWDPAppClient ws opened: ${this.url}`);
       for (const { msg, resolve, reject } of this.msgBuffer) {
         const msgStr = JSON.stringify(msg);
         this.ws.send(msgStr);
@@ -59,17 +67,22 @@ export class IWDPAppClient extends AppClient {
     });
 
     this.ws.on('close', () => {
+      this.stopPing();
+      this.isConnecting = false;
       this.isClosed = true;
       this.emit(AppClientEvent.Close);
+      log.warn('IWDPAppClient ws close!');
 
-      const e = new Error('ws closed');
+      const e = new Error('IWDPAppClient ws closed');
       for (const requestPromise of this.requestPromiseMap.values()) {
         requestPromise.reject(e);
       }
     });
 
     this.ws.on('error', (e) => {
-      log.error('ios proxy client error: %s', e?.stack);
+      this.stopPing();
+      this.isConnecting = false;
+      log.error('IWDPAppClient ws error: %s', e?.stack);
     });
   }
 
@@ -80,6 +93,10 @@ export class IWDPAppClient extends AppClient {
         this.ws.send(msgStr);
         this.requestPromiseMap.set(msg.id, { resolve, reject });
       } else {
+        if (!this.isConnecting) {
+          this.connect();
+          this.isConnecting = true;
+        }
         this.msgBuffer.push({
           msg,
           resolve,
@@ -102,5 +119,15 @@ export class IWDPAppClient extends AppClient {
       log.error('IWDP connect error: %s', (e as Error)?.stack);
       throw e;
     }
+  }
+
+  private startPing() {
+    this.pingTimer = setInterval(() => {
+      this.ws.ping('ping');
+    }, 1000);
+  }
+
+  private stopPing() {
+    this.pingTimer && clearInterval(this.pingTimer);
   }
 }

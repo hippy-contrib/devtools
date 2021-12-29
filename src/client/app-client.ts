@@ -15,8 +15,8 @@ import { Logger } from '@/utils/log';
 import { composeMiddlewares } from '@/utils/middleware';
 
 const filteredLog = new Logger('filtered', WinstonColor.Yellow);
-const downwardLog = new Logger('↓↓↓', WinstonColor.Red);
-const upwardLog = new Logger('↑↑↑', WinstonColor.Green);
+const downwardLog = new Logger('↓↓↓', WinstonColor.BrightRed);
+const upwardLog = new Logger('↑↑↑', WinstonColor.BrightGreen);
 
 export interface AppClient {
   on(event: AppClientEvent.Close, listener: () => void): this;
@@ -77,6 +77,8 @@ export abstract class AppClient extends EventEmitter {
     // 上行的具体协议的处理交给中间件去适配，最后分发到 app 端
     return this.middlewareMessageHandler(middlewareList, msg);
   }
+
+  public destroy() {}
 
   /**
    * 下行协议适配 handler
