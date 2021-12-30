@@ -1,6 +1,7 @@
-import { ChromeCommand, ChromeEvent, ScriptLanguage } from 'tdf-devtools-protocol/dist/types';
+import { ChromeCommand, ChromeEvent, IOS90Command, ScriptLanguage } from 'tdf-devtools-protocol/dist/types';
 import { requestId } from '../global-id';
 import { MiddleWareManager } from '../middleware-context';
+import { sendEmptyResultToDevtools } from '../default-middleware';
 
 let lastScriptEval;
 
@@ -21,6 +22,9 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
       lastScriptEval = eventRes.params.scriptId;
       return sendToDevtools(eventRes);
     },
+    [IOS90Command.DebuggerEnable]: sendEmptyResultToDevtools,
+    [ChromeCommand.DebuggerSetBlackboxPatterns]: sendEmptyResultToDevtools,
+    [IOS90Command.DebuggerSetPauseOnExceptions]: sendEmptyResultToDevtools,
   },
   upwardMiddleWareListMap: {
     [ChromeCommand.DebuggerEnable]: async ({ sendToApp, msg }) => {
@@ -49,5 +53,6 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
       sendToDevtools(res);
       return res;
     },
+    [ChromeCommand.DebuggerSetAsyncCallStackDepth]: sendEmptyResultToDevtools,
   },
 };

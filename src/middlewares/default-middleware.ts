@@ -21,7 +21,6 @@ export const defaultUpwardMiddleware: MiddleWare = async ({ msg, sendToApp }, ne
  * 发送空包至 devtools
  */
 export const sendEmptyResultToDevtools: MiddleWare = async ({ msg, sendToDevtools }, next) => {
-  await next();
   const req = msg as Adapter.CDP.Req;
   return sendToDevtools({
     id: req.id,
@@ -34,7 +33,6 @@ export const sendEmptyResultToDevtools: MiddleWare = async ({ msg, sendToDevtool
  * 发送失败回包至 devtools
  */
 export const sendFailResultToDevtools: MiddleWare = async ({ msg, sendToDevtools }, next) => {
-  await next();
   const req = msg as Adapter.CDP.Req;
   return sendToDevtools({
     id: req.id,
