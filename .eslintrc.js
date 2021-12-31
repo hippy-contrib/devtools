@@ -10,9 +10,9 @@ module.exports = {
   extends: [
     'plugin:import/recommended',
     'plugin:import/typescript',
-    '@tencent/eslint-config-tencent',
-    '@tencent/eslint-config-tencent/ts',
-    '@tencent/eslint-config-tencent/prettier',
+    'eslint-config-tencent',
+    'eslint-config-tencent/ts',
+    'eslint-config-tencent/prettier',
   ],
   plugins: ['import', '@typescript-eslint'],
   rules: {

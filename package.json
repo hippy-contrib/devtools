@@ -1,6 +1,6 @@
 {
   "name": "@hippy/debug-server-next",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Debug server for hippy-core.",
   "repository": "https://github.com/hippy-contrib/debug-server-next",
   "homepage": "http://hippyjs.org",
@@ -88,7 +88,7 @@
     "@babel/plugin-transform-runtime": "^7.14.5",
     "@babel/preset-env": "^7.14.5",
     "@babel/runtime": "^7.14.5",
-    "@tencent/eslint-config-tencent": "^0.15.2",
+    "eslint-config-tencent": "^1.0.2",
     "@types/colors": "^1.2.1",
     "@types/jest": "^26.0.24",
     "@types/koa": "^2.13.4",

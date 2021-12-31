@@ -126,7 +126,7 @@ export enum ChromeLogLevel {
   Info = 'info',
   Error = 'error',
   Verbose = 'verbose',
-  Warning = 'warning'
+  Warning = 'warning',
 }
 
 export enum OSType {
