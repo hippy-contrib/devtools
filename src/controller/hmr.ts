@@ -1,9 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import WebSocket from 'ws';
-import { HMREvent, WinstonColor } from '@/@types/enum';
+import { HMREvent, WinstonColor, WSCode } from '@/@types/enum';
 import { HMRWsParams } from '@/utils/url';
-import { WS_CLOSE_REASON } from '@/@types/constants';
 import { Logger } from '@/utils/log';
 import { createHMRChannel } from '@/utils/pub-sub-channel';
 import { getDBOperator } from '@/db';
@@ -18,7 +17,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
   const bundle = await BundleManager.get(hash);
   if (!bundle) {
     const reason = 'Hippy dev server not started, not support HMR!';
-    ws.close(WS_CLOSE_REASON, reason);
+    ws.close(WSCode.InvalidRequestParams, reason);
     return logger.warn(reason);
   }
 
@@ -29,7 +28,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
       subscriber.unsubscribe();
       subscriber.disconnect();
       const reason = 'Hippy dev server closed, stop HMR!';
-      ws.close(WS_CLOSE_REASON, reason);
+      ws.close(WSCode.HMRServerClosed, reason);
       logger.warn(reason);
     } else {
       ws.send(msg);
@@ -45,14 +44,14 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
 
   ws.on('message', (msg) => {
     try {
-      const body: HMRBody = JSON.parse(msg.toString());
-      if (body.event === HMREvent.TransferFile) {
+      const msgStr = msg.toString();
+      const body: HMRBody = JSON.parse(msgStr);
+      if (body.type === HMREvent.TransferFile) {
         saveHMRFiles(hash, body);
       } else {
-        publisher.publish(body.body);
+        publisher.publish(msgStr);
       }
     } catch (e) {}
-    publisher.publish(msg.toString());
   });
 
   ws.on('close', close);
@@ -68,22 +67,25 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
 };
 
 interface HMRBody {
-  event: HMREvent;
-  body: string;
-  files?: Array<{
-    // include folder structure
-    filename: string;
-    body: string;
-  }>;
+  type: HMREvent;
+  data: unknown;
+  params: unknown;
 }
 
+type TransFerFile = Array<{
+  // include folder structure
+  name: string;
+  content: string;
+}>;
+
 async function saveHMRFiles(hash: string, hmrBody: HMRBody) {
+  const files = hmrBody.data as TransFerFile;
   return Promise.all(
-    hmrBody.files.map(async ({ filename, body }) => {
-      const fullFname = path.join(config.hmrStaticPath, hash, filename);
+    files.map(async ({ name, content }) => {
+      const fullFname = path.join(config.hmrStaticPath, hash, name);
       const cacheFolder = path.dirname(fullFname);
       await fs.promises.mkdir(cacheFolder, { recursive: true });
-      return fs.promises.writeFile(fullFname, body);
+      return fs.promises.writeFile(fullFname, content);
     }),
   );
 }

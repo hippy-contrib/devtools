@@ -15,9 +15,10 @@
   "scripts": {
     "start": "nodemon --exec \"npm run dev\"",
     "hippy:debug": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index-debug.ts",
-    "hippy:dev": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index-dev.ts",
-    "build": "npm run build:webpack-dev-server && npx gulp",
-    "build:webpack-dev-server": "cd src/webpack-dev-server && rimraf ./client/* && babel client-src/ --out-dir client/ --ignore \"client-src/webpack.config.js\" --ignore \"client-src/modules\" && webpack --config client-src/webpack.config.js",
+    "hippy:dev": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect-brk=127.0.0.1:7778 -r ts-node/register src/index-dev.ts",
+    "hippy:dev:dist": "cross-env DEBUG=*,-koa* TS_NODE_FILES=true node --inspect=127.0.0.1:7778 -r ts-node/register dist/index-dev",
+    "build": "npm run build:client && npx gulp",
+    "build:client": "cd src/webpack-dev-server && rimraf ./client/* && babel client-src/ --out-dir client/ --ignore \"client-src/webpack.config.js\" --ignore \"client-src/modules\" && webpack --config client-src/webpack.config.js",
     "watch": "gulp watch",
     "test": "npx jest --silent --coverage",
     "lint": "npx eslint --fix --ext .js,.ts ./src"

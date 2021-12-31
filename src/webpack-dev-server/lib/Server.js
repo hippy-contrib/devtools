@@ -10,6 +10,7 @@ const defaultGateway = require('default-gateway');
 const express = require('express');
 const { validate } = require('schema-utils');
 const schema = require('./options.json');
+const WebSocket = require('ws');
 
 if (!process.env.WEBPACK_SERVE) {
   process.env.WEBPACK_SERVE = true;
@@ -21,7 +22,7 @@ class Server {
     if (options.hooks) {
       util.deprecate(
         () => {},
-        'Using \'compiler\' as the first argument is deprecated. Please use \'options\' as the first argument and \'compiler\' as the second argument.',
+        "Using 'compiler' as the first argument is deprecated. Please use 'options' as the first argument and 'compiler' as the second argument.",
         'DEP_WEBPACK_DEV_SERVER_CONSTRUCTOR',
       )();
 
@@ -39,6 +40,7 @@ class Server {
     this.compiler = compiler;
     this.currentHash = null;
     this.cb = cb || (() => {});
+    this.emitMap = new Map();
   }
 
   static get DEFAULT_STATS() {
@@ -169,114 +171,37 @@ class Server {
     const isWebTarget = compiler.options.externalsPresets
       ? compiler.options.externalsPresets.web
       : [
-        'web',
-        'webworker',
-        'electron-preload',
-        'electron-renderer',
-        'node-webkit',
-        // eslint-disable-next-line no-undefined
-        undefined,
-        null,
-      ].includes(compiler.options.target);
+          'web',
+          'webworker',
+          'electron-preload',
+          'electron-renderer',
+          'node-webkit',
+          // eslint-disable-next-line no-undefined
+          undefined,
+          null,
+        ].includes(compiler.options.target);
 
     // TODO maybe empty empty client
     if (this.options.client && isWebTarget) {
       let webSocketURL = '';
-      if (this.options.webSocketServer) {
-        const searchParams = new URLSearchParams();
 
-        /** @type {"ws:" | "wss:" | "http:" | "https:" | "auto:"} */
-        let protocol;
+      const searchParams = new URLSearchParams();
+      searchParams.set('protocol', 'ws:');
+      searchParams.set('hostname', this.options.remote.host);
+      searchParams.set('port', String(this.options.remote.port));
+      searchParams.set('pathname', '/debugger-proxy');
+      searchParams.set('role', 'hmr_client');
+      searchParams.set('hash', this.options.remote.id);
 
-        // We are proxying dev server and need to specify custom `hostname`
-        if (typeof this.options.client.webSocketURL.protocol !== 'undefined') {
-          protocol = this.options.client.webSocketURL.protocol;
-        } else {
-          protocol = this.options.server.type === 'http' ? 'ws:' : 'wss:';
-        }
-
-        searchParams.set('protocol', protocol);
-
-        if (typeof this.options.client.webSocketURL.username !== 'undefined') {
-          searchParams.set('username', this.options.client.webSocketURL.username);
-        }
-
-        if (typeof this.options.client.webSocketURL.password !== 'undefined') {
-          searchParams.set('password', this.options.client.webSocketURL.password);
-        }
-
-        /** @type {string} */
-        let hostname;
-
-        // SockJS is not supported server mode, so `hostname` and `port` can't specified, let's ignore them
-        // TODO show warning about this
-        const isSockJSType = this.options.webSocketServer.type === 'sockjs';
-
-        // We are proxying dev server and need to specify custom `hostname`
-        if (typeof this.options.client.webSocketURL.hostname !== 'undefined') {
-          hostname = this.options.client.webSocketURL.hostname;
-        } else if (typeof this.options.webSocketServer.options.host !== 'undefined' && !isSockJSType) {
-          // Web socket server works on custom `hostname`,
-          // only for `ws` because `sock-js` is not support custom `hostname`
-          hostname = this.options.webSocketServer.options.host;
-        } else if (typeof this.options.host !== 'undefined') {
-          // The `host` option is specified
-          hostname = this.options.host;
-        } else {
-          // The `port` option is not specified
-          hostname = '0.0.0.0';
-        }
-
-        searchParams.set('hostname', hostname);
-
-        /** @type {number | string} */
-        let port;
-
-        // We are proxying dev server and need to specify custom `port`
-        if (typeof this.options.client.webSocketURL.port !== 'undefined') {
-          port = this.options.client.webSocketURL.port;
-        } else if (typeof this.options.webSocketServer.options.port !== 'undefined' && !isSockJSType) {
-          // Web socket server works on custom `port`, only for `ws` because `sock-js` is not support custom `port`
-          port = this.options.webSocketServer.options.port;
-        } else if (typeof this.options.port === 'number') {
-          // The `port` option is specified
-          port = this.options.port;
-        } else if (typeof this.options.port === 'string' && this.options.port !== 'auto') {
-          // The `port` option is specified using `string`
-          port = Number(this.options.port);
-        } else {
-          // The `port` option is not specified or set to `auto`
-          port = '0';
-        }
-
-        searchParams.set('port', String(port));
-
-        /** @type {string} */
-        let pathname = '';
-
-        // We are proxying dev server and need to specify custom `pathname`
-        if (typeof this.options.client.webSocketURL.pathname !== 'undefined') {
-          pathname = this.options.client.webSocketURL.pathname;
-        } else if (
-          typeof this.options.webSocketServer.options.prefix !== 'undefined'
-          || typeof this.options.webSocketServer.options.path !== 'undefined'
-        ) {
-          // Web socket server works on custom `path`
-          pathname = this.options.webSocketServer.options.prefix || this.options.webSocketServer.options.path;
-        }
-
-        searchParams.set('pathname', pathname);
-
-        if (typeof this.options.client.logging !== 'undefined') {
-          searchParams.set('logging', this.options.client.logging);
-        }
-
-        if (typeof this.options.client.reconnect !== 'undefined') {
-          searchParams.set('reconnect', this.options.client.reconnect);
-        }
-
-        webSocketURL = searchParams.toString();
+      if (typeof this.options.client.logging !== 'undefined') {
+        searchParams.set('logging', this.options.client.logging);
       }
+
+      if (typeof this.options.client.reconnect !== 'undefined') {
+        searchParams.set('reconnect', this.options.client.reconnect);
+      }
+
+      webSocketURL = searchParams.toString();
 
       additionalEntries.push(`${require.resolve('../client/index.js')}?${webSocketURL}`);
     }
@@ -313,7 +238,7 @@ class Server {
        */
       const prependEntry = (originalEntry, newAdditionalEntries) => {
         if (typeof originalEntry === 'function') {
-          return () => Promise.resolve(originalEntry()).then(entry => prependEntry(entry, newAdditionalEntries));
+          return () => Promise.resolve(originalEntry()).then((entry) => prependEntry(entry, newAdditionalEntries));
         }
 
         if (typeof originalEntry === 'object' && !Array.isArray(originalEntry)) {
@@ -356,25 +281,27 @@ class Server {
       }
 
       // Configuration with the `devServer` options
-      const compilerWithDevServer = this.compiler.compilers.find(config => config.options.devServer);
+      const compilerWithDevServer = this.compiler.compilers.find((config) => config.options.devServer);
 
       if (compilerWithDevServer) {
         return compilerWithDevServer.options;
       }
 
       // Configuration with `web` preset
-      const isTarget = config => [
-        'web',
-        'webworker',
-        'electron-preload',
-        'electron-renderer',
-        'node-webkit',
-        // eslint-disable-next-line no-undefined
-        undefined,
-        null,
-      ].includes(config.options.target);
-      const compilerWithWebPreset = this.compiler.compilers
-        .find(config => (config.options.externalsPresets && config.options.externalsPresets.web) || isTarget(config));
+      const isTarget = (config) =>
+        [
+          'web',
+          'webworker',
+          'electron-preload',
+          'electron-renderer',
+          'node-webkit',
+          // eslint-disable-next-line no-undefined
+          undefined,
+          null,
+        ].includes(config.options.target);
+      const compilerWithWebPreset = this.compiler.compilers.find(
+        (config) => (config.options.externalsPresets && config.options.externalsPresets.web) || isTarget(config),
+      );
 
       if (compilerWithWebPreset) {
         return compilerWithWebPreset.options;
@@ -486,7 +413,7 @@ class Server {
           watch:
             // eslint-disable-next-line no-nested-ternary
             typeof optionsForStatic.watch !== 'undefined'
-              ?              typeof optionsForStatic.watch === 'boolean'
+              ? typeof optionsForStatic.watch === 'boolean'
                 ? optionsForStatic.watch
                   ? def.watch
                   : false
@@ -511,9 +438,9 @@ class Server {
       // AllowedHosts allows some default hosts picked from `options.host` or `webSocketURL.hostname` and `localhost`
       options.allowedHosts = 'auto';
     } else if (
-      typeof options.allowedHosts === 'string'
-      && options.allowedHosts !== 'auto'
-      && options.allowedHosts !== 'all'
+      typeof options.allowedHosts === 'string' &&
+      options.allowedHosts !== 'auto' &&
+      options.allowedHosts !== 'all'
     ) {
       // We store allowedHosts as array when supplied as string
       options.allowedHosts = [options.allowedHosts];
@@ -531,23 +458,6 @@ class Server {
     if (typeof options.client === 'undefined' || (typeof options.client === 'object' && options.client !== null)) {
       if (!options.client) {
         options.client = {};
-      }
-
-      if (typeof options.client.webSocketURL === 'undefined') {
-        options.client.webSocketURL = {};
-      } else if (typeof options.client.webSocketURL === 'string') {
-        const parsedURL = new URL(options.client.webSocketURL);
-
-        options.client.webSocketURL = {
-          protocol: parsedURL.protocol,
-          hostname: parsedURL.hostname,
-          port: parsedURL.port.length > 0 ? Number(parsedURL.port) : '',
-          pathname: parsedURL.pathname,
-          username: parsedURL.username,
-          password: parsedURL.password,
-        };
-      } else if (typeof options.client.webSocketURL.port === 'string') {
-        options.client.webSocketURL.port = Number(options.client.webSocketURL.port);
       }
 
       // Enable client overlay by default
@@ -615,12 +525,12 @@ class Server {
         typeof options.server === 'string'
           ? options.server
           : typeof (options.server || {}).type === 'string'
-            ? options.server.type
-            : isSPDY
-              ? 'spdy'
-              : isHTTPs
-                ? 'https'
-                : 'http',
+          ? options.server.type
+          : isSPDY
+          ? 'spdy'
+          : isHTTPs
+          ? 'https'
+          : 'http',
       options: {
         ...options.https,
         ...(options.server || {}).options,
@@ -665,7 +575,7 @@ class Server {
           }
         };
 
-        options.server.options[property] = Array.isArray(value) ? value.map(item => readFile(item)) : readFile(value);
+        options.server.options[property] = Array.isArray(value) ? value.map((item) => readFile(item)) : readFile(value);
       }
 
       let fakeCert;
@@ -781,7 +691,7 @@ class Server {
 
       if (options.server.options.cacert) {
         if (options.server.options.ca) {
-          this.logger.warn('Do not specify \'ca\' and \'cacert\' options together, the \'ca\' option will be used.');
+          this.logger.warn("Do not specify 'ca' and 'cacert' options together, the 'ca' option will be used.");
         } else {
           options.server.options.ca = options.server.options.cacert;
         }
@@ -793,17 +703,7 @@ class Server {
       options.server.options.cert = options.server.options.cert || fakeCert;
     }
 
-    if (typeof options.ipc === 'boolean') {
-      const isWindows = process.platform === 'win32';
-      const pipePrefix = isWindows ? '\\\\.\\pipe\\' : os.tmpdir();
-      const pipeName = 'webpack-dev-server.sock';
-
-      options.ipc = path.join(pipePrefix, pipeName);
-    }
-
     options.liveReload = typeof options.liveReload !== 'undefined' ? options.liveReload : true;
-
-    options.magicHtml = typeof options.magicHtml !== 'undefined' ? options.magicHtml : true;
 
     // https://github.com/webpack/webpack-dev-server/issues/1990
     const defaultOpenOptions = { wait: false };
@@ -819,7 +719,7 @@ class Server {
       const normalizedTarget = typeof target === 'undefined' ? '<url>' : target;
 
       if (Array.isArray(normalizedTarget)) {
-        return normalizedTarget.map(singleTarget => ({ target: singleTarget, options: normalizedOptions }));
+        return normalizedTarget.map((singleTarget) => ({ target: singleTarget, options: normalizedOptions }));
       }
 
       return [{ target: normalizedTarget, options: normalizedOptions }];
@@ -853,74 +753,6 @@ class Server {
       options.port = Number(options.port);
     }
 
-    /**
-     * Assume a proxy configuration specified as:
-     * proxy: {
-     *   'context': { options }
-     * }
-     * OR
-     * proxy: {
-     *   'context': 'target'
-     * }
-     */
-    if (typeof options.proxy !== 'undefined') {
-      // TODO remove in the next major release, only accept `Array`
-      if (!Array.isArray(options.proxy)) {
-        if (
-          Object.prototype.hasOwnProperty.call(options.proxy, 'target')
-          || Object.prototype.hasOwnProperty.call(options.proxy, 'router')
-        ) {
-          options.proxy = [options.proxy];
-        } else {
-          options.proxy = Object.keys(options.proxy).map((context) => {
-            let proxyOptions;
-            // For backwards compatibility reasons.
-            const correctedContext = context.replace(/^\*$/, '**').replace(/\/\*$/, '');
-
-            if (typeof options.proxy[context] === 'string') {
-              proxyOptions = {
-                context: correctedContext,
-                target: options.proxy[context],
-              };
-            } else {
-              proxyOptions = { ...options.proxy[context] };
-              proxyOptions.context = correctedContext;
-            }
-
-            return proxyOptions;
-          });
-        }
-      }
-
-      options.proxy = options.proxy.map((item) => {
-        const getLogLevelForProxy = (level) => {
-          if (level === 'none') {
-            return 'silent';
-          }
-
-          if (level === 'log') {
-            return 'info';
-          }
-
-          if (level === 'verbose') {
-            return 'debug';
-          }
-
-          return level;
-        };
-
-        if (typeof item.logLevel === 'undefined') {
-          item.logLevel = getLogLevelForProxy(compilerOptions.infrastructureLogging ? compilerOptions.infrastructureLogging.level : 'info');
-        }
-
-        if (typeof item.logProvider === 'undefined') {
-          item.logProvider = () => this.logger;
-        }
-
-        return item;
-      });
-    }
-
     if (typeof options.setupExitSignals === 'undefined') {
       options.setupExitSignals = true;
     }
@@ -946,9 +778,9 @@ class Server {
     if (typeof options.watchFiles === 'string') {
       options.watchFiles = [{ paths: options.watchFiles, options: getWatchOptions() }];
     } else if (
-      typeof options.watchFiles === 'object'
-      && options.watchFiles !== null
-      && !Array.isArray(options.watchFiles)
+      typeof options.watchFiles === 'object' &&
+      options.watchFiles !== null &&
+      !Array.isArray(options.watchFiles)
     ) {
       options.watchFiles = [
         {
@@ -970,124 +802,6 @@ class Server {
     } else {
       options.watchFiles = [];
     }
-
-    const defaultWebSocketServerType = 'ws';
-    const defaultWebSocketServerOptions = { path: '/ws' };
-
-    if (typeof options.webSocketServer === 'undefined') {
-      options.webSocketServer = {
-        type: defaultWebSocketServerType,
-        options: defaultWebSocketServerOptions,
-      };
-    } else if (typeof options.webSocketServer === 'boolean' && !options.webSocketServer) {
-      options.webSocketServer = false;
-    } else if (typeof options.webSocketServer === 'string' || typeof options.webSocketServer === 'function') {
-      options.webSocketServer = {
-        type: options.webSocketServer,
-        options: defaultWebSocketServerOptions,
-      };
-    } else {
-      options.webSocketServer = {
-        type: options.webSocketServer.type || defaultWebSocketServerType,
-        options: {
-          ...defaultWebSocketServerOptions,
-          ...options.webSocketServer.options,
-        },
-      };
-
-      if (typeof options.webSocketServer.options.port === 'string') {
-        options.webSocketServer.options.port = Number(options.webSocketServer.options.port);
-      }
-    }
-  }
-
-  getClientTransport() {
-    let ClientImplementation;
-    let clientImplementationFound = true;
-
-    const isKnownWebSocketServerImplementation =      this.options.webSocketServer
-      && typeof this.options.webSocketServer.type === 'string'
-      && (this.options.webSocketServer.type === 'ws' || this.options.webSocketServer.type === 'sockjs');
-
-    let clientTransport;
-
-    if (this.options.client) {
-      if (typeof this.options.client.webSocketTransport !== 'undefined') {
-        clientTransport = this.options.client.webSocketTransport;
-      } else if (isKnownWebSocketServerImplementation) {
-        clientTransport = this.options.webSocketServer.type;
-      } else {
-        clientTransport = 'ws';
-      }
-    } else {
-      clientTransport = 'ws';
-    }
-
-    switch (typeof clientTransport) {
-      case 'string':
-        // could be 'sockjs', 'ws', or a path that should be required
-        if (clientTransport === 'sockjs') {
-          ClientImplementation = require.resolve('../client/clients/SockJSClient');
-        } else if (clientTransport === 'ws') {
-          ClientImplementation = require.resolve('../client/clients/WebSocketClient');
-        } else {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            ClientImplementation = require.resolve(clientTransport);
-          } catch (e) {
-            clientImplementationFound = false;
-          }
-        }
-        break;
-      default:
-        clientImplementationFound = false;
-    }
-
-    if (!clientImplementationFound) {
-      throw new Error(`${
-        !isKnownWebSocketServerImplementation
-          ? 'When you use custom web socket implementation you must explicitly specify client.webSocketTransport. '
-          : ''
-      }client.webSocketTransport must be a string denoting a default implementation (e.g. 'sockjs', 'ws') or a full path to a JS file via require.resolve(...) which exports a class `);
-    }
-
-    return ClientImplementation;
-  }
-
-  getServerTransport() {
-    let implementation;
-    let implementationFound = true;
-
-    switch (typeof this.options.webSocketServer.type) {
-      case 'string':
-        // Could be 'sockjs', in the future 'ws', or a path that should be required
-        if (this.options.webSocketServer.type === 'sockjs') {
-          implementation = require('./servers/SockJSServer');
-        } else if (this.options.webSocketServer.type === 'ws') {
-          implementation = require('./servers/WebsocketServer');
-        } else {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            implementation = require(this.options.webSocketServer.type);
-          } catch (error) {
-            implementationFound = false;
-          }
-        }
-        break;
-      case 'function':
-        implementation = this.options.webSocketServer.type;
-        break;
-      default:
-        implementationFound = false;
-    }
-
-    if (!implementationFound) {
-      throw new Error('webSocketServer (webSocketServer.type) must be a string denoting a default implementation (e.g. \'ws\', \'sockjs\'), a full path to '
-          + 'a JS file which exports a class extending BaseServer (webpack-dev-server/lib/servers/BaseServer.js) '
-          + 'via require.resolve(...), or the class itself which extends BaseServer');
-    }
-
-    return implementation;
   }
 
   setupProgressPlugin() {
@@ -1104,8 +818,8 @@ class Server {
         msg = `${msg} (${addInfo})`;
       }
 
-      if (this.webSocketServer) {
-        this.sendMessage(this.webSocketServer.clients, 'progress-update', {
+      if (this.webSocketClient) {
+        this.sendMessage('progress-update', {
           percent,
           msg,
           pluginName,
@@ -1119,39 +833,36 @@ class Server {
   }
 
   async initialize() {
-    if (this.options.webSocketServer) {
-      const compilers = this.compiler.compilers || [this.compiler];
+    const compilers = this.compiler.compilers || [this.compiler];
 
-      compilers.forEach((compiler) => {
-        this.addAdditionalEntries(compiler);
+    compilers.forEach((compiler) => {
+      this.addAdditionalEntries(compiler);
 
-        const webpack = compiler.webpack || require('webpack');
+      const webpack = compiler.webpack || require('webpack');
 
-        new webpack.ProvidePlugin({
-          __webpack_dev_server_client__: this.getClientTransport(),
-        }).apply(compiler);
+      // TODO remove after drop webpack v4 support
+      compiler.options.plugins = compiler.options.plugins || [];
 
-        // TODO remove after drop webpack v4 support
-        compiler.options.plugins = compiler.options.plugins || [];
+      if (this.options.hot) {
+        const HMRPluginExists = compiler.options.plugins.find(
+          (p) => p.constructor === webpack.HotModuleReplacementPlugin,
+        );
 
-        if (this.options.hot) {
-          const HMRPluginExists = compiler.options.plugins
-            .find(p => p.constructor === webpack.HotModuleReplacementPlugin);
+        if (HMRPluginExists) {
+          this.logger.warn(
+            '"hot: true" automatically applies HMR plugin, you don\'t have to add it manually to your webpack configuration.',
+          );
+        } else {
+          // Apply the HMR plugin
+          const plugin = new webpack.HotModuleReplacementPlugin();
 
-          if (HMRPluginExists) {
-            this.logger.warn('"hot: true" automatically applies HMR plugin, you don\'t have to add it manually to your webpack configuration.');
-          } else {
-            // Apply the HMR plugin
-            const plugin = new webpack.HotModuleReplacementPlugin();
-
-            plugin.apply(compiler);
-          }
+          plugin.apply(compiler);
         }
-      });
-
-      if (this.options.client && this.options.client.progress) {
-        this.setupProgressPlugin();
       }
+    });
+
+    if (this.options.client && this.options.client.progress) {
+      this.setupProgressPlugin();
     }
 
     this.setupHooks();
@@ -1198,12 +909,6 @@ class Server {
         process.on(signal, listener);
       });
     }
-
-    // Proxy WebSocket without the initial http request
-    // https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
-    this.webSocketProxies.forEach((webSocketProxy) => {
-      this.server.on('upgrade', webSocketProxy.upgrade);
-    }, this);
   }
 
   setupApp() {
@@ -1228,19 +933,47 @@ class Server {
       this.cb(error);
     });
     this.compiler.hooks.invalid.tap('webpack-dev-server', () => {
-      if (this.webSocketServer) {
-        this.sendOption(this.webSocketServer.clients);
-        this.sendMessage(this.webSocketServer.clients, 'invalid');
-      }
+      this.sendMessage('invalid');
     });
-    this.compiler.hooks.done.tap('webpack-dev-server', (stats) => {
-      this.cb(null, stats);
-      if (this.webSocketServer) {
-        this.sendOption(this.webSocketServer.clients);
-        this.sendStats(this.webSocketServer.clients, this.getStats(stats));
+    this.compiler.hooks.done.tap('webpack-dev-server', async (stats) => {
+      if (!this.webSocketClient) {
+        await this.createWebSocketClient();
       }
-
       this.stats = stats;
+      this.cb(null, stats);
+      this.sendStatsWithOption(this.getStats(stats));
+    });
+    this.setupEmitHooks();
+  }
+
+  setupEmitHooks() {
+    const { compiler } = this;
+    compiler.hooks.emit.tap('webpack-dev-server', (compilation) => {
+      const { hash } = compilation;
+      if (!this.emitMap.has(hash)) this.emitMap.set(hash, []);
+
+      compiler.hooks.assetEmitted.tap('webpack-dev-server', (file, info) => {
+        const emitList = this.emitMap.get(hash);
+        let content = null;
+        let targetName = null;
+
+        if (info.compilation) {
+          ({ targetPath: targetName, content } = info);
+        } else {
+          let targetFile = file;
+          const queryStringIdx = targetFile.indexOf('?');
+          if (queryStringIdx >= 0) {
+            targetFile = targetFile.substr(0, queryStringIdx);
+          }
+          targetName = targetFile;
+          content = info;
+        }
+
+        emitList.push({
+          name: targetName,
+          content: content.toString(),
+        });
+      });
     });
   }
 
@@ -1322,87 +1055,6 @@ class Server {
     this.app.use(compress());
   }
 
-  setupProxyFeature() {
-    const { createProxyMiddleware } = require('http-proxy-middleware');
-
-    const getProxyMiddleware = (proxyConfig) => {
-      // It is possible to use the `bypass` method without a `target` or `router`.
-      // However, the proxy middleware has no use in this case, and will fail to instantiate.
-      if (proxyConfig.target) {
-        const context = proxyConfig.context || proxyConfig.path;
-
-        return createProxyMiddleware(context, proxyConfig);
-      }
-
-      if (proxyConfig.router) {
-        return createProxyMiddleware(proxyConfig);
-      }
-    };
-    /**
-     * Assume a proxy configuration specified as:
-     * proxy: [
-     *   {
-     *     context: "value",
-     *     ...options,
-     *   },
-     *   // or:
-     *   function() {
-     *     return {
-     *       context: "context",
-     *       ...options,
-     *     };
-     *   }
-     * ]
-     */
-    this.options.proxy.forEach((proxyConfigOrCallback) => {
-      let proxyMiddleware;
-
-      let proxyConfig = typeof proxyConfigOrCallback === 'function' ? proxyConfigOrCallback() : proxyConfigOrCallback;
-
-      proxyMiddleware = getProxyMiddleware(proxyConfig);
-
-      if (proxyConfig.ws) {
-        this.webSocketProxies.push(proxyMiddleware);
-      }
-
-      const handle = async (req, res, next) => {
-        if (typeof proxyConfigOrCallback === 'function') {
-          const newProxyConfig = proxyConfigOrCallback(req, res, next);
-
-          if (newProxyConfig !== proxyConfig) {
-            proxyConfig = newProxyConfig;
-            proxyMiddleware = getProxyMiddleware(proxyConfig);
-          }
-        }
-
-        // - Check if we have a bypass function defined
-        // - In case the bypass function is defined we'll retrieve the
-        // bypassUrl from it otherwise bypassUrl would be null
-        // TODO remove in the next major in favor `context` and `router` options
-        const isByPassFuncDefined = typeof proxyConfig.bypass === 'function';
-        const bypassUrl = isByPassFuncDefined ? await proxyConfig.bypass(req, res, proxyConfig) : null;
-
-        if (typeof bypassUrl === 'boolean') {
-          // skip the proxy
-          req.url = null;
-          next();
-        } else if (typeof bypassUrl === 'string') {
-          // byPass to that url
-          req.url = bypassUrl;
-          next();
-        } else if (proxyMiddleware) {
-          return proxyMiddleware(req, res, next);
-        } else {
-          next();
-        }
-      };
-
-      this.app.use(handle);
-      // Also forward error requests to the proxy so it can handle them.
-      this.app.use((error, req, res, next) => handle(req, res, next));
-    });
-  }
-
   setupHistoryApiFallbackFeature() {
     const { historyApiFallback } = this.options;
 
@@ -1475,20 +1127,11 @@ class Server {
     this.app.all('*', this.setHeaders.bind(this));
   }
 
-  setupMagicHtmlFeature() {
-    this.app.get('*', this.serveMagicHtml.bind(this));
-  }
-
   setupFeatures() {
     const features = {
       compress: () => {
         if (this.options.compress) {
           this.setupCompressFeature();
-        }
-      },
-      proxy: () => {
-        if (this.options.proxy) {
-          this.setupProxyFeature();
         }
       },
       historyApiFallback: () => {
@@ -1523,9 +1166,6 @@ class Server {
       headers: () => {
         this.setupHeadersFeature();
       },
-      magicHtml: () => {
-        this.setupMagicHtmlFeature();
-      },
     };
 
     const runnableFeatures = [];
@@ -1541,10 +1181,6 @@ class Server {
 
     runnableFeatures.push('headers', 'middleware');
 
-    if (this.options.proxy) {
-      runnableFeatures.push('proxy', 'middleware');
-    }
-
     if (this.options.static) {
       runnableFeatures.push('static');
     }
@@ -1559,10 +1195,6 @@ class Server {
 
     if (this.options.static) {
       runnableFeatures.push('staticServeIndex', 'staticWatch');
-    }
-
-    if (this.options.magicHtml) {
-      runnableFeatures.push('magicHtml');
     }
 
     if (this.options.onAfterSetupMiddleware) {
@@ -1593,43 +1225,58 @@ class Server {
     });
   }
 
-  // TODO: remove `--web-socket-server` in favor of `--web-socket-server-type`
-  createWebSocketServer() {
-    this.webSocketServer = new (this.getServerTransport())(this);
-    this.webSocketServer.implementation.on('connection', (client, request) => {
-      client.on('close', () => {
-        this.logger.warn('HMR ws client is closed.');
+  createWebSocketClient() {
+    return new Promise((resolve, reject) => {
+      const { host, port } = this.options.remote;
+      const webSocketURL = `ws://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.remote.id}`;
+      this.webSocketClient = new WebSocket(webSocketURL);
+      this.webSocketClient.on('open', () => {
+        this.logger.info('HMR ws client is connected.');
+        resolve();
       });
-
-      const headers = typeof request !== 'undefined'
-        ? request.headers
-        : typeof client.headers !== 'undefined'
-          ? client.headers
-          : undefined;
-
-      if (!headers) {
-        this.logger.warn('webSocketServer implementation must pass headers for the "connection" event');
-      }
-
-      if (!headers || !this.checkHeader(headers, 'host') || !this.checkHeader(headers, 'origin')) {
-        this.sendMessage([client], 'error', 'Invalid Host/Origin header');
-
-        // With https enabled, the sendMessage above is encrypted asynchronously so not yet sent
-        // Terminate would prevent it sending, so use close to allow it to be sent
-        client.close();
-
-        return;
-      }
-      this.logger.info('HMR ws client is connected.');
-
-      this.sendOption([client]);
-
-      if (!this.stats) {
-        return;
-      }
-
-      this.sendStats([client], this.getStats(this.stats), true);
+      this.webSocketClient.on('ping', () => {
+        this.webSocketClient.pong();
+      });
+      this.webSocketClient.on('close', () => {
+        this.logger.info('HMR ws client is closed! ');
+      });
+      this.webSocketClient.on('error', (e) => {
+        this.logger.warn('HMR ws error: ', e);
+        if (this.webSocketClient.readyState === WebSocket.CLOSING) reject();
+      });
     });
+  }
+
+  sendStatsWithOption() {
+    if (this.options.hot === true || this.options.hot === 'only') {
+      this.logger.info('enable HMR');
+      this.sendMessage('hot');
+    }
+
+    if (this.options.liveReload) {
+      this.logger.info('enable live reload');
+      this.sendMessage('liveReload');
+    }
+
+    if (this.options.client && this.options.client.progress) {
+      this.sendMessage('progress', this.options.client.progress);
+    }
+
+    if (this.options.client && this.options.client.reconnect) {
+      this.sendMessage('reconnect', this.options.client.reconnect);
+    }
+
+    if (this.options.client && this.options.client.overlay) {
+      this.sendMessage('overlay', this.options.client.overlay);
+    }
+
+    if (!this.stats) {
+      return;
+    }
+
+    const stats = this.getStats(this.stats);
+    this.sendFiles(stats.hash);
+    this.sendStats(stats, true);
   }
 
   sendOption(clients) {
@@ -1659,28 +1306,32 @@ class Server {
   openBrowser(defaultOpenTarget) {
     const open = require('open');
 
-    Promise.all(this.options.open.map((item) => {
-      let openTarget;
+    Promise.all(
+      this.options.open.map((item) => {
+        let openTarget;
 
-      if (item.target === '<url>') {
-        openTarget = defaultOpenTarget;
-      } else {
-        openTarget = Server.isAbsoluteURL(item.target)
-          ? item.target
-          : new URL(item.target, defaultOpenTarget).toString();
-      }
+        if (item.target === '<url>') {
+          openTarget = defaultOpenTarget;
+        } else {
+          openTarget = Server.isAbsoluteURL(item.target)
+            ? item.target
+            : new URL(item.target, defaultOpenTarget).toString();
+        }
 
-      return open(openTarget, item.options).catch(() => {
-        this.logger.warn(`Unable to open "${openTarget}" page${
-          // eslint-disable-next-line no-nested-ternary
-          item.options.app
-            ? ` in "${item.options.app.name}" app${
-              item.options.app.arguments ? ` with "${item.options.app.arguments.join(' ')}" arguments` : ''
-            }`
-            : ''
-        }. If you are running in a headless environment, please do not use the "open" option or related flags like "--open", "--open-target", and "--open-app".`);
-      });
-    }));
+        return open(openTarget, item.options).catch(() => {
+          this.logger.warn(
+            `Unable to open "${openTarget}" page${
+              // eslint-disable-next-line no-nested-ternary
+              item.options.app
+                ? ` in "${item.options.app.name}" app${
+                    item.options.app.arguments ? ` with "${item.options.app.arguments.join(' ')}" arguments` : ''
+                  }`
+                : ''
+            }. If you are running in a headless environment, please do not use the "open" option or related flags like "--open", "--open-target", and "--open-app".`,
+          );
+        });
+      }),
+    );
   }
 
   stopBonjour(callback = () => {}) {
@@ -1737,109 +1388,110 @@ class Server {
     };
     const useColor = getColorsOption(this.getCompilerOptions());
 
-    if (this.options.ipc) {
-      this.logger.info(`Project is running at: "${this.server.address()}"`);
-    } else {
-      const protocol = this.options.server.type === 'http' ? 'http' : 'https';
-      const { address, port } = this.server.address();
-      const prettyPrintURL = newHostname => url.format({ protocol, hostname: newHostname, port, pathname: '/' });
+    const protocol = this.options.server.type === 'http' ? 'http' : 'https';
+    const { address, port } = this.server.address();
+    const prettyPrintURL = (newHostname) => url.format({ protocol, hostname: newHostname, port, pathname: '/' });
 
-      let server;
-      let localhost;
-      let loopbackIPv4;
-      let loopbackIPv6;
-      let networkUrlIPv4;
-      let networkUrlIPv6;
+    let server;
+    let localhost;
+    let loopbackIPv4;
+    let loopbackIPv6;
+    let networkUrlIPv4;
+    let networkUrlIPv6;
 
-      if (this.options.host) {
-        if (this.options.host === 'localhost') {
-          localhost = prettyPrintURL('localhost');
-        } else {
-          let isIP;
+    if (this.options.host) {
+      if (this.options.host === 'localhost') {
+        localhost = prettyPrintURL('localhost');
+      } else {
+        let isIP;
 
-          try {
-            isIP = ipaddr.parse(this.options.host);
-          } catch (error) {
-            // Ignore
-          }
+        try {
+          isIP = ipaddr.parse(this.options.host);
+        } catch (error) {
+          // Ignore
+        }
 
-          if (!isIP) {
-            server = prettyPrintURL(this.options.host);
-          }
+        if (!isIP) {
+          server = prettyPrintURL(this.options.host);
         }
       }
+    }
 
-      const parsedIP = ipaddr.parse(address);
+    const parsedIP = ipaddr.parse(address);
 
-      if (parsedIP.range() === 'unspecified') {
-        localhost = prettyPrintURL('localhost');
+    if (parsedIP.range() === 'unspecified') {
+      localhost = prettyPrintURL('localhost');
 
-        const networkIPv4 = Server.internalIPSync('v4');
+      const networkIPv4 = Server.internalIPSync('v4');
 
-        if (networkIPv4) {
-          networkUrlIPv4 = prettyPrintURL(networkIPv4);
-        }
+      if (networkIPv4) {
+        networkUrlIPv4 = prettyPrintURL(networkIPv4);
+      }
 
-        const networkIPv6 = Server.internalIPSync('v6');
+      const networkIPv6 = Server.internalIPSync('v6');
 
-        if (networkIPv6) {
-          networkUrlIPv6 = prettyPrintURL(networkIPv6);
-        }
-      } else if (parsedIP.range() === 'loopback') {
-        if (parsedIP.kind() === 'ipv4') {
-          loopbackIPv4 = prettyPrintURL(parsedIP.toString());
-        } else if (parsedIP.kind() === 'ipv6') {
-          loopbackIPv6 = prettyPrintURL(parsedIP.toString());
-        }
-      } else {
-        networkUrlIPv4 =          parsedIP.kind() === 'ipv6' && parsedIP.isIPv4MappedAddress()
+      if (networkIPv6) {
+        networkUrlIPv6 = prettyPrintURL(networkIPv6);
+      }
+    } else if (parsedIP.range() === 'loopback') {
+      if (parsedIP.kind() === 'ipv4') {
+        loopbackIPv4 = prettyPrintURL(parsedIP.toString());
+      } else if (parsedIP.kind() === 'ipv6') {
+        loopbackIPv6 = prettyPrintURL(parsedIP.toString());
+      }
+    } else {
+      networkUrlIPv4 =
+        parsedIP.kind() === 'ipv6' && parsedIP.isIPv4MappedAddress()
           ? prettyPrintURL(parsedIP.toIPv4Address().toString())
           : prettyPrintURL(address);
 
-        if (parsedIP.kind() === 'ipv6') {
-          networkUrlIPv6 = prettyPrintURL(address);
-        }
+      if (parsedIP.kind() === 'ipv6') {
+        networkUrlIPv6 = prettyPrintURL(address);
       }
+    }
 
-      this.logger.info('Project is running at:');
+    this.logger.info('Project is running at:');
 
-      if (server) {
-        this.logger.info(`Server: ${colors.info(useColor, server)}`);
-      }
+    if (server) {
+      this.logger.info(`Server: ${colors.info(useColor, server)}`);
+    }
 
-      if (localhost || loopbackIPv4 || loopbackIPv6) {
-        const loopbacks = []
-          .concat(localhost ? [colors.info(useColor, localhost)] : [])
-          .concat(loopbackIPv4 ? [colors.info(useColor, loopbackIPv4)] : [])
-          .concat(loopbackIPv6 ? [colors.info(useColor, loopbackIPv6)] : []);
+    if (localhost || loopbackIPv4 || loopbackIPv6) {
+      const loopbacks = []
+        .concat(localhost ? [colors.info(useColor, localhost)] : [])
+        .concat(loopbackIPv4 ? [colors.info(useColor, loopbackIPv4)] : [])
+        .concat(loopbackIPv6 ? [colors.info(useColor, loopbackIPv6)] : []);
 
-        this.logger.info(`Loopback: ${loopbacks.join(', ')}`);
-      }
+      this.logger.info(`Loopback: ${loopbacks.join(', ')}`);
+    }
 
-      if (networkUrlIPv4) {
-        this.logger.info(`On Your Network (IPv4): ${colors.info(useColor, networkUrlIPv4)}`);
-      }
+    if (networkUrlIPv4) {
+      this.logger.info(`On Your Network (IPv4): ${colors.info(useColor, networkUrlIPv4)}`);
+    }
 
-      if (networkUrlIPv6) {
-        this.logger.info(`On Your Network (IPv6): ${colors.info(useColor, networkUrlIPv6)}`);
-      }
+    if (networkUrlIPv6) {
+      this.logger.info(`On Your Network (IPv6): ${colors.info(useColor, networkUrlIPv6)}`);
+    }
 
-      if (this.options.open.length > 0) {
-        const openTarget = prettyPrintURL(this.options.host || 'localhost');
+    if (this.options.open.length > 0) {
+      const openTarget = prettyPrintURL(this.options.host || 'localhost');
 
-        this.openBrowser(openTarget);
-      }
+      this.openBrowser(openTarget);
     }
 
     if (this.options.static && this.options.static.length > 0) {
-      this.logger.info(`Content not from webpack is served from '${colors.info(
-        useColor,
-        this.options.static.map(staticOption => staticOption.directory).join(', '),
-      )}' directory`);
+      this.logger.info(
+        `Content not from webpack is served from '${colors.info(
+          useColor,
+          this.options.static.map((staticOption) => staticOption.directory).join(', '),
+        )}' directory`,
+      );
     }
 
     if (this.options.historyApiFallback) {
-      this.logger.info(`404s will fallback to '${colors.info(useColor, this.options.historyApiFallback.index || '/index.html')}'`);
+      this.logger.info(
+        `404s will fallback to '${colors.info(useColor, this.options.historyApiFallback.index || '/index.html')}'`,
+      );
     }
 
     if (this.options.bonjour) {
@@ -1910,10 +1562,11 @@ class Server {
     // so we have the pure IPv6-address in hostname.
     // always allow localhost host, for convenience (hostname === 'localhost')
     // allow hostname of listening address  (hostname === this.options.host)
-    const isValidHostname =      ipaddr.IPv4.isValid(hostname)
-      || ipaddr.IPv6.isValid(hostname)
-      || hostname === 'localhost'
-      || hostname === this.options.host;
+    const isValidHostname =
+      ipaddr.IPv4.isValid(hostname) ||
+      ipaddr.IPv6.isValid(hostname) ||
+      hostname === 'localhost' ||
+      hostname === this.options.host;
 
     if (isValidHostname) {
       return true;
@@ -1943,65 +1596,33 @@ class Server {
       }
     }
 
-    // Also allow if `client.webSocketURL.hostname` provided
-    if (this.options.client && typeof this.options.client.webSocketURL !== 'undefined') {
-      return this.options.client.webSocketURL.hostname === hostname;
-    }
-
     // disallow
     return false;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  sendMessage(clients, type, data, params) {
-    for (const client of clients) {
-      // `sockjs` uses `1` to indicate client is ready to accept data
-      // `ws` uses `WebSocket.OPEN`, but it is mean `1` too
-      if (client.readyState === 1) {
-        client.send(JSON.stringify({ type, data, params }));
-      }
+  sendMessage(type, data, params) {
+    if (this.webSocketClient && this.webSocketClient.readyState === 1) {
+      this.webSocketClient.send(JSON.stringify({ type, data, params }));
     }
   }
 
-  serveMagicHtml(req, res, next) {
-    this.middleware.waitUntilValid(() => {
-      const _path = req.path;
-
-      try {
-        const filename = this.middleware.getFilenameFromUrl(`${_path}.js`);
-        const isFile = this.middleware.context.outputFileSystem.statSync(filename).isFile();
-
-        if (!isFile) {
-          return next();
-        }
-
-        // Serve a page that executes the javascript
-        const queries = req._parsedUrl.search || '';
-        const responsePage = `<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body><script type="text/javascript" charset="utf-8" src="${_path}.js${queries}"></script></body></html>`;
-
-        res.send(responsePage);
-      } catch (error) {
-        return next();
-      }
-    });
-  }
-
   // Send stats to a socket or multiple sockets
-  sendStats(clients, stats, force) {
-    const shouldEmit =      !force
-      && stats
-      && (!stats.errors || stats.errors.length === 0)
-      && (!stats.warnings || stats.warnings.length === 0)
-      && this.currentHash === stats.hash;
+  sendStats(stats, force) {
+    const shouldEmit =
+      !force &&
+      stats &&
+      (!stats.errors || stats.errors.length === 0) &&
+      (!stats.warnings || stats.warnings.length === 0) &&
+      this.currentHash === stats.hash;
 
     if (shouldEmit) {
-      this.sendMessage(clients, 'still-ok');
-
+      this.sendMessage('still-ok');
       return;
     }
 
     this.currentHash = stats.hash;
-    this.sendMessage(clients, 'hash', stats.hash);
+    this.sendMessage('hash', stats.hash);
 
     if (stats.errors.length > 0 || stats.warnings.length > 0) {
       const hasErrors = stats.errors.length > 0;
@@ -2013,15 +1634,24 @@ class Server {
           params = { preventReloading: true };
         }
 
-        this.sendMessage(clients, 'warnings', stats.warnings, params);
+        this.sendMessage('warnings', stats.warnings, params);
       }
 
       if (stats.errors.length > 0) {
-        this.sendMessage(clients, 'errors', stats.errors);
+        this.sendMessage('errors', stats.errors);
       }
     } else {
-      this.sendMessage(clients, 'ok');
+      this.sendMessage('ok');
     }
+  }
+
+  sendFiles(hash) {
+    const emitList = this.emitMap.get(hash);
+    if (!emitList || emitList.length === 0) return;
+    this.sendMessage('transfer-file', emitList, { id: this.options.remote.id });
+    process.nextTick(() => {
+      this.emitMap.delete(hash);
+    });
   }
 
   watchFiles(watchPath, watchOptions) {
@@ -2031,9 +1661,7 @@ class Server {
     // disabling refreshing on changing the content
     if (this.options.liveReload) {
       watcher.on('change', (item) => {
-        if (this.webSocketServer) {
-          this.sendMessage(this.webSocketServer.clients, 'static-changed', item);
-        }
+        this.sendMessage('static-changed', item);
       });
     }
 
@@ -2049,60 +1677,18 @@ class Server {
   async start() {
     await this.normalizeOptions();
 
-    if (this.options.ipc) {
-      await new Promise((resolve, reject) => {
-        const net = require('net');
-        const socket = new net.Socket();
-
-        socket.on('error', (error) => {
-          if (error.code === 'ECONNREFUSED') {
-            // No other server listening on this socket so it can be safely removed
-            fs.unlinkSync(this.options.ipc);
-
-            resolve();
-
-            return;
-          }
-          if (error.code === 'ENOENT') {
-            resolve();
-
-            return;
-          }
-
-          reject(error);
-        });
-
-        socket.connect({ path: this.options.ipc }, () => {
-          throw new Error(`IPC "${this.options.ipc}" is already used`);
-        });
-      });
-    } else {
-      this.options.host = await Server.getHostname(this.options.host);
-      this.options.port = await Server.getFreePort(this.options.port);
-    }
+    this.options.host = await Server.getHostname(this.options.host);
+    this.options.port = await Server.getFreePort(this.options.port);
 
     await this.initialize();
 
-    const listenOptions = this.options.ipc
-      ? { path: this.options.ipc }
-      : { host: this.options.host, port: this.options.port };
+    const listenOptions = { host: this.options.host, port: this.options.port };
 
     await new Promise((resolve) => {
-      this.server.listen(listenOptions, () => {
+      this.server.listen(this.options.port, this.options.host, () => {
         resolve();
       });
     });
-
-    if (this.options.ipc) {
-      // chmod 666 (rw rw rw)
-      const READ_WRITE = 438;
-
-      await fs.promises.chmod(this.options.ipc, READ_WRITE);
-    }
-
-    if (this.options.webSocketServer) {
-      this.createWebSocketServer();
-    }
 
     if (this.options.bonjour) {
       this.runBonjour();
@@ -2132,26 +1718,11 @@ class Server {
 
     this.webSocketProxies = [];
 
-    await Promise.all(this.staticWatchers.map(watcher => watcher.close()));
+    await Promise.all(this.staticWatchers.map((watcher) => watcher.close()));
 
     this.staticWatchers = [];
 
-    if (this.webSocketServer) {
-      await new Promise((resolve) => {
-        this.webSocketServer.implementation.close(() => {
-          this.webSocketServer = null;
-          this.logger.warn('HMR ws server is closed.');
-
-          resolve();
-        });
-
-        for (const client of this.webSocketServer.clients) {
-          client.terminate();
-        }
-
-        this.webSocketServer.clients = [];
-      });
-    }
+    this.webSocketClient.terminate();
 
     if (this.server) {
       await new Promise((resolve) => {
@@ -2199,58 +1770,10 @@ class Server {
   }
 
   // TODO remove in the next major release
-  listen(port, hostname, fn) {
-    util.deprecate(
-      () => {},
-      '\'listen\' is deprecated. Please use async \'start\' or \'startCallback\' methods.',
-      'DEP_WEBPACK_DEV_SERVER_LISTEN',
-    )();
-
-    this.logger = this.compiler.getInfrastructureLogger('webpack-dev-server');
-
-    if (typeof port === 'function') {
-      fn = port;
-    }
-
-    if (typeof port !== 'undefined' && typeof this.options.port !== 'undefined' && port !== this.options.port) {
-      this.options.port = port;
-
-      this.logger.warn('The "port" specified in options is different from the port passed as an argument. Will be used from arguments.');
-    }
-
-    if (!this.options.port) {
-      this.options.port = port;
-    }
-
-    if (typeof hostname !== 'undefined' && typeof this.options.host !== 'undefined' && hostname !== this.options.host) {
-      this.options.host = hostname;
-
-      this.logger.warn('The "host" specified in options is different from the host passed as an argument. Will be used from arguments.');
-    }
-
-    if (!this.options.host) {
-      this.options.host = hostname;
-    }
-
-    return this.start()
-      .then(() => {
-        if (fn) {
-          fn.call(this.server);
-        }
-      })
-      .catch((error) => {
-        // Nothing
-        if (fn) {
-          fn.call(this.server, error);
-        }
-      });
-  }
-
-  // TODO remove in the next major release
   close(callback) {
     util.deprecate(
       () => {},
-      '\'close\' is deprecated. Please use async \'stop\' or \'stopCallback\' methods.',
+      "'close' is deprecated. Please use async 'stop' or 'stopCallback' methods.",
       'DEP_WEBPACK_DEV_SERVER_CLOSE',
     )();
 

@@ -61,12 +61,6 @@
             },
             "reconnect": {
               "$ref": "#/definitions/ClientReconnect"
-            },
-            "webSocketTransport": {
-              "$ref": "#/definitions/ClientWebSocketTransport"
-            },
-            "webSocketURL": {
-              "$ref": "#/definitions/ClientWebSocketURL"
             }
           }
         }
@@ -460,29 +454,10 @@
       "description": "Enables Hot Module Replacement.",
       "link": "https://webpack.js.org/configuration/dev-server/#devserverhot"
     },
-    "IPC": {
-      "anyOf": [
-        {
-          "type": "string",
-          "minLength": 1
-        },
-        {
-          "type": "boolean",
-          "enum": [true]
-        }
-      ],
-      "description": "Listen to a unix socket.",
-      "link": "https://webpack.js.org/configuration/dev-server/#devserveripc"
-    },
     "LiveReload": {
       "type": "boolean",
       "description": "Enables reload/refresh the page(s) when file changes are detected (enabled by default).",
       "link": "https://webpack.js.org/configuration/dev-server/#devserverlivereload"
-    },
-    "MagicHTML": {
-      "type": "boolean",
-      "description": "Tells dev-server whether to enable magic HTML routes (routes corresponding to your webpack output, for example '/main' for 'main.js').",
-      "link": "https://webpack.js.org/configuration/dev-server/#devservermagichtml"
     },
     "OnAfterSetupMiddleware": {
       "instanceof": "Function",
@@ -608,28 +583,6 @@
       ],
       "description": "Allows to specify a port to use.",
       "link": "https://webpack.js.org/configuration/dev-server/#devserverport"
-    },
-    "Proxy": {
-      "anyOf": [
-        {
-          "type": "object"
-        },
-        {
-          "type": "array",
-          "items": {
-            "anyOf": [
-              {
-                "type": "object"
-              },
-              {
-                "instanceof": "Function"
-              }
-            ]
-          }
-        }
-      ],
-      "description": "Allows to proxy requests, can be useful when you have a separate API backend development server and you want to send API requests on the same domain.",
-      "link": "https://webpack.js.org/configuration/dev-server/#devserverproxy"
     },
     "Server": {
       "anyOf": [
@@ -997,70 +950,26 @@
       "type": "string",
       "minLength": 1
     },
-    "WebSocketServer": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/WebSocketServerEnum"
-        },
-        {
-          "$ref": "#/definitions/WebSocketServerString"
-        },
-        {
-          "$ref": "#/definitions/WebSocketServerFunction"
-        },
-        {
-          "$ref": "#/definitions/WebSocketServerObject"
-        }
-      ],
-      "description": "Allows to set web socket server and options (by default 'ws').",
-      "link": "https://webpack.js.org/configuration/dev-server/#devserverwebsocketserver"
-    },
-    "WebSocketServerType": {
-      "enum": ["sockjs", "ws"]
-    },
-    "WebSocketServerEnum": {
-      "anyOf": [
-        {
-          "enum": [false]
-        },
-        {
-          "$ref": "#/definitions/WebSocketServerType"
-        }
-      ],
-      "description": "Deprecated: please use 'webSocketServer.type'/'--web-socket-server-type' option."
-    },
-    "WebSocketServerFunction": {
-      "instanceof": "Function"
-    },
-    "WebSocketServerObject": {
+    "Remote": {
       "type": "object",
       "properties": {
-        "type": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/WebSocketServerType"
-            },
-            {
-              "$ref": "#/definitions/WebSocketServerString"
-            },
-            {
-              "$ref": "#/definitions/WebSocketServerFunction"
-            }
-          ]
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "remote public resource uuid."
         },
-        "options": {
-          "type": "object",
-          "additionalProperties": true,
-          "cli": {
-            "exclude": true
-          }
+        "host": {
+          "type": "string",
+          "minLength": 1,
+          "description": "remote debug host."
+        },
+        "port": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "remote debug port."
         }
-      },
-      "additionalProperties": false
-    },
-    "WebSocketServerString": {
-      "type": "string",
-      "minLength": 1
+      }
     }
   },
   "additionalProperties": false,
@@ -1098,14 +1007,8 @@
     "https": {
       "$ref": "#/definitions/HTTPS"
     },
-    "ipc": {
-      "$ref": "#/definitions/IPC"
-    },
     "liveReload": {
       "$ref": "#/definitions/LiveReload"
-    },
-    "magicHtml": {
-      "$ref": "#/definitions/MagicHTML"
     },
     "onAfterSetupMiddleware": {
       "$ref": "#/definitions/OnAfterSetupMiddleware"
@@ -1122,9 +1025,6 @@
     "port": {
       "$ref": "#/definitions/Port"
     },
-    "proxy": {
-      "$ref": "#/definitions/Proxy"
-    },
     "server": {
       "$ref": "#/definitions/Server"
     },
@@ -1137,8 +1037,8 @@
     "watchFiles": {
       "$ref": "#/definitions/WatchFiles"
     },
-    "webSocketServer": {
-      "$ref": "#/definitions/WebSocketServer"
+    "remote": {
+      "$ref": "#/definitions/Remote"
     }
   }
 }

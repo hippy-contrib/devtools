@@ -13,8 +13,9 @@ export class MemoryModel extends DBModel {
   public async init() {}
 
   public async get(key: string, field: string) {
-    const all = await this.getAll(key);
-    return all[field];
+    const hashmap = MemoryModel.db.get(key);
+    if(!hashmap) return;
+    return hashmap.get(field);
   }
 
   public getAll(key: string) {

@@ -164,3 +164,9 @@ export enum HMREvent {
   ContentChanged = 'content-changed',
   TransferFile = 'transfer-file',
 }
+
+export enum WSCode {
+  InvalidRequestParams = 4000,
+  HMRServerClosed = 4001,
+  NoDebugTarget = 4002,
+}

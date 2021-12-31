@@ -32,8 +32,16 @@
       "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "Attach",
+      "name": "Attach debug server",
       "port": 7777,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "pwa-node",
+      "timeout": 60000
+    },
+    {
+      "name": "Attach dev server",
+      "port": 7778,
       "request": "attach",
       "skipFiles": ["<node_internals>/**"],
       "type": "pwa-node",

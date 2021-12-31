@@ -12,8 +12,8 @@ import { parseWsUrl, getWsInvalidReason, AppWsUrlParams, DevtoolsWsUrlParams, HM
 import { createTargetByWsUrlParams, patchDebugTarget } from '@/utils/debug-target';
 import { config } from '@/config';
 import { onHMRClientConnection, onHMRServerConnection } from '@/controller/hmr';
-import { WS_CLOSE_REASON } from '@/@types/constants';
 
+const heartbeatInterval = 30000;
 // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
 const mockCmdId = -100000;
 const resumeCommands = [
@@ -45,6 +45,7 @@ const log = new Logger('socket-server', WinstonColor.Cyan);
 export class SocketServer {
   private wss: WSServer;
   private server: HTTPServer | undefined;
+  private interval;
 
   public constructor(server: HTTPServer) {
     this.server = server;
@@ -70,6 +71,21 @@ export class SocketServer {
     wss.on('upgrade', (response: IncomingMessage) => {
       log.info('wss upgrade: %j', response);
     });
+    wss.on('close', () => {
+      clearInterval(this.interval);
+    });
+
+    this.interval = setInterval(() => {
+      (this.wss.clients as Set<MyWebSocket>).forEach((client) => {
+        if (client.isAlive === false) {
+          client.terminate();
+          return;
+        }
+
+        client.isAlive = false;
+        client.ping(() => {});
+      });
+    }, heartbeatInterval);
   }
 
   /**
@@ -90,8 +106,12 @@ export class SocketServer {
     log.info('on connection, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
     const reason = getWsInvalidReason(wsUrlParams);
-    if (reason) return ws.close(WS_CLOSE_REASON, reason);
+    if (reason) return ws.close(WSCode.InvalidRequestParams, reason);
 
+    ws.isAlive = true;
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
     const { clientRole } = wsUrlParams;
     if (clientRole === ClientRole.HMRClient) {
       onHMRClientConnection(ws, wsUrlParams as HMRWsParams);
@@ -109,7 +129,7 @@ export class SocketServer {
       if (!exist) {
         const reason = `debugTarget not exist! ${params.clientId}`;
         log.warn(reason);
-        ws.close(WS_CLOSE_REASON, reason);
+        ws.close(WSCode.NoDebugTarget, reason);
       }
     }
   }
