@@ -8,9 +8,11 @@ import { DebugTargetManager } from '@/controller/debug-targets';
 import { subscribeCommand, cleanDebugTarget, cleanAllDebugTargets } from '@/controller/pub-sub-manager';
 import { Logger } from '@/utils/log';
 import { createDownwardChannel, createUpwardChannel, createInternalChannel } from '@/utils/pub-sub-channel';
-import { parseWsUrl, isConnectionValid, AppWsUrlParams, DevtoolsWsUrlParams } from '@/utils/url';
+import { parseWsUrl, getWsInvalidReason, AppWsUrlParams, DevtoolsWsUrlParams, HMRWsParams } from '@/utils/url';
 import { createTargetByWsUrlParams, patchDebugTarget } from '@/utils/debug-target';
 import { config } from '@/config';
+import { onHMRClientConnection, onHMRServerConnection } from '@/controller/hmr';
+import { WS_CLOSE_REASON } from '@/@types/constants';
 
 // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
 const mockCmdId = -100000;
@@ -80,23 +82,43 @@ export class SocketServer {
     });
   }
 
+  /**
+   * ⚠️ 给 ws 添加事件监听前，不要执行异步操作，否则会遗漏消息
+   * 事件监听后，再异步判断是否合法，不合法则关闭
+   */
   private async onConnection(ws: MyWebSocket, req: IncomingMessage) {
     log.info('on connection, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
-    const { clientRole, clientId } = wsUrlParams;
-    if (clientRole === ClientRole.Devtools) {
+    const reason = getWsInvalidReason(wsUrlParams);
+    if (reason) return ws.close(WS_CLOSE_REASON, reason);
+
+    const { clientRole } = wsUrlParams;
+    if (clientRole === ClientRole.HMRClient) {
+      onHMRClientConnection(ws, wsUrlParams as HMRWsParams);
+    } else if (clientRole === ClientRole.HMRServer) {
+      onHMRServerConnection(ws, wsUrlParams as HMRWsParams);
+    } else if (clientRole === ClientRole.Devtools) {
       this.onDevtoolsConnection(ws, wsUrlParams as DevtoolsWsUrlParams);
     } else {
-      this.onAppConnection(ws, wsUrlParams);
+      this.onAppConnection(ws, wsUrlParams as AppWsUrlParams);
     }
 
-    /**
-     * ⚠️ 给 ws 添加事件监听前，不要执行异步操作
-     * 连接建立后，再判断是否合法，不合法则关闭
-     */
+    if (clientRole === ClientRole.Devtools) {
+      const params = wsUrlParams as DevtoolsWsUrlParams;
+      const exist = await this.checkDebugTargetExist(params);
+      if (!exist) {
+        const reason = `debugTarget not exist! ${params.clientId}`;
+        log.warn(reason);
+        ws.close(WS_CLOSE_REASON, reason);
+      }
+    }
+  }
+
+  private async checkDebugTargetExist(wsUrlParams: DevtoolsWsUrlParams): Promise<boolean> {
+    const { clientId } = wsUrlParams;
     const debugTarget = await DebugTargetManager.findDebugTarget(clientId);
-    const isValid = isConnectionValid(wsUrlParams, debugTarget);
-    if (!isValid) return ws.close();
+    log.info('checkDebugTargetExist debug target: %j', debugTarget);
+    return Boolean(debugTarget);
   }
 
   /**
@@ -162,7 +184,7 @@ export class SocketServer {
     // app ws 添加监听前可以执行异步操作，因为 app 建立连接后不会主动发送任何消息
     debugTarget = await patchDebugTarget(debugTarget);
     const { model } = getDBOperator();
-    model.upsert(config.redis.key, clientId, debugTarget);
+    model.upsert(config.redis.debugTargetTable, clientId, debugTarget);
     process.nextTick(() => {
       subscribeCommand(debugTarget, ws);
     });

@@ -105,7 +105,7 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
  */
 export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean) => {
   const { model } = getDBOperator();
-  model.delete(config.redis.key, clientId);
+  model.delete(config.redis.debugTargetTable, clientId);
   const channelInfo = channelMap.get(clientId);
   if (!channelInfo) return;
 

@@ -38,7 +38,7 @@ class DeviceManager {
         debugTarget = await patchDebugTarget(debugTarget);
         const { model } = getDBOperator();
         log.info('before upsert model %j', debugTarget);
-        model.upsert(config.redis.key, debugTarget.clientId, debugTarget);
+        model.upsert(config.redis.debugTargetTable, debugTarget.clientId, debugTarget);
         subscribeCommand(debugTarget);
       } catch (e) {
         log.info('app connect e, %j, %j', (e as any)?.stack, e);

@@ -41,6 +41,8 @@ export enum ClientRole {
   Android = 'android_client',
   Devtools = 'devtools',
   IOS = 'ios_client',
+  HMRClient = 'hmr_client',
+  HMRServer = 'hmr_server',
 }
 
 export const enum AppClientEvent {
@@ -141,4 +143,24 @@ export enum WSCode {
   NoDebugTarget = 4002,
   ClosePage = 4003,
   ReloadPage = 4004,
+}
+
+export enum HMREvent {
+  Hot = 'hot',
+  LiveReload = 'liveReload',
+  Invalid = 'invalid',
+  Hash = 'hash',
+  Logging = 'logging',
+  Overlay = 'overlay',
+  Reconnect = 'reconnect',
+  Progress = 'progress',
+  Ok = 'ok',
+  Warnings = 'warnings',
+  Errors = 'errors',
+  Error = 'error',
+  Close = 'close',
+  ProgressUpdate = 'progress-update',
+  StillOk = 'still-ok',
+  ContentChanged = 'content-changed',
+  TransferFile = 'transfer-file',
 }

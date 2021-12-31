@@ -4,6 +4,7 @@
 export abstract class DBModel {
   public abstract init();
   public abstract getAll(key: string);
+  public abstract get(key: string, field: string);
 
   /**
    * field 存在则更新，不存在则添加

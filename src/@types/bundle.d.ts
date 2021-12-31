@@ -1,0 +1,3 @@
+interface Bundle {
+  hash: string;
+}

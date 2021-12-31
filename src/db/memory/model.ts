@@ -12,7 +12,12 @@ export class MemoryModel extends DBModel {
    */
   public async init() {}
 
-  public getAll(key) {
+  public async get(key: string, field: string) {
+    const all = await this.getAll(key);
+    return all[field];
+  }
+
+  public getAll(key: string) {
     const hashmap = MemoryModel.db.get(key) || new Map();
     return Array.from(hashmap.values());
   }

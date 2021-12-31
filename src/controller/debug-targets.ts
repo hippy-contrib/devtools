@@ -15,7 +15,10 @@ export class DebugTargetManager {
   public static getDebugTargets = async (): Promise<DebugTarget[]> => {
     const { iWDPPort } = global.debugAppArgv;
     const { model } = getDBOperator();
-    const [targets, iOSPages] = await Promise.all([model.getAll(config.redis.key), getIWDPPages(iWDPPort)]);
+    const [targets, iOSPages] = await Promise.all([
+      model.getAll(config.redis.debugTargetTable),
+      getIWDPPages(iWDPPort),
+    ]);
     targets.forEach((target, i) => {
       if (target.platform === DevicePlatform.IOS) {
         targets[i] = patchIOSTarget(target, iOSPages);

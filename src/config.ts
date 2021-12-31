@@ -8,6 +8,7 @@ export const config: Config = {
   domain,
   wsPath: '/debugger-proxy',
   cachePath: path.join(__dirname, 'cache'),
+  hmrStaticPath: path.join(__dirname, 'hmr'),
   logPath: path.join(__dirname, 'log'),
   hmrPortPath: path.join(__dirname, 'cache/hmr-port.txt'),
   iWDPStartPort: 9200,
@@ -15,7 +16,8 @@ export const config: Config = {
   redis: {
     // ⚠️ redis-server 6 以下，username 需要置空
     url: `redis://:${process.env.REDIS_PWD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}/0`,
-    key: 'tdf:debugtargets',
+    debugTargetTable: 'tdf:debugtargets',
+    bundleTable: 'tdf:bundles',
   },
 };
 
@@ -23,12 +25,14 @@ interface Config {
   domain: string;
   wsPath: string;
   cachePath: string;
+  hmrStaticPath: string;
   logPath: string;
   hmrPortPath: string;
   iWDPStartPort: number;
   iWDPEndPort: number;
   redis: {
     url: string;
-    key: string;
+    debugTargetTable: string;
+    bundleTable: string;
   };
 }

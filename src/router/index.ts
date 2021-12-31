@@ -1,14 +1,19 @@
 import path from 'path';
 import cors from '@koa/cors';
 import staticCache from 'koa-static-cache';
+import bodyParser from 'koa-bodyparser';
 import Koa from 'koa';
 import { Logger } from '@/utils/log';
 import { getDebugTargetsRouter } from '@/router/debug-targets';
+import { getBundleRouter } from '@/router/bundle';
+import { config } from '@/config';
 
 const log = new Logger('router');
 
 export const routeApp = (app: Koa) => {
   const { staticPath, entry } = global.debugAppArgv;
+
+  app.use(bodyParser());
 
   app.use(cors());
 
@@ -24,6 +29,9 @@ export const routeApp = (app: Koa) => {
   const debugTargetsRouter = getDebugTargetsRouter();
   app.use(debugTargetsRouter.routes()).use(debugTargetsRouter.allowedMethods());
 
+  const bundleRouter = getBundleRouter();
+  app.use(bundleRouter.routes()).use(bundleRouter.allowedMethods());
+
   let servePath;
   if (staticPath) servePath = path.resolve(staticPath);
   else servePath = path.resolve(path.dirname(entry));
@@ -33,13 +41,20 @@ export const routeApp = (app: Koa) => {
     buffer: false,
     dynamic: true,
   };
-  // bundle 静态资源，禁用缓存
-  app.use(staticCache(servePath, defaultStaicOption));
-  // devtools 静态资源，优先强缓存，强缓存过期后协商缓存
+  // devtools frontend resources
   app.use(
     staticCache(path.join(__dirname, '../public'), {
       ...defaultStaicOption,
       maxAge: 60 * 60,
     }),
   );
+  // hmr resources
+  app.use(
+    staticCache(config.hmrStaticPath, {
+      ...defaultStaicOption,
+      maxAge: 60 * 60,
+    }),
+  );
+  // bundle resources
+  app.use(staticCache(servePath, defaultStaicOption));
 };

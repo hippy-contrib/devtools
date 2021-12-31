@@ -67,7 +67,7 @@ export const stopServer = (exitProcess = false, ...arg) => {
  * 服务初始化
  */
 const init = async () => {
-  const { cachePath } = config;
+  const { cachePath, hmrStaticPath } = config;
   try {
     fs.rmdirSync(cachePath, { recursive: true });
   } catch (e) {
@@ -75,6 +75,7 @@ const init = async () => {
   }
   await importTunnel();
   await fs.promises.mkdir(cachePath, { recursive: true });
+  await fs.promises.mkdir(hmrStaticPath, { recursive: true });
   await initDbModel();
   initAppClient();
 

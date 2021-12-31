@@ -41,6 +41,11 @@ export class RedisModel extends DBModel {
     }
   }
 
+  public async get(key: string, field: string) {
+    const all = await this.getAll(key);
+    return all[field];
+  }
+
   /**
    * 查询 hashmap 的所有 value
    */

@@ -19,5 +19,7 @@ export const createInternalChannel = (clientId: string, extensionName?: string) 
 export const upwardChannelToDownwardChannel = (upwardChannelId: string) =>
   upwardChannelId.replace(upwardSpliter, downwardSpliter);
 
+export const createHMRChannel = (hash: string) => `HMR-${hash}`;
+
 const createChannel = (clientId: string, extensionName?: string, spliter?: string) =>
   `${clientId}${spliter}${extensionName || defaultExtensionName}`;
