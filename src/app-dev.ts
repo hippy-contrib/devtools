@@ -1,12 +1,21 @@
 import fs from 'fs';
 import path from 'path';
 import oldWebpack from 'webpack';
+import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@/utils/log';
 import { config } from '@/config';
 
 const log = new Logger('app-dev-server');
 
 export const webpack = (webpackConfig, cb?) => {
+  const id = uuidv4();
+  const publicPath = webpackConfig.output?.publicPath;
+  if (publicPath) {
+    webpackConfig.output.publicPath = publicPath.replace(/[version]/, id);
+  }
+  if (webpackConfig.devServer) {
+    webpackConfig.devServer.id = id;
+  }
   const compiler = oldWebpack(webpackConfig);
   startWebpackDevServer(webpackConfig, compiler, cb);
   return compiler;

@@ -193,7 +193,7 @@ class Server {
       searchParams.set('port', String(this.options.remote.port));
       searchParams.set('pathname', '/debugger-proxy');
       searchParams.set('role', 'hmr_client');
-      searchParams.set('hash', this.options.remote.id);
+      searchParams.set('hash', this.options.id);
 
       if (typeof this.options.client.logging !== 'undefined') {
         searchParams.set('logging', this.options.client.logging);
@@ -1228,7 +1228,7 @@ class Server {
   createWebSocketClient() {
     return new Promise((resolve, reject) => {
       const { host, port } = this.options.remote;
-      const webSocketURL = `ws://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.remote.id}`;
+      const webSocketURL = `ws://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.id}`;
       this.webSocketClient = new WebSocket(webSocketURL);
       this.webSocketClient.on('open', () => {
         this.logger.info('HMR ws client is connected.');
