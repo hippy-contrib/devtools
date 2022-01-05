@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import WebSocket from 'ws';
-import { HMREvent, WinstonColor, WSCode } from '@/@types/enum';
+import { WinstonColor, WSCode } from '@/@types/enum';
 import { HMRWsParams } from '@/utils/url';
 import { Logger } from '@/utils/log';
 import { createHMRChannel } from '@/utils/pub-sub-channel';
 import { getDBOperator } from '@/db';
 import { config } from '@/config';
+import { decodeHMRData } from '@/utils/buffer';
 import { BundleManager } from './bundles';
 
 const logger = new Logger('hmr-controller', WinstonColor.Blue);
@@ -42,16 +43,17 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
   const { Publisher } = getDBOperator();
   const publisher = new Publisher(createHMRChannel(hash));
 
-  ws.on('message', (msg) => {
+  ws.on('message', (msg: Buffer) => {
     try {
-      const msgStr = msg.toString();
-      const body: HMRBody = JSON.parse(msgStr);
-      if (body.type === HMREvent.TransferFile) {
-        saveHMRFiles(hash, body);
+      const { isFile, emitList, hmrBody } = decodeHMRData(msg);
+      if (isFile) {
+        saveHMRFiles(hash, emitList);
       } else {
-        publisher.publish(msgStr);
+        publisher.publish(JSON.stringify(hmrBody));
       }
-    } catch (e) {}
+    } catch (e) {
+      logger.warn('decodeHMRData failed: ', (e as any)?.stack || e);
+    }
   });
 
   ws.on('close', close);
@@ -66,22 +68,15 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
   }
 };
 
-interface HMRBody {
-  type: HMREvent;
-  data: unknown;
-  params: unknown;
-}
-
-type TransFerFile = Array<{
+type TransFerFile = {
   // include folder structure
   name: string;
-  content: string;
-}>;
+  content: Buffer;
+};
 
-async function saveHMRFiles(hash: string, hmrBody: HMRBody) {
-  const files = hmrBody.data as TransFerFile;
+async function saveHMRFiles(hash: string, emitList: TransFerFile[]) {
   return Promise.all(
-    files.map(async ({ name, content }) => {
+    emitList.map(async ({ name, content }) => {
       const fullFname = path.join(config.hmrStaticPath, hash, name);
       const cacheFolder = path.dirname(fullFname);
       await fs.promises.mkdir(cacheFolder, { recursive: true });

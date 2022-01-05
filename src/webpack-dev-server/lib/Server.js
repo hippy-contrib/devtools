@@ -11,6 +11,8 @@ const express = require('express');
 const { validate } = require('schema-utils');
 const schema = require('./options.json');
 const WebSocket = require('ws');
+const { HMREvent } = require('@/@types/enum');
+const { encodeHMRData } = require('@/utils/buffer');
 
 if (!process.env.WEBPACK_SERVE) {
   process.env.WEBPACK_SERVE = true;
@@ -40,7 +42,7 @@ class Server {
     this.compiler = compiler;
     this.currentHash = null;
     this.cb = cb || (() => {});
-    this.emitMap = new Map();
+    this.msgQueue = [];
   }
 
   static get DEFAULT_STATS() {
@@ -819,7 +821,7 @@ class Server {
       }
 
       if (this.webSocketClient) {
-        this.sendMessage('progress-update', {
+        this.sendMessage(HMREvent.ProgressUpdate, {
           percent,
           msg,
           pluginName,
@@ -827,7 +829,7 @@ class Server {
       }
 
       if (this.server) {
-        this.server.emit('progress-update', { percent, msg, pluginName });
+        this.server.emit(HMREvent.ProgressUpdate, { percent, msg, pluginName });
       }
     }).apply(this.compiler);
   }
@@ -933,7 +935,7 @@ class Server {
       this.cb(error);
     });
     this.compiler.hooks.invalid.tap('webpack-dev-server', () => {
-      this.sendMessage('invalid');
+      this.sendMessage(HMREvent.Invalid);
     });
     this.compiler.hooks.done.tap('webpack-dev-server', async (stats) => {
       if (!this.webSocketClient) {
@@ -949,11 +951,9 @@ class Server {
   setupEmitHooks() {
     const { compiler } = this;
     compiler.hooks.emit.tap('webpack-dev-server', (compilation) => {
-      const { hash } = compilation;
-      if (!this.emitMap.has(hash)) this.emitMap.set(hash, []);
+      this.emitList = []
 
       compiler.hooks.assetEmitted.tap('webpack-dev-server', (file, info) => {
-        const emitList = this.emitMap.get(hash);
         let content = null;
         let targetName = null;
 
@@ -969,9 +969,9 @@ class Server {
           content = info;
         }
 
-        emitList.push({
+        this.emitList.push({
           name: targetName,
-          content: content.toString(),
+          content: content,
         });
       });
     });
@@ -1232,13 +1232,15 @@ class Server {
       this.webSocketClient = new WebSocket(webSocketURL);
       this.webSocketClient.on('open', () => {
         this.logger.info('HMR ws client is connected.');
+        this.msgQueue.map(({type, data, params}) => this.sendMessage(type, data, params));
+        this.msgQueue = [];
         resolve();
       });
       this.webSocketClient.on('ping', () => {
         this.webSocketClient.pong();
       });
       this.webSocketClient.on('close', () => {
-        this.logger.info('HMR ws client is closed! ');
+        this.logger.warn('HMR ws client is closed! ');
       });
       this.webSocketClient.on('error', (e) => {
         this.logger.warn('HMR ws error: ', e);
@@ -1250,24 +1252,24 @@ class Server {
   sendStatsWithOption() {
     if (this.options.hot === true || this.options.hot === 'only') {
       this.logger.info('enable HMR');
-      this.sendMessage('hot');
+      this.sendMessage(HMREvent.Hot);
     }
 
     if (this.options.liveReload) {
       this.logger.info('enable live reload');
-      this.sendMessage('liveReload');
+      this.sendMessage(HMREvent.LiveReload);
     }
 
     if (this.options.client && this.options.client.progress) {
-      this.sendMessage('progress', this.options.client.progress);
+      this.sendMessage(HMREvent.Progress, this.options.client.progress);
     }
 
     if (this.options.client && this.options.client.reconnect) {
-      this.sendMessage('reconnect', this.options.client.reconnect);
+      this.sendMessage(HMREvent.Reconnect, this.options.client.reconnect);
     }
 
     if (this.options.client && this.options.client.overlay) {
-      this.sendMessage('overlay', this.options.client.overlay);
+      this.sendMessage(HMREvent.Overlay, this.options.client.overlay);
     }
 
     if (!this.stats) {
@@ -1601,9 +1603,15 @@ class Server {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  sendMessage(type, data, params) {
-    if (this.webSocketClient && this.webSocketClient.readyState === 1) {
-      this.webSocketClient.send(JSON.stringify({ type, data, params }));
+  async sendMessage(type, data, params) {
+    if (this.webSocketClient) {
+      if(this.webSocketClient.readyState === WebSocket.OPEN) {
+        const encoded = encodeHMRData({ type, data, params });
+        this.webSocketClient.send(encoded);
+      } else if(this.webSocketClient.readyState === WebSocket.CLOSED) {
+        this.msgQueue.push({type, data, params});
+        this.createWebSocketClient();
+      }
     }
   }
 
@@ -1617,12 +1625,12 @@ class Server {
       this.currentHash === stats.hash;
 
     if (shouldEmit) {
-      this.sendMessage('still-ok');
+      this.sendMessage(HMREvent.StillOk);
       return;
     }
 
     this.currentHash = stats.hash;
-    this.sendMessage('hash', stats.hash);
+    this.sendMessage(HMREvent.Hash, stats.hash);
 
     if (stats.errors.length > 0 || stats.warnings.length > 0) {
       const hasErrors = stats.errors.length > 0;
@@ -1634,24 +1642,21 @@ class Server {
           params = { preventReloading: true };
         }
 
-        this.sendMessage('warnings', stats.warnings, params);
+        this.sendMessage(HMREvent.Warnings, stats.warnings, params);
       }
 
       if (stats.errors.length > 0) {
-        this.sendMessage('errors', stats.errors);
+        this.sendMessage(HMREvent.Errors, stats.errors);
       }
     } else {
-      this.sendMessage('ok');
+      this.sendMessage(HMREvent.Ok);
     }
   }
 
   sendFiles(hash) {
-    const emitList = this.emitMap.get(hash);
+    const {emitList} = this;
     if (!emitList || emitList.length === 0) return;
-    this.sendMessage('transfer-file', emitList, { id: this.options.remote.id });
-    process.nextTick(() => {
-      this.emitMap.delete(hash);
-    });
+    this.sendMessage(HMREvent.TransferFile, emitList);
   }
 
   watchFiles(watchPath, watchOptions) {
@@ -1661,7 +1666,7 @@ class Server {
     // disabling refreshing on changing the content
     if (this.options.liveReload) {
       watcher.on('change', (item) => {
-        this.sendMessage('static-changed', item);
+        this.sendMessage(HMREvent.StaticChanged, item);
       });
     }
 
