@@ -27,15 +27,14 @@ export const startDebugServer = async () => {
 
   server = app.listen(port, host, async () => {
     log.info('start debug server success.');
-    let startAdbProxy;
     if (env !== DevtoolsEnv.Hippy && process.env.IS_REMOTE !== 'true') {
-      const childProcesFn = await import('./child-process/index');
-      const { startTunnel, startChrome } = childProcesFn;
-      startAdbProxy = childProcesFn.startAdbProxy;
-
+      const { startTunnel, startChrome } = await import('./child-process/index');
       startTunnel();
-      startAdbProxy();
       startChrome();
+    }
+    if (process.env.IS_REMOTE !== 'true') {
+      const { startAdbProxy } = await import('./child-process/adb');
+      startAdbProxy();
     }
 
     socketServer = new SocketServer(server);

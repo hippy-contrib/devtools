@@ -29,7 +29,7 @@ async function startWebpackDevServer(config, compiler, cb) {
   const hmrPort = config.devServer?.port || 38988;
   saveHmrPort(hmrPort);
 
-  const { startAdbProxy } = await import('./child-process/index');
+  const { startAdbProxy } = await import('./child-process/adb');
   startAdbProxy();
 
   const WebpackDevServer = (await import('./webpack-dev-server/lib/Server')).default;

@@ -1,4 +1,5 @@
 import { Server as HTTPServer, IncomingMessage } from 'http';
+import { Socket } from 'net';
 import WebSocket, { Server as WSServer } from 'ws';
 import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
 import { AppClientType, ClientRole, DevicePlatform, InternalChannelEvent, WinstonColor, WSCode } from '@/@types/enum';
@@ -56,10 +57,11 @@ export class SocketServer {
    */
   public start() {
     const wss = new WSServer({
-      server: this.server,
+      noServer: true,
       path: config.wsPath,
     });
     this.wss = wss;
+    this.server.on('upgrade', this.onUpgrade.bind(this));
     wss.on('connection', this.onConnection.bind(this));
 
     wss.on('error', (e: Error) => {
@@ -98,15 +100,26 @@ export class SocketServer {
     });
   }
 
+  private onUpgrade(req: IncomingMessage, socket: Socket, head: Buffer) {
+    log.info('onUpgrade, ws url: %s', req.url);
+    const wsUrlParams = parseWsUrl(req.url);
+    const reason = getWsInvalidReason(wsUrlParams);
+    if (reason) {
+      log.warn('onUpgrade error: %s', reason);
+      return socket.destroy();
+    }
+
+    this.wss.handleUpgrade(req, socket, head, (ws) => {
+      this.wss.emit('connection', ws, req);
+    });
+  }
+
   /**
    * ⚠️ 给 ws 添加事件监听前，不要执行异步操作，否则会遗漏消息
    * 事件监听后，再异步判断是否合法，不合法则关闭
    */
   private async onConnection(ws: MyWebSocket, req: IncomingMessage) {
-    log.info('on connection, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
-    const reason = getWsInvalidReason(wsUrlParams);
-    if (reason) return ws.close(WSCode.InvalidRequestParams, reason);
 
     ws.isAlive = true;
     ws.on('pong', () => {

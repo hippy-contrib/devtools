@@ -2,20 +2,18 @@ import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
 import os from 'os';
-import fs from 'fs';
 import open from 'open';
 import { TunnelEvent, WinstonColor, OSType } from '@/@types/enum';
 import { deviceManager } from '@/device-manager';
 import { Logger, TunnelLogger } from '@/utils/log';
-import { exec } from '@/utils/process';
 import { config } from '@/config';
 import { StartTunnelOption } from './addon-api';
+import { startAdbProxy } from './adb';
 
 const childProcessLog = new Logger('child-process', WinstonColor.Magenta);
 const tunnelLog = new TunnelLogger('tunnel', WinstonColor.BrightRed);
 const tunnelEventLog = new Logger('tunnel-event', WinstonColor.BrightCyan);
 let proxyProcess;
-let hmrPort;
 
 export const TUNNEL_EVENT = 'message';
 export const tunnelEmitter = new EventEmitter();
@@ -72,32 +70,6 @@ export const startIWDP = () => {
   });
 };
 
-export const startAdbProxy = async () => {
-  if (!hmrPort) {
-    try {
-      const data = fs.readFileSync(config.hmrPortPath);
-      hmrPort = data.toString();
-    } catch (e) {
-      childProcessLog.warn('hmrPort file does not exist.');
-    }
-  }
-  const { port } = global.debugAppArgv || {};
-  const adbRelatePath = {
-    [OSType.Darwin]: '../build/mac/adb',
-    [OSType.Windows]: '../build/win/adb.exe',
-  }[os.type()];
-  const adbPath = path.join(__dirname, adbRelatePath);
-  try {
-    if (port) await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
-    if (hmrPort) await exec(adbPath, ['reverse', `tcp:${hmrPort}`, `tcp:${hmrPort}`]);
-  } catch (e) {
-    childProcessLog.info('Port reverse failed, For iOS app log.info only just ignore the message.');
-    childProcessLog.info(`Otherwise please check 'adb devices' command working correctly`);
-    if (port) childProcessLog.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
-    if (hmrPort) childProcessLog.info(`type 'adb reverse tcp:${hmrPort} tcp:${hmrPort}' retry!`);
-    childProcessLog.info('start adb reverse error: %s', (e as Error)?.stack);
-  }
-};
 
 export const startChrome = async () => {
   const { host, port, open: openChrome } = global.debugAppArgv;

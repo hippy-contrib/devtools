@@ -1,9 +1,10 @@
 import { createClient } from 'redis';
 import { config } from '@/config';
 import { Logger } from '@/utils/log';
+import { WinstonColor } from '@/@types/enum';
 import { DBModel } from '../base-model';
 
-const log = new Logger('redis-model');
+const log = new Logger('redis-model', WinstonColor.BrightCyan);
 export type RedisClient = ReturnType<typeof createClient>;
 
 /**
@@ -37,7 +38,7 @@ export class RedisModel extends DBModel {
       // ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
       await this.client.connect();
     } catch (e) {
-      log.error('connect redis failed: %s', (e as Error).stack);
+      log.error('connect redis failed: %s', (e as Error).stack || e);
     }
   }
 
@@ -77,11 +78,22 @@ export class RedisModel extends DBModel {
 
 const createMyClient = (): RedisClient => {
   const client = createClient({ url: config.redis.url }) as RedisClient;
-  client.on('error', (e) => {
-    log.error('create redis client error: %s', e?.stack);
+  client.on(RedisClientEvent.Error, (e) => {
+    log.error('redis client error: %s', e?.stack || e);
   });
-  client.on('connect', log.error.bind(log));
-  client.on('warning', log.error.bind(log));
-  client.on('ready', log.error.bind(log));
+  client.on(RedisClientEvent.Connect, () => log.info('redis connected'));
+  client.on(RedisClientEvent.Ready, () => log.info('redis ready'));
+  client.on(RedisClientEvent.End, () => log.warn('redis disconnect by quit() or disconnect()'));
+  client.on(RedisClientEvent.Reconnecting, () => {
+    log.warn('redis reconnecting');
+  });
   return client;
 };
+
+const enum RedisClientEvent {
+  Error = 'error',
+  Connect = 'connect',
+  Ready = 'ready',
+  End = 'end',
+  Reconnecting = 'reconnecting',
+}
