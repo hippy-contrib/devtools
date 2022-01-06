@@ -1,8 +1,6 @@
-import { EmitFile, isFileFieldLen, HMRData } from './constant';
 import { Buffer } from 'buffer';
 import { HMREvent } from '@/@types/enum';
-
-
+import { EmitFile, isFileFieldLen, HMRData } from './constant';
 
 export const encodeHMRData = (data: HMRData) => {
   const { type } = data;
@@ -69,5 +67,3 @@ function genBufferWithLen(buf: Buffer): Buffer {
   headBuf[fn](len, (offset += 1));
   return Buffer.concat([headBuf, buf]);
 }
-
-

@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { WinstonColor, HMREvent } from '@/@types/enum';
+import { WinstonColor } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { EmitFile, isFileFieldLen, HMRData } from './constant';
 
