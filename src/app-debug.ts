@@ -52,6 +52,10 @@ export const startDebugServer = async () => {
 export const stopServer = (exitProcess = false, ...arg) => {
   try {
     log.info('stopServer %j', arg);
+    if (socketServer) {
+      socketServer.close();
+      socketServer = null;
+    }
     if (server) {
       server.close();
       server = null;

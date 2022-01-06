@@ -67,9 +67,6 @@ export class SocketServer {
     wss.on('error', (e: Error) => {
       log.error('wss error: %s', (e as Error)?.stack);
     });
-    wss.on('headers', (headers: string[]) => {
-      log.info('wss headers: %j', headers);
-    });
     wss.on('upgrade', (response: IncomingMessage) => {
       log.info('wss upgrade: %j', response);
     });
