@@ -32,11 +32,6 @@ export const routeApp = (app: Koa) => {
   const bundleRouter = getBundleRouter();
   app.use(bundleRouter.routes()).use(bundleRouter.allowedMethods());
 
-  let servePath;
-  if (staticPath) servePath = path.resolve(staticPath);
-  else servePath = path.resolve(path.dirname(entry));
-  log.info(`serve bundle: ${entry}; serve folder: ${servePath}`);
-
   const defaultStaicOption = {
     buffer: false,
     dynamic: true,
@@ -55,6 +50,13 @@ export const routeApp = (app: Koa) => {
       maxAge: 60 * 60,
     }),
   );
+
   // bundle resources
-  app.use(staticCache(servePath, defaultStaicOption));
+  if (process.env.IS_REMOTE !== 'true') {
+    let servePath;
+    if (staticPath) servePath = path.resolve(staticPath);
+    else servePath = path.resolve(path.dirname(entry));
+    log.info(`serve bundle: ${entry}; serve folder: ${servePath}`);
+    app.use(staticCache(servePath, defaultStaicOption));
+  }
 };
