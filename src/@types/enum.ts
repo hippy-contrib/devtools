@@ -134,3 +134,11 @@ export enum OSType {
   Linux = 'Linux',
   Windows = 'Windows_NT',
 }
+
+export enum WSCode {
+  InvalidRequestParams = 4000,
+  HMRServerClosed = 4001,
+  NoDebugTarget = 4002,
+  ClosePage = 4003,
+  ReloadPage = 4004,
+}

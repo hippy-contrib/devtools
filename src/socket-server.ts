@@ -1,7 +1,7 @@
 import { Server as HTTPServer, IncomingMessage } from 'http';
 import WebSocket, { Server as WSServer } from 'ws';
 import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
-import { AppClientType, ClientRole, DevicePlatform, InternalChannelEvent, WinstonColor } from '@/@types/enum';
+import { AppClientType, ClientRole, DevicePlatform, InternalChannelEvent, WinstonColor, WSCode } from '@/@types/enum';
 import { getDBOperator } from '@/db';
 import { appClientManager } from '@/client';
 import { DebugTargetManager } from '@/controller/debug-targets';
@@ -80,7 +80,7 @@ export class SocketServer {
     });
   }
 
-  private async onConnection(ws: WebSocket, req: IncomingMessage) {
+  private async onConnection(ws: MyWebSocket, req: IncomingMessage) {
     log.info('on connection, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
     const { clientRole, clientId } = wsUrlParams;
@@ -102,7 +102,7 @@ export class SocketServer {
   /**
    * 将来自于 devtools 的 ws，通过 pub/sub 转发到 redis
    */
-  private onDevtoolsConnection(ws: WebSocket, wsUrlParams: DevtoolsWsUrlParams) {
+  private onDevtoolsConnection(ws: MyWebSocket, wsUrlParams: DevtoolsWsUrlParams) {
     const { Subscriber, Publisher } = getDBOperator();
     const { extensionName, clientId } = wsUrlParams;
     const downwardChannelId = createDownwardChannel(clientId, extensionName);
@@ -129,9 +129,9 @@ export class SocketServer {
     ws.on('message', (msg) => {
       publisher.publish(msg.toString());
     });
-    const onClose = (e?: Error) => {
-      if (e) log.error('devtools ws client error %s', e?.stack || e);
-      log.info('devtools ws disconnect. clientId: %s', clientId);
+    const onClose = (code, reason, e?: Error) => {
+      log.info('devtools ws client close code %s, reason: %s, clientId: %s', code, reason, clientId);
+      log.error('devtools ws client error: %j', e);
       resumeCommands.map(publisher.publish.bind(publisher));
       // 延时等 publisher 发布完成
       process.nextTick(() => {
@@ -140,15 +140,15 @@ export class SocketServer {
         downwardSubscriber.disconnect();
       });
     };
-    ws.on('close', onClose);
+    ws.on('close', (code, reason) => onClose(code, reason));
     // ws 标准规定 on error 后一定触发 on close，所以也要做清理
-    ws.on('error', onClose);
+    ws.on('error', (error) => onClose(null, null, error));
   }
 
   /**
    * app ws 连接，创建调试对象，并订阅上行调试消息
    */
-  private async onAppConnection(ws: WebSocket, wsUrlParams: AppWsUrlParams) {
+  private async onAppConnection(ws: MyWebSocket, wsUrlParams: AppWsUrlParams) {
     const { clientId, clientRole } = wsUrlParams;
     log.info('WsAppClient connected. %s', clientId);
     const platform = {
@@ -163,14 +163,22 @@ export class SocketServer {
     debugTarget = await patchDebugTarget(debugTarget);
     const { model } = getDBOperator();
     model.upsert(config.redis.key, clientId, debugTarget);
-    subscribeCommand(debugTarget, ws);
+    process.nextTick(() => {
+      subscribeCommand(debugTarget, ws);
+    });
 
-    const onClose = (e?: Error) => {
-      if (e) log.error('app ws error %j %j', e?.stack, e);
-      log.info('WsAppClient disconnect. %s', clientId);
-      cleanDebugTarget(clientId);
+    const onClose = (code: number, reason: string, error?) => {
+      log.warn('WsAppClient close: %j, reason: , clientId: %s', code, reason, clientId);
+      if (error) {
+        log.error('WsAppClient error %j', error);
+      }
+      cleanDebugTarget(clientId, code === WSCode.ClosePage);
     };
-    ws.on('close', onClose);
-    ws.on('error', onClose);
+    ws.on('close', (code, reason) => onClose(code, reason));
+    ws.on('error', (e) => onClose(null, null, e));
   }
+}
+
+declare class MyWebSocket extends WebSocket {
+  isAlive: boolean;
 }

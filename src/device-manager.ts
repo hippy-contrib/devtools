@@ -19,7 +19,7 @@ class DeviceManager {
     const device = this.deviceList[0];
     if (!device) return;
     // 通过 tunnel 通道创建的 debugTarget 的 clientId 为 devicename
-    cleanDebugTarget(device.devicename);
+    cleanDebugTarget(device.devicename, false);
   }
 
   /**

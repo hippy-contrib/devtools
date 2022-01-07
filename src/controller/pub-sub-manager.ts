@@ -15,7 +15,12 @@ import { AppClientOption } from '@/client/app-client';
 import { AppClientFullOptionOmicCtx } from '@/client/app-client-manager';
 import { debugTargetToUrlParsedContext } from '@/middlewares';
 import { DebugTarget } from '@/@types/debug-target';
-import { upwardChannelToDownwardChannel, createUpwardChannel, createInternalChannel } from '@/utils/pub-sub-channel';
+import {
+  upwardChannelToDownwardChannel,
+  createUpwardChannel,
+  createInternalChannel,
+  createDownwardChannel,
+} from '@/utils/pub-sub-channel';
 import { Logger } from '@/utils/log';
 import { config } from '@/config';
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
@@ -98,13 +103,16 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
  * 调试结束，清除缓存
  * appDisconnect, app ws close 时调用
  */
-export const cleanDebugTarget = async (clientId: string) => {
+export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean) => {
   const { model } = getDBOperator();
   model.delete(config.redis.key, clientId);
   const channelInfo = channelMap.get(clientId);
   if (!channelInfo) return;
+
   const { publisherMap, upwardSubscriber, internalPublisher } = channelInfo;
-  internalPublisher.publish(InternalChannelEvent.WSClose);
+  if (closeDevtools) {
+    internalPublisher.publish(InternalChannelEvent.WSClose);
+  }
   Array.from(publisherMap.values()).forEach((publisher) => publisher.disconnect());
   // 稍作延迟，等处理完 InternalChannelEvent.WSClose 事件后再取消订阅
   process.nextTick(() => {
@@ -120,7 +128,7 @@ export const cleanDebugTarget = async (clientId: string) => {
  */
 export const cleanAllDebugTargets = async () => {
   channelMap.forEach(({ debugTarget }) => {
-    cleanDebugTarget(debugTarget.clientId);
+    cleanDebugTarget(debugTarget.clientId, true);
   });
 };
 
@@ -134,7 +142,7 @@ export const subscribeByIWDP = (debugTargets: DebugTarget[]) => {
   oldIWDPDebugTargets = debugTargets;
   if (outdatedDebugTargets.length) log.info('outdatedDebugTargets %j', outdatedDebugTargets);
   outdatedDebugTargets.forEach(({ clientId }) => {
-    cleanDebugTarget(clientId);
+    cleanDebugTarget(clientId, true);
   });
   debugTargets.forEach((debugTarget) => subscribeCommand(debugTarget));
 };
@@ -259,6 +267,9 @@ const getAppClientMessageHandler = (debugTarget: DebugTarget) => {
       const publisher = publisherMap.get(downwardChannelId);
       publisher.publish(msgStr);
     } else {
+      if (downwardChannelSet.size === 0) {
+        downwardChannelSet.add(createDownwardChannel(debugTarget.clientId));
+      }
       // 消息类型为 EventRes，event 无法确定来源，广播到所有 channel
       downwardChannelSet.forEach((channelId) => {
         if (!publisherMap.has(channelId)) {
