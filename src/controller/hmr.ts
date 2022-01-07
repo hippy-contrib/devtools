@@ -15,6 +15,7 @@ const hmrCloseEvent = 'HMR_SERVER_CLOSED';
 
 export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
+  logger.info('HMR client connected, hash: %s', hash);
   const bundle = await BundleManager.get(hash);
   if (!bundle) {
     const reason = 'Hippy dev server not started, not support HMR!';
@@ -32,6 +33,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
       ws.close(WSCode.HMRServerClosed, reason);
       logger.warn(reason);
     } else {
+      logger.info('receive HMR msg from redis: %s', msg);
       ws.send(msg);
     }
   });
@@ -39,6 +41,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
 
 export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
+  logger.info('HMR server connected, hash: %s', hash);
   BundleManager.add({ hash });
   const { Publisher } = getDBOperator();
   const publisher = new Publisher(createHMRChannel(hash));
@@ -49,7 +52,9 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
       if (isFile) {
         saveHMRFiles(hash, emitList);
       } else {
-        publisher.publish(JSON.stringify(hmrBody));
+        const msgStr = JSON.stringify(hmrBody);
+        logger.info('receive HMR server msg: %s', msgStr);
+        publisher.publish(msgStr);
       }
     } catch (e) {
       logger.warn('decodeHMRData failed: ', (e as any)?.stack || e);

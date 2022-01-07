@@ -9,7 +9,8 @@ moduleAlias.addAliases({
 import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
-import { webpack, getWebpackConfig } from '@/app-dev';
+import { webpack } from '@/app-dev';
+import { getWebpackConfig } from '@/utils/webpack';
 import { Logger } from '@/utils/log';
 import { version } from 'package.json';
 import './process-handler';

@@ -953,11 +953,6 @@
     "Remote": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1,
-          "description": "remote public resource uuid."
-        },
         "host": {
           "type": "string",
           "minLength": 1,
@@ -974,6 +969,11 @@
   },
   "additionalProperties": false,
   "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "remote public resource uuid."
+    },
     "allowedHosts": {
       "$ref": "#/definitions/AllowedHosts"
     },

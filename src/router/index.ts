@@ -5,7 +5,6 @@ import bodyParser from 'koa-bodyparser';
 import Koa from 'koa';
 import { Logger } from '@/utils/log';
 import { getDebugTargetsRouter } from '@/router/debug-targets';
-import { getBundleRouter } from '@/router/bundle';
 import { config } from '@/config';
 
 const log = new Logger('router');
@@ -28,9 +27,6 @@ export const routeApp = (app: Koa) => {
 
   const debugTargetsRouter = getDebugTargetsRouter();
   app.use(debugTargetsRouter.routes()).use(debugTargetsRouter.allowedMethods());
-
-  const bundleRouter = getBundleRouter();
-  app.use(bundleRouter.routes()).use(bundleRouter.allowedMethods());
 
   const defaultStaicOption = {
     buffer: false,

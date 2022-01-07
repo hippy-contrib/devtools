@@ -43,8 +43,15 @@ export class RedisModel extends DBModel {
   }
 
   public async get(key: string, field: string) {
-    const all = await this.getAll(key);
-    return all[field];
+    const hashmap: Record<string, string> = await this.client.hGetAll(key);
+    const item = hashmap[field];
+    try {
+      const itemObj = JSON.parse(item);
+      return itemObj;
+    } catch (e) {
+      log.error('parse redis hashmap error, key: %s, field: %s, value: %s', key, field, item);
+      return null;
+    }
   }
 
   /**

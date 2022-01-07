@@ -39,6 +39,7 @@
   },
   "types": "dist/@types/index.d.ts",
   "dependencies": {
+    "@hippy/hippy-hmr-plugin": "^0.0.3",
     "@koa/cors": "^3.1.0",
     "ansi-html-community": "^0.0.8",
     "bonjour": "^3.5.0",
@@ -63,6 +64,7 @@
     "koa-static-cache": "^5.1.4",
     "lodash": "^4.17.21",
     "module-alias": "^2.2.2",
+    "node-machine-id": "^1.1.12",
     "open": "^8.4.0",
     "p-retry": "^4.5.0",
     "portfinder": "^1.0.28",

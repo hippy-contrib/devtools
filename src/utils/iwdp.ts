@@ -10,6 +10,7 @@ import { makeUrl } from '@/utils/url';
 import { Logger } from '@/utils/log';
 import { sleep } from '@/utils/timer';
 import { DebugTarget } from '@/@types/debug-target';
+import { wsUrlWithoutProtocol } from '@/utils/debug-target';
 
 const log = new Logger('IWDP-util');
 
@@ -30,7 +31,6 @@ export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
     const debugTargets: IWDPPage[] = (await Promise.all(deviceList.map(getDeviceIWDPPages))) || [];
     return debugTargets.flat().filter(iWDPPagesFilter);
   } catch (e) {
-    log.warn('request IWDP pages error');
     return [];
   }
 };
@@ -52,14 +52,14 @@ export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPag
 
   iOSPage.shouldRemove = true;
   const iWDPWsUrl = iOSPage.webSocketDebuggerUrl;
-  const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
+  const wsUrl = makeUrl(`${config.wsDomain}${config.wsPath}`, {
     clientId: debugTarget.clientId,
     role: ClientRole.Devtools,
   });
-  const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
+  const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
     remoteFrontend: true,
     experiments: true,
-    ws: wsUrl,
+    ws: wsUrlWithoutProtocol(wsUrl),
     env: global.debugAppArgv.env,
   });
   const { appClientTypeList } = debugTarget;
@@ -73,7 +73,7 @@ export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPag
     deviceOSVersion: iOSPage.device.deviceOSVersion,
     title: iOSPage.title,
     devtoolsFrontendUrl,
-    webSocketDebuggerUrl: `ws://${wsUrl}`,
+    webSocketDebuggerUrl: wsUrl,
   };
 };
 

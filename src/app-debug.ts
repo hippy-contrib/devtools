@@ -8,7 +8,6 @@ import { Logger } from '@/utils/log';
 import { initDbModel } from '@/db';
 import { routeApp } from '@/router';
 import { config } from '@/config';
-import { importTunnel } from '@/child-process/import-addon';
 import { WinstonColor, DevtoolsEnv } from '@/@types/enum';
 
 const log = new Logger('app-debug-server', WinstonColor.Yellow);
@@ -76,7 +75,10 @@ const init = async () => {
   } catch (e) {
     log.warn('rm cache dir error');
   }
-  await importTunnel();
+  if (process.env.IS_REMOTE !== 'true') {
+    const { importTunnel } = await import('@/child-process/import-addon');
+    await importTunnel();
+  }
   await fs.promises.mkdir(cachePath, { recursive: true });
   await fs.promises.mkdir(hmrStaticPath, { recursive: true });
   await initDbModel();

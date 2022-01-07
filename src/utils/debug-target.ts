@@ -11,14 +11,14 @@ import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
 export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
   // 通过 tunnel 创建的 target，暂时使用 devicename 作为调试对象 id，后续终端重构后使用 targetCreated 事件抛出的 id
   const clientId = device.devicename;
-  const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
+  const wsUrl = makeUrl(`${config.wsDomain}${config.wsPath}`, {
     clientId,
     role: ClientRole.Devtools,
   });
-  const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
+  const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
     remoteFrontend: true,
     experiments: true,
-    ws: wsUrl,
+    ws: wsUrlWithoutProtocol(wsUrl),
     env: global.debugAppArgv.env,
   });
   const title = device.platform === DevicePlatform.IOS ? clientId : 'Hippy debug tools for V8';
@@ -30,7 +30,7 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
     title,
     url: '',
     description: '',
-    webSocketDebuggerUrl: `ws://${wsUrl}`,
+    webSocketDebuggerUrl: wsUrl,
     platform: device.platform,
     type: ChromePageType.Page,
     appClientTypeList: [AppClientType.Tunnel],
@@ -48,14 +48,14 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
   let platform;
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
   if (clientRole === ClientRole.IOS) platform = DevicePlatform.IOS;
-  const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
+  const wsUrl = makeUrl(`${config.wsDomain}${config.wsPath}`, {
     clientId,
     role: ClientRole.Devtools,
   });
-  const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
+  const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
     remoteFrontend: true,
     experiments: true,
-    ws: wsUrl,
+    ws: wsUrlWithoutProtocol(wsUrl),
     env: global.debugAppArgv.env,
   });
   return {
@@ -65,7 +65,7 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
     title: contextName,
     url: '',
     description: '',
-    webSocketDebuggerUrl: `ws://${wsUrl}`,
+    webSocketDebuggerUrl: wsUrl,
     platform,
     type: ChromePageType.Page,
     deviceName,
@@ -78,14 +78,14 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
  */
 export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
   const iWDPWsUrl = iWDPPage.webSocketDebuggerUrl;
-  const wsUrl = makeUrl(`${config.domain}${config.wsPath}`, {
+  const wsUrl = makeUrl(`${config.wsDomain}${config.wsPath}`, {
     clientId: iWDPWsUrl,
     role: ClientRole.Devtools,
   });
-  const devtoolsFrontendUrl = makeUrl(`http://${config.domain}/front_end/inspector.html`, {
+  const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
     remoteFrontend: true,
     experiments: true,
-    ws: wsUrl,
+    ws: wsUrlWithoutProtocol(wsUrl),
     env: global.debugAppArgv.env,
   });
   return {
@@ -96,7 +96,7 @@ export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
     thumbnailUrl: '',
     url: '',
     description: '',
-    webSocketDebuggerUrl: `ws://${wsUrl}`,
+    webSocketDebuggerUrl: wsUrl,
     platform: DevicePlatform.IOS,
     type: ChromePageType.Page,
     deviceId: iWDPPage.device.deviceId,
@@ -117,3 +117,7 @@ export const patchDebugTarget = async (debugTarget: DebugTarget) => {
   }
   return debugTarget;
 };
+
+export function wsUrlWithoutProtocol(wsUrl) {
+  return wsUrl.replace('wss://', '').replace('ws://', '');
+}

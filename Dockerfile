@@ -17,6 +17,6 @@ ENV REDIS_HOST=$REDIS_PRIVATE_HOST
 ENV REDIS_PORT=$REDIS_PRIVATE_PORT
 ENV IS_REMOTE=true
 
-CMD ["node", "dist"]
+CMD ["node", "dist/index-debug", "--port", "80"]
 
-EXPOSE 38989
+EXPOSE 80
