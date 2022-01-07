@@ -137,14 +137,6 @@ export enum OSType {
   Windows = 'Windows_NT',
 }
 
-export enum WSCode {
-  InvalidRequestParams = 4000,
-  HMRServerClosed = 4001,
-  NoDebugTarget = 4002,
-  ClosePage = 4003,
-  ReloadPage = 4004,
-}
-
 export enum HMREvent {
   Hot = 'hot',
   LiveReload = 'liveReload',
@@ -162,6 +154,7 @@ export enum HMREvent {
   ProgressUpdate = 'progress-update',
   StillOk = 'still-ok',
   ContentChanged = 'content-changed',
+  StaticChanged = 'static-changed',
   TransferFile = 'transfer-file',
 }
 

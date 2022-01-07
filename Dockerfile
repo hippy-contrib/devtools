@@ -16,6 +16,7 @@ ENV REDIS_PWD=$REDIS_PWD
 ENV REDIS_HOST=$REDIS_PRIVATE_HOST
 ENV REDIS_PORT=$REDIS_PRIVATE_PORT
 ENV IS_REMOTE=true
+ENV DOMAIN="http://tdf-devtools.woa.com"
 
 CMD ["node", "dist/index-debug", "--port", "80"]
 

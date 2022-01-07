@@ -15,10 +15,12 @@ export async function getWebpackConfig(configPath) {
 export function appendHMRPlugin(versionId: string, config) {
   if (!config.devServer || (config.devServer.hot === false && config.devServer.liveReload === false)) return;
   const { remote } = config.devServer;
-  const { host, port, protocol }: typeof DEFAULT_REMOTE = {
+  const fullRemote: typeof DEFAULT_REMOTE = {
     ...DEFAULT_REMOTE,
     ...remote,
   };
+  const { host, port, protocol } = fullRemote;
+  config.devServer.remote = fullRemote;
   const hotManifestPublicPath = `${protocol}://${host}:${port}/${versionId}/`;
   const i = config.plugins.findIndex((plugin) => plugin.constructor.name === HippyHMRPlugin.name);
   if (i !== -1) {

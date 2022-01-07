@@ -1281,30 +1281,6 @@ class Server {
     this.sendStats(stats, true);
   }
 
-  sendOption(clients) {
-    if (this.options.hot === true || this.options.hot === 'only') {
-      this.logger.info('enable HMR');
-      this.sendMessage(clients, 'hot');
-    }
-
-    if (this.options.liveReload) {
-      this.logger.info('enable live reload');
-      this.sendMessage(clients, 'liveReload');
-    }
-
-    if (this.options.client && this.options.client.progress) {
-      this.sendMessage(clients, 'progress', this.options.client.progress);
-    }
-
-    if (this.options.client && this.options.client.reconnect) {
-      this.sendMessage(clients, 'reconnect', this.options.client.reconnect);
-    }
-
-    if (this.options.client && this.options.client.overlay) {
-      this.sendMessage(clients, 'overlay', this.options.client.overlay);
-    }
-  }
-
   openBrowser(defaultOpenTarget) {
     const open = require('open');
 
