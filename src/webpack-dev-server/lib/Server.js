@@ -1229,14 +1229,14 @@ class Server {
     });
     this.compiler.hooks.invalid.tap('webpack-dev-server', () => {
       if (this.webSocketServer) {
-        this.sendOption();
+        this.sendOption(this.webSocketServer.clients);
         this.sendMessage(this.webSocketServer.clients, 'invalid');
       }
     });
     this.compiler.hooks.done.tap('webpack-dev-server', (stats) => {
       this.cb(null, stats);
       if (this.webSocketServer) {
-        this.sendOption();
+        this.sendOption(this.webSocketServer.clients);
         this.sendStats(this.webSocketServer.clients, this.getStats(stats));
       }
 
@@ -1622,7 +1622,7 @@ class Server {
       }
       this.logger.info('HMR ws client is connected.');
 
-      this.sendOption();
+      this.sendOption([client]);
 
       if (!this.stats) {
         return;
@@ -1632,27 +1632,27 @@ class Server {
     });
   }
 
-  sendOption(client) {
+  sendOption(clients) {
     if (this.options.hot === true || this.options.hot === 'only') {
       this.logger.info('enable HMR');
-      this.sendMessage([client], 'hot');
+      this.sendMessage(clients, 'hot');
     }
 
     if (this.options.liveReload) {
       this.logger.info('enable live reload');
-      this.sendMessage([client], 'liveReload');
+      this.sendMessage(clients, 'liveReload');
     }
 
     if (this.options.client && this.options.client.progress) {
-      this.sendMessage([client], 'progress', this.options.client.progress);
+      this.sendMessage(clients, 'progress', this.options.client.progress);
     }
 
     if (this.options.client && this.options.client.reconnect) {
-      this.sendMessage([client], 'reconnect', this.options.client.reconnect);
+      this.sendMessage(clients, 'reconnect', this.options.client.reconnect);
     }
 
     if (this.options.client && this.options.client.overlay) {
-      this.sendMessage([client], 'overlay', this.options.client.overlay);
+      this.sendMessage(clients, 'overlay', this.options.client.overlay);
     }
   }
 

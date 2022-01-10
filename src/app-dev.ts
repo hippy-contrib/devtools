@@ -41,6 +41,8 @@ export async function getWebpackConfig(configPath) {
 /**
  * hippy-dev 进程保存 hmrPort，hippy-debug 进程可监听设备连接与断连，在设备重连时自动 reverse hmrPort
  */
-function saveHmrPort(hmrPort) {
+async function saveHmrPort(hmrPort) {
+  const { cachePath } = config;
+  fs.mkdirSync(cachePath, { recursive: true });
   return fs.writeFileSync(config.hmrPortPath, String(hmrPort));
 }

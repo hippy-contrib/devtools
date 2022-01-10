@@ -1,7 +1,11 @@
 import path from 'path';
 
+const host =
+  !global.debugAppArgv?.host || global.debugAppArgv?.host === '0.0.0.0' ? 'localhost' : global.debugAppArgv?.host;
+const domain = `${host}:${global.debugAppArgv?.port || 38989}`;
+
 export const config: Config = {
-  domain: 'localhost:38989',
+  domain,
   wsPath: '/debugger-proxy',
   cachePath: path.join(__dirname, 'cache'),
   logPath: path.join(__dirname, 'log'),

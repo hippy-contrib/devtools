@@ -10,10 +10,6 @@ import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
 import { DevtoolsEnv } from '@/@types/enum';
-import { Logger } from '@/utils/log';
-import { startDebugServer } from '@/app-debug';
-import { version } from 'package.json';
-import './process-handler';
 
 const { argv } = yargs
   .alias('v', 'version')
@@ -71,6 +67,11 @@ if (fullArgv.version) yargs.version().exit(0, null);
 
 global.debugAppArgv = fullArgv;
 
+// import after global.debugAppArgv is set
+import { Logger } from '@/utils/log';
+import { startDebugServer } from '@/app-debug';
+import { version } from 'package.json';
+import './process-handler';
 const log = new Logger('entry');
 log.info('version: %s', version);
 
