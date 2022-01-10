@@ -1,9 +1,10 @@
 import { config } from '@/config';
 import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
+import { createTargetByIWDPPage } from '@/utils/debug-target';
 import { getDBOperator } from '@/db';
 import { DebugTarget } from '@/@types/debug-target';
 import { DevicePlatform } from '@/@types/enum';
-import { updateIWDPAppClient } from './pub-sub-manager';
+import { updateIWDPAppClient, subscribeByIWDP } from './pub-sub-manager';
 
 export class DebugTargetManager {
   public static debugTargets: DebugTarget[] = [];
@@ -22,13 +23,12 @@ export class DebugTargetManager {
       }
     });
     // 追加 IWDP 获取到的 h5 页面
-    // const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
-    // const h5Pages = iOSPagesWithFlag.filter((iOSPage) => !iOSPage.shouldRemove);
-    // const h5DebugTargets = h5Pages.map(createTargetByIWDPPage);
-    // subscribeByIWDP(h5DebugTargets);
-    // DebugTargetManager.debugTargets = targets.concat(h5DebugTargets);
-    DebugTargetManager.debugTargets = targets;
-    return targets;
+    const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
+    const h5Pages = iOSPagesWithFlag.filter((iOSPage) => !iOSPage.shouldRemove);
+    const h5DebugTargets = h5Pages.map(createTargetByIWDPPage);
+    subscribeByIWDP(h5DebugTargets);
+    DebugTargetManager.debugTargets = targets.concat(h5DebugTargets);
+    return DebugTargetManager.debugTargets;
   };
 
   /**
