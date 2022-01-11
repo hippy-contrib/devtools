@@ -1,13 +1,7 @@
 import path from 'path';
 
-const host =
-  !global.debugAppArgv?.host || global.debugAppArgv?.host === '0.0.0.0' ? 'localhost' : global.debugAppArgv?.host;
-const domain = `${host}:${global.debugAppArgv?.port || 38989}`;
-const wsDomain = domain.replace('https://', 'wss://').replace('http://', 'ws://');
-
 export const config: Config = {
-  domain,
-  wsDomain,
+  ...getPublicDomain(),
   wsPath: '/debugger-proxy',
   cachePath: path.join(__dirname, 'cache'),
   hmrStaticPath: path.join(__dirname, 'hmr'),
@@ -21,6 +15,7 @@ export const config: Config = {
     debugTargetTable: 'tdf:debugtargets',
     bundleTable: 'tdf:bundles',
   },
+  isRemote: process.env.IS_REMOTE === 'true',
 };
 
 interface Config {
@@ -38,4 +33,16 @@ interface Config {
     debugTargetTable: string;
     bundleTable: string;
   };
+  isRemote: boolean;
+}
+
+function getPublicDomain() {
+  const hostFromArgv =
+    !global.debugAppArgv?.host || global.debugAppArgv?.host === '0.0.0.0' ? 'localhost' : global.debugAppArgv?.host;
+  const portFromArgv = global.debugAppArgv?.port || 38989;
+  const host = process.env.PUBLIC_HOST || hostFromArgv;
+  const port = process.env.PUBLIC_PORT || portFromArgv;
+  const domain = `http://${host}:${port}`;
+  const wsDomain = domain.replace('https://', 'wss://').replace('http://', 'ws://');
+  return { domain, wsDomain };
 }

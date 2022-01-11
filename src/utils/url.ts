@@ -10,6 +10,9 @@ export type AppWsUrlParams = {
   pathname: string;
   contextName?: string;
   deviceName?: string;
+  // when use remote debug, we use this field for auth, you can only find and debug
+  // pages with this version id
+  hash?: string;
 };
 
 export type DevtoolsWsUrlParams = {
@@ -18,6 +21,7 @@ export type DevtoolsWsUrlParams = {
   clientRole: ClientRole;
   extensionName: string;
   contextName?: string;
+  hash?: string;
 };
 
 export type HMRWsParams = {
@@ -68,6 +72,8 @@ export const getWsInvalidReason = (wsUrlParams: WsUrlParams): string => {
   }
 
   const { clientId, contextName } = wsUrlParams as AppWsUrlParams | DevtoolsWsUrlParams;
+  // if (clientRole === ClientRole.Devtools && !('hash' in wsUrlParams) && config.isRemote)
+  //   return 'invalid ws connection, you ws url should carry `hash` query params!';
   if (clientRole === ClientRole.IOS && !contextName) return 'invalid iOS connection, should request with contextName!';
   if (!clientId) return 'invalid ws connection!';
   return '';

@@ -48,7 +48,7 @@ export const routeApp = (app: Koa) => {
   );
 
   // bundle resources
-  if (process.env.IS_REMOTE !== 'true') {
+  if (!config.isRemote) {
     let servePath;
     if (staticPath) servePath = path.resolve(staticPath);
     else servePath = path.resolve(path.dirname(entry));

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import oldWebpack from 'webpack';
+import QRCode from 'qrcode';
 import { Logger } from '@/utils/log';
 import { config } from '@/config';
 import { getBundleVersionId } from '@/utils/bundle-version';
@@ -13,7 +14,22 @@ export const webpack = (webpackConfig, cb?) => {
   const publicPath = webpackConfig.output?.publicPath;
   if (publicPath) {
     webpackConfig.output.publicPath = publicPath.replace(/\[version\]/, id);
-    log.info('bundleUrl: %s', `${webpackConfig.output.publicPath}index.bundle`);
+    const isEndWithSlash = webpackConfig.output.publicPath.endsWith('/');
+    const bundleUrl = `${webpackConfig.output.publicPath}${isEndWithSlash ? '' : '/'}index.bundle`;
+    log.info('bundleUrl: %s', bundleUrl);
+    QRCode.toString(
+      bundleUrl,
+      {
+        small: true,
+        type: 'terminal',
+      },
+      (e, qrcodeStr) => {
+        if (e) log.error('draw qrcode of bundleUrl failed: %j', e?.stack || e);
+        log.info('qrcode\n%s', qrcodeStr);
+      },
+    );
+    const homeUrl = `${config.domain}/extensions/home.html?hash=${id}`;
+    log.info('find debug page on: %s', homeUrl);
   }
   if (webpackConfig.devServer) {
     webpackConfig.devServer.id = id;

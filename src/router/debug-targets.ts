@@ -12,7 +12,8 @@ export const getDebugTargetsRouter = () => {
   });
 
   const getDebugTargets = async (ctx) => {
-    const rst = await DebugTargetManager.getDebugTargets();
+    const { hash = '' } = ctx.query;
+    const rst = await DebugTargetManager.getDebugTargets(hash);
     ctx.body = rst;
   };
 

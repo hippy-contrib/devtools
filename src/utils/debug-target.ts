@@ -44,7 +44,7 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
  * 通过 ws 连接 url 创建调试对象
  */
 export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTarget => {
-  const { clientId, clientRole, contextName, deviceName } = wsUrlParams;
+  const { clientId, clientRole, contextName, deviceName, hash } = wsUrlParams;
   let platform;
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
   if (clientRole === ClientRole.IOS) platform = DevicePlatform.IOS;
@@ -57,8 +57,10 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
     experiments: true,
     ws: wsUrlWithoutProtocol(wsUrl),
     env: global.debugAppArgv.env,
+    hash,
   });
   return {
+    hash,
     clientId,
     devtoolsFrontendUrl,
     thumbnailUrl: '',

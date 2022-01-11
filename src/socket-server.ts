@@ -145,8 +145,8 @@ export class SocketServer {
   }
 
   private async checkDebugTargetExist(wsUrlParams: DevtoolsWsUrlParams): Promise<boolean> {
-    const { clientId } = wsUrlParams;
-    const debugTarget = await DebugTargetManager.findDebugTarget(clientId);
+    const { clientId, hash } = wsUrlParams;
+    const debugTarget = await DebugTargetManager.findDebugTarget(clientId, hash);
     log.info('checkDebugTargetExist debug target: %j', debugTarget);
     return Boolean(debugTarget);
   }
@@ -220,7 +220,7 @@ export class SocketServer {
     });
 
     const onClose = (code: number, reason: string, error?) => {
-      log.warn('WsAppClient close: %j, reason: , clientId: %s', code, reason, clientId);
+      log.warn('WsAppClient close: %j, reason: %s, clientId: %s', code, reason, clientId);
       if (error) {
         log.error('WsAppClient error %j', error);
       }

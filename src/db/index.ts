@@ -1,4 +1,5 @@
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
+import { config } from '@/config';
 import { MemoryModel } from './memory/model';
 import { MemoryPubSub } from './memory/pub-sub';
 import { RedisModel } from './redis/model';
@@ -22,7 +23,7 @@ export const getDBOperator = () => ({
  * 初始化数据库环境
  */
 export const initDbModel = async () => {
-  if (process.env.IS_REMOTE === 'true') {
+  if (config.isRemote) {
     model = new RedisModel();
     Publisher = RedisPublisher;
     Subscriber = RedisSubscriber;

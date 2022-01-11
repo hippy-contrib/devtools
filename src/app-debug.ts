@@ -26,12 +26,12 @@ export const startDebugServer = async () => {
 
   server = app.listen(port, host, async () => {
     log.info('start debug server success.');
-    if (env !== DevtoolsEnv.Hippy && process.env.IS_REMOTE !== 'true') {
+    if (env !== DevtoolsEnv.Hippy && !config.isRemote) {
       const { startTunnel, startChrome } = await import('./child-process/index');
       startTunnel();
       startChrome();
     }
-    if (process.env.IS_REMOTE !== 'true') {
+    if (!config.isRemote) {
       const { startAdbProxy } = await import('./child-process/adb');
       startAdbProxy();
     }
@@ -75,7 +75,7 @@ const init = async () => {
   } catch (e) {
     log.warn('rm cache dir error');
   }
-  if (process.env.IS_REMOTE !== 'true') {
+  if (!config.isRemote) {
     const { importTunnel } = await import('@/child-process/import-addon');
     await importTunnel();
   }

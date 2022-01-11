@@ -12,13 +12,16 @@ export class DebugTargetManager {
   /**
    * 查询所有连接的调试对象
    */
-  public static getDebugTargets = async (): Promise<DebugTarget[]> => {
+  public static getDebugTargets = async (hash: string): Promise<DebugTarget[]> => {
     const { iWDPPort } = global.debugAppArgv;
     const { model } = getDBOperator();
-    const [targets, iOSPages] = await Promise.all([
-      model.getAll(config.redis.debugTargetTable),
-      getIWDPPages(iWDPPort),
-    ]);
+    let getDebugTargetPromise;
+    if (config.isRemote) {
+      getDebugTargetPromise = hash ? model.find(config.redis.debugTargetTable, 'hash', hash) : Promise.resolve([]);
+    } else {
+      getDebugTargetPromise = model.getAll(config.redis.debugTargetTable);
+    }
+    const [targets, iOSPages] = await Promise.all([getDebugTargetPromise, getIWDPPages(iWDPPort)]);
     targets.forEach((target, i) => {
       if (target.platform === DevicePlatform.IOS) {
         targets[i] = patchIOSTarget(target, iOSPages);
@@ -37,8 +40,8 @@ export class DebugTargetManager {
   /**
    * 根据 clientId 查询调试对象
    */
-  public static async findDebugTarget(clientId: string) {
-    const debugTargets = await DebugTargetManager.getDebugTargets();
+  public static async findDebugTarget(clientId: string, hash: string) {
+    const debugTargets = await DebugTargetManager.getDebugTargets(hash);
     return debugTargets.find((target) => target.clientId === clientId);
   }
 }
