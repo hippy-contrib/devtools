@@ -19,4 +19,9 @@ export interface DebugTarget {
   deviceName: string;
   deviceId?: string;
   deviceOSVersion?: string;
+  // DebugTarget reference num, every time create with same clientId will increase
+  // every time clean will decrease, and will remove this record when ref === 0
+  // To be compatible with iOS reload scene, the new ws will firstly connect, then the old will close
+  // so we could keep the old DebugTarget.
+  ref: number;
 }

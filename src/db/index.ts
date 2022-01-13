@@ -1,20 +1,20 @@
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
 import { config } from '@/config';
-import { MemoryModel } from './memory/model';
+import { MemoryDB } from './memory/memory-db';
 import { MemoryPubSub } from './memory/pub-sub';
-import { RedisModel } from './redis/model';
+import { RedisDB } from './redis/redis-db';
 import { RedisPublisher, RedisSubscriber } from './redis/pub-sub';
-import { DBModel } from './base-model';
+import { BaseDB } from './base-db';
 
-let model: DBModel;
+let DB: new (key: string) => BaseDB;
 let Publisher: new (channel: string) => IPublisher;
 let Subscriber: new (channel: string) => ISubscriber;
 
 /**
- * 获取数据库 model, Publisher, Subscriber
+ * 获取数据库 db, Publisher, Subscriber
  */
 export const getDBOperator = () => ({
-  model,
+  DB,
   Publisher,
   Subscriber,
 });
@@ -22,16 +22,14 @@ export const getDBOperator = () => ({
 /**
  * 初始化数据库环境
  */
-export const initDbModel = async () => {
+export const initDbModel = () => {
   if (config.isRemote) {
-    model = new RedisModel();
+    DB = RedisDB;
     Publisher = RedisPublisher;
     Subscriber = RedisSubscriber;
   } else {
-    model = new MemoryModel();
+    DB = MemoryDB;
     Publisher = MemoryPubSub;
     Subscriber = MemoryPubSub;
   }
-  await model.init();
-  return model;
 };

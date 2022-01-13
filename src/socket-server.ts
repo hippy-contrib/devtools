@@ -213,8 +213,8 @@ export class SocketServer {
     let debugTarget = createTargetByWsUrlParams(wsUrlParams);
     // app ws 添加监听前可以执行异步操作，因为 app 建立连接后不会主动发送任何消息
     debugTarget = await patchDebugTarget(debugTarget);
-    const { model } = getDBOperator();
-    model.upsert(config.redis.debugTargetTable, clientId, debugTarget);
+    const { DB } = getDBOperator();
+    new DB(config.redis.debugTargetTable).upsert(clientId, debugTarget);
     process.nextTick(() => {
       subscribeCommand(debugTarget, ws);
     });

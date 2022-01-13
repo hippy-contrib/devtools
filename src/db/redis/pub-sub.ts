@@ -3,7 +3,7 @@
  */
 import { Logger } from '@/utils/log';
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
-import { RedisClient, RedisModel } from './model';
+import { RedisClient, RedisDB } from './redis-db';
 
 const log = new Logger('redis-pub-sub');
 
@@ -20,8 +20,7 @@ export class RedisPublisher implements IPublisher {
       throw e;
     }
     this.channel = channel;
-    const model = new RedisModel();
-    this.client = model.client.duplicate();
+    this.client = RedisDB.client.duplicate();
     this.init();
   }
 
@@ -75,8 +74,7 @@ export class RedisSubscriber implements ISubscriber {
       throw e;
     }
     this.channel = channel;
-    const model = new RedisModel();
-    this.client = model.client.duplicate();
+    this.client = RedisDB.client.duplicate();
     this.init();
   }
 

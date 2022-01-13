@@ -81,7 +81,7 @@ const init = async () => {
   }
   await fs.promises.mkdir(cachePath, { recursive: true });
   await fs.promises.mkdir(hmrStaticPath, { recursive: true });
-  await initDbModel();
+  initDbModel();
   initAppClient();
 
   const { port, iWDPPort, clearAddrInUse } = global.debugAppArgv;

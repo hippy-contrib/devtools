@@ -8,7 +8,6 @@ import { createHMRChannel } from '@/utils/pub-sub-channel';
 import { getDBOperator } from '@/db';
 import { config } from '@/config';
 import { decodeHMRData } from '@/utils/buffer';
-import { BundleManager } from './bundles';
 
 const logger = new Logger('hmr-controller', WinstonColor.Blue);
 const hmrCloseEvent = 'HMR_SERVER_CLOSED';
@@ -16,14 +15,14 @@ const hmrCloseEvent = 'HMR_SERVER_CLOSED';
 export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
   logger.info('HMR client connected, hash: %s', hash);
-  const bundle = await BundleManager.get(hash);
+  const { Subscriber, DB } = getDBOperator();
+  const bundle = await new DB(config.redis.bundleTable).get(hash);
   if (!bundle) {
     const reason = 'Hippy dev server not started, not support HMR!';
     ws.close(WSCode.InvalidRequestParams, reason);
     return logger.warn(reason);
   }
 
-  const { Subscriber } = getDBOperator();
   const subscriber = new Subscriber(createHMRChannel(hash));
   subscriber.subscribe((msg) => {
     if (msg === hmrCloseEvent) {
@@ -42,8 +41,9 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
 export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
   logger.info('HMR server connected, hash: %s', hash);
-  BundleManager.add({ hash });
-  const { Publisher } = getDBOperator();
+  const { Publisher, DB } = getDBOperator();
+  const model = new DB(config.redis.bundleTable);
+  model.upsert(hash, { hash });
   const publisher = new Publisher(createHMRChannel(hash));
 
   ws.on('message', (msg: Buffer) => {
@@ -69,7 +69,7 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
     process.nextTick(() => {
       publisher.disconnect();
     });
-    BundleManager.remove(hash);
+    model.delete(hash);
   }
 };
 
