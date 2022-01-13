@@ -953,6 +953,11 @@
     "Remote": {
       "type": "object",
       "properties": {
+        "protocol": {
+          "type": "string",
+          "minLength": 1,
+          "description": "https or http"
+        },
         "host": {
           "type": "string",
           "minLength": 1,

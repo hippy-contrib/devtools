@@ -12,30 +12,29 @@ export const webpack = (webpackConfig, cb?) => {
   const id = getBundleVersionId();
   appendHMRPlugin(id, webpackConfig);
   const publicPath = webpackConfig.output?.publicPath;
+  let bundleUrl;
+  let homeUrl;
   if (publicPath) {
     webpackConfig.output.publicPath = publicPath.replace(/\[version\]/, id);
     const isEndWithSlash = webpackConfig.output.publicPath.endsWith('/');
-    const bundleUrl = `${webpackConfig.output.publicPath}${isEndWithSlash ? '' : '/'}index.bundle`;
-    log.info('bundleUrl: %s', bundleUrl);
-    QRCode.toString(
-      bundleUrl,
-      {
-        small: true,
-        type: 'terminal',
-      },
-      (e, qrcodeStr) => {
-        if (e) log.error('draw qrcode of bundleUrl failed: %j', e?.stack || e);
-        log.info('qrcode\n%s', qrcodeStr);
-      },
+    bundleUrl = `${webpackConfig.output.publicPath}${isEndWithSlash ? '' : '/'}index.bundle`;
+    homeUrl = `${config.domain}/extensions/home.html?hash=${id}`;
+  } else {
+    log.warn(
+      'If you use remote HMR, you should config `publicPath` field to `http://devtools.hippy.myqcloud.com:80/[version]/`.',
     );
-    const homeUrl = `${config.domain}/extensions/home.html?hash=${id}`;
-    log.info('find debug page on: %s', homeUrl);
   }
   if (webpackConfig.devServer) {
     webpackConfig.devServer.id = id;
   }
   const compiler = oldWebpack(webpackConfig);
-  startWebpackDevServer(webpackConfig, compiler, cb);
+  const cbWithQRCode = (err, stats) => {
+    process.nextTick(() => {
+      printDebugInfo(bundleUrl, homeUrl);
+    });
+    if (cb) cb(err, stats);
+  };
+  startWebpackDevServer(webpackConfig, compiler, cbWithQRCode);
   return compiler;
 };
 
@@ -62,4 +61,21 @@ async function saveHmrPort(hmrPort) {
   const { cachePath } = config;
   fs.mkdirSync(cachePath, { recursive: true });
   return fs.writeFileSync(config.hmrPortPath, String(hmrPort));
+}
+
+async function printDebugInfo(bundleUrl, homeUrl) {
+  log.info('bundleUrl: %s', bundleUrl);
+  log.info('find debug page on: %s', homeUrl);
+  QRCode.toString(
+    bundleUrl,
+    {
+      small: true,
+      width: 50,
+      type: 'terminal',
+    },
+    (e, qrcodeStr) => {
+      if (e) log.error('draw qrcode of bundleUrl failed: %j', e?.stack || e);
+      log.info('qrcode\n%s', qrcodeStr);
+    },
+  );
 }

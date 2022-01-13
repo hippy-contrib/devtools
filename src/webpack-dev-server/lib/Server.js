@@ -188,7 +188,7 @@ class Server {
       let webSocketURL = '';
 
       const searchParams = new URLSearchParams();
-      searchParams.set('protocol', 'ws:');
+      searchParams.set('protocol', `${this.getProtocol()}:`);
       searchParams.set('hostname', this.options.remote.host);
       searchParams.set('port', String(this.options.remote.port));
       searchParams.set('pathname', '/debugger-proxy');
@@ -1228,7 +1228,7 @@ class Server {
   createWebSocketClient() {
     return new Promise((resolve, reject) => {
       const { host, port } = this.options.remote;
-      const webSocketURL = `ws://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.id}`;
+      const webSocketURL = `${this.getProtocol()}://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.id}`;
       this.webSocketClient = new WebSocket(webSocketURL);
       this.webSocketClient.on('open', () => {
         this.logger.info('HMR ws client is connected.');
@@ -1769,6 +1769,13 @@ class Server {
           callback(error);
         }
       });
+  }
+
+  getProtocol() {
+    return {
+      'https': 'wss',
+      'http': 'ws',
+    }[this.options.remote.protocol] || 'ws';
   }
 }
 
