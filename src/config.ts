@@ -40,9 +40,7 @@ function getPublicDomain() {
   const hostFromArgv =
     !global.debugAppArgv?.host || global.debugAppArgv?.host === '0.0.0.0' ? 'localhost' : global.debugAppArgv?.host;
   const portFromArgv = global.debugAppArgv?.port || 38989;
-  const host = process.env.PUBLIC_HOST || hostFromArgv;
-  const port = process.env.PUBLIC_PORT || portFromArgv;
-  const domain = `http://${host}:${port}`;
+  const domain = process.env.DOMAIN || `http://${hostFromArgv}:${portFromArgv}`;
   const wsDomain = domain.replace('https://', 'wss://').replace('http://', 'ws://');
   return { domain, wsDomain };
 }
