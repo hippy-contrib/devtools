@@ -1,4 +1,3 @@
-import { AppClientType } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
@@ -12,7 +11,6 @@ export class TunnelAppClient extends AppClient {
     if (typeof global.addon?.sendMsg === 'undefined') {
       throw new Error('tunnel does not imported.');
     }
-    this.type = AppClientType.Tunnel;
     this.registerMessageListener();
   }
 

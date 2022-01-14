@@ -21,6 +21,9 @@ export class DebugTargetManager {
     } else {
       getDebugTargetPromise = new DB(config.redis.debugTargetTable).getAll();
     }
+    // TODO delete test code
+    getDebugTargetPromise = new DB(config.redis.debugTargetTable).getAll();
+
     const [targets, iOSPages] = await Promise.all([getDebugTargetPromise, getIWDPPages(iWDPPort)]);
     targets.forEach((target, i) => {
       if (target.platform === DevicePlatform.IOS) {

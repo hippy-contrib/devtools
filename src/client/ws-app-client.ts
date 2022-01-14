@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientType, AppClientEvent } from '@/@types/enum';
+import { AppClientEvent } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
@@ -11,7 +11,6 @@ export class WsAppClient extends AppClient {
 
   public constructor(id, option) {
     super(id, option);
-    this.type = AppClientType.WS;
     this.ws = option.ws;
     if (!this.ws) {
       const e = new Error('WsAppClient constructor option need ws');
@@ -47,6 +46,7 @@ export class WsAppClient extends AppClient {
   }
 
   protected sendHandler(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
+    if (this.ws.readyState !== WebSocket.OPEN) return;
     return new Promise((resolve, reject) => {
       const msgStr = JSON.stringify(msg);
       this.ws.send(msgStr);

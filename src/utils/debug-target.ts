@@ -4,6 +4,10 @@ import { makeUrl, AppWsUrlParams } from '@/utils/url';
 import { config } from '@/config';
 import { DebugTarget } from '@/@types/debug-target';
 import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
+import { getDBOperator } from '@/db';
+import { Logger } from '@/utils/log';
+
+const log = new Logger('debug-target-util');
 
 /**
  * 通过 device 信息创建调试对象
@@ -37,6 +41,7 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
     deviceId: device.deviceid,
     deviceName: device.devicename,
     deviceOSVersion: device.osVersion,
+    ref: 1,
   };
 };
 
@@ -51,6 +56,7 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
   const wsUrl = makeUrl(`${config.wsDomain}${config.wsPath}`, {
     clientId,
     role: ClientRole.Devtools,
+    hash,
   });
   const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
     remoteFrontend: true,
@@ -72,6 +78,7 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
     type: ChromePageType.Page,
     deviceName,
     appClientTypeList: [AppClientType.WS],
+    ref: 1,
   };
 };
 
@@ -105,6 +112,7 @@ export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
     deviceName: iWDPPage.device.deviceName,
     deviceOSVersion: iWDPPage.device.deviceOSVersion,
     appClientTypeList: [AppClientType.IWDP],
+    ref: 1,
   };
 };
 
@@ -123,3 +131,34 @@ export const patchDebugTarget = async (debugTarget: DebugTarget) => {
 export function wsUrlWithoutProtocol(wsUrl) {
   return wsUrl.replace('wss://', '').replace('ws://', '');
 }
+
+export const patchRefAndSave = async (newDebugTarget: DebugTarget): Promise<DebugTarget> => {
+  const { DB } = getDBOperator();
+  const { clientId } = newDebugTarget;
+  const db = new DB<DebugTarget>(config.redis.debugTargetTable);
+  const oldDebugTarget = await db.get(clientId);
+  const debugTarget = newDebugTarget;
+  if (oldDebugTarget) {
+    debugTarget.ref = oldDebugTarget.ref + 1;
+    log.info('increase debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
+  }
+  const patched = await patchDebugTarget(debugTarget);
+  await db.upsert(clientId, patched);
+  return patched;
+};
+
+export const decreaseRefAndSave = async (clientId: string): Promise<DebugTarget> => {
+  const { DB } = getDBOperator();
+  const db = new DB<DebugTarget>(config.redis.debugTargetTable);
+  const debugTarget = await db.get(clientId);
+  if (!debugTarget) return;
+  debugTarget.ref -= 1;
+  log.info('decrease debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
+  if (debugTarget.ref <= 0) {
+    db.delete(clientId);
+    log.info('debugTarget ref is 0, should delete, clientId: %s', clientId);
+    return;
+  }
+  await db.upsert(clientId, debugTarget);
+  return debugTarget;
+};

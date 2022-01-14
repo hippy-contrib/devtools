@@ -56,7 +56,6 @@ export class RedisPublisher implements IPublisher {
     await this.client.connect();
     log.info('redis publisher client created, %s', this.channel);
     this.isConnected = true;
-    log.info('publish queue message, length %s', this.queue.length);
     this.queue.forEach(this.realPublish.bind(this));
   }
 }
@@ -118,7 +117,6 @@ export class RedisSubscriber implements ISubscriber {
     log.info('redis subscriber client created, %s', this.channel);
     this.isConnected = true;
     if (this.operateQueue) {
-      log.info('clear subscribe queue, length %s', this.operateQueue.length);
       this.operateQueue.forEach(([fn, cb]) => {
         fn.call(this, cb);
       });

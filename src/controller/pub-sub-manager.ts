@@ -22,12 +22,12 @@ import {
   createDownwardChannel,
 } from '@/utils/pub-sub-channel';
 import { Logger } from '@/utils/log';
-import { config } from '@/config';
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
+import { decreaseRefAndSave } from '@/utils/debug-target';
 
 const log = new Logger('pub-sub-manager', WinstonColor.BrightGreen);
 
-// 保存一个调试页面的缓存数据，key: clientId
+// store the data of a DebugTarget, key: clientId
 const channelMap: Map<
   string,
   {
@@ -36,7 +36,7 @@ const channelMap: Map<
     cmdIdChannelIdMap: Map<number, string>;
     // key: downward channelId
     publisherMap: Map<string, IPublisher>;
-    // 多个 node 节点之间通信的 publisher，用于当 app 端断连时，通知 devtools 端断开
+    // channel for multiple node publisher, when the WSAppClient is closed, we could publish close event to devtools
     internalPublisher: IPublisher;
     upwardSubscriber: ISubscriber;
     debugTarget: DebugTarget;
@@ -45,17 +45,17 @@ const channelMap: Map<
 > = new Map();
 
 /**
- * 订阅调试指令，触发时机：
- *  1. tunnel appConnect
- *  2. app ws connection
- *  3. get IWDP pages: 这种场景会触发的很频繁（前端定时器2s请求一次），但是已经订阅过的会直接 filter 掉
+ * subscribe to the upward command, trigger occasion:
+ *  1. tunnel appConnect event
+ *  2. app ws connection: maybe repeat subscribe because the iOS close event is later connect event
+ *  3. get IWDP pages: should filter this situation, because frontend will request every 2s
  */
 export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket) => {
   const { clientId } = debugTarget;
   if (!channelMap.has(clientId)) addChannelItem(debugTarget);
-  else return;
-
-  log.info('subscribeCommand clientId %s', clientId);
+  else {
+    if (isIWDPPage(clientId)) return;
+  }
 
   const { appClientList, downwardChannelSet, cmdIdChannelIdMap, upwardSubscriber } = channelMap.get(clientId);
 
@@ -67,8 +67,9 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
   channelMap.get(clientId).upwardSubscriber = newUpwardSubscriber;
 
   /**
-   * 订阅上行消息。由于可能存在多个 devtools client（如多个插件，每个插件一个通道），
-   * 所以这里应该用批量订阅 pSubscribe
+   * subscribe upward message.
+   * because there maybe multiple devtools client, such as multiple chrome extensions,
+   * we need use batch subscribe (pSubscribe)
    */
   newUpwardSubscriber.pSubscribe((message: string, upwardChannelId: string) => {
     if (!upwardChannelId) return log.warn('pSubscribe without channelId');
@@ -78,21 +79,21 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
     } catch (e) {
       log.error('%s channel message are invalid JSON, %s', upwardChannelId, message);
     }
-    // log.info('on channel message, %s, %s, %s', msgObj.id, msgObj.method, upwardChannelId);
     const downwardChannelId = upwardChannelToDownwardChannel(upwardChannelId);
     cmdIdChannelIdMap.set(msgObj.id, downwardChannelId);
     downwardChannelSet.add(downwardChannelId);
 
-    appClientList.forEach((appClient) => {
+    const { appClientList: latestAppClientList } = channelMap.get(clientId);
+    latestAppClientList.forEach((appClient) => {
       appClient.sendToApp(msgObj).catch((e) => {
         if (e !== ErrorCode.DomainFiltered) {
-          return log.error('%s app client send error: %j', appClient.type, e);
+          return log.error('%s app client send error: %j', appClient.constructor.name, e);
         }
       });
     });
   });
 
-  // 发布下行消息
+  // publish downward message to devtools frontend
   appClientList.forEach((appClient) => {
     appClient.removeAllListeners(AppClientEvent.Message);
     appClient.on(AppClientEvent.Message, (msg) => getAppClientMessageHandler(debugTarget)(msg));
@@ -100,12 +101,13 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
 };
 
 /**
- * 调试结束，清除缓存
- * appDisconnect, app ws close 时调用
+ * clean cache of one DebugTarget
+ * should invoke when tunnel appDisconnect event, or WSAppClient ws close event.
  */
 export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean) => {
-  const { DB } = getDBOperator();
-  new DB(config.redis.debugTargetTable).delete(clientId);
+  const debugTarget = await decreaseRefAndSave(clientId);
+  if (debugTarget) return;
+
   const channelInfo = channelMap.get(clientId);
   if (!channelInfo) return;
 
@@ -114,7 +116,7 @@ export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean)
     internalPublisher.publish(InternalChannelEvent.WSClose);
   }
   Array.from(publisherMap.values()).forEach((publisher) => publisher.disconnect());
-  // 稍作延迟，等处理完 InternalChannelEvent.WSClose 事件后再取消订阅
+  // need some delay for the finish of `InternalChannelEvent.WSClose` event
   process.nextTick(() => {
     upwardSubscriber.pUnsubscribe();
     upwardSubscriber.disconnect();
@@ -124,7 +126,7 @@ export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean)
 };
 
 /**
- * 清除所有调试对象的缓存
+ * clean all cache of DebugTarget
  */
 export const cleanAllDebugTargets = async () => {
   channelMap.forEach(({ debugTarget }) => {
@@ -134,8 +136,7 @@ export const cleanAllDebugTargets = async () => {
 
 let oldIWDPDebugTargets: DebugTarget[] = [];
 /**
- * 订阅 IWDP 获取到的 DebugTarget 上行消息，清理关闭的 IWDP DebugTarget。
- * IWDP 检测到的已关闭的页面，清空调试对象缓存
+ * subscribe upward message from IWDP, and clean the outdated IWDP page
  */
 export const subscribeByIWDP = (debugTargets: DebugTarget[]) => {
   const outdatedDebugTargets = differenceBy(oldIWDPDebugTargets, debugTargets, 'clientId');
@@ -172,7 +173,7 @@ const createUpwardSubscriber = (clientId) => {
 };
 
 /**
- * 根据调试对象创建匹配的调试通道（AppClient）
+ * create matched debug tunnels by DebugTarget
  */
 const createAppClientList = (debugTarget: DebugTarget, ws?: WebSocket): AppClient[] => {
   const { clientId } = debugTarget;
@@ -181,10 +182,13 @@ const createAppClientList = (debugTarget: DebugTarget, ws?: WebSocket): AppClien
   return options
     .map(({ Ctor: AppClientCtor, ...option }: AppClientFullOptionOmicCtx) => {
       try {
-        const outdatedAppClientIndex = appClientList.findIndex((appClient) => appClient.type === AppClientCtor.name);
+        const outdatedAppClientIndex = appClientList.findIndex(
+          (appClient) => appClient.constructor.name === AppClientCtor.name,
+        );
         if (outdatedAppClientIndex !== -1) {
           const outdatedAppClient = appClientList.splice(outdatedAppClientIndex, 1)[0];
           outdatedAppClient.destroy();
+          log.info('%s is outdated, re-constructor now', outdatedAppClient.constructor.name);
         }
         const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
         const newOption: AppClientOption = {
@@ -199,7 +203,7 @@ const createAppClientList = (debugTarget: DebugTarget, ws?: WebSocket): AppClien
         }
         if (AppClientCtor.name === AppClientType.IWDP && !debugTarget.iWDPWsUrl) {
           log.warn(
-            'IWDPAppClient constructor option need iWDPWsUrl, if you are debug iOS without USB, please ignore this error.',
+            'IWDPAppClient constructor option need iWDPWsUrl, if you are debug iOS without USB, please ignore this warning.',
           );
           return;
         }
@@ -216,7 +220,7 @@ const createAppClientList = (debugTarget: DebugTarget, ws?: WebSocket): AppClien
 };
 
 /**
- * iOS 重新插拔时 IWDP ws url change，需要重新 new IWDPAppClient
+ * when re-plug iOS device, IWDPAppClient ws url will change, so need update new IWDPAppClient
  */
 export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
   const { clientId } = debugTarget;
@@ -228,7 +232,9 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
   if (!iWDPOption) return;
 
   const { Ctor: AppClientCtor, ...option } = iWDPOption;
-  const outdatedAppClientIndex = appClientList.findIndex((appClient) => appClient.type === AppClientCtor.name);
+  const outdatedAppClientIndex = appClientList.findIndex(
+    (appClient) => appClient.constructor.name === AppClientCtor.name,
+  );
   if (outdatedAppClientIndex === -1) return;
 
   const iWDPAppClient = appClientList[outdatedAppClientIndex] as IWDPAppClient;
@@ -250,35 +256,42 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
   log.info(`create app client ${AppClientCtor.name}, update iWDPWsUrl to %s`, debugTarget.iWDPWsUrl);
 };
 
-const getAppClientMessageHandler = (debugTarget: DebugTarget) => {
-  const { downwardChannelSet, cmdIdChannelIdMap, publisherMap } = channelMap.get(debugTarget.clientId);
-  return async (msg: Adapter.CDP.Res) => {
-    const msgStr = JSON.stringify(msg);
-    const { Publisher } = getDBOperator();
-    if ('id' in msg) {
-      // 消息为 CommandRes，根据缓存的 cmdId 查找 downwardChannelId，只发布到该 channel
-      const commandRes = msg as Adapter.CDP.CommandRes;
-      const downwardChannelId = cmdIdChannelIdMap.get(commandRes.id);
-      if (!downwardChannelId) return;
-      if (!publisherMap.has(downwardChannelId)) {
-        const publisher = new Publisher(downwardChannelId);
-        publisherMap.set(downwardChannelId, publisher);
-      }
-      const publisher = publisherMap.get(downwardChannelId);
-      publisher.publish(msgStr);
-    } else {
-      if (downwardChannelSet.size === 0) {
-        downwardChannelSet.add(createDownwardChannel(debugTarget.clientId));
-      }
-      // 消息类型为 EventRes，event 无法确定来源，广播到所有 channel
-      downwardChannelSet.forEach((channelId) => {
-        if (!publisherMap.has(channelId)) {
-          const publisher = new Publisher(channelId);
-          publisherMap.set(channelId, publisher);
-        }
-        const publisher = publisherMap.get(channelId);
-        publisher.publish(msgStr);
-      });
+const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Adapter.CDP.Res) => {
+  const channelInfo = channelMap.get(debugTarget.clientId);
+  if (!channelInfo) {
+    log.error('channelInfo does not exist!');
+  }
+  const { downwardChannelSet, cmdIdChannelIdMap, publisherMap } = channelInfo;
+  const msgStr = JSON.stringify(msg);
+  const { Publisher } = getDBOperator();
+  if ('id' in msg) {
+    // publish CommandRes to `downwardChannelId`
+    const commandRes = msg as Adapter.CDP.CommandRes;
+    const downwardChannelId = cmdIdChannelIdMap.get(commandRes.id);
+    if (!downwardChannelId) return;
+    if (!publisherMap.has(downwardChannelId)) {
+      const publisher = new Publisher(downwardChannelId);
+      publisherMap.set(downwardChannelId, publisher);
     }
-  };
+    const publisher = publisherMap.get(downwardChannelId);
+    publisher.publish(msgStr);
+  } else {
+    if (downwardChannelSet.size === 0) {
+      downwardChannelSet.add(createDownwardChannel(debugTarget.clientId));
+    }
+    // broadcast to all channel, because could'n determine the receiver of EventRes
+    downwardChannelSet.forEach((channelId) => {
+      if (!publisherMap.has(channelId)) {
+        const publisher = new Publisher(channelId);
+        publisherMap.set(channelId, publisher);
+      }
+      const publisher = publisherMap.get(channelId);
+      publisher.publish(msgStr);
+    });
+  }
+};
+
+const isIWDPPage = (clientId: string) => {
+  const { appClientList } = channelMap.get(clientId);
+  return appClientList?.length === 1 && appClientList[0].constructor.name === AppClientType.IWDP;
 };

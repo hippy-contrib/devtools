@@ -1,6 +1,6 @@
 import { Server as HTTPServer, IncomingMessage } from 'http';
 import { Socket } from 'net';
-import WebSocket, { Server as WSServer } from 'ws';
+import { Server as WSServer } from 'ws';
 import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
 import { AppClientType, ClientRole, DevicePlatform, InternalChannelEvent, WinstonColor, WSCode } from '@/@types/enum';
 import { getDBOperator } from '@/db';
@@ -10,9 +10,10 @@ import { subscribeCommand, cleanDebugTarget, cleanAllDebugTargets } from '@/cont
 import { Logger } from '@/utils/log';
 import { createDownwardChannel, createUpwardChannel, createInternalChannel } from '@/utils/pub-sub-channel';
 import { parseWsUrl, getWsInvalidReason, AppWsUrlParams, DevtoolsWsUrlParams, HMRWsParams } from '@/utils/url';
-import { createTargetByWsUrlParams, patchDebugTarget } from '@/utils/debug-target';
+import { createTargetByWsUrlParams, patchRefAndSave } from '@/utils/debug-target';
 import { config } from '@/config';
 import { onHMRClientConnection, onHMRServerConnection } from '@/controller/hmr';
+import { MyWebSocket } from '@/@types/socker-server';
 
 const heartbeatInterval = 30000;
 // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
@@ -212,9 +213,7 @@ export class SocketServer {
 
     let debugTarget = createTargetByWsUrlParams(wsUrlParams);
     // app ws 添加监听前可以执行异步操作，因为 app 建立连接后不会主动发送任何消息
-    debugTarget = await patchDebugTarget(debugTarget);
-    const { DB } = getDBOperator();
-    new DB(config.redis.debugTargetTable).upsert(clientId, debugTarget);
+    debugTarget = await patchRefAndSave(debugTarget);
     process.nextTick(() => {
       subscribeCommand(debugTarget, ws);
     });
@@ -229,8 +228,4 @@ export class SocketServer {
     ws.on('close', (code, reason) => onClose(code, reason));
     ws.on('error', (e) => onClose(null, null, e));
   }
-}
-
-declare class MyWebSocket extends WebSocket {
-  isAlive: boolean;
 }

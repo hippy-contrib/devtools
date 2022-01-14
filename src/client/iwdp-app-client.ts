@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientType, AppClientEvent, WinstonColor } from '@/@types/enum';
+import { AppClientEvent, WinstonColor } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
@@ -29,7 +29,6 @@ export class IWDPAppClient extends AppClient {
       );
       throw e;
     }
-    this.type = AppClientType.IWDP;
     this.connect();
   }
 

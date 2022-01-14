@@ -6,7 +6,7 @@ import { RedisDB } from './redis/redis-db';
 import { RedisPublisher, RedisSubscriber } from './redis/pub-sub';
 import { BaseDB } from './base-db';
 
-let DB: new (key: string) => BaseDB;
+let DB: new <T>(key: string) => BaseDB<T>;
 let Publisher: new (channel: string) => IPublisher;
 let Subscriber: new (channel: string) => ISubscriber;
 

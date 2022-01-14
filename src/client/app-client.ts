@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
-import { AppClientType, AppClientEvent, DevicePlatform, ErrorCode, MiddlewareType, WinstonColor } from '@/@types/enum';
+import { AppClientEvent, DevicePlatform, ErrorCode, MiddlewareType, WinstonColor } from '@/@types/enum';
 import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
@@ -31,7 +31,6 @@ export interface AppClient {
  **/
 export abstract class AppClient extends EventEmitter {
   public id: string;
-  public type: AppClientType;
   protected isClosed = false;
   protected platform: DevicePlatform;
   private middleWareManager: MiddleWareManager;
@@ -67,7 +66,7 @@ export abstract class AppClient extends EventEmitter {
    */
   public sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     if (!this.filter(msg)) {
-      filteredLog.info(`'${msg.method}' is filtered in app client type: ${this.type}`);
+      filteredLog.info(`'${msg.method}' is filtered in app client type: ${this.constructor.name}`);
       return Promise.reject(ErrorCode.DomainFiltered);
     }
 
@@ -112,11 +111,11 @@ export abstract class AppClient extends EventEmitter {
         if (!msg.id) {
           msg.id = requestId.create();
         }
-        upwardLog.info('%s sendToApp %j', this.type, msg);
+        upwardLog.info('%s sendToApp %j', this.constructor.name, msg);
         return this.sendHandler(msg);
       },
       sendToDevtools: (msg: Adapter.CDP.Res) => {
-        downwardLog.info('%s sendToDevtools %s %s', this.type, (msg as Adapter.CDP.CommandRes).id || '', msg.method);
+        downwardLog.info('%s sendToDevtools %s %s', this.constructor.name, (msg as Adapter.CDP.CommandRes).id || '', msg.method);
         return this.emitMessageToDevtools(msg);
       },
     };
