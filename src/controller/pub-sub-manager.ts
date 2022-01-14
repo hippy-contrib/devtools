@@ -23,7 +23,7 @@ import {
 } from '@/utils/pub-sub-channel';
 import { Logger } from '@/utils/log';
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
-import { decreaseRefAndSave } from '@/utils/debug-target';
+import { decreaseRefAndSave, removeDebugTarget } from '@/utils/debug-target';
 
 const log = new Logger('pub-sub-manager', WinstonColor.BrightGreen);
 
@@ -104,7 +104,13 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
  * clean cache of one DebugTarget
  * should invoke when tunnel appDisconnect event, or WSAppClient ws close event.
  */
-export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean) => {
+export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean, cleanCache = false) => {
+  if (cleanCache) {
+    await removeDebugTarget(clientId);
+    log.info('removeDebugTarget %s', clientId);
+    return;
+  }
+
   const debugTarget = await decreaseRefAndSave(clientId);
   if (debugTarget) return;
 
@@ -128,11 +134,10 @@ export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean)
 /**
  * clean all cache of DebugTarget
  */
-export const cleanAllDebugTargets = async () => {
-  channelMap.forEach(({ debugTarget }) => {
-    cleanDebugTarget(debugTarget.clientId, true);
-  });
-};
+export const cleanAllDebugTargets = async () =>
+  Promise.all(
+    Array.from(channelMap.values()).map(({ debugTarget }) => cleanDebugTarget(debugTarget.clientId, true, true)),
+  );
 
 let oldIWDPDebugTargets: DebugTarget[] = [];
 /**
@@ -198,7 +203,7 @@ const createAppClientList = (debugTarget: DebugTarget, ws?: WebSocket): AppClien
           ws,
         };
         if (AppClientCtor.name === AppClientType.WS && !ws) {
-          log.warn('WsAppClient constructor option need ws');
+          log.warn('WSAppClient constructor option need ws');
           return;
         }
         if (AppClientCtor.name === AppClientType.IWDP && !debugTarget.iWDPWsUrl) {

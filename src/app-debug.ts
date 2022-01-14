@@ -48,11 +48,11 @@ export const startDebugServer = async () => {
 /**
  * 停止调试服务
  */
-export const stopServer = (exitProcess = false, ...arg) => {
+export const stopServer = async (exitProcess = false, ...arg) => {
   try {
     log.info('stopServer %j', arg);
     if (socketServer) {
-      socketServer.close();
+      await socketServer.close();
       socketServer = null;
     }
     if (server) {

@@ -1,6 +1,6 @@
 import { ChromeCommand, ChromeEvent, IOS100Command, IOS100Event } from 'tdf-devtools-protocol/dist/types';
 import { Logger } from '@/utils/log';
-import { requestId } from '../global-id';
+import { requestId } from '@/utils/global-id';
 import { MiddleWareManager } from '../middleware-context';
 import TraceAdapter from './adapter/trace-adapter';
 

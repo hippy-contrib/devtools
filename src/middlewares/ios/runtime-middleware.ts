@@ -1,6 +1,6 @@
 import { ChromeCommand, ChromeEvent } from 'tdf-devtools-protocol/dist/types/enum-chrome-mapping';
 import { IOS90Command } from 'tdf-devtools-protocol/dist/types/enum-ios-9.0-mapping';
-import { contextId, requestId } from '../global-id';
+import { contextId, requestId } from '@/utils/global-id';
 import { MiddleWareManager } from '../middleware-context';
 import { getLastScriptEval } from './debugger-middleware';
 

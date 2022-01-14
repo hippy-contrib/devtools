@@ -3,7 +3,7 @@ import { DevicePlatform, DevtoolsEnv } from '@/@types/enum';
 import { appClientManager } from './app-client-manager';
 import { IWDPAppClient } from './iwdp-app-client';
 import { TunnelAppClient } from './tunnel-app-client';
-import { WsAppClient } from './ws-app-client';
+import { WSAppClient } from './ws-app-client';
 
 export const initAppClient = () => {
   const initFn = {
@@ -38,7 +38,7 @@ const initHippyAppClient = () => {
   appClientManager.addAndroidAppClientOption({
     useAllDomain: true,
     middleWareManager: androidMiddleWareManager,
-    Ctor: WsAppClient,
+    Ctor: WSAppClient,
     platform: DevicePlatform.Android,
   });
   appClientManager.addIOSAppClientOption({
@@ -52,7 +52,7 @@ const initHippyAppClient = () => {
     useAllDomain: false,
     acceptDomains: customDomains,
     middleWareManager: iOSMiddleWareManager,
-    Ctor: WsAppClient,
+    Ctor: WSAppClient,
     platform: DevicePlatform.IOS,
   });
 };

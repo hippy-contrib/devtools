@@ -1,5 +1,5 @@
 export const DEFAULT_REMOTE = {
-  protocol: 'http',
-  host: 'tdf-devtools.woa.com',
-  port: 80,
-}
+  protocol: 'https',
+  host: 'devtools.hippy.myqcloud.com',
+  port: 443,
+};

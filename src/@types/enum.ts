@@ -52,7 +52,7 @@ export const enum AppClientEvent {
 
 export const enum AppClientType {
   Tunnel = 'TunnelAppClient',
-  WS = 'WsAppClient',
+  WS = 'WSAppClient',
   IWDP = 'IWDPAppClient',
 }
 

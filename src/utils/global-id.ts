@@ -1,7 +1,9 @@
-class GlobalId {
+export class GlobalId {
   private globalId = 0;
 
-  public constructor(private step: number = 1) {}
+  public constructor(private start = 0, private step: number = 1) {
+    this.globalId = start;
+  }
 
   public get id() {
     return this.globalId;
@@ -16,7 +18,7 @@ class GlobalId {
 /**
  * 全局调试协议 request command id
  */
-export const requestId = new GlobalId(-1);
+export const requestId = new GlobalId(0, -1);
 
 /**
  * 全局 js 执行上下文 id

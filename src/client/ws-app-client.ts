@@ -5,7 +5,7 @@ import { AppClient } from './app-client';
 
 const log = new Logger('app-client:ws');
 
-export class WsAppClient extends AppClient {
+export class WSAppClient extends AppClient {
   private ws: WebSocket;
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
 
@@ -13,7 +13,7 @@ export class WsAppClient extends AppClient {
     super(id, option);
     this.ws = option.ws;
     if (!this.ws) {
-      const e = new Error('WsAppClient constructor option need ws');
+      const e = new Error('WSAppClient constructor option need ws');
       throw e;
     }
     this.registerMessageListener();
@@ -29,7 +29,7 @@ export class WsAppClient extends AppClient {
       try {
         msgObj = JSON.parse(msg);
       } catch (e) {
-        log.error(`parse WsAppClient json message error: ${msg}`);
+        log.error(`parse WSAppClient json message error: ${msg}`);
       }
 
       const res = await this.downwardMessageHandler(msgObj);
@@ -40,7 +40,7 @@ export class WsAppClient extends AppClient {
 
     this.ws.on('close', () => {
       this.isClosed = true;
-      log.info(`${this.id} WsAppClient closed.`);
+      log.info(`${this.id} WSAppClient closed.`);
       this.emit(AppClientEvent.Close);
     });
   }

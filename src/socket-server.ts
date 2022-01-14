@@ -14,6 +14,7 @@ import { createTargetByWsUrlParams, patchRefAndSave } from '@/utils/debug-target
 import { config } from '@/config';
 import { onHMRClientConnection, onHMRServerConnection } from '@/controller/hmr';
 import { MyWebSocket } from '@/@types/socker-server';
+import { publishReloadCommand } from '@/utils/reload-adapter';
 
 const heartbeatInterval = 30000;
 // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
@@ -91,8 +92,8 @@ export class SocketServer {
   /**
    * 关闭调试服务，并清理当前节点连接的调试对象缓存
    */
-  public close() {
-    cleanAllDebugTargets();
+  public async close() {
+    await cleanAllDebugTargets();
     this.wss.close(() => {
       log.info('wss closed.');
     });
@@ -184,7 +185,7 @@ export class SocketServer {
     });
     const onClose = (code, reason, e?: Error) => {
       log.info('devtools ws client close code %s, reason: %s, clientId: %s', code, reason, clientId);
-      log.error('devtools ws client error: %j', e);
+      if (e) log.error('devtools ws client error: %j', e);
       resumeCommands.map(publisher.publish.bind(publisher));
       // 延时等 publisher 发布完成
       process.nextTick(() => {
@@ -203,7 +204,7 @@ export class SocketServer {
    */
   private async onAppConnection(ws: MyWebSocket, wsUrlParams: AppWsUrlParams) {
     const { clientId, clientRole } = wsUrlParams;
-    log.info('WsAppClient connected. %s', clientId);
+    log.info('WSAppClient connected. %s', clientId);
     const platform = {
       [ClientRole.Android]: DevicePlatform.Android,
       [ClientRole.IOS]: DevicePlatform.IOS,
@@ -218,10 +219,12 @@ export class SocketServer {
       subscribeCommand(debugTarget, ws);
     });
 
+    publishReloadCommand(debugTarget);
+
     const onClose = (code: number, reason: string, error?) => {
-      log.warn('WsAppClient close: %j, reason: %s, clientId: %s', code, reason, clientId);
+      log.warn('WSAppClient closed: %j, reason: %s, clientId: %s', code, reason, clientId);
       if (error) {
-        log.error('WsAppClient error %j', error);
+        log.error('WSAppClient error %j', error);
       }
       cleanDebugTarget(clientId, code === WSCode.ClosePage);
     };

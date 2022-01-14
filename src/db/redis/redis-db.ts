@@ -21,6 +21,7 @@ export class RedisDB<T> extends BaseDB<T> {
    */
   public static client;
   private static isInited = false;
+  private static opQueue: Array<Function> = [];
 
   /**
    * 初始化数据库连接
@@ -31,12 +32,12 @@ export class RedisDB<T> extends BaseDB<T> {
       // ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
       await RedisDB.client.connect();
       RedisDB.isInited = true;
+      await Promise.all(RedisDB.opQueue.map(async (op) => await op()));
+      RedisDB.opQueue = [];
     } catch (e) {
       log.error('connect redis failed: %s', (e as Error).stack || e);
     }
   }
-
-  private opQueue: Array<Function> = [];
 
   public constructor(key: string) {
     super(key);
@@ -59,7 +60,7 @@ export class RedisDB<T> extends BaseDB<T> {
         }
       };
       if (RedisDB.isInited) return op();
-      this.opQueue.push(op);
+      RedisDB.opQueue.push(op);
     });
   }
 
@@ -84,7 +85,7 @@ export class RedisDB<T> extends BaseDB<T> {
         resolve(result);
       };
       if (RedisDB.isInited) return op();
-      this.opQueue.push(op);
+      RedisDB.opQueue.push(op);
     });
   }
 
@@ -101,7 +102,7 @@ export class RedisDB<T> extends BaseDB<T> {
         }
       };
       if (RedisDB.isInited) return op();
-      this.opQueue.push(op);
+      RedisDB.opQueue.push(op);
     });
   }
 
@@ -116,13 +117,18 @@ export class RedisDB<T> extends BaseDB<T> {
         }
       };
       if (RedisDB.isInited) return op();
-      this.opQueue.push(op);
+      RedisDB.opQueue.push(op);
     });
   }
 }
 
 const createMyClient = (): RedisClient => {
   const client = createClient({ url: config.redis.url }) as RedisClient;
+  listenRedisEvent(client);
+  return client;
+};
+
+export const listenRedisEvent = (client) => {
   client.on(RedisClientEvent.Error, (e) => {
     log.error('redis client error: %s', e?.stack || e);
   });
@@ -132,7 +138,6 @@ const createMyClient = (): RedisClient => {
   client.on(RedisClientEvent.Reconnecting, () => {
     log.warn('redis reconnecting');
   });
-  return client;
 };
 
 const enum RedisClientEvent {

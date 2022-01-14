@@ -462,9 +462,9 @@ class Server {
         options.client = {};
       }
 
-      // Enable client overlay by default
+      // Disable client overlay by default
       if (typeof options.client.overlay === 'undefined') {
-        options.client.overlay = true;
+        options.client.overlay = false;
       } else if (typeof options.client.overlay !== 'boolean') {
         options.client.overlay = {
           errors: true,
@@ -1260,17 +1260,17 @@ class Server {
       this.sendMessage(HMREvent.LiveReload);
     }
 
-    if (this.options.client && this.options.client.progress) {
-      this.sendMessage(HMREvent.Progress, this.options.client.progress);
-    }
+    // if (this.options.client && this.options.client.progress) {
+    //   this.sendMessage(HMREvent.Progress, this.options.client.progress);
+    // }
 
     if (this.options.client && this.options.client.reconnect) {
       this.sendMessage(HMREvent.Reconnect, this.options.client.reconnect);
     }
 
-    if (this.options.client && this.options.client.overlay) {
-      this.sendMessage(HMREvent.Overlay, this.options.client.overlay);
-    }
+    // if (this.options.client && this.options.client.overlay) {
+    //   this.sendMessage(HMREvent.Overlay, this.options.client.overlay);
+    // }
 
     if (!this.stats) {
       return;

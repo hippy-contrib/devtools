@@ -1,5 +1,5 @@
 import { ChromeCommand, ChromeEvent, IOS90Command, ScriptLanguage } from 'tdf-devtools-protocol/dist/types';
-import { requestId } from '../global-id';
+import { requestId } from '@/utils/global-id';
 import { MiddleWareManager } from '../middleware-context';
 import { sendEmptyResultToDevtools } from '../default-middleware';
 

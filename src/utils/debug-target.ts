@@ -162,3 +162,9 @@ export const decreaseRefAndSave = async (clientId: string): Promise<DebugTarget>
   await db.upsert(clientId, debugTarget);
   return debugTarget;
 };
+
+export const removeDebugTarget = async (clientId: string) => {
+  const { DB } = getDBOperator();
+  const db = new DB<DebugTarget>(config.redis.debugTargetTable);
+  return db.delete(clientId);
+};
