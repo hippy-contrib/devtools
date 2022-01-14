@@ -39,7 +39,9 @@ function normalizeRemoteDebug(versionId, config) {
     const domain = publicPath.replace(/\/\[version\]\/?/, '');
     publicPath = publicPath.replace(/\[version\]/, versionId);
     config.output.publicPath = publicPath;
-    bundleUrl = `${publicPath}/index.bundle`;
+    const isEndWithSlash = publicPath.endsWith('/');
+    const slash = isEndWithSlash ? '' : '/';
+    bundleUrl = `${publicPath}${slash}index.bundle`;
     homeUrl = `${domain}/extensions/home.html?hash=${versionId}`;
   } else {
     log.warn(

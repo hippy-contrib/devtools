@@ -15,14 +15,15 @@ export class DebugTargetManager {
   public static getDebugTargets = async (hash: string): Promise<DebugTarget[]> => {
     const { iWDPPort } = global.debugAppArgv;
     const { DB } = getDBOperator();
+    const db = new DB(config.redis.debugTargetTable);
     let getDebugTargetPromise;
     if (config.isRemote) {
-      getDebugTargetPromise = hash ? new DB(config.redis.debugTargetTable).find('hash', hash) : Promise.resolve([]);
+      getDebugTargetPromise = hash ? db.find('hash', hash) : Promise.resolve([]);
     } else {
-      getDebugTargetPromise = new DB(config.redis.debugTargetTable).getAll();
+      getDebugTargetPromise = db.getAll();
     }
     // TODO delete test code
-    getDebugTargetPromise = new DB(config.redis.debugTargetTable).getAll();
+    // getDebugTargetPromise = db.getAll();
 
     const [targets, iOSPages] = await Promise.all([getDebugTargetPromise, getIWDPPages(iWDPPort)]);
     targets.forEach((target, i) => {

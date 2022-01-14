@@ -22,7 +22,7 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
   const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
     remoteFrontend: true,
     experiments: true,
-    ws: wsUrlWithoutProtocol(wsUrl),
+    [config.wsProtocol]: wsUrlWithoutProtocol(wsUrl),
     env: global.debugAppArgv.env,
   });
   const title = device.platform === DevicePlatform.IOS ? clientId : 'Hippy debug tools for V8';
@@ -61,7 +61,7 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
   const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
     remoteFrontend: true,
     experiments: true,
-    ws: wsUrlWithoutProtocol(wsUrl),
+    [config.wsProtocol]: wsUrlWithoutProtocol(wsUrl),
     env: global.debugAppArgv.env,
     hash,
   });
@@ -94,7 +94,7 @@ export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
   const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
     remoteFrontend: true,
     experiments: true,
-    ws: wsUrlWithoutProtocol(wsUrl),
+    [config.wsProtocol]: wsUrlWithoutProtocol(wsUrl),
     env: global.debugAppArgv.env,
   });
   return {

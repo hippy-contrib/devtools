@@ -1,10 +1,10 @@
 import url from 'url';
 
 function createSocketURL(parsedURL) {
-  const { hostname, port, pathname, hash, role } = parsedURL;
+  const { protocol, hostname, port, pathname, hash, role } = parsedURL;
 
   return url.format({
-    protocol: 'ws:',
+    protocol: protocol || 'ws:',
     hostname: hostname || 'localhost',
     port: port || 38988,
     pathname: pathname || '/ws',

@@ -21,6 +21,7 @@ export const config: Config = {
 interface Config {
   domain: string;
   wsDomain: string;
+  wsProtocol: string;
   wsPath: string;
   cachePath: string;
   hmrStaticPath: string;
@@ -42,5 +43,6 @@ function getPublicDomain() {
   const portFromArgv = global.debugAppArgv?.port || 38989;
   const domain = process.env.DOMAIN || `http://${hostFromArgv}:${portFromArgv}`;
   const wsDomain = domain.replace('https://', 'wss://').replace('http://', 'ws://');
-  return { domain, wsDomain };
+  const wsProtocol = domain.startsWith('https://') ? 'wss' : 'ws';
+  return { domain, wsDomain, wsProtocol };
 }
