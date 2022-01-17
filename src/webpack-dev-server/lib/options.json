@@ -954,9 +954,7 @@
       "type": "object",
       "properties": {
         "protocol": {
-          "type": "string",
-          "minLength": 1,
-          "description": "https or http"
+          "enum": ["http", "https"]
         },
         "host": {
           "type": "string",

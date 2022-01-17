@@ -36,6 +36,13 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
       ws.send(msg);
     }
   });
+
+  ws.on('close', (code, reason) => onClose(code, reason));
+  ws.on('error', (e) => onClose(null, null, e));
+  function onClose(code: number, reason: string, error?) {
+    if (error) logger.error('HMR client ws error: %s', error.stack || error);
+    logger.warn('HMR client ws closed, code: %s, reason: %s', code, reason);
+  }
 };
 
 export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) => {
@@ -61,10 +68,11 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
     }
   });
 
-  ws.on('close', close);
-  ws.on('error', close);
-  function close(e) {
-    if (e) logger.error('hmr server ws error: %s', e.stack || e);
+  ws.on('close', (code, reason) => onClose(code, reason));
+  ws.on('error', (e) => onClose(null, null, e));
+  function onClose(code: number, reason: string, error?) {
+    if (error) logger.error('HMR server ws error: %s', error.stack || error);
+    logger.warn('HMR server ws closed, code: %s, reason: %s', code, reason);
     publisher.publish(hmrCloseEvent);
     process.nextTick(() => {
       publisher.disconnect();

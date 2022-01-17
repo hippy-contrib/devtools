@@ -110,7 +110,7 @@ class Server {
       return (await Server.internalIP('v6')) || '::';
     }
 
-    return hostname;
+    return hostname || 'localhost';
   }
 
   static async getFreePort(port) {
@@ -804,6 +804,9 @@ class Server {
     } else {
       options.watchFiles = [];
     }
+
+    options.host = await Server.getHostname(options.host);
+    options.port = await Server.getFreePort(options.port);
   }
 
   setupProgressPlugin() {
@@ -1657,9 +1660,6 @@ class Server {
 
   async start() {
     await this.normalizeOptions();
-
-    this.options.host = await Server.getHostname(this.options.host);
-    this.options.port = await Server.getFreePort(this.options.port);
 
     await this.initialize();
 

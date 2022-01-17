@@ -3,7 +3,6 @@ import path from 'path';
 import HippyHMRPlugin from '@hippy/hippy-hmr-plugin';
 import QRCode from 'qrcode';
 import { once } from 'lodash';
-import { DEFAULT_REMOTE } from '@/@types/constants';
 import { Logger } from '@/utils/log';
 import { config } from '@/config';
 
@@ -25,12 +24,14 @@ export function normalizeWebpackConfig(versionId, config) {
 
 function normalizeRemoteDebug(versionId, config) {
   if (!config.devServer || (config.devServer.hot === false && config.devServer.liveReload === false)) return;
-  const { remote } = config.devServer;
-  const fullRemote: typeof DEFAULT_REMOTE = {
-    ...DEFAULT_REMOTE,
-    ...remote,
-  };
-  config.devServer.remote = fullRemote;
+
+  if (!config.devServer.remote) {
+    config.devServer.remote = {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 38989,
+    };
+  }
   const enableRemote = isRemoteDebugEnabled(config);
   let bundleUrl;
   let homeUrl;
@@ -43,10 +44,6 @@ function normalizeRemoteDebug(versionId, config) {
     const slash = isEndWithSlash ? '' : '/';
     bundleUrl = `${publicPath}${slash}index.bundle`;
     homeUrl = `${domain}/extensions/home.html?hash=${versionId}`;
-  } else {
-    log.warn(
-      `If you use remote HMR, you should config 'publicPath' field to '${DEFAULT_REMOTE.protocol}://${DEFAULT_REMOTE.host}:${DEFAULT_REMOTE.port}/[version]/'.`,
-    );
   }
 
   config.devServer.cb = once(() => {
@@ -58,7 +55,12 @@ function normalizeRemoteDebug(versionId, config) {
 }
 
 function appendHMRPlugin(versionId: string, config) {
-  if (!config.devServer || (config.devServer.hot === false && config.devServer.liveReload === false)) return;
+  if (
+    !config.devServer ||
+    !config.devServer.remote ||
+    (config.devServer.hot === false && config.devServer.liveReload === false)
+  )
+    return;
   const { host, port, protocol } = config.devServer.remote;
   const hotManifestPublicPath = `${protocol}://${host}:${port}/${versionId}/`;
   const i = config.plugins.findIndex((plugin) => plugin.constructor.name === HippyHMRPlugin.name);
@@ -69,11 +71,27 @@ function appendHMRPlugin(versionId: string, config) {
 }
 
 function isRemoteDebugEnabled(webpackConfig) {
-  if (!webpackConfig.devServer?.remote || !webpackConfig.output.publicPath) return false;
+  if (!webpackConfig.devServer?.remote || !webpackConfig.output.publicPath) {
+    log.warn('remote debug is disabled!');
+    return false;
+  }
+  const { host, port, protocol } = webpackConfig.devServer.remote;
+  if (!host || !port || !protocol) {
+    log.warn('you must config remote host, port and protocol!');
+    return false;
+  }
+
   const {
     output: { publicPath },
   } = webpackConfig;
-  return publicPath && /\[version\]/.test(publicPath);
+  const enabled = publicPath && /\[version\]/.test(publicPath);
+  if (!enabled) {
+    log.warn(
+      `If you use remote debug or HMR, you should config 'publicPath' field to '${protocol}://${host}:${port}/[version]/'`,
+    );
+  }
+
+  return enabled;
 }
 
 function printDebugInfo(bundleUrl, homeUrl) {
