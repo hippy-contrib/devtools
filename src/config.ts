@@ -1,4 +1,5 @@
 import path from 'path';
+import { StaticFileStorage } from '@/@types/enum';
 
 export const config: Config = {
   ...getPublicDomain(),
@@ -16,6 +17,14 @@ export const config: Config = {
     bundleTable: 'tdf:bundles',
   },
   isRemote: process.env.IS_REMOTE === 'true',
+  cos: {
+    SecretId: process.env.SecretId,
+    SecretKey: process.env.SecretKey,
+    Bucket: process.env.Bucket,
+    Region: process.env.Region,
+    StorageClass: process.env.StorageClass,
+  },
+  staticFileStorage: (process.env.StaticFileStorage as StaticFileStorage) || StaticFileStorage.Local,
 };
 
 interface Config {
@@ -35,6 +44,14 @@ interface Config {
     bundleTable: string;
   };
   isRemote: boolean;
+  cos: {
+    SecretId: string;
+    SecretKey: string;
+    Bucket: string;
+    Region: string;
+    StorageClass: string;
+  };
+  staticFileStorage: StaticFileStorage;
 }
 
 function getPublicDomain() {

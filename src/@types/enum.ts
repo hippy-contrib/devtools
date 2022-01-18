@@ -165,3 +165,8 @@ export enum WSCode {
   ClosePage = 4003,
   ReloadPage = 4004,
 }
+
+export enum StaticFileStorage {
+  Local = 'local',
+  COS = 'COS',
+}

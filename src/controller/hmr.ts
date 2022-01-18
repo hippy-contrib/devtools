@@ -1,13 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import WebSocket from 'ws';
-import { WinstonColor, WSCode } from '@/@types/enum';
+import { WinstonColor, WSCode, StaticFileStorage } from '@/@types/enum';
 import { HMRWsParams } from '@/utils/url';
 import { Logger } from '@/utils/log';
 import { createHMRChannel } from '@/utils/pub-sub-channel';
 import { getDBOperator } from '@/db';
 import { config } from '@/config';
 import { decodeHMRData } from '@/utils/buffer';
+import { cosUpload } from '@/utils/cos';
 
 const logger = new Logger('hmr-controller', WinstonColor.Blue);
 const hmrCloseEvent = 'HMR_SERVER_CLOSED';
@@ -90,10 +91,23 @@ type TransFerFile = {
 async function saveHMRFiles(hash: string, emitList: TransFerFile[]) {
   return Promise.all(
     emitList.map(async ({ name, content }) => {
-      const fullFname = path.join(config.hmrStaticPath, hash, name);
-      const cacheFolder = path.dirname(fullFname);
-      await fs.promises.mkdir(cacheFolder, { recursive: true });
-      return fs.promises.writeFile(fullFname, content);
+      const saveFn = {
+        [StaticFileStorage.COS]: saveHMRFileToCOS,
+        [StaticFileStorage.Local]: saveHMRFileToLocal,
+      }[config.staticFileStorage];
+      saveFn(hash, name, content);
     }),
   );
+}
+
+async function saveHMRFileToLocal(hash: string, name: string, content: Buffer) {
+  const fullFname = path.join(config.hmrStaticPath, hash, name);
+  const cacheFolder = path.dirname(fullFname);
+  await fs.promises.mkdir(cacheFolder, { recursive: true });
+  return fs.promises.writeFile(fullFname, content);
+}
+
+async function saveHMRFileToCOS(hash: string, name: string, content: Buffer) {
+  const key = path.join(hash, name);
+  cosUpload(key, content);
 }

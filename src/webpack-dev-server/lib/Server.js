@@ -954,7 +954,7 @@ class Server {
   setupEmitHooks() {
     const { compiler } = this;
     compiler.hooks.emit.tap('webpack-dev-server', (compilation) => {
-      this.emitList = []
+      this.emitMap = new Map();
 
       compiler.hooks.assetEmitted.tap('webpack-dev-server', (file, info) => {
         let content = null;
@@ -972,7 +972,7 @@ class Server {
           content = info;
         }
 
-        this.emitList.push({
+        this.emitMap.set(targetName, {
           name: targetName,
           content: content,
         });
@@ -1280,7 +1280,7 @@ class Server {
     }
 
     const stats = this.getStats(this.stats);
-    this.sendFiles(stats.hash);
+    this.sendFiles();
     this.sendStats(stats, true);
   }
 
@@ -1632,8 +1632,9 @@ class Server {
     }
   }
 
-  sendFiles(hash) {
-    const {emitList} = this;
+  sendFiles() {
+    const {emitMap} = this;
+    const emitList = Array.from(emitMap.values());
     if (!emitList || emitList.length === 0) return;
     this.sendMessage(HMREvent.TransferFile, emitList);
   }
