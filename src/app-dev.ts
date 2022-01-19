@@ -35,5 +35,3 @@ async function startWebpackDevServer(config, compiler, cb) {
   const webpackDevServer = new WebpackDevServer(config.devServer, compiler, cb);
   await webpackDevServer.start();
 }
-
-

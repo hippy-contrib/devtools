@@ -82,7 +82,7 @@ export const getWsInvalidReason = (wsUrlParams: WsUrlParams): string => {
 /**
  * 根据 query 对象创建 url
  */
-export const makeUrl = (baseUrl: string, query: unknown) => {
+export const makeUrl = (baseUrl: string, query: unknown = {}) => {
   let fullUrl = baseUrl;
 
   const keys = Object.keys(query);
@@ -98,3 +98,9 @@ export const makeUrl = (baseUrl: string, query: unknown) => {
   }
   return fullUrl;
 };
+
+export const getWSProtocolByHttpProtocol = (httpProtocol: string) =>
+  ({
+    https: 'wss',
+    http: 'ws',
+  }[httpProtocol] || 'ws');

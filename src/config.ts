@@ -5,7 +5,7 @@ export const config: Config = {
   ...getPublicDomain(),
   wsPath: '/debugger-proxy',
   cachePath: path.join(__dirname, 'cache'),
-  hmrStaticPath: path.join(__dirname, 'hmr'),
+  hmrStaticPath: path.join(process.env.HMRStaticPath || __dirname, 'hmr'),
   logPath: path.join(__dirname, 'log'),
   hmrPortPath: path.join(__dirname, 'cache/hmr-port.txt'),
   iWDPStartPort: 9200,

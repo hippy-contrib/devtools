@@ -3,8 +3,11 @@ import path from 'path';
 import HippyHMRPlugin from '@hippy/hippy-hmr-plugin';
 import QRCode from 'qrcode';
 import { once } from 'lodash';
+import { green, bold } from 'colors/safe';
 import { Logger } from '@/utils/log';
+import { makeUrl, getWSProtocolByHttpProtocol } from '@/utils/url';
 import { config } from '@/config';
+import { PUBLIC_RESOURCE } from '@/@types/constants';
 
 const log = new Logger('webpack-util');
 
@@ -18,51 +21,43 @@ export async function getWebpackConfig(configPath) {
 }
 
 export function normalizeWebpackConfig(versionId, config) {
+  const enableRemoteDebug = isRemoteDebugEnabled(config);
+  if (!enableRemoteDebug) return log.warn('remote debug is disabled!');
+
   normalizeRemoteDebug(versionId, config);
   appendHMRPlugin(versionId, config);
 }
 
 function normalizeRemoteDebug(versionId, config) {
-  if (!config.devServer || (config.devServer.hot === false && config.devServer.liveReload === false)) return;
+  config.devServer.remote ||= {
+    protocol: 'http',
+    host: '127.0.0.1',
+    port: 38989,
+  };
+  const { protocol, host, port } = config.devServer.remote;
 
-  if (!config.devServer.remote) {
-    config.devServer.remote = {
-      protocol: 'http',
-      host: '127.0.0.1',
-      port: 38989,
-    };
+  if (host && port && protocol === false) {
+    log.warn('you must config remote host, port and protocol!');
+    process.exit(1);
   }
-  const enableRemote = isRemoteDebugEnabled(config);
-  let bundleUrl;
-  let homeUrl;
-  if (enableRemote) {
-    let { publicPath } = config.output;
-    const domain = publicPath.replace(/\/\[version\]\/?/, '');
-    publicPath = publicPath.replace(/\[version\]/, versionId);
-    config.output.publicPath = publicPath;
-    const isEndWithSlash = publicPath.endsWith('/');
-    const slash = isEndWithSlash ? '' : '/';
-    bundleUrl = `${publicPath}${slash}index.bundle`;
-    homeUrl = `${domain}/extensions/home.html?hash=${versionId}`;
-  }
+
+  config.output.publicPath = getPublicPath(versionId);
+  log.warn(bold(green(`webpack publicPath is set as: ${config.output.publicPath}`)));
+  const bundleURL = makeUrl(`${config.output.publicPath}index.bundle`, {
+    debugURL: makeUrl(`${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy`),
+  });
+  const homeURL = `${protocol}://${host}:${port}/extensions/home.html?hash=${versionId}`;
 
   config.devServer.cb = once(() => {
-    if (!enableRemote) return;
     process.nextTick(() => {
-      printDebugInfo(bundleUrl, homeUrl);
+      printDebugInfo(bundleURL, homeURL);
     });
   });
 }
 
 function appendHMRPlugin(versionId: string, config) {
-  if (
-    !config.devServer ||
-    !config.devServer.remote ||
-    (config.devServer.hot === false && config.devServer.liveReload === false)
-  )
-    return;
-  const { host, port, protocol } = config.devServer.remote;
-  const hotManifestPublicPath = `${protocol}://${host}:${port}/${versionId}/`;
+  if (config.devServer.hot && config.devServer.liveReload === false) return;
+  const hotManifestPublicPath = getPublicPath(versionId);
   const i = config.plugins.findIndex((plugin) => plugin.constructor.name === HippyHMRPlugin.name);
   if (i !== -1) {
     config.plugins.splice(i, 1);
@@ -70,33 +65,17 @@ function appendHMRPlugin(versionId: string, config) {
   config.plugins.push(new HippyHMRPlugin({ hotManifestPublicPath }));
 }
 
+/**
+ * remote debug is enabled by default if enable webpack-dev-server
+ * you could disable it by set `devServer.remote: false`
+ */
 function isRemoteDebugEnabled(webpackConfig) {
-  if (!webpackConfig.devServer?.remote || !webpackConfig.output.publicPath) {
-    log.warn('remote debug is disabled!');
-    return false;
-  }
-  const { host, port, protocol } = webpackConfig.devServer.remote;
-  if (!host || !port || !protocol) {
-    log.warn('you must config remote host, port and protocol!');
-    return false;
-  }
-
-  const {
-    output: { publicPath },
-  } = webpackConfig;
-  const enabled = publicPath && /\[version\]/.test(publicPath);
-  if (!enabled) {
-    log.warn(
-      `If you use remote debug or HMR, you should config 'publicPath' field to '${protocol}://${host}:${port}/[version]/'`,
-    );
-  }
-
-  return enabled;
+  return !(!webpackConfig.devServer || webpackConfig.devServer.remote === false);
 }
 
 function printDebugInfo(bundleUrl, homeUrl) {
-  log.info('bundleUrl: %s', bundleUrl);
-  log.info('find debug page on: %s', homeUrl);
+  log.info('bundleUrl: %s', bold(green(bundleUrl)));
+  log.info('find debug page on: %s', bold(green(homeUrl)));
   QRCode.toString(
     bundleUrl,
     {
@@ -108,6 +87,10 @@ function printDebugInfo(bundleUrl, homeUrl) {
       log.info('qrcode\n%s', qrcodeStr);
     },
   );
+}
+
+function getPublicPath(versionId) {
+  return `${PUBLIC_RESOURCE}${versionId}/`;
 }
 
 /**

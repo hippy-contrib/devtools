@@ -951,23 +951,30 @@
       "minLength": 1
     },
     "Remote": {
-      "type": "object",
-      "properties": {
-        "protocol": {
-          "enum": ["http", "https"]
+      "anyOf": [
+        {
+          "enum": [false]
         },
-        "host": {
-          "type": "string",
-          "minLength": 1,
-          "description": "remote debug host."
-        },
-        "port": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 65535,
-          "description": "remote debug port."
+        {
+          "type": "object",
+          "properties": {
+            "protocol": {
+              "enum": ["http", "https"]
+            },
+            "host": {
+              "type": "string",
+              "minLength": 1,
+              "description": "remote debug host."
+            },
+            "port": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 65535,
+              "description": "remote debug port."
+            }
+          }
         }
-      }
+      ]
     }
   },
   "additionalProperties": false,
