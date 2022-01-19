@@ -1,7 +1,8 @@
 import { createClient } from 'redis';
 import { config } from '@/config';
 import { Logger } from '@/utils/log';
-import { WinstonColor } from '@/@types/enum';
+import { WinstonColor, ReportEvent } from '@/@types/enum';
+import { timeStart } from '@/utils/aegis';
 import { BaseDB } from '../base-db';
 
 const log = new Logger('redis-model', WinstonColor.BrightCyan);
@@ -30,7 +31,9 @@ export class RedisDB<T> extends BaseDB<T> {
     try {
       RedisDB.client = createMyClient();
       // ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
+      const timeEnd = timeStart(ReportEvent.RedisConnection);
       await RedisDB.client.connect();
+      timeEnd();
       RedisDB.isInited = true;
       await Promise.all(RedisDB.opQueue.map(async (op) => await op()));
       RedisDB.opQueue = [];

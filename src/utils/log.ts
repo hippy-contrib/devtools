@@ -5,6 +5,7 @@ import { Logger as WinstonLogger, transports, format, createLogger } from 'winst
 import { lowerFirst, uniq, random } from 'lodash';
 import { WinstonColor } from '@/@types/enum';
 import { config } from '@/config';
+import { aegis } from '@/utils/aegis';
 import 'winston-daily-rotate-file';
 
 export class Logger {
@@ -30,6 +31,16 @@ export class Logger {
 
   public error(...args) {
     this.log('error', ...args);
+    const errMsg = args.reduce((prev, curr) => {
+      if (curr instanceof Error) {
+        prev += `\n${curr.stack}`;
+      } else if (typeof curr === 'string') {
+        prev += curr;
+      } else {
+        prev += String(curr);
+      }
+    }, '');
+    aegis.report(new Error(errMsg));
   }
 
   private log(level, ...args) {

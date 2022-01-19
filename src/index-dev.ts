@@ -9,6 +9,7 @@ moduleAlias.addAliases({
 import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
+import '@/utils/aegis';
 import { webpack } from '@/app-dev';
 import { getWebpackConfig } from '@/utils/webpack';
 import { Logger } from '@/utils/log';

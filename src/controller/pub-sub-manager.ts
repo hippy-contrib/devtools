@@ -8,6 +8,7 @@ import {
   InternalChannelEvent,
   WinstonColor,
   DevicePlatform,
+  ReportEvent,
 } from '@/@types/enum';
 import { getDBOperator } from '@/db';
 import { appClientManager, AppClient } from '@/client';
@@ -24,6 +25,7 @@ import {
 import { Logger } from '@/utils/log';
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
 import { decreaseRefAndSave, removeDebugTarget } from '@/utils/debug-target';
+import { aegis } from '@/utils/aegis';
 
 const log = new Logger('pub-sub-manager', WinstonColor.BrightGreen);
 
@@ -51,11 +53,17 @@ const channelMap: Map<
  *  3. get IWDP pages: should filter this situation, because frontend will request every 2s
  */
 export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket) => {
-  const { clientId } = debugTarget;
+  const { clientId, title, platform } = debugTarget;
   if (!channelMap.has(clientId)) addChannelItem(debugTarget);
   else {
     if (isIWDPPage(clientId)) return;
   }
+
+  aegis.reportEvent({
+    name: ReportEvent.RemoteDebug,
+    ext1: title,
+    ext2: DevicePlatform[platform],
+  });
 
   const { appClientList, downwardChannelSet, cmdIdChannelIdMap, upwardSubscriber } = channelMap.get(clientId);
 
@@ -261,12 +269,13 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
   log.info(`create app client ${AppClientCtor.name}, update iWDPWsUrl to %s`, debugTarget.iWDPWsUrl);
 };
 
-const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Adapter.CDP.Res) => {
+const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Adapter.CDP.Res & { ts?: number }) => {
   const channelInfo = channelMap.get(debugTarget.clientId);
   if (!channelInfo) {
     log.error('channelInfo does not exist!');
   }
   const { downwardChannelSet, cmdIdChannelIdMap, publisherMap } = channelInfo;
+  msg.ts = Date.now();
   const msgStr = JSON.stringify(msg);
   const { Publisher } = getDBOperator();
   if ('id' in msg) {

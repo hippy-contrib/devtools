@@ -10,6 +10,7 @@ import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
 import { DevtoolsEnv } from '@/@types/enum';
+import '@/utils/aegis';
 
 const { argv } = yargs
   .alias('v', 'version')

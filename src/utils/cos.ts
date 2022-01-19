@@ -2,6 +2,8 @@ import Stream from 'stream';
 import COS from 'cos-nodejs-sdk-v5';
 import { Logger } from '@/utils/log';
 import { config } from '@/config';
+import { ReportEvent } from '@/@types/enum';
+import { timeStart } from '@/utils/aegis';
 
 const log = new Logger('cos-util');
 
@@ -30,6 +32,7 @@ export const cosUpload = (key: string, buffer: Buffer) =>
 
 export const cosUploadByBuffer = function (options: COSUploadByBufferOptions) {
   const { SecretId, SecretKey, Bucket, Region, Key, buffer, StorageClass = 'STANDARD', onProgress } = options;
+  const timeEnd = timeStart(ReportEvent.COSUpload);
   return new Promise((resolve, reject) => {
     const client = new COS({
       SecretId,
@@ -45,6 +48,11 @@ export const cosUploadByBuffer = function (options: COSUploadByBufferOptions) {
         onProgress: onProgress ? onProgress : () => {},
       },
       (err, data) => {
+        timeEnd({
+          ext1: `${Math.ceil(buffer.length / 1024)}KB`,
+          ext2: Key,
+          ext3: config.isRemote ? 'remote' : 'local',
+        });
         if (err) {
           reject({
             code: COSErrorCode.UploadError,

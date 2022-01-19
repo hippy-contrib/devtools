@@ -25,6 +25,9 @@ export const config: Config = {
     StorageClass: process.env.StorageClass,
   },
   staticFileStorage: (process.env.StaticFileStorage as StaticFileStorage) || StaticFileStorage.Local,
+  maxStaticFileSize: 20 * 1024 * 1024,
+  staticThrottleInterval: 10000,
+  aegisId: 'yxqehauSsvzBZxdRmz',
 };
 
 interface Config {
@@ -52,6 +55,9 @@ interface Config {
     StorageClass: string;
   };
   staticFileStorage: StaticFileStorage;
+  maxStaticFileSize: number;
+  staticThrottleInterval: number;
+  aegisId: string;
 }
 
 function getPublicDomain() {

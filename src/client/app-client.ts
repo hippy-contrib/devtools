@@ -13,6 +13,7 @@ import {
 import { CDP_DOMAIN_LIST, getDomain } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
 import { composeMiddlewares } from '@/utils/middleware';
+import { createCDPPerformance } from '@/utils/aegis';
 
 const filteredLog = new Logger('filtered', WinstonColor.Yellow);
 const downwardLog = new Logger('↓↓↓', WinstonColor.BrightRed);
@@ -38,7 +39,14 @@ export abstract class AppClient extends EventEmitter {
   private acceptDomains: string[] = CDP_DOMAIN_LIST;
   private ignoreDomains: string[] = [];
   private useAllDomain = true;
-  private msgIdMethodMap: Map<number, string> = new Map();
+  private msgIdMap: Map<
+    number,
+    {
+      method: string;
+      // upward start ts, used to report adapter performance
+      performance: Adapter.Performance;
+    }
+  > = new Map();
 
   public constructor(
     id,
@@ -71,7 +79,13 @@ export abstract class AppClient extends EventEmitter {
     }
 
     const { method } = msg;
-    this.msgIdMethodMap.set(msg.id, msg.method);
+    this.msgIdMap.set(msg.id, {
+      method: msg.method,
+      performance: createCDPPerformance({
+        ...(msg.performance || {}),
+        debugServerReceiveFromDevtools: Date.now(),
+      }),
+    });
     const middlewareList = this.getMiddlewareList(MiddlewareType.Upward, method);
     // 上行的具体协议的处理交给中间件去适配，最后分发到 app 端
     return this.middlewareMessageHandler(middlewareList, msg);
@@ -85,10 +99,15 @@ export abstract class AppClient extends EventEmitter {
   protected downwardMessageHandler(msg: Adapter.CDP.Res): Promise<Adapter.CDP.Res> {
     try {
       if ('id' in msg) {
-        const method = this.msgIdMethodMap.get(msg.id);
+        const { method, performance } = this.msgIdMap.get(msg.id);
+        performance.appReceive = msg?.performance.appReceive;
+        performance.appResponse = msg?.performance.appResponse;
+        msg.performance = createCDPPerformance(performance);
         if (method) msg.method = method;
-        this.msgIdMethodMap.delete(msg.id);
+      } else {
+        msg.performance = createCDPPerformance(msg.performance);
       }
+      msg.performance.debugServerReceiveFromApp = Date.now();
 
       const { method } = msg;
       const middlewareList = this.getMiddlewareList(MiddlewareType.Downward, method);
@@ -102,21 +121,36 @@ export abstract class AppClient extends EventEmitter {
   /**
    * 通过中间件处理上下行消息
    */
-  private middlewareMessageHandler(middlewareList: MiddleWare[], msg: Adapter.CDP.Res | Adapter.CDP.Req) {
+  private middlewareMessageHandler(middlewareList: MiddleWare[], msgBeforeAdapter: Adapter.CDP.Res | Adapter.CDP.Req) {
     // 创建中间件上下文，中间件中可以通过调用 sendToApp, sendToDevtools 将调试协议分发到接收端
     const middlewareContext: MiddleWareContext = {
       ...this.urlParsedContext,
-      msg,
+      msg: msgBeforeAdapter,
       sendToApp: (msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> => {
+        let performance: Adapter.Performance;
         if (!msg.id) {
           msg.id = requestId.create();
+        } else {
+          performance = this.msgIdMap.get(msg.id).performance;
+          performance.debugServerToApp = Date.now();
         }
         upwardLog.info('%s sendToApp %j', this.constructor.name, msg);
-        return this.sendHandler(msg);
+        return this.sendHandler({
+          performance: createCDPPerformance(performance),
+          ...msg,
+        });
       },
       sendToDevtools: (msg: Adapter.CDP.Res) => {
-        downwardLog.info('%s sendToDevtools %s %s', this.constructor.name, (msg as Adapter.CDP.CommandRes).id || '', msg.method);
-        return this.emitMessageToDevtools(msg);
+        downwardLog.info(
+          '%s sendToDevtools %s %s',
+          this.constructor.name,
+          (msg as Adapter.CDP.CommandRes).id || '',
+          msg.method,
+        );
+        return this.emitMessageToDevtools({
+          ...msg,
+          performance: msgBeforeAdapter.performance,
+        });
       },
     };
     return composeMiddlewares(middlewareList)(middlewareContext);
@@ -127,7 +161,14 @@ export abstract class AppClient extends EventEmitter {
    */
   private emitMessageToDevtools(msg: Adapter.CDP.Res) {
     if (!msg) return Promise.reject(ErrorCode.EmptyCommand);
+    const { performance } = msg;
+    if (performance) performance.debugServerToDevtools = Date.now();
     this.emit(AppClientEvent.Message, msg);
+
+    if ('id' in msg) {
+      this.msgIdMap.delete(msg.id);
+    }
+
     return Promise.resolve(msg);
   }
 

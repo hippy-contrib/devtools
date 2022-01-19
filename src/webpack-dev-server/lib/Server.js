@@ -14,6 +14,8 @@ const WebSocket = require('ws');
 const { HMREvent } = require('@/@types/enum');
 const { encodeHMRData } = require('@/utils/buffer');
 const { getWSProtocolByHttpProtocol } = require('@/utils/url');
+const { throttle } = require('@/utils/throttle');
+const { config } = require('@/config');
 
 if (!process.env.WEBPACK_SERVE) {
   process.env.WEBPACK_SERVE = true;
@@ -1256,7 +1258,7 @@ class Server {
     });
   }
 
-  sendStatsWithOption() {
+  async sendStatsWithOption() {
     if (this.options.hot === true || this.options.hot === 'only') {
       this.logger.info('enable HMR');
       this.sendMessage(HMREvent.Hot);
@@ -1284,7 +1286,11 @@ class Server {
     }
 
     const stats = this.getStats(this.stats);
-    this.sendFiles();
+    const { isThrottled, throttledFn: sendFiles } = throttle(this.sendFiles.bind(this), config.staticThrottleInterval);
+    await sendFiles();
+    if(isThrottled()) {
+      this.logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
+    }
     this.sendStats(stats, true);
   }
 
@@ -1589,7 +1595,9 @@ class Server {
   async sendMessage(type, data, params) {
     if (this.webSocketClient) {
       if(this.webSocketClient.readyState === WebSocket.OPEN) {
+        
         const encoded = encodeHMRData({ type, data, params });
+        this.logger.info('speed', Date.now(), Math.ceil(encoded.length / 1024) + 'KB')
         this.webSocketClient.send(encoded);
       } else if(this.webSocketClient.readyState === WebSocket.CLOSED) {
         this.msgQueue.push({type, data, params});
@@ -1640,6 +1648,12 @@ class Server {
     const {emitMap} = this;
     const emitList = Array.from(emitMap.values());
     if (!emitList || emitList.length === 0) return;
+
+    const totalSize = emitList.reduce((prev, curr) => prev += curr.content.length, 0);
+    if (!totalSize > config.maxStaticFileSize) return this.logger.warn(`remote debug server accept max ${config.maxStaticFileSize/1024/1024 }MB of static resources, please minify you webpack output!`);
+    // emitList.forEach(emitFile => {
+    //   this.sendMessage(HMREvent.TransferFile, [emitFile]);
+    // })
     this.sendMessage(HMREvent.TransferFile, emitList);
   }
 

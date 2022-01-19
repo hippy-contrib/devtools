@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import WebSocket from 'ws';
-import { WinstonColor, WSCode, StaticFileStorage } from '@/@types/enum';
+// import { throttle } from '@/utils/throttle';
+import { WinstonColor, WSCode, StaticFileStorage, ReportEvent, HMRReportExt2 } from '@/@types/enum';
 import { HMRWsParams } from '@/utils/url';
 import { Logger } from '@/utils/log';
 import { createHMRChannel } from '@/utils/pub-sub-channel';
@@ -9,6 +10,7 @@ import { getDBOperator } from '@/db';
 import { config } from '@/config';
 import { decodeHMRData } from '@/utils/buffer';
 import { cosUpload } from '@/utils/cos';
+import { aegis } from '@/utils/aegis';
 
 const logger = new Logger('hmr-controller', WinstonColor.Blue);
 const hmrCloseEvent = 'HMR_SERVER_CLOSED';
@@ -23,6 +25,11 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
     ws.close(WSCode.InvalidRequestParams, reason);
     return logger.warn(reason);
   }
+  aegis.reportEvent({
+    name: ReportEvent.RemoteHMR,
+    ext1: hash,
+    ext2: HMRReportExt2.Client,
+  });
 
   const subscriber = new Subscriber(createHMRChannel(hash));
   subscriber.subscribe((msg) => {
@@ -43,6 +50,8 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
   function onClose(code: number, reason: string, error?) {
     if (error) logger.error('HMR client ws error: %s', error.stack || error);
     logger.warn('HMR client ws closed, code: %s, reason: %s', code, reason);
+    subscriber.unsubscribe();
+    subscriber.disconnect();
   }
 };
 
@@ -53,11 +62,25 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
   const model = new DB(config.redis.bundleTable);
   model.upsert(hash, { hash });
   const publisher = new Publisher(createHMRChannel(hash));
+  aegis.reportEvent({
+    name: ReportEvent.RemoteHMR,
+    ext1: hash,
+    ext2: HMRReportExt2.Server,
+  });
+  // const { throttledFn: throttledHMRFilesHandle, isThrottled } = throttle((hash, emitList) => {
+  //   saveHMRFiles(hash, emitList);
+  //   return Date.now();
+  // }, config.staticThrottleInterval);
 
   ws.on('message', (msg: Buffer) => {
     try {
       const { isFile, emitList, hmrBody } = decodeHMRData(msg);
+      logger.info('speed %s', Date.now(), `${Math.ceil(msg.length / 1024)}KB`);
       if (isFile) {
+        // throttledHMRFilesHandle(hash, emitList);
+        // if (isThrottled()) {
+        //   return logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
+        // }
         saveHMRFiles(hash, emitList);
       } else {
         const msgStr = JSON.stringify(hmrBody);
@@ -89,6 +112,14 @@ type TransFerFile = {
 };
 
 async function saveHMRFiles(hash: string, emitList: TransFerFile[]) {
+  const totalSize = emitList.reduce((prev, curr) => (prev += curr.content.length), 0);
+  if (totalSize > config.maxStaticFileSize)
+    return logger.warn(
+      `remote debug server accept max ${
+        config.maxStaticFileSize / 1024 / 1024
+      }MB of static resources, please minify you webpack output!`,
+    );
+
   return Promise.all(
     emitList.map(async ({ name, content }) => {
       const saveFn = {

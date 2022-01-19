@@ -2,7 +2,16 @@ import { Server as HTTPServer, IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { Server as WSServer } from 'ws';
 import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
-import { AppClientType, ClientRole, DevicePlatform, InternalChannelEvent, WinstonColor, WSCode } from '@/@types/enum';
+import { aegis, createCDPPerformance } from '@/utils/aegis';
+import {
+  AppClientType,
+  ClientRole,
+  DevicePlatform,
+  InternalChannelEvent,
+  WinstonColor,
+  WSCode,
+  ReportEvent,
+} from '@/@types/enum';
 import { getDBOperator } from '@/db';
 import { appClientManager } from '@/client';
 import { DebugTargetManager } from '@/controller/debug-targets';
@@ -24,16 +33,19 @@ const resumeCommands = [
     id: mockCmdId,
     method: TdfCommand.TDFRuntimeResume,
     params: {},
+    performance: createCDPPerformance(),
   },
   {
     id: mockCmdId - 1,
     method: ChromeCommand.DebuggerDisable,
     params: {},
+    performance: createCDPPerformance(),
   },
   {
     id: mockCmdId - 2,
     method: ChromeCommand.RuntimeDisable,
     params: {},
+    performance: createCDPPerformance(),
   },
 ];
 const log = new Logger('socket-server', WinstonColor.Cyan);
@@ -170,7 +182,25 @@ export class SocketServer {
     const publisher = new Publisher(upwardChannelId);
     downwardSubscriber.unsubscribe();
     internalSubscriber.unsubscribe();
-    downwardSubscriber.subscribe(ws.send.bind(ws));
+    downwardSubscriber.subscribe((msg) => {
+      ws.send(msg);
+      try {
+        const msgStr = msg as string;
+        const msgObj = JSON.parse(msgStr as string);
+        const { ts: start } = msgObj;
+        if (start) {
+          aegis.reportTime({
+            name: ReportEvent.PubSub,
+            duration: Date.now() - start,
+            ext1: `${Math.ceil(msgStr.length / 1024)}KB`,
+            ext2: msgObj.method,
+            ext3: config.isRemote ? 'redis' : 'memory',
+          });
+        }
+      } catch (e) {
+        log.error('%s channel message are invalid JSON, %s', downwardChannelId, msg);
+      }
+    });
     internalSubscriber.subscribe((msg) => {
       if (msg === InternalChannelEvent.WSClose) {
         log.warn('close devtools ws connection');

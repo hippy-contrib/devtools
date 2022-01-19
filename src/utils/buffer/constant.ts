@@ -32,4 +32,8 @@ export type HMRData = {
   params: unknown;
 };
 
+// export type HMRWSData = {
+//   type:
+// }
+
 export const isFileFieldLen = 1;

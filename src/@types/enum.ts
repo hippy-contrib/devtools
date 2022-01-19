@@ -5,7 +5,7 @@ export const enum DevtoolsEnv {
   TDFCore = 'TDFCore',
 }
 
-export const enum DevicePlatform {
+export enum DevicePlatform {
   Unkonwn = '0',
   IOS = '1',
   Android = '2',
@@ -169,4 +169,22 @@ export enum WSCode {
 export enum StaticFileStorage {
   Local = 'local',
   COS = 'COS',
+}
+
+export enum ReportEvent {
+  COSUpload = 'cos-upload',
+  HMRNotificationToServer = 'hmr-notification-to-server',
+  UpwardAdapter = 'upward-adapter',
+  DownwardAdapter = 'downward-adapter',
+  AppCDPCost = 'app-CDP-cost',
+  RemoteDebug = 'remote-debug',
+  RemoteHMR = 'remote-hmr',
+  PubSub = 'pub-sub',
+  RedisConnection = 'redis-connection',
+  RedisError = 'redis-error',
+}
+
+export enum HMRReportExt2 {
+  Server = 'server',
+  Client = 'client',
 }

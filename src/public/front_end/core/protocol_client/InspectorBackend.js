@@ -238,6 +238,9 @@ export class SessionRouter {
             return;
         }
         session.callbacks.set(messageId, { callback, method });
+        messageObject.performance = {
+          devtoolsToDebugServer: Date.now(),
+        };
         this._connection.sendRawMessage(JSON.stringify(messageObject));
     }
     _sendRawMessageForTesting(method, params, callback) {
@@ -253,6 +256,55 @@ export class SessionRouter {
             test.onMessageReceived(messageObjectCopy, this._getTargetBySessionId(messageObjectCopy.sessionId));
         }
         const messageObject = ((typeof message === 'string') ? JSON.parse(message) : message);
+        const method = messageObject.method;
+        const { performance } = messageObject;
+        if(performance) {
+          const { 
+            devtoolsToDebugServer,
+            debugServerReceiveFromDevtools,
+            debugServerToApp,
+            appReceive,
+            appResponse,
+            debugServerReceiveFromApp,
+            debugServerToDevtools,
+          } = performance;
+          const devtoolsReceive = Date.now();
+          const ReportEvent = {
+            COSUpload: 'cos-upload',
+            HMRNotificationToServer: 'hmr-notification-to-server',
+            UpwardAdapter: 'upward-adapter',
+            DownwardAdapter: 'downward-adapter',
+            CDPImplement: 'CDP-implement',
+            DevtoolsToDebugServer: 'devtools-to-debug-server',
+            DebugServerToApp: 'debug-server-to-app',
+            AppToDebugServer: 'app-to-debug-server',
+            DebugServerToDevtools: 'debug-server-to-devtools',
+            RemoteDebug: 'remote-debug',
+            RemoteHMR: 'remote-hmr',
+            PubSub: 'pub-sub',
+            RedisConnection: 'redis-connection',
+            RedisError: 'redis-error',
+            CDPTotal: 'CDP-total',
+          }
+          function report (name, start, end) {
+            if(name && start && end) {
+              aegis.reportTime({
+                name,
+                duration: end - start,
+                ext1: method,
+                ext2: ['localhost', '127.0.0.1'].includes(location.hostname) ? 'local' : 'remote',
+              });
+            }
+          }
+          report(ReportEvent.DevtoolsToDebugServer, devtoolsToDebugServer, debugServerReceiveFromDevtools);
+          report(ReportEvent.DebugServerToApp, debugServerToApp, appReceive);
+          report(ReportEvent.AppToDebugServer, appResponse, debugServerReceiveFromApp);
+          report(ReportEvent.DebugServerToDevtools, debugServerToDevtools, devtoolsReceive);
+          report(ReportEvent.CDPImplement, appReceive, appResponse);
+          report(ReportEvent.UpwardAdapter, debugServerReceiveFromDevtools, debugServerToApp);
+          report(ReportEvent.DownwardAdapter, debugServerReceiveFromApp, debugServerToDevtools);
+          report(ReportEvent.CDPTotal, devtoolsReceive, devtoolsToDebugServer);
+        }
         // Send all messages to proxy connections.
         let suppressUnknownMessageErrors = false;
         for (const session of this._sessions.values()) {
