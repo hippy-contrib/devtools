@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import WebSocket from 'ws';
 // import { throttle } from '@/utils/throttle';
-import { WinstonColor, WSCode, StaticFileStorage, ReportEvent, HMRReportExt2 } from '@/@types/enum';
+import { WinstonColor, WSCode, StaticFileStorage, ReportEvent, HMRReportExt2, HMRSyncType } from '@/@types/enum';
 import { HMRWsParams } from '@/utils/url';
 import { Logger } from '@/utils/log';
 import { createHMRChannel } from '@/utils/pub-sub-channel';
@@ -41,7 +41,11 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
       logger.warn(reason);
     } else {
       logger.info('receive HMR msg from redis: %s', msg);
-      ws.send(msg);
+      const msgObj = JSON.parse(msg.toString());
+      if (msgObj.performance) {
+        msgObj.performance.serverToApp = Date.now();
+      }
+      ws.send(JSON.stringify(msgObj));
     }
   });
 
@@ -72,23 +76,47 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
   //   return Date.now();
   // }, config.staticThrottleInterval);
 
-  ws.on('message', (msg: Buffer) => {
+  ws.on('message', async (msg: Buffer) => {
     try {
-      const { isFile, emitList, hmrBody } = decodeHMRData(msg);
-      logger.info('speed %s', Date.now(), `${Math.ceil(msg.length / 1024)}KB`);
-      if (isFile) {
-        // throttledHMRFilesHandle(hash, emitList);
-        // if (isThrottled()) {
-        //   return logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
-        // }
-        saveHMRFiles(hash, emitList);
-      } else {
-        const msgStr = JSON.stringify(hmrBody);
-        logger.info('receive HMR server msg: %s', msgStr);
-        publisher.publish(msgStr);
+      const serverReceive = Date.now();
+      const { emitList, ...emitJSON } = decodeHMRData(msg);
+      if (emitJSON.performance) {
+        const { hadSyncBundleResource } = emitJSON;
+        const afterDecode = Date.now();
+        emitJSON.performance.afterDecode = afterDecode;
+        const { beforeEncode, pcToServer } = emitJSON.performance;
+        const hmrSize = `${Math.ceil(msg.length / 1024)}KB`;
+        const reportData = {
+          name: ReportEvent.HMRPCToServer,
+          duration: serverReceive - pcToServer,
+          ext1: hmrSize,
+          ext2: '',
+        };
+        if ('hadSyncBundleResource' in emitJSON)
+          reportData.ext2 = hadSyncBundleResource ? HMRSyncType.Patch : HMRSyncType.FirstTime;
+        aegis.reportTime(reportData);
+        aegis.reportTime({
+          name: ReportEvent.HMREncode,
+          duration: pcToServer - beforeEncode,
+          ext1: hmrSize,
+        });
+        aegis.reportTime({
+          name: ReportEvent.HMRDecode,
+          duration: afterDecode - serverReceive,
+          ext1: hmrSize,
+        });
       }
+
+      await saveHMRFiles(hash, emitList);
+      // throttledHMRFilesHandle(hash, emitList);
+      // if (isThrottled()) {
+      //   return logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
+      // }
+      const msgStr = JSON.stringify(emitJSON);
+      logger.info('receive HMR msg from PC: %s', msgStr);
+      if (emitJSON.messages?.length) publisher.publish(msgStr);
     } catch (e) {
-      logger.warn('decodeHMRData failed: ', (e as any)?.stack || e);
+      logger.error('decodeHMRData failed: ', (e as any)?.stack || e);
     }
   });
 
@@ -113,12 +141,13 @@ type TransFerFile = {
 
 async function saveHMRFiles(hash: string, emitList: TransFerFile[]) {
   const totalSize = emitList.reduce((prev, curr) => (prev += curr.content.length), 0);
-  if (totalSize > config.maxStaticFileSize)
-    return logger.warn(
-      `remote debug server accept max ${
-        config.maxStaticFileSize / 1024 / 1024
-      }MB of static resources, please minify you webpack output!`,
-    );
+  if (totalSize > config.maxStaticFileSize) {
+    const error = `remote debug server accept max ${
+      config.maxStaticFileSize / 1024 / 1024
+    }MB of static resources, please minify you webpack output!`;
+    logger.warn(error);
+    throw new Error(error);
+  }
 
   return Promise.all(
     emitList.map(async ({ name, content }) => {
@@ -126,7 +155,7 @@ async function saveHMRFiles(hash: string, emitList: TransFerFile[]) {
         [StaticFileStorage.COS]: saveHMRFileToCOS,
         [StaticFileStorage.Local]: saveHMRFileToLocal,
       }[config.staticFileStorage];
-      saveFn(hash, name, content);
+      return saveFn(hash, name, content);
     }),
   );
 }

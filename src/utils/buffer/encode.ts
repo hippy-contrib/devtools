@@ -1,37 +1,30 @@
 import { Buffer } from 'buffer';
-import { HMREvent } from '@/@types/enum';
-import { EmitFile, isFileFieldLen, HMRData } from './constant';
+import { EmitFile, HMRWSData } from './constant';
 
-export const encodeHMRData = (data: HMRData) => {
-  const { type } = data;
-  if (type === HMREvent.TransferFile) {
-    return encodeEmitFiles(data.data as EmitFile[]);
-  }
-  return encodeEmitJSON(data);
+export const encodeHMRData = (data: HMRWSData) => {
+  const { emitList = [], ...emitJSON } = data;
+  emitJSON.performance = {
+    beforeEncode: Date.now(),
+  };
+  const fileBuffer = encodeEmitFiles(emitList);
+  if (emitJSON.performance) emitJSON.performance.pcToServer = Date.now();
+  const jsonBuffer = encodeEmitJSON(emitJSON);
+  return Buffer.concat([jsonBuffer, fileBuffer]);
 };
 
-const encodeEmitFiles = (emitList: EmitFile[]) => {
+const encodeEmitFiles = (emitList: EmitFile[] = []) => {
   const fileNumLen = 1;
-  const headBufLen = isFileFieldLen + fileNumLen;
-  const headBuf = Buffer.alloc(headBufLen);
-  const isFile = 1;
-  headBuf.writeUInt8(isFile);
-  headBuf.writeUInt8(emitList.length, isFileFieldLen);
+  const headBuf = Buffer.alloc(fileNumLen);
+  headBuf.writeUInt8(emitList.length);
 
   const fileBuffers = emitList.map(genFileBufferWithLen);
   return Buffer.concat([headBuf, ...fileBuffers]);
 };
 
 const encodeEmitJSON = (data: unknown) => {
-  const headBuf = Buffer.alloc(isFileFieldLen);
-  const isFile = 0;
-  headBuf.writeUInt8(isFile);
-
   const dataStr = JSON.stringify(data);
   const dataBuf = Buffer.from(dataStr);
-
-  const bodyBuf = genBufferWithLen(dataBuf);
-  return Buffer.concat([headBuf, bodyBuf]);
+  return genBufferWithLen(dataBuf);
 };
 
 function genFileBufferWithLen({ name, content }: EmitFile): Buffer {

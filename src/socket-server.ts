@@ -73,6 +73,7 @@ export class SocketServer {
     const wss = new WSServer({
       noServer: true,
       path: config.wsPath,
+      maxPayload: config.wsMaxPayload,
     });
     this.wss = wss;
     this.server.on('upgrade', this.onUpgrade.bind(this));
@@ -194,7 +195,6 @@ export class SocketServer {
             duration: Date.now() - start,
             ext1: `${Math.ceil(msgStr.length / 1024)}KB`,
             ext2: msgObj.method,
-            ext3: config.isRemote ? 'redis' : 'memory',
           });
         }
       } catch (e) {

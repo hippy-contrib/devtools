@@ -46,6 +46,7 @@ class Server {
     this.currentHash = null;
     this.cb = cb || (() => {});
     this.msgQueue = [];
+    this.hadSyncBundleResource = false;
   }
 
   static get DEFAULT_STATS() {
@@ -204,9 +205,11 @@ class Server {
         searchParams.set('logging', this.options.client.logging);
       }
 
-      if (typeof this.options.client.reconnect !== 'undefined') {
-        searchParams.set('reconnect', this.options.client.reconnect);
-      }
+      searchParams.set('hot', Boolean(this.options.hot));
+      searchParams.set('liveReload', Boolean(this.options.liveReload));
+      searchParams.set('progress', Boolean(this.options.client.progress));
+      searchParams.set('overlay', false);
+      searchParams.set('reconnect', this.options.client.reconnect || 10);
 
       webSocketURL = searchParams.toString();
 
@@ -829,10 +832,15 @@ class Server {
       }
 
       if (this.webSocketClient) {
-        this.sendMessage(HMREvent.ProgressUpdate, {
-          percent,
-          msg,
-          pluginName,
+        this.sendMessage({
+          messages: [{
+            type: HMREvent.ProgressUpdate, 
+            data: {
+              percent,
+              msg,
+              pluginName,
+            }
+          }]
         });
       }
 
@@ -927,7 +935,7 @@ class Server {
     this.app = new express();
   }
 
-  getStats(statsObj) {
+  getWebpackStats(statsObj) {
     const stats = Server.DEFAULT_STATS;
     const compilerOptions = this.getCompilerOptions();
 
@@ -943,7 +951,11 @@ class Server {
       this.cb(error);
     });
     this.compiler.hooks.invalid.tap('webpack-dev-server', () => {
-      this.sendMessage(HMREvent.Invalid);
+      this.sendMessage({
+        messages: [{
+          type: HMREvent.Invalid,
+        }]
+      });
     });
     this.compiler.hooks.done.tap('webpack-dev-server', async (stats) => {
       if (!this.webSocketClient) {
@@ -951,7 +963,7 @@ class Server {
       }
       this.stats = stats;
       this.cb(null, stats);
-      this.sendStatsWithOption(this.getStats(stats));
+      this.sendStatsWithOption(this.getWebpackStats(stats));
     });
     this.setupEmitHooks();
   }
@@ -980,6 +992,7 @@ class Server {
         this.emitMap.set(targetName, {
           name: targetName,
           content: content,
+          isHMRResource: (/hot-update\.js(on)?(\.map)?$/.test(file)),
         });
       });
     });
@@ -1241,7 +1254,7 @@ class Server {
       this.webSocketClient = new WebSocket(webSocketURL);
       this.webSocketClient.on('open', () => {
         this.logger.info('HMR ws client is connected.');
-        this.msgQueue.map(({type, data, params}) => this.sendMessage(type, data, params));
+        this.msgQueue.map((hmrData) => this.sendMessage(hmrData));
         this.msgQueue = [];
         resolve();
       });
@@ -1259,39 +1272,101 @@ class Server {
   }
 
   async sendStatsWithOption() {
-    if (this.options.hot === true || this.options.hot === 'only') {
-      this.logger.info('enable HMR');
-      this.sendMessage(HMREvent.Hot);
-    }
-
-    if (this.options.liveReload) {
-      this.logger.info('enable live reload');
-      this.sendMessage(HMREvent.LiveReload);
-    }
-
-    // if (this.options.client && this.options.client.progress) {
-    //   this.sendMessage(HMREvent.Progress, this.options.client.progress);
-    // }
-
-    if (this.options.client && this.options.client.reconnect) {
-      this.sendMessage(HMREvent.Reconnect, this.options.client.reconnect);
-    }
-
-    // if (this.options.client && this.options.client.overlay) {
-    //   this.sendMessage(HMREvent.Overlay, this.options.client.overlay);
-    // }
-
     if (!this.stats) {
       return;
     }
 
-    const stats = this.getStats(this.stats);
-    const { isThrottled, throttledFn: sendFiles } = throttle(this.sendFiles.bind(this), config.staticThrottleInterval);
-    await sendFiles();
-    if(isThrottled()) {
-      this.logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
+    const stats = this.getWebpackStats(this.stats);
+    const messages = [{
+      type: HMREvent.Hash,
+      data: stats.hash,
+    }];
+
+    const { hmrResources, otherResources } = this.getEmitList();
+    const allResource = [...otherResources, ...hmrResources];
+    if(allResource.length === 0) return;
+
+    const syncQueue = [];
+    if (this.hadSyncBundleResource) {
+      syncQueue.push(hmrResources, otherResources);
+    } else {
+      syncQueue.push(allResource);
     }
-    this.sendStats(stats, true);
+
+    const hmrData = {
+      emitList: syncQueue.shift(),
+      messages,
+    }
+
+    if (this.options.hot === true || this.options.hot === 'only') {
+      this.logger.info('enable HMR');
+    }
+
+    if (this.options.liveReload) {
+      this.logger.info('enable live reload');
+    }
+
+    // const { isThrottled, throttledFn: sendFiles } = throttle(.bind(this), config.staticThrottleInterval);
+    // await sendFiles();
+    // if(isThrottled()) {
+    //   this.logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
+    // }
+
+    const shouldEmit =
+      stats &&
+      (!stats.errors || stats.errors.length === 0) &&
+      (!stats.warnings || stats.warnings.length === 0) &&
+      this.currentHash === stats.hash;
+
+    if (shouldEmit) {
+      messages.push({
+        type: HMREvent.StillOk,
+      });
+      delete hmrData.emitList;
+    } else {
+      this.currentHash = stats.hash;
+
+      if (stats.errors.length > 0 || stats.warnings.length > 0) {
+        const hasErrors = stats.errors.length > 0;
+  
+        if (stats.warnings.length > 0) {
+          let params;
+  
+          if (hasErrors) {
+            params = { preventReloading: true };
+          }
+          
+          messages.push({
+            type: HMREvent.Warnings,
+            data: stats.warnings,
+            params,
+          });
+        }
+  
+        if (stats.errors.length > 0) {
+          messages.push({
+            type: HMREvent.Errors, 
+            data: stats.errors,
+          });
+        }
+      } else {
+        messages.push({
+          type: HMREvent.Ok,
+        });
+      }
+    }
+
+    this.sendMessage({
+      ...hmrData,
+      hadSyncBundleResource: this.hadSyncBundleResource,
+    });
+    if(syncQueue.length) {
+      this.sendMessage({
+        emitList: syncQueue.pop(),
+        hadSyncBundleResource: true,
+      })
+    }
+    this.hadSyncBundleResource = true;
   }
 
   openBrowser(defaultOpenTarget) {
@@ -1592,69 +1667,42 @@ class Server {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async sendMessage(type, data, params) {
+  async sendMessage(hmrWsData) {
     if (this.webSocketClient) {
       if(this.webSocketClient.readyState === WebSocket.OPEN) {
-        
-        const encoded = encodeHMRData({ type, data, params });
-        this.logger.info('speed', Date.now(), Math.ceil(encoded.length / 1024) + 'KB')
+        const encoded = encodeHMRData(hmrWsData);
         this.webSocketClient.send(encoded);
       } else if(this.webSocketClient.readyState === WebSocket.CLOSED) {
-        this.msgQueue.push({type, data, params});
+        this.msgQueue.push(hmrWsData);
         this.createWebSocketClient();
       }
     }
   }
 
-  // Send stats to a socket or multiple sockets
-  sendStats(stats, force) {
-    const shouldEmit =
-      !force &&
-      stats &&
-      (!stats.errors || stats.errors.length === 0) &&
-      (!stats.warnings || stats.warnings.length === 0) &&
-      this.currentHash === stats.hash;
-
-    if (shouldEmit) {
-      this.sendMessage(HMREvent.StillOk);
-      return;
-    }
-
-    this.currentHash = stats.hash;
-    this.sendMessage(HMREvent.Hash, stats.hash);
-
-    if (stats.errors.length > 0 || stats.warnings.length > 0) {
-      const hasErrors = stats.errors.length > 0;
-
-      if (stats.warnings.length > 0) {
-        let params;
-
-        if (hasErrors) {
-          params = { preventReloading: true };
-        }
-
-        this.sendMessage(HMREvent.Warnings, stats.warnings, params);
-      }
-
-      if (stats.errors.length > 0) {
-        this.sendMessage(HMREvent.Errors, stats.errors);
-      }
-    } else {
-      this.sendMessage(HMREvent.Ok);
-    }
-  }
-
-  sendFiles() {
+  getEmitList() {
     const {emitMap} = this;
     const emitList = Array.from(emitMap.values());
-    if (!emitList || emitList.length === 0) return;
+    if (!emitList || emitList.length === 0) {
+      return {
+        hmrResources: [],
+        otherResources: [],
+      };
+    }
 
     const totalSize = emitList.reduce((prev, curr) => prev += curr.content.length, 0);
-    if (!totalSize > config.maxStaticFileSize) return this.logger.warn(`remote debug server accept max ${config.maxStaticFileSize/1024/1024 }MB of static resources, please minify you webpack output!`);
-    // emitList.forEach(emitFile => {
-    //   this.sendMessage(HMREvent.TransferFile, [emitFile]);
-    // })
-    this.sendMessage(HMREvent.TransferFile, emitList);
+    if (!totalSize > config.maxStaticFileSize) {
+      this.logger.warn(`remote debug server accept max ${config.maxStaticFileSize/1024/1024 }MB of static resources, please minify you webpack output!`)
+      return {
+        hmrResources: [],
+        otherResources: [],
+      };
+    }
+    const hmrResources = emitList.filter(item => item.isHMRResource);
+    const otherResources = emitList.filter(item => !item.isHMRResource);
+    return {
+      hmrResources,
+      otherResources,
+    };
   }
 
   watchFiles(watchPath, watchOptions) {
@@ -1664,7 +1712,14 @@ class Server {
     // disabling refreshing on changing the content
     if (this.options.liveReload) {
       watcher.on('change', (item) => {
-        this.sendMessage(HMREvent.StaticChanged, item);
+        this.sendMessage({
+          messages: [
+            {
+              type: HMREvent.StaticChanged, 
+              data: item
+            }
+          ]
+        });
       });
     }
 

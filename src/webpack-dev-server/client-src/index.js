@@ -30,7 +30,7 @@ if (parsedResourceQuery.hot === 'true') {
   log.info('Hot Module Replacement enabled.');
 }
 
-if (parsedResourceQuery['live-reload'] === 'true') {
+if (parsedResourceQuery.liveReload === 'true') {
   options.liveReload = true;
 
   log.info('Live Reloading enabled.');
@@ -55,24 +55,6 @@ if (options.logging) {
 }
 
 const onSocketMessage = {
-  hot() {
-    if (parsedResourceQuery.hot === 'false') {
-      return;
-    }
-
-    options.hot = true;
-
-    log.info('Hot Module Replacement enabled.');
-  },
-  liveReload() {
-    if (parsedResourceQuery['live-reload'] === 'false') {
-      return;
-    }
-
-    options.liveReload = true;
-
-    log.info('Live Reloading enabled.');
-  },
   invalid() {
     log.info('App updated. Recompiling...');
 
@@ -86,23 +68,6 @@ const onSocketMessage = {
     status.currentHash = hash;
   },
   logging: setAllLogLevel,
-  overlay(value) {
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    options.overlay = value;
-  },
-  reconnect(value) {
-    if (parsedResourceQuery.reconnect === 'false') {
-      return;
-    }
-
-    options.reconnect = value;
-  },
-  progress(progress) {
-    options.progress = progress;
-  },
   'progress-update': function progressUpdate(data) {
     if (options.progress) {
       log.info(`${data.pluginName ? `[${data.pluginName}] ` : ''}${data.percent}% - ${data.msg}.`);

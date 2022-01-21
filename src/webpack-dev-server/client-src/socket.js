@@ -4,6 +4,7 @@ import { log } from './utils/log';
 let retries = 0;
 let maxRetries = 10;
 let client = null;
+let aegis
 
 const socket = function initSocket(url, handlers, reconnect) {
   client = new WebSocketClient(url);
@@ -39,13 +40,43 @@ const socket = function initSocket(url, handlers, reconnect) {
 
   client.onMessage((data) => {
     retries = 0;
-    const message = JSON.parse(data);
-    log.info(message);
-
-    if (handlers[message.type]) {
-      handlers[message.type](message.data, message.params);
+    const hmrData = JSON.parse(data);
+    log.info(hmrData);
+    if(!hmrData.messages || hmrData.messages.length === 0) return;
+    if(hmrData.performance) {
+      doReport(hmrData.performance)
     }
+
+    hmrData.messages.forEach(message => {
+      if (handlers[message.type]) {
+        handlers[message.type](message.data, message.params);
+      }
+    })
   });
 };
 
 export default socket;
+
+function doReport(performance) {
+  try {
+    import('@tencent/aegis-hippy-sdk').then(({default: Aegis}) => {
+      aegis ||= new Aegis({
+        id: 'yxqehauSsvzBZxdRmz',
+      });
+    
+      const appReceive = Date.now();
+      const { beforeEncode, afterDecode } = performance;
+      const report = (name, start, end) => {
+        if(start && end)
+          aegis.reportTime({
+            name: name,
+            duration: end - start,
+            ext1: Math.ceil(data.length/1024) + 'KB',
+          });
+      }
+      report('HMR-server-to-app', afterDecode, appReceive);
+      report('HMR-total', beforeEncode, appReceive);
+    })
+  } catch(e) {}
+  
+};

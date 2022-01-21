@@ -3,11 +3,11 @@ import path from 'path';
 import HippyHMRPlugin from '@hippy/hippy-hmr-plugin';
 import QRCode from 'qrcode';
 import { once } from 'lodash';
-import { green, bold } from 'colors/safe';
+import { green, yellow, bold } from 'colors/safe';
 import { Logger } from '@/utils/log';
 import { makeUrl, getWSProtocolByHttpProtocol } from '@/utils/url';
 import { config } from '@/config';
-import { PUBLIC_RESOURCE } from '@/@types/constants';
+import { PUBLIC_RESOURCE, DEFAULT_REMOTE } from '@/@types/constants';
 
 const log = new Logger('webpack-util');
 
@@ -41,8 +41,8 @@ function normalizeRemoteDebug(versionId, config) {
     process.exit(1);
   }
 
-  config.output.publicPath = getPublicPath(versionId);
-  log.warn(bold(green(`webpack publicPath is set as: ${config.output.publicPath}`)));
+  config.output.publicPath = getPublicPath(versionId, config.devServer.remote);
+  log.warn(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
   const bundleURL = makeUrl(`${config.output.publicPath}index.bundle`, {
     debugURL: makeUrl(`${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy`),
   });
@@ -57,7 +57,7 @@ function normalizeRemoteDebug(versionId, config) {
 
 function appendHMRPlugin(versionId: string, config) {
   if (config.devServer.hot && config.devServer.liveReload === false) return;
-  const hotManifestPublicPath = getPublicPath(versionId);
+  const hotManifestPublicPath = getPublicPath(versionId, config.devServer.remote);
   const i = config.plugins.findIndex((plugin) => plugin.constructor.name === HippyHMRPlugin.name);
   if (i !== -1) {
     config.plugins.splice(i, 1);
@@ -89,8 +89,9 @@ function printDebugInfo(bundleUrl, homeUrl) {
   );
 }
 
-function getPublicPath(versionId) {
-  return `${PUBLIC_RESOURCE}${versionId}/`;
+function getPublicPath(versionId, { host, port, protocol }) {
+  if (host === DEFAULT_REMOTE.host) return `${PUBLIC_RESOURCE}${versionId}/`;
+  return `${protocol}://${host}:${port}/${versionId}/`;
 }
 
 /**

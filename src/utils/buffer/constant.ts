@@ -26,14 +26,22 @@ export type EmitFile = {
   content: Buffer;
 };
 
-export type HMRData = {
+export type HMRMessage = {
   type: HMREvent;
   data: unknown;
   params: unknown;
 };
 
-// export type HMRWSData = {
-//   type:
-// }
-
-export const isFileFieldLen = 1;
+export type HMRWSData = {
+  emitList: EmitFile[];
+  messages: HMRMessage[];
+  performance?: {
+    beforeEncode?: number;
+    pcToServer?: number;
+    serverReceive?: number;
+    afterDecode?: number;
+    serverToApp?: number;
+    appReceive?: number;
+  };
+  hadSyncBundleResource?: boolean;
+};

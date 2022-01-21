@@ -303,7 +303,7 @@ export class SessionRouter {
           report(ReportEvent.CDPImplement, appReceive, appResponse);
           report(ReportEvent.UpwardAdapter, debugServerReceiveFromDevtools, debugServerToApp);
           report(ReportEvent.DownwardAdapter, debugServerReceiveFromApp, debugServerToDevtools);
-          report(ReportEvent.CDPTotal, devtoolsReceive, devtoolsToDebugServer);
+          report(ReportEvent.CDPTotal, devtoolsToDebugServer, devtoolsReceive);
         }
         // Send all messages to proxy connections.
         let suppressUnknownMessageErrors = false;

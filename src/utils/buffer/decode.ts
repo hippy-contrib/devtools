@@ -1,29 +1,20 @@
 import { Buffer } from 'buffer';
 import { WinstonColor } from '@/@types/enum';
 import { Logger } from '@/utils/log';
-import { EmitFile, isFileFieldLen, HMRData } from './constant';
+import { EmitFile, HMRWSData } from './constant';
 
 const logger = new Logger('buffer-decoder', WinstonColor.Red);
 
-export const decodeHMRData = (buf: Buffer) => {
-  const offset = 0;
-  const isFile = buf.readUInt8(offset);
-  if (isFile) {
-    const emitList = decodeEmitFiles(buf);
-    return {
-      isFile: true,
-      emitList,
-    };
-  }
-  const hmrBody = decodeEmitJSON(buf);
+export const decodeHMRData = (buf: Buffer): HMRWSData => {
+  const { offset, emitJSON } = decodeEmitJSON(0, buf);
+  const emitList = decodeEmitFiles(offset, buf);
   return {
-    isFile: false,
-    hmrBody,
+    ...emitJSON,
+    emitList,
   };
 };
 
-const decodeEmitFiles = (buf: Buffer): EmitFile[] => {
-  let offset = isFileFieldLen;
+const decodeEmitFiles = (offset: number, buf: Buffer): EmitFile[] => {
   const fileNum = buf.readUInt8(offset);
   offset += 1;
   const emitList = [];
@@ -46,8 +37,13 @@ const decodeEmitFiles = (buf: Buffer): EmitFile[] => {
   return emitList;
 };
 
-const decodeEmitJSON = (buf: Buffer): HMRData => {
-  let offset = isFileFieldLen;
+const decodeEmitJSON = (
+  offset = 0,
+  buf: Buffer,
+): {
+  offset: number;
+  emitJSON: Omit<HMRWSData, 'emitList'>;
+} => {
   const lenOfLen = buf.readUInt8(offset);
   offset += 1;
   const fn = {
@@ -58,10 +54,12 @@ const decodeEmitJSON = (buf: Buffer): HMRData => {
   const jsonLen = buf[fn](offset);
   offset += lenOfLen;
   const str = buf.toString('utf8', offset, offset + jsonLen);
+  offset += jsonLen;
   try {
     const emitJSON = JSON.parse(str);
-    return emitJSON;
+    return { emitJSON, offset };
   } catch (e) {
     logger.error('decodeEmitJSON error: %j', (e as any).stack || e);
+    throw e;
   }
 };

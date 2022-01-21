@@ -1,5 +1,6 @@
 import Aegis from '@tencent/aegis-node-sdk';
 import { config } from '@/config';
+import { ReportExt3 } from '@/@types/enum';
 import { version } from '../../package.json';
 
 export const aegis = new Aegis({
@@ -7,6 +8,7 @@ export const aegis = new Aegis({
   uin: '',
   delay: 3000,
   version,
+  ext3: config.isRemote ? ReportExt3.Remote : ReportExt3.Local,
 });
 
 export const timeStart = (name: string) => {
@@ -18,6 +20,7 @@ export const timeStart = (name: string) => {
       name,
       duration,
       ...ext,
+      ext3: config.isRemote ? 'remote' : 'local',
     });
   };
 };

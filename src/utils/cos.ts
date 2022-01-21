@@ -50,8 +50,6 @@ export const cosUploadByBuffer = function (options: COSUploadByBufferOptions) {
       (err, data) => {
         timeEnd({
           ext1: `${Math.ceil(buffer.length / 1024)}KB`,
-          ext2: Key,
-          ext3: config.isRemote ? 'remote' : 'local',
         });
         if (err) {
           reject({

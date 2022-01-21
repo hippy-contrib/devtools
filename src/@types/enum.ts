@@ -176,15 +176,35 @@ export enum ReportEvent {
   HMRNotificationToServer = 'hmr-notification-to-server',
   UpwardAdapter = 'upward-adapter',
   DownwardAdapter = 'downward-adapter',
-  AppCDPCost = 'app-CDP-cost',
+  CDPImplement = 'CDP-implement',
+  DevtoolsToDebugServer = 'devtools-to-debug-server',
+  DebugServerToApp = 'debug-server-to-app',
+  AppToDebugServer = 'app-to-debug-server',
+  DebugServerToDevtools = 'debug-server-to-devtools',
   RemoteDebug = 'remote-debug',
   RemoteHMR = 'remote-hmr',
   PubSub = 'pub-sub',
   RedisConnection = 'redis-connection',
   RedisError = 'redis-error',
+  CDPTotal = 'CDP-total',
+  HMREncode = 'HMR-encode',
+  HMRPCToServer = 'HMR-PC-to-server',
+  HMRDecode = 'HMR-decode',
+  HMRServerToApp = 'HMR-server-to-app',
+  HMRTotal = 'HMR-total',
+}
+
+export const enum ReportExt3 {
+  Remote = 'remote',
+  Local = 'local',
 }
 
 export enum HMRReportExt2 {
   Server = 'server',
   Client = 'client',
+}
+
+export enum HMRSyncType {
+  FirstTime = 'first-time',
+  Patch = 'patch',
 }

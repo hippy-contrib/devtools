@@ -100,8 +100,8 @@ export abstract class AppClient extends EventEmitter {
     try {
       if ('id' in msg) {
         const { method, performance } = this.msgIdMap.get(msg.id);
-        performance.appReceive = msg?.performance.appReceive;
-        performance.appResponse = msg?.performance.appResponse;
+        performance.appReceive = msg?.performance?.appReceive;
+        performance.appResponse = msg?.performance?.appResponse;
         msg.performance = createCDPPerformance(performance);
         if (method) msg.method = method;
       } else {
