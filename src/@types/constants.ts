@@ -1,7 +1,7 @@
 export const DEFAULT_REMOTE = {
   protocol: 'https',
-  host: process.env.DOMAIN?.replace(/https?:\/\//, '') || 'devtools.hippy.myqcloud.com',
+  host: process.env.DOMAIN?.replace(/https?:\/\//, '') || 'devtools.qq.com',
   port: 443,
 };
 
-export const PUBLIC_RESOURCE = 'https://devtools.hippy.myqcloud.com/';
+export const PUBLIC_RESOURCE = 'https://devtools.qq.com/';
