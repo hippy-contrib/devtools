@@ -33,19 +33,16 @@ const resumeCommands = [
     id: mockCmdId,
     method: TdfCommand.TDFRuntimeResume,
     params: {},
-    performance: createCDPPerformance(),
   },
   {
     id: mockCmdId - 1,
     method: ChromeCommand.DebuggerDisable,
     params: {},
-    performance: createCDPPerformance(),
   },
   {
     id: mockCmdId - 2,
     method: ChromeCommand.RuntimeDisable,
     params: {},
-    performance: createCDPPerformance(),
   },
 ];
 const log = new Logger('socket-server', WinstonColor.Cyan);

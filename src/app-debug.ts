@@ -8,7 +8,7 @@ import { Logger } from '@/utils/log';
 import { initDbModel } from '@/db';
 import { routeApp } from '@/router';
 import { config } from '@/config';
-import { WinstonColor, DevtoolsEnv } from '@/@types/enum';
+import { WinstonColor } from '@/@types/enum';
 
 const log = new Logger('app-debug-server', WinstonColor.Yellow);
 let server: HTTPServer;
@@ -20,13 +20,13 @@ let socketServer: SocketServer;
 export const startDebugServer = async () => {
   log.info('start server argv: %j', global.debugAppArgv);
   await init();
-  const { host, port, env } = global.debugAppArgv;
+  const { host, port } = global.debugAppArgv;
   const app = new Koa();
   routeApp(app);
 
   server = app.listen(port, host, async () => {
     log.info('start debug server success.');
-    if (env !== DevtoolsEnv.Hippy && !config.isRemote) {
+    if (!config.isRemote) {
       const { startTunnel, startChrome } = await import('./child-process/index');
       startTunnel();
       startChrome();

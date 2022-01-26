@@ -6,13 +6,11 @@ declare namespace Adapter {
       id: number;
       method: string;
       params: T;
-      performance?: Performance;
     }
 
     interface EventRes<T = any> {
       method: string;
       params: T;
-      performance?: Performance;
     }
 
     // CommanRes/ErrorRes 接口统一在 onMessage 时把 method 字段补充上去了
@@ -20,7 +18,6 @@ declare namespace Adapter {
       id: number;
       result: T;
       method: string;
-      performance?: Performance;
     }
 
     interface ErrorRes {
@@ -30,7 +27,6 @@ declare namespace Adapter {
         code: number;
         message: string;
       };
-      performance?: Performance;
     }
 
     type Res = EventRes | CommandRes | ErrorRes;
