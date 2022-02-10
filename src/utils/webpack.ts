@@ -41,7 +41,12 @@ function normalizeRemoteDebug(versionId, config) {
     process.exit(1);
   }
 
-  config.output.publicPath = getPublicPath(versionId, config.devServer.remote);
+  const needVersionId = needPublicPathWithVersionId(host);
+  if (!needVersionId) return;
+
+  const publicPath = getPublicPath(versionId, config.devServer.remote);
+
+  config.output.publicPath = publicPath;
   log.warn(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
   const bundleURL = makeUrl(`${config.output.publicPath}index.bundle`, {
     debugURL: makeUrl(`${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy`),
@@ -89,8 +94,17 @@ function printDebugInfo(bundleUrl, homeUrl) {
   );
 }
 
+/**
+ * when use debug-server-next in local, no need to set webpack `publicPath` field,
+ * only should set `hotManifestPublicPath` field
+ */
+function needPublicPathWithVersionId(host) {
+  return !(host === 'localhost' || host === '127.0.0.1');
+}
+
 function getPublicPath(versionId, { host, port, protocol }) {
   if (host === DEFAULT_REMOTE.host) return `${PUBLIC_RESOURCE}${versionId}/`;
+  if (!needPublicPathWithVersionId(host)) return `${protocol}://${host}:${port}/`;
   return `${protocol}://${host}:${port}/${versionId}/`;
 }
 
