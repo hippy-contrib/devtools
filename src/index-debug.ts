@@ -10,7 +10,6 @@ import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
 import { DevtoolsEnv } from '@/@types/enum';
-import '@/utils/aegis';
 
 const { argv } = yargs
   .alias('v', 'version')
@@ -51,6 +50,16 @@ const { argv } = yargs
     default: 9000,
     describe: 'Device list port of ios_webkit_debug_proxy',
   })
+  .option('iWDPStartPort', {
+    type: 'number',
+    default: 9200,
+    describe: 'Start port of ios_webkit_debug_proxy for iOS device',
+  })
+  .option('iWDPEndPort', {
+    type: 'number',
+    default: 9300,
+    describe: 'End port of ios_webkit_debug_proxy for iOS device',
+  })
   .option('env', {
     type: 'string',
     default: DevtoolsEnv.Hippy,
@@ -68,7 +77,10 @@ if (fullArgv.version) yargs.version().exit(0, null);
 
 global.debugAppArgv = fullArgv;
 
-// import after global.debugAppArgv is set
+/**
+ * import after global.debugAppArgv is set
+ */
+import '@/utils/aegis';
 import { Logger } from '@/utils/log';
 import { startDebugServer } from '@/app-debug';
 import { version } from 'package.json';

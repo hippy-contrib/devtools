@@ -70,11 +70,10 @@ export const startIWDP = () => {
   });
 };
 
-
 export const startChrome = async () => {
-  const { host, port, open: openChrome } = global.debugAppArgv;
+  const { open: openChrome } = global.debugAppArgv;
   if (openChrome) {
-    const url = `http://${host}:${port}/extensions/home.html`;
+    const url = `${config.domain}/extensions/home.html`;
     try {
       open(url, { app: { name: open.apps.chrome } });
     } catch (e) {

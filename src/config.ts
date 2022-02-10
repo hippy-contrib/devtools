@@ -9,8 +9,8 @@ export const config: Config = {
   hmrStaticPath: path.join(process.env.HMRStaticPath || __dirname, 'hmr'),
   logPath: path.join(__dirname, 'log'),
   hmrPortPath: path.join(__dirname, 'cache/hmr-port.txt'),
-  iWDPStartPort: 9200,
-  iWDPEndPort: 9300,
+  iWDPStartPort: global.debugAppArgv?.iWDPStartPort || 9200,
+  iWDPEndPort: global.debugAppArgv?.iWDPEndPort || 9300,
   redis: {
     // ⚠️ redis-server 6 以下，username 需要置空
     url: `redis://:${process.env.REDIS_PWD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}/0`,

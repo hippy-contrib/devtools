@@ -2,7 +2,7 @@ import { Server as HTTPServer, IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { Server as WSServer } from 'ws';
 import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
-import { aegis, createCDPPerformance } from '@/utils/aegis';
+import { aegis } from '@/utils/aegis';
 import {
   AppClientType,
   ClientRole,

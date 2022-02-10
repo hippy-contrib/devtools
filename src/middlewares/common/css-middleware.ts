@@ -62,6 +62,7 @@ class CssDomainAdapter {
 
   public static intToRGBA(int32Color: number): string {
     const int = int32Color << 0;
+    // Converts 0xaarrggbb into 0xrrggbbaa
     const int32 = ((int << 8) | (int >>> 24)) >>> 0;
     const int8 = new Uint8Array(new Uint32Array([int32]).buffer).reverse();
     const r = int8[0];
@@ -74,6 +75,7 @@ class CssDomainAdapter {
   public static rgbaToInt(stringColor: string): number {
     const uint8 = color(stringColor, 'uint8');
     const int = Buffer.from(uint8).readUInt32BE(0);
+    // Converts 0xrrggbbaa into 0xaarrggbb
     return ((int << 24) | (int >>> 8)) >>> 0;
   }
 
