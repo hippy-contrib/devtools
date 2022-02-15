@@ -117,6 +117,9 @@ export abstract class AppClient extends EventEmitter {
         if (!msg.id) {
           msg.id = requestId.create();
         }
+        this.msgIdMap.set(msg.id, {
+          method: msg.method,
+        });
         upwardLog.info('%s sendToApp %j', this.constructor.name, msg);
         return this.sendHandler({
           ...msg,

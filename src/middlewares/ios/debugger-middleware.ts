@@ -24,6 +24,7 @@ export const debuggerMiddleWareManager: MiddleWareManager = {
     },
     [IOS90Command.DebuggerEnable]: sendEmptyResultToDevtools,
     [ChromeCommand.DebuggerSetBlackboxPatterns]: sendEmptyResultToDevtools,
+    // TODO ios 支持
     [IOS90Command.DebuggerSetPauseOnExceptions]: sendEmptyResultToDevtools,
   },
   upwardMiddleWareListMap: {
