@@ -50,7 +50,7 @@ function normalizeRemoteDebug(versionId, config) {
   log.warn(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
 
   const bundleUrl = makeUrl(`${config.output.publicPath}index.bundle`, {
-    debugURL: makeUrl(`${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy`),
+    debugUrl: makeUrl(`${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy`),
   });
   const homeUrl = `${protocol}://${host}:${port}/extensions/home.html?hash=${versionId}`;
 
