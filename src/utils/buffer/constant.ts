@@ -36,10 +36,8 @@ export type HMRWSData = {
   emitList: EmitFile[];
   messages: HMRMessage[];
   performance?: {
-    beforeEncode?: number;
     pcToServer?: number;
     serverReceive?: number;
-    afterDecode?: number;
     serverToApp?: number;
     appReceive?: number;
   };

@@ -1,11 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import Aegis from '@tencent/aegis-node-sdk';
 import { config } from '@/config';
+import { ReportExt3 } from '@/@types/enum';
+import { version } from '../../package.json';
 
-export const aegis = {
-  reportEvent: (argv: unknown) => {},
-  reportTime: (argv: unknown) => {},
-  report: (argv: unknown) => {},
-};
+export const aegis = new Aegis({
+  id: config.aegisId,
+  uin: '',
+  delay: 3000,
+  version,
+  ext3: config.isRemote ? ReportExt3.Remote : ReportExt3.Local,
+});
 
 export const timeStart = (name: string) => {
   const start = Date.now();
@@ -30,10 +34,6 @@ type ExtOption = {
 export const createCDPPerformance = (perf?: Partial<Adapter.Performance>): Adapter.Performance => ({
   devtoolsToDebugServer: 0,
   debugServerReceiveFromDevtools: 0,
-  debugServerToApp: 0,
-  appReceive: 0,
-  appResponse: 0,
-  debugServerReceiveFromApp: 0,
   debugServerToDevtools: 0,
   devtoolsReceive: 0,
   ...(perf || {}),

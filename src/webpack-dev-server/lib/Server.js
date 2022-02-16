@@ -14,7 +14,6 @@ const WebSocket = require('ws');
 const { HMREvent } = require('@/@types/enum');
 const { encodeHMRData } = require('@/utils/buffer');
 const { getWSProtocolByHttpProtocol } = require('@/utils/url');
-const { throttle } = require('@/utils/throttle');
 const { config } = require('@/config');
 
 if (!process.env.WEBPACK_SERVE) {

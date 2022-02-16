@@ -2,7 +2,7 @@ import { Server as HTTPServer, IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { Server as WSServer } from 'ws';
 import { ChromeCommand, TdfCommand } from 'tdf-devtools-protocol/dist/types';
-import { aegis } from '@/utils/aegis';
+import { aegis, createCDPPerformance } from '@/utils/aegis';
 import {
   AppClientType,
   ClientRole,
@@ -33,16 +33,19 @@ const resumeCommands = [
     id: mockCmdId,
     method: TdfCommand.TDFRuntimeResume,
     params: {},
+    performance: createCDPPerformance(),
   },
   {
     id: mockCmdId - 1,
     method: ChromeCommand.DebuggerDisable,
     params: {},
+    performance: createCDPPerformance(),
   },
   {
     id: mockCmdId - 2,
     method: ChromeCommand.RuntimeDisable,
     params: {},
+    performance: createCDPPerformance(),
   },
 ];
 const log = new Logger('socket-server', WinstonColor.Cyan);

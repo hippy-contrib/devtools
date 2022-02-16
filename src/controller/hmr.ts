@@ -82,9 +82,7 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
       const { emitList, ...emitJSON } = decodeHMRData(msg);
       if (emitJSON.performance) {
         const { hadSyncBundleResource } = emitJSON;
-        const afterDecode = Date.now();
-        emitJSON.performance.afterDecode = afterDecode;
-        const { beforeEncode, pcToServer } = emitJSON.performance;
+        const { pcToServer } = emitJSON.performance;
         const hmrSize = `${Math.ceil(msg.length / 1024)}KB`;
         const reportData = {
           name: ReportEvent.HMRPCToServer,
@@ -95,16 +93,6 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
         if ('hadSyncBundleResource' in emitJSON)
           reportData.ext2 = hadSyncBundleResource ? HMRSyncType.Patch : HMRSyncType.FirstTime;
         aegis.reportTime(reportData);
-        aegis.reportTime({
-          name: ReportEvent.HMREncode,
-          duration: pcToServer - beforeEncode,
-          ext1: hmrSize,
-        });
-        aegis.reportTime({
-          name: ReportEvent.HMRDecode,
-          duration: afterDecode - serverReceive,
-          ext1: hmrSize,
-        });
       }
 
       await saveHMRFiles(hash, emitList);

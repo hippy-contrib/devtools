@@ -13,6 +13,7 @@ import {
 import { CDP_DOMAIN_LIST, getDomain } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
 import { composeMiddlewares } from '@/utils/middleware';
+import { createCDPPerformance } from '@/utils/aegis';
 
 const filteredLog = new Logger('filtered', WinstonColor.Yellow);
 const downwardLog = new Logger('↓↓↓', WinstonColor.BrightRed);
@@ -42,6 +43,8 @@ export abstract class AppClient extends EventEmitter {
     number,
     {
       method: string;
+      // upward start ts, used to report adapter performance
+      performance: Adapter.Performance;
     }
   > = new Map();
 
@@ -75,9 +78,13 @@ export abstract class AppClient extends EventEmitter {
       return Promise.reject(ErrorCode.DomainFiltered);
     }
 
-    const { method } = msg;
-    this.msgIdMap.set(msg.id, {
-      method: msg.method,
+    const { id, method } = msg;
+    this.msgIdMap.set(id, {
+      method,
+      performance: createCDPPerformance({
+        ...(msg.performance || {}),
+        debugServerReceiveFromDevtools: Date.now(),
+      }),
     });
     const middlewareList = this.getMiddlewareList(MiddlewareType.Upward, method);
     // 上行的具体协议的处理交给中间件去适配，最后分发到 app 端
@@ -93,8 +100,8 @@ export abstract class AppClient extends EventEmitter {
     try {
       if ('id' in msg && 'result' in msg) {
         const cache = this.msgIdMap.get(msg.id);
-        if (cache?.method) msg.method = cache.method;
-        else downwardLog.warn("method doesn't exist %j", msg);
+        if (!cache) downwardLog.warn("method doesn't exist %j", msg);
+        else if (cache?.method) msg.method = cache.method;
       }
 
       const { method } = msg;
@@ -118,13 +125,10 @@ export abstract class AppClient extends EventEmitter {
         if (!msg.id) {
           msg.id = requestId.create();
         }
-        this.msgIdMap.set(msg.id, {
-          method: msg.method,
-        });
-        upwardLog.info('%s sendToApp %j', this.constructor.name, msg);
-        return this.sendHandler({
-          ...msg,
-        });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { performance, ...msgWithoutPerf } = msg;
+        upwardLog.info('%s sendToApp %j', this.constructor.name, msgWithoutPerf);
+        return this.sendHandler(msgWithoutPerf);
       },
       sendToDevtools: (msg: Adapter.CDP.Res) => {
         downwardLog.info(
@@ -133,8 +137,16 @@ export abstract class AppClient extends EventEmitter {
           (msg as Adapter.CDP.CommandRes).id || '',
           msg.method,
         );
+        let performance;
+        if ('id' in msg) {
+          const cache = this.msgIdMap.get(msg.id);
+          performance = cache?.performance;
+          if (performance) performance.debugServerToDevtools = Date.now();
+        }
+
         return this.emitMessageToDevtools({
           ...msg,
+          performance,
         });
       },
     };

@@ -4,10 +4,9 @@ import { EmitFile, HMRWSData } from './constant';
 export const encodeHMRData = (data: HMRWSData) => {
   const { emitList = [], ...emitJSON } = data;
   emitJSON.performance = {
-    beforeEncode: Date.now(),
+    pcToServer: Date.now(),
   };
   const fileBuffer = encodeEmitFiles(emitList);
-  if (emitJSON.performance) emitJSON.performance.pcToServer = Date.now();
   const jsonBuffer = encodeEmitJSON(emitJSON);
   return Buffer.concat([jsonBuffer, fileBuffer]);
 };
