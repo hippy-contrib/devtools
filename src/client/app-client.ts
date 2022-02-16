@@ -92,8 +92,9 @@ export abstract class AppClient extends EventEmitter {
   protected downwardMessageHandler(msg: Adapter.CDP.Res): Promise<Adapter.CDP.Res> {
     try {
       if ('id' in msg && 'result' in msg) {
-        const { method } = this.msgIdMap.get(msg.id);
-        if (method) msg.method = method;
+        const cache = this.msgIdMap.get(msg.id);
+        if (cache?.method) msg.method = cache.method;
+        else downwardLog.warn("method doesn't exist %j", msg);
       }
 
       const { method } = msg;

@@ -966,6 +966,18 @@
           "minimum": 0,
           "maximum": 65535,
           "description": "remote debug port."
+        },
+        "qrcode": {
+          "optional": true,
+          "anyOf": [
+            {
+              "enum": [false]
+            },
+            {
+              "instanceof": "Function"
+            }
+          ],
+          "description": "Bundle URL and Debug URL QRCode, app could scan to open remote bundle and debug."
         }
       }
     }

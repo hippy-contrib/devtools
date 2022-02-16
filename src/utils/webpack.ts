@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import HippyHMRPlugin from '@hippy/hippy-hmr-plugin';
 import QRCode from 'qrcode';
-import { once } from 'lodash';
 import { green, yellow, bold } from 'colors/safe';
 import { Logger } from '@/utils/log';
 import { makeUrl, getWSProtocolByHttpProtocol } from '@/utils/url';
@@ -33,31 +32,33 @@ function normalizeRemoteDebug(versionId, config) {
     protocol: 'http',
     host: '127.0.0.1',
     port: 38989,
+    qrcode: false,
   };
-  const { protocol, host, port } = config.devServer.remote;
+  const { protocol, host, port, qrcode: qrcodeFn } = config.devServer.remote;
 
   if (host && port && protocol === false) {
     log.warn('you must config remote host, port and protocol!');
     process.exit(1);
   }
 
+  // only print qrcode when use remote debug server
   const needVersionId = needPublicPathWithVersionId(host);
   if (!needVersionId) return;
 
   const publicPath = getPublicPath(versionId, config.devServer.remote);
-
   config.output.publicPath = publicPath;
   log.warn(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
-  const bundleURL = makeUrl(`${config.output.publicPath}index.bundle`, {
+
+  const bundleUrl = makeUrl(`${config.output.publicPath}index.bundle`, {
     debugURL: makeUrl(`${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy`),
   });
-  const homeURL = `${protocol}://${host}:${port}/extensions/home.html?hash=${versionId}`;
+  const homeUrl = `${protocol}://${host}:${port}/extensions/home.html?hash=${versionId}`;
 
-  config.devServer.cb = once(() => {
+  config.devServer.cb = () => {
     process.nextTick(() => {
-      printDebugInfo(bundleURL, homeURL);
+      printDebugInfo(qrcodeFn, { bundleUrl, homeUrl });
     });
-  });
+  };
 }
 
 function appendHMRPlugin(versionId: string, config) {
@@ -78,20 +79,25 @@ function isRemoteDebugEnabled(webpackConfig) {
   return !(!webpackConfig.devServer || webpackConfig.devServer.remote === false);
 }
 
-function printDebugInfo(bundleUrl, homeUrl) {
+function printDebugInfo(qrcodeFn, { bundleUrl, homeUrl }) {
   log.info('bundleUrl: %s', bold(green(bundleUrl)));
   log.info('find debug page on: %s', bold(green(homeUrl)));
-  QRCode.toString(
-    bundleUrl,
-    {
-      small: true,
-      type: 'terminal',
-    },
-    (e, qrcodeStr) => {
-      if (e) log.error('draw qrcode of bundleUrl failed: %j', e?.stack || e);
-      log.info('qrcode\n%s', qrcodeStr);
-    },
-  );
+
+  if (qrcodeFn && typeof qrcodeFn === 'function') {
+    const qrcodeStr = qrcodeFn(bundleUrl);
+    log.info('bundleUrl scheme: %s', bold(green(qrcodeStr)));
+    QRCode.toString(
+      qrcodeStr,
+      {
+        small: true,
+        type: 'terminal',
+      },
+      (e, qrcodeStr) => {
+        if (e) log.error('draw qrcode of bundleUrl failed: %j', e?.stack || e);
+        log.info('scheme qrcode:\n%s', qrcodeStr);
+      },
+    );
+  }
 }
 
 /**
