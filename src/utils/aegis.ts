@@ -1,15 +1,14 @@
-import Aegis from '@tencent/aegis-node-sdk';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { config } from '@/config';
-import { ReportExt3 } from '@/@types/enum';
-import { version } from '../../package.json';
 
-export const aegis = new Aegis({
-  id: config.aegisId,
-  uin: '',
-  delay: 3000,
-  version,
-  ext3: config.isRemote ? ReportExt3.Remote : ReportExt3.Local,
-});
+/**
+ * remove report because aegis could not access in npm registry
+ */
+export const aegis = {
+  reportEvent: (argv: unknown) => {},
+  reportTime: (argv: unknown) => {},
+  report: (argv: unknown) => {},
+};
 
 export const timeStart = (name: string) => {
   const start = Date.now();

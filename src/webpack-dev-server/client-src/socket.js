@@ -43,9 +43,6 @@ const socket = function initSocket(url, handlers, reconnect) {
     const hmrData = JSON.parse(data);
     log.info(hmrData);
     if(!hmrData.messages || hmrData.messages.length === 0) return;
-    // if(hmrData.performance) {
-    //   doReport(hmrData.performance, data.length)
-    // }
 
     hmrData.messages.forEach(message => {
       if (handlers[message.type]) {
@@ -56,26 +53,3 @@ const socket = function initSocket(url, handlers, reconnect) {
 };
 
 export default socket;
-
-function doReport(performance, length) {
-  try {
-    import('@tencent/aegis-hippy-sdk').then(({default: Aegis}) => {
-      aegis ||= new Aegis({
-        id: 'yxqehauSsvzBZxdRmz',
-      });
-    
-      const appReceive = Date.now();
-      const { pcToServer, serverToApp } = performance;
-      const report = (name, start, end) => {
-        if(start && end)
-          aegis.reportTime({
-            name: name,
-            duration: end - start,
-            ext1: Math.ceil(length/1024) + 'KB',
-          });
-      }
-      report('HMR-server-to-app', serverToApp, appReceive);
-      report('HMR-total', pcToServer, appReceive);
-    })
-  } catch(e) {}
-};
