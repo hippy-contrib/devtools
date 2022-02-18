@@ -7,6 +7,7 @@ moduleAlias.addAliases({
   'package.json': '../package.json',
 });
 import yargs from 'yargs';
+import detect from 'detect-port';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
 import { DevtoolsEnv } from '@/@types/enum';
@@ -88,4 +89,12 @@ import './process-handler';
 const log = new Logger('entry');
 log.info('version: %s', version);
 
-startDebugServer();
+(async () => {
+  const { iWDPPort } = global.debugAppArgv;
+  const port = await detect(iWDPPort);
+  if (port !== iWDPPort) {
+    global.debugAppArgv.iWDPPort = port;
+    log.warn('iWDPPort was changed to %d, because %d is occupied!', port, iWDPPort);
+  }
+  startDebugServer();
+})();

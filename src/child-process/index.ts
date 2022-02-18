@@ -18,7 +18,7 @@ let proxyProcess;
 export const TUNNEL_EVENT = 'message';
 export const tunnelEmitter = new EventEmitter();
 
-export const startTunnel = (cb?: StartTunnelCallback) => {
+export const startTunnel = async (cb?: StartTunnelCallback) => {
   global.addon.addEventListener((event: TunnelEvent, data: unknown) => {
     try {
       if (event !== TunnelEvent.TunnelLog) {

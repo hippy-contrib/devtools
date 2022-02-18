@@ -28,7 +28,7 @@ export const startDebugServer = async () => {
     log.info('start debug server success.');
     if (!config.isRemote) {
       const { startTunnel, startChrome } = await import('./child-process/index');
-      startTunnel();
+      await startTunnel();
       startChrome();
     }
     if (!config.isRemote) {
@@ -42,6 +42,10 @@ export const startDebugServer = async () => {
 
   server.on('close', () => {
     log.warn('debug server is closed.');
+  });
+
+  server.on('error', (e) => {
+    log.error('launch debug server failed: %j', e);
   });
 };
 

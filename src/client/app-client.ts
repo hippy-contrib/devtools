@@ -100,8 +100,7 @@ export abstract class AppClient extends EventEmitter {
     try {
       if ('id' in msg && 'result' in msg) {
         const cache = this.msgIdMap.get(msg.id);
-        if (!cache) downwardLog.warn("method doesn't exist %j", msg);
-        else if (cache?.method) msg.method = cache.method;
+        if (cache?.method) msg.method = cache.method;
       }
 
       const { method } = msg;

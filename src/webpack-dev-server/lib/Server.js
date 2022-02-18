@@ -1241,6 +1241,7 @@ class Server {
     });
 
     this.server.on('error', (error) => {
+      this.logger.error('start hippy dev server error: ', error);
       throw error;
     });
   }
@@ -1265,6 +1266,7 @@ class Server {
       });
       this.webSocketClient.on('error', (e) => {
         this.logger.warn('HMR ws error: ', e);
+        this.logger.warn('If debug-server is closed, please restart @hippy/debug-server-next');
         if (this.webSocketClient.readyState === WebSocket.CLOSING) reject();
       });
     });
