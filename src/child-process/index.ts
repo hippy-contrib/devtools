@@ -114,7 +114,7 @@ function getTunnelOption(): StartTunnelOption {
         iwdp_listen_port: iWDPPort,
         iwdp_path: path.join(__dirname, '../build/win/iwdp1.8.8/ios_webkit_debug_proxy.exe'),
       },
-      only_use_iwdp: 1,
+      only_use_iwdp: 0,
       iproxy_path: path.join(__dirname, '../build/win/idevice/iproxy.exe'),
       idevice_info_path: path.join(__dirname, '../build/win/idevice/ideviceinfo.exe'),
     };
