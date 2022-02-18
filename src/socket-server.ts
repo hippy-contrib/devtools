@@ -210,6 +210,10 @@ export class SocketServer {
       }
     });
 
+    // must Debugger.disable before devtools frontend connected, otherwise couldn't
+    // receive Debugger.scriptParsed event.
+    resumeCommands.map(publisher.publish.bind(publisher));
+
     ws.on('message', (msg) => {
       publisher.publish(msg.toString());
     });
