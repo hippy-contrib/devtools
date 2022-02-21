@@ -42,6 +42,7 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
     deviceName: device.devicename,
     deviceOSVersion: device.osVersion,
     ref: 1,
+    ts: Date.now(),
   };
 };
 
@@ -79,6 +80,7 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTar
     deviceName,
     appClientTypeList: [AppClientType.WS],
     ref: 1,
+    ts: Date.now(),
   };
 };
 
@@ -113,6 +115,7 @@ export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
     deviceOSVersion: iWDPPage.device.deviceOSVersion,
     appClientTypeList: [AppClientType.IWDP],
     ref: 1,
+    ts: Date.now(),
   };
 };
 

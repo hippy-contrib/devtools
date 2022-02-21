@@ -16,6 +16,7 @@ export interface DebugTarget {
   platform: DevicePlatform;
   appClientTypeList: AppClientType[];
   type: string;
+  ts: number;
   deviceName: string;
   deviceId?: string;
   deviceOSVersion?: string;
