@@ -61,9 +61,13 @@ export const startIWDP = () => {
   proxyProcess.unref();
 
   childProcessLog.info(`start IWDP on port ${iWDPPort}`);
-
+  proxyProcess.stdout.on('data', (msg) => childProcessLog.info(msg.toString()));
+  proxyProcess.stderr.on('data', (msg) => childProcessLog.error(msg.toString()));
   proxyProcess.on('error', (e) => {
     childProcessLog.error('IWDP error: %s', e?.stack);
+  });
+  proxyProcess.on('message', (msg) => {
+    childProcessLog.info('IWDP message: %j', msg);
   });
   proxyProcess.on('close', (code) => {
     childProcessLog.warn(`IWDP close with code: ${code}`);
@@ -92,9 +96,13 @@ export const killChildProcess = () => {
 type StartTunnelCallback = (event: TunnelEvent, data: unknown) => void;
 
 function getTunnelOption(): StartTunnelOption {
-  const { iWDPPort } = global.debugAppArgv;
+  const { iWDPPort, verbose } = global.debugAppArgv;
   const { iWDPStartPort, iWDPEndPort } = config;
-  const iWDPParams = ['--no-frontend', `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`];
+  const iWDPParams = [
+    '--no-frontend',
+    verbose ? '--debug' : '',
+    `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`,
+  ].filter(Boolean);
   let tunnelOption;
   if (os.type() === OSType.Darwin) {
     tunnelOption = {

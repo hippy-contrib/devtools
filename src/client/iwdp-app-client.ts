@@ -71,11 +71,6 @@ export class IWDPAppClient extends AppClient {
       this.isClosed = true;
       this.emit(AppClientEvent.Close);
       log.warn('IWDPAppClient ws close!');
-
-      const e = new Error('IWDPAppClient ws closed');
-      for (const requestPromise of this.requestPromiseMap.values()) {
-        requestPromise.reject(e);
-      }
     });
 
     this.ws.on('error', (e) => {

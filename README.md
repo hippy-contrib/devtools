@@ -27,3 +27,6 @@ webpack(webpackConfig, (err, stats) => {
 // start hippy debug
 startDebugServer();
 ```
+
+## Private Deployment
+If you want to use **remote debug**, you could follow [this doc](./doc/deploy.md) to deploy your debug server.

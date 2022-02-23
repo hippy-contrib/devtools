@@ -3,7 +3,7 @@ import util from 'util';
 import colors from 'colors/safe';
 import { Logger as WinstonLogger, transports, format, createLogger } from 'winston';
 import { lowerFirst, uniq, random } from 'lodash';
-import { WinstonColor } from '@/@types/enum';
+import { WinstonColor, DevtoolsEnv } from '@/@types/enum';
 import { config } from '@/config';
 import { aegis } from '@/utils/aegis';
 import 'winston-daily-rotate-file';
@@ -13,11 +13,13 @@ export class Logger {
   private loggerInstance: WinstonLogger;
   private label: string;
   private color: string;
+  private hideInConsole: boolean;
 
-  public constructor(label = '', color?: string, logFilename?: string) {
+  public constructor(label = '', color?: string, logFilename?: string, hideInConsole = false) {
     this.label = label;
     this.color = color || getRandomColor();
     this.logFilename = logFilename || '%DATE%.log';
+    this.hideInConsole = hideInConsole;
     this.initLoggerInstance();
   }
 
@@ -49,13 +51,6 @@ export class Logger {
   }
 
   private initLoggerInstance() {
-    const transport = new transports.DailyRotateFile({
-      filename: path.join(config.logPath, this.logFilename),
-      datePattern: 'YYYY-MM-DD-HH',
-      zippedArchive: false,
-      maxSize: '20m',
-      maxFiles: '7d',
-    });
     const label = colors[this.color](this.label);
     this.loggerInstance = createLogger({
       format: format.combine(
@@ -65,14 +60,24 @@ export class Logger {
         format.colorize(),
         format.printf(({ level, message, label, timestamp }) => `${timestamp} ${label} ${level} ${message}`),
       ),
-      transports: [transport, new transports.Console()],
+      transports: [
+        new transports.DailyRotateFile({
+          filename: path.join(config.logPath, this.logFilename),
+          datePattern: 'YYYY-MM-DD-HH',
+          zippedArchive: false,
+          maxSize: '20m',
+          maxFiles: '7d',
+        }),
+        !this.hideInConsole ? new transports.Console() : null,
+      ].filter(Boolean),
     });
   }
 }
 
 export class TunnelLogger extends Logger {
   public constructor(label = '', color?: string, logFilename?: string) {
-    super(label, color, logFilename || '%DATE%.tunnel.log');
+    const hideInConsole = global.debugAppArgv?.env === DevtoolsEnv.Hippy;
+    super(label, color, logFilename || '%DATE%.tunnel.log', hideInConsole);
   }
 }
 

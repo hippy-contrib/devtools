@@ -17,13 +17,11 @@ export class DebugTargetManager {
     const { DB } = getDBOperator();
     const db = new DB(config.redis.debugTargetTable);
     let getDebugTargetPromise;
-    if (config.isRemote) {
+    if (config.isCluster) {
       getDebugTargetPromise = hash ? db.find('hash', hash) : Promise.resolve([]);
     } else {
       getDebugTargetPromise = db.getAll();
     }
-    // TODO delete test code
-    // getDebugTargetPromise = db.getAll();
 
     const [targets, iOSPages] = await Promise.all([getDebugTargetPromise, getIWDPPages(iWDPPort)]);
     targets.forEach((target, i) => {
@@ -34,7 +32,9 @@ export class DebugTargetManager {
     });
     // 追加 IWDP 获取到的 h5 页面
     const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
-    const h5Pages = iOSPagesWithFlag.filter((iOSPage) => !iOSPage.shouldRemove);
+    const h5Pages = iOSPagesWithFlag.filter(
+      (iOSPage) => !iOSPage.shouldRemove && !iOSPage.title.startsWith('HippyContext: '),
+    );
     const h5DebugTargets = h5Pages.map(createTargetByIWDPPage);
     subscribeByIWDP(h5DebugTargets);
     DebugTargetManager.debugTargets = targets.concat(h5DebugTargets);

@@ -15,7 +15,8 @@ import { Logger } from '@/utils/log';
 import { composeMiddlewares } from '@/utils/middleware';
 import { createCDPPerformance } from '@/utils/aegis';
 
-const filteredLog = new Logger('filtered', WinstonColor.Yellow);
+const ignoreMethods = ['Page.screencastFrame', 'Page.screencastFrameAck'];
+// const filteredLog = new Logger('filtered', WinstonColor.Yellow);
 const downwardLog = new Logger('↓↓↓', WinstonColor.BrightRed);
 const upwardLog = new Logger('↑↑↑', WinstonColor.BrightGreen);
 
@@ -74,7 +75,7 @@ export abstract class AppClient extends EventEmitter {
    */
   public sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
     if (!this.filter(msg)) {
-      filteredLog.info(`'${msg.method}' is filtered in app client type: ${this.constructor.name}`);
+      // filteredLog.info(`'${msg.method}' is filtered in app client type: ${this.constructor.name}`);
       return Promise.reject(ErrorCode.DomainFiltered);
     }
 
@@ -126,16 +127,18 @@ export abstract class AppClient extends EventEmitter {
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { performance, ...msgWithoutPerf } = msg;
-        upwardLog.info('%s sendToApp %j', this.constructor.name, msgWithoutPerf);
+        if (!ignoreMethods.includes(msg.method))
+          upwardLog.info('%s sendToApp %j', this.constructor.name, msgWithoutPerf);
         return this.sendHandler(msgWithoutPerf);
       },
       sendToDevtools: (msg: Adapter.CDP.Res) => {
-        downwardLog.info(
-          '%s sendToDevtools %s %s',
-          this.constructor.name,
-          (msg as Adapter.CDP.CommandRes).id || '',
-          msg.method,
-        );
+        if (!ignoreMethods.includes(msg.method))
+          downwardLog.info(
+            '%s sendToDevtools %s %s',
+            this.constructor.name,
+            (msg as Adapter.CDP.CommandRes).id || '',
+            msg.method,
+          );
         let performance;
         if ('id' in msg) {
           const cache = this.msgIdMap.get(msg.id);

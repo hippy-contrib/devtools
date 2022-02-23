@@ -14,7 +14,7 @@ export const webpack = (webpackConfig, cb?) => {
   const compiler = oldWebpack(webpackConfig);
   const cbWithQRCode = (err, stats) => {
     if (cb) cb(err, stats);
-    if (webpackConfig.devServer.cb) webpackConfig.devServer.cb();
+    if (webpackConfig.devServer?.cb) webpackConfig.devServer.cb();
   };
   startWebpackDevServer(webpackConfig, compiler, cbWithQRCode);
   return compiler;

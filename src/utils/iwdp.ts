@@ -18,7 +18,7 @@ const log = new Logger('IWDP-util');
  * 获取所有 usb 连接设备的 IWDP 页面列表
  */
 export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
-  if (config.isRemote) return [];
+  if (config.isCluster) return [];
   try {
     // IWDP 检查页面列表会稍有延迟，这里简单做下 sleep
     await sleep(800);
@@ -36,7 +36,7 @@ export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
 };
 
 /**
- * 用 IWDP 获取到的页面信息扩展 debugTarget
+ * use IWDP info extend debugTarget
  */
 export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPage>): DebugTarget => {
   if (debugTarget.platform !== DevicePlatform.IOS) return debugTarget;
@@ -44,11 +44,18 @@ export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPag
   const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
   const iOSPage = iOSPagesWithFlag.find(
     (iOSPage) =>
-      (debugTarget.appClientTypeList[0] === AppClientType.WS && debugTarget.title === iOSPage.title) ||
+      (debugTarget.appClientTypeList.includes(AppClientType.WS) && debugTarget.title === iOSPage.title) ||
       (debugTarget.appClientTypeList[0] === AppClientType.Tunnel &&
         debugTarget.deviceName === iOSPage.device.deviceName),
   );
-  if (!iOSPage) return debugTarget;
+  if (!iOSPage) {
+    const i = debugTarget.appClientTypeList.indexOf(AppClientType.IWDP);
+    if (i !== -1) debugTarget.appClientTypeList.splice(i, 1);
+    delete debugTarget.deviceOSVersion;
+    delete debugTarget.deviceId;
+    delete debugTarget.deviceOSVersion;
+    return debugTarget;
+  }
 
   iOSPage.shouldRemove = true;
   const iWDPWsUrl = iOSPage.webSocketDebuggerUrl;
@@ -97,4 +104,4 @@ const getDeviceIWDPPages = async (device: IWDPDevice): Promise<IWDPPage[]> => {
 };
 
 const iWDPPagesFilter = (iWDPPage: IWDPPage) =>
-  /^HippyContext/.test(iWDPPage.title) && !/\(delete\)/.test(iWDPPage.title);
+  /^HippyContext/.test(iWDPPage.title) && !/\(delete\)/.test(iWDPPage.title) && Boolean(iWDPPage.devtoolsFrontendUrl);

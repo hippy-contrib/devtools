@@ -17,7 +17,7 @@ export const config: Config = {
     debugTargetTable: 'tdf:debugtargets',
     bundleTable: 'tdf:bundles',
   },
-  isRemote: process.env.IS_REMOTE === 'true',
+  isCluster: process.env.IS_CLUSTER === 'true',
   cos: {
     SecretId: process.env.SecretId,
     SecretKey: process.env.SecretKey,
@@ -48,7 +48,7 @@ interface Config {
     debugTargetTable: string;
     bundleTable: string;
   };
-  isRemote: boolean;
+  isCluster: boolean;
   cos: {
     SecretId: string;
     SecretKey: string;

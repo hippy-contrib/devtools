@@ -23,7 +23,7 @@ export const getDBOperator = () => ({
  * 初始化数据库环境
  */
 export const initDbModel = () => {
-  if (config.isRemote) {
+  if (config.isCluster) {
     DB = RedisDB;
     Publisher = RedisPublisher;
     Subscriber = RedisSubscriber;

@@ -19,7 +19,7 @@ export const timeStart = (name: string) => {
       name,
       duration,
       ...ext,
-      ext3: config.isRemote ? 'remote' : 'local',
+      ext3: config.isCluster ? 'remote' : 'local',
     });
   };
 };

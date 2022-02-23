@@ -26,12 +26,12 @@ export const startDebugServer = async () => {
 
   server = app.listen(port, host, async () => {
     log.info('start debug server success.');
-    if (!config.isRemote) {
-      const { startTunnel, startChrome } = await import('./child-process/index');
-      await startTunnel();
+    if (!config.isCluster) {
+      const { startChrome } = await import('./child-process/index');
+      // await startIWDP();
       startChrome();
     }
-    if (!config.isRemote) {
+    if (!config.isCluster) {
       const { startAdbProxy } = await import('./child-process/adb');
       startAdbProxy();
     }
@@ -79,7 +79,7 @@ const init = async () => {
   } catch (e) {
     log.warn('rm cache dir error');
   }
-  if (!config.isRemote) {
+  if (!config.isCluster) {
     const { importTunnel } = await import('@/child-process/import-addon');
     await importTunnel();
   }
