@@ -27,8 +27,8 @@ export const startDebugServer = async () => {
   server = app.listen(port, host, async () => {
     log.info('start debug server success.');
     if (!config.isCluster) {
-      const { startChrome } = await import('./child-process/index');
-      // await startIWDP();
+      const { startTunnel, startChrome } = await import('./child-process/index');
+      await startTunnel();
       startChrome();
     }
     if (!config.isCluster) {

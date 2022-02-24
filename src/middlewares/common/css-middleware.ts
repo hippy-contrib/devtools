@@ -34,7 +34,8 @@ export const cssMiddleWareManager: MiddleWareManager = {
             const [name] = styleItems;
             let [, ...values] = styleItems;
             if (!CssDomainAdapter.shouldSkipStyle(name)) {
-              if (name.toLowerCase().includes('color')) {
+              values[0] = values[0].trim();
+              if (name.toLowerCase().includes('color') && !/^\d+$/.test(values[0])) {
                 const rgba = CssDomainAdapter.transformRGBA(values[0]);
                 values = [String(CssDomainAdapter.rgbaToInt(rgba))];
               }
