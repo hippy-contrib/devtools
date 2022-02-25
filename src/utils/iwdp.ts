@@ -41,13 +41,7 @@ export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
 export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPage>): DebugTarget => {
   if (debugTarget.platform !== DevicePlatform.IOS) return debugTarget;
 
-  const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
-  const iOSPage = iOSPagesWithFlag.find(
-    (iOSPage) =>
-      (debugTarget.appClientTypeList.includes(AppClientType.WS) && debugTarget.title === iOSPage.title) ||
-      (debugTarget.appClientTypeList[0] === AppClientType.Tunnel &&
-        debugTarget.deviceName === iOSPage.device.deviceName),
-  );
+  const iOSPage = findIOSPage(debugTarget, iOSPages);
   if (!iOSPage) {
     const i = debugTarget.appClientTypeList.indexOf(AppClientType.IWDP);
     if (i !== -1) debugTarget.appClientTypeList.splice(i, 1);
@@ -104,4 +98,17 @@ const getDeviceIWDPPages = async (device: IWDPDevice): Promise<IWDPPage[]> => {
 };
 
 const iWDPPagesFilter = (iWDPPage: IWDPPage) =>
-  /^HippyContext/.test(iWDPPage.title) && !/\(delete\)/.test(iWDPPage.title) && Boolean(iWDPPage.devtoolsFrontendUrl);
+  /^HippyContext/.test(iWDPPage.title) && !/\(delete\)/.test(iWDPPage.title);
+//  && Boolean(iWDPPage.devtoolsFrontendUrl);
+
+const findIOSPage = (debugTarget: DebugTarget, iOSPages: Array<IWDPPage>) => {
+  const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
+  return iOSPagesWithFlag.find(
+    (iOSPage) =>
+      (debugTarget.appClientTypeList.includes(AppClientType.WS) &&
+        debugTarget.title === iOSPage.title &&
+        debugTarget.deviceName === iOSPage.device.deviceName) ||
+      (debugTarget.appClientTypeList[0] === AppClientType.Tunnel &&
+        debugTarget.deviceName === iOSPage.device.deviceName),
+  );
+};
