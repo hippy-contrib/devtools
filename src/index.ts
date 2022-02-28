@@ -4,7 +4,7 @@ moduleAlias.addAliases({
   '@': __dirname,
   'package.json': '../package.json',
 });
-import { DevtoolsEnv } from '@/@types/enum';
+import { DevtoolsEnv, LogLevel } from '@/@types/enum';
 import { DebugAppArgv } from '@/@types/app';
 import { startDebugServer as oldStartDebugServer } from '@/app-debug';
 import './process-handler';
@@ -18,7 +18,7 @@ export const startDebugServer = (options?: DebugAppArgv) => {
     static: '',
     entry: 'dist/dev/index.bundle',
     open: true,
-    verbose: false,
+    log: LogLevel.Info,
     env: DevtoolsEnv.Hippy,
     iWDPPort: 9000,
     ...(options || {}),

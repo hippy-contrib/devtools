@@ -10,7 +10,7 @@ import yargs from 'yargs';
 // import detect from 'detect-port';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
-import { DevtoolsEnv } from '@/@types/enum';
+import { DevtoolsEnv, LogLevel } from '@/@types/enum';
 
 const { argv } = yargs
   .alias('v', 'version')
@@ -41,10 +41,11 @@ const { argv } = yargs
     default: true,
     descript: 'Auto open chrome debug page',
   })
-  .option('verbose', {
-    type: 'boolean',
-    default: false,
-    describe: 'Output error details',
+  .option('log', {
+    type: 'string',
+    default: LogLevel.Info,
+    describe: 'Log level',
+    choices: Object.values(LogLevel),
   })
   .option('iWDPPort', {
     type: 'number',
@@ -64,6 +65,7 @@ const { argv } = yargs
   .option('env', {
     type: 'string',
     default: DevtoolsEnv.Hippy,
+    describe: 'Debug framework',
     choices: [DevtoolsEnv.Hippy, DevtoolsEnv.Voltron, DevtoolsEnv.TDF, DevtoolsEnv.TDFCore],
   })
   .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`);

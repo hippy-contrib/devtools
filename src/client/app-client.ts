@@ -128,12 +128,12 @@ export abstract class AppClient extends EventEmitter {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { performance, ...msgWithoutPerf } = msg;
         if (!ignoreMethods.includes(msg.method))
-          upwardLog.info('%s sendToApp %j', this.constructor.name, msgWithoutPerf);
+          upwardLog.verbose('%s sendToApp %j', this.constructor.name, msgWithoutPerf);
         return this.sendHandler(msgWithoutPerf);
       },
       sendToDevtools: (msg: Adapter.CDP.Res) => {
         if (!ignoreMethods.includes(msg.method))
-          downwardLog.info(
+          downwardLog.verbose(
             '%s sendToDevtools %s %s',
             this.constructor.name,
             (msg as Adapter.CDP.CommandRes).id || '',

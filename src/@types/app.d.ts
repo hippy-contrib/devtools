@@ -1,4 +1,4 @@
-import { DevtoolsEnv } from './enum';
+import { DevtoolsEnv, LogLevel } from './enum';
 
 export interface DebugAppArgv {
   host: string;
@@ -8,7 +8,7 @@ export interface DebugAppArgv {
   iWDPPort: number;
   env: DevtoolsEnv;
   open: boolean;
-  verbose: boolean;
+  log: LogLevel;
 }
 declare namespace NodeJS {
   interface Global {

@@ -12,18 +12,18 @@ import { decodeHMRData } from '@/utils/buffer';
 import { cosUpload } from '@/utils/cos';
 import { aegis } from '@/utils/aegis';
 
-const logger = new Logger('hmr-controller', WinstonColor.Blue);
+const log = new Logger('hmr-controller', WinstonColor.Blue);
 const hmrCloseEvent = 'HMR_SERVER_CLOSED';
 
 export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
-  logger.info('HMR client connected, hash: %s', hash);
+  log.info('HMR client connected, hash: %s', hash);
   const { Subscriber, DB } = getDBOperator();
   const bundle = await new DB(config.redis.bundleTable).get(hash);
   if (!bundle) {
     const reason = 'Hippy dev server not started, not support HMR!';
     ws.close(WSCode.InvalidRequestParams, reason);
-    return logger.warn(reason);
+    return log.warn(reason);
   }
   aegis.reportEvent({
     name: ReportEvent.RemoteHMR,
@@ -38,9 +38,9 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
       subscriber.disconnect();
       const reason = 'Hippy dev server closed, stop HMR!';
       ws.close(WSCode.HMRServerClosed, reason);
-      logger.warn(reason);
+      log.warn(reason);
     } else {
-      logger.info('receive HMR msg from redis: %s', msg);
+      log.info('receive HMR msg from redis: %s', msg);
       const msgObj = JSON.parse(msg.toString());
       if (msgObj.performance) {
         msgObj.performance.serverToApp = Date.now();
@@ -52,8 +52,8 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
   ws.on('close', (code, reason) => onClose(code, reason));
   ws.on('error', (e) => onClose(null, null, e));
   function onClose(code: number, reason: string, error?) {
-    if (error) logger.error('HMR client ws error: %s', error.stack || error);
-    logger.warn('HMR client ws closed, code: %s, reason: %s', code, reason);
+    if (error) log.error('HMR client ws error: %s', error.stack || error);
+    log.warn('HMR client ws closed, code: %s, reason: %s', code, reason);
     subscriber.unsubscribe();
     subscriber.disconnect();
   }
@@ -61,7 +61,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
 
 export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
-  logger.info('HMR server connected, hash: %s', hash);
+  log.info('HMR server connected, hash: %s', hash);
   const { Publisher, DB } = getDBOperator();
   const model = new DB(config.redis.bundleTable);
   model.upsert(hash, { hash });
@@ -101,18 +101,18 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
       //   return logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
       // }
       const msgStr = JSON.stringify(emitJSON);
-      logger.info('receive HMR msg from PC: %s', msgStr);
+      log.info('receive HMR msg from PC: %s', msgStr);
       if (emitJSON.messages?.length) publisher.publish(msgStr);
     } catch (e) {
-      logger.error('decodeHMRData failed: ', (e as any)?.stack || e);
+      log.error('decodeHMRData failed: ', (e as any)?.stack || e);
     }
   });
 
   ws.on('close', (code, reason) => onClose(code, reason));
   ws.on('error', (e) => onClose(null, null, e));
   function onClose(code: number, reason: string, error?) {
-    if (error) logger.error('HMR server ws error: %s', error.stack || error);
-    logger.warn('HMR server ws closed, code: %s, reason: %s', code, reason);
+    if (error) log.error('HMR server ws error: %s', error.stack || error);
+    log.warn('HMR server ws closed, code: %s, reason: %s', code, reason);
     publisher.publish(hmrCloseEvent);
     process.nextTick(() => {
       publisher.disconnect();
@@ -133,7 +133,7 @@ async function saveHMRFiles(hash: string, emitList: TransFerFile[]) {
     const error = `remote debug server accept max ${
       config.maxStaticFileSize / 1024 / 1024
     }MB of static resources, please minify you webpack output!`;
-    logger.warn(error);
+    log.error(error);
     throw new Error(error);
   }
 

@@ -28,10 +28,10 @@ export const startAdbProxy = async () => {
     if (port) await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
     if (hmrPort) await exec(adbPath, ['reverse', `tcp:${hmrPort}`, `tcp:${hmrPort}`]);
   } catch (e) {
-    log.info('Port reverse failed, For iOS app log.info only just ignore the message.');
-    log.info(`Otherwise please check 'adb devices' command working correctly`);
-    if (port) log.info(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
-    if (hmrPort) log.info(`type 'adb reverse tcp:${hmrPort} tcp:${hmrPort}' retry!`);
-    log.info('start adb reverse error: %s', (e as Error)?.stack);
+    log.warn('Port reverse failed, For iOS app log.info only just ignore the message.');
+    log.warn(`Otherwise please check 'adb devices' command working correctly`);
+    if (port) log.warn(`type 'adb reverse tcp:${port} tcp:${port}' retry!`);
+    if (hmrPort) log.warn(`type 'adb reverse tcp:${hmrPort} tcp:${hmrPort}' retry!`);
+    log.warn('start adb reverse error: %s', (e as Error)?.stack);
   }
 };

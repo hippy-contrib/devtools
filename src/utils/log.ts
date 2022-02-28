@@ -3,7 +3,7 @@ import util from 'util';
 import colors from 'colors/safe';
 import { Logger as WinstonLogger, transports, format, createLogger } from 'winston';
 import { lowerFirst, uniq, random } from 'lodash';
-import { WinstonColor, DevtoolsEnv } from '@/@types/enum';
+import { WinstonColor, LogLevel } from '@/@types/enum';
 import { config } from '@/config';
 import { aegis } from '@/utils/aegis';
 import 'winston-daily-rotate-file';
@@ -13,26 +13,36 @@ export class Logger {
   private loggerInstance: WinstonLogger;
   private label: string;
   private color: string;
-  private hideInConsole: boolean;
 
-  public constructor(label = '', color?: string, logFilename?: string, hideInConsole = false) {
+  public constructor(label = '', color?: string, logFilename?: string) {
     this.label = label;
     this.color = color || getRandomColor();
     this.logFilename = logFilename || '%DATE%.log';
-    this.hideInConsole = hideInConsole;
     this.initLoggerInstance();
   }
 
   public info(...args) {
-    this.log('info', ...args);
+    this.log(LogLevel.Info, ...args);
+  }
+
+  public verbose(...args) {
+    this.log(LogLevel.Verbose, ...args);
+  }
+
+  public debug(...args) {
+    this.log(LogLevel.Debug, ...args);
+  }
+
+  public silly(...args) {
+    this.log(LogLevel.Silly, ...args);
   }
 
   public warn(...args) {
-    this.log('warn', ...args);
+    this.log(LogLevel.Warn, ...args);
   }
 
   public error(...args) {
-    this.log('error', ...args);
+    this.log(LogLevel.Error, ...args);
     const errMsg = args.reduce((prev, curr) => {
       if (curr instanceof Error) {
         prev += `\n${curr.stack}`;
@@ -68,7 +78,9 @@ export class Logger {
           maxSize: '20m',
           maxFiles: '7d',
         }),
-        !this.hideInConsole ? new transports.Console() : null,
+        new transports.Console({
+          level: global.debugAppArgv?.log || LogLevel.Info,
+        }),
       ].filter(Boolean),
     });
   }
@@ -76,8 +88,7 @@ export class Logger {
 
 export class TunnelLogger extends Logger {
   public constructor(label = '', color?: string, logFilename?: string) {
-    const hideInConsole = global.debugAppArgv?.env === DevtoolsEnv.Hippy;
-    super(label, color, logFilename || '%DATE%.tunnel.log', hideInConsole);
+    super(label, color, logFilename || '%DATE%.tunnel.log');
   }
 }
 
