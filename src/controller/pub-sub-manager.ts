@@ -104,7 +104,10 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
   // publish downward message to devtools frontend
   appClientList.forEach((appClient) => {
     appClient.removeAllListeners(AppClientEvent.Message);
-    appClient.on(AppClientEvent.Message, (msg) => getAppClientMessageHandler(debugTarget)(msg));
+    appClient.on(AppClientEvent.Message, (msg) => {
+      const handler = getAppClientMessageHandler(debugTarget);
+      if (handler) handler(msg);
+    });
   });
 };
 
@@ -153,12 +156,16 @@ let oldIWDPDebugTargets: DebugTarget[] = [];
  */
 export const subscribeByIWDP = (debugTargets: DebugTarget[]) => {
   const outdatedDebugTargets = differenceBy(oldIWDPDebugTargets, debugTargets, 'clientId');
-  oldIWDPDebugTargets = debugTargets;
   if (outdatedDebugTargets.length) log.info('outdatedDebugTargets %j', outdatedDebugTargets);
   outdatedDebugTargets.forEach(({ clientId }) => {
     cleanDebugTarget(clientId, true);
   });
-  debugTargets.forEach((debugTarget) => subscribeCommand(debugTarget));
+  debugTargets.forEach((debugTarget) => {
+    const oldDebugTarget = oldIWDPDebugTargets.find((item) => item.clientId === debugTarget.clientId);
+    if (oldDebugTarget) debugTarget.ts = oldDebugTarget.ts;
+    subscribeCommand(debugTarget);
+  });
+  oldIWDPDebugTargets = debugTargets;
 };
 
 const addChannelItem = (debugTarget: DebugTarget) => {
@@ -287,7 +294,7 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
 const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Adapter.CDP.Res & { ts?: number }) => {
   const channelInfo = channelMap.get(debugTarget.clientId);
   if (!channelInfo) {
-    log.error('channelInfo does not exist!');
+    return log.error('channelInfo does not exist!');
   }
   const { downwardChannelSet, cmdIdChannelIdMap, publisherMap } = channelInfo;
   msg.ts = Date.now();

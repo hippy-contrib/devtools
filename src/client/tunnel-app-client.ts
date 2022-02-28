@@ -23,7 +23,7 @@ export class TunnelAppClient extends AppClient {
       try {
         msgObject = JSON.parse(data);
       } catch (e) {
-        return log.info('parse tunnel response json failed. error: %s, \n msg: %j', (e as Error)?.stack, data);
+        return log.error('parse tunnel response json failed. error: %s, \n msg: %j', (e as Error)?.stack, data);
       }
       if ('id' in msgObject) {
         const requestPromise = this.requestPromiseMap.get(msgObject.id);

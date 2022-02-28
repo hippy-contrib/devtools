@@ -5,3 +5,5 @@ export const DEFAULT_REMOTE = {
 };
 
 export const PUBLIC_RESOURCE = 'https://devtools.hippy.myqcloud.com/';
+
+export const SIMULATOR_DEVICE_NAME = 'SIMULATOR';

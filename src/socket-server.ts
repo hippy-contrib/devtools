@@ -108,7 +108,7 @@ export class SocketServer {
   public async close() {
     await cleanAllDebugTargets();
     this.wss.close(() => {
-      log.info('wss closed.');
+      log.warn('wss closed.');
     });
   }
 
@@ -218,7 +218,7 @@ export class SocketServer {
       publisher.publish(msg.toString());
     });
     const onClose = (code, reason, e?: Error) => {
-      log.info('devtools ws client close code %s, reason: %s, clientId: %s', code, reason, clientId);
+      log.warn('devtools ws client close code %s, reason: %s, clientId: %s', code, reason, clientId);
       if (e) log.error('devtools ws client error: %j', e);
       resumeCommands.map(publisher.publish.bind(publisher));
       // 延时等 publisher 发布完成

@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import path from 'path';
 import os from 'os';
 import open from 'open';
-import { TunnelEvent, WinstonColor, OSType } from '@/@types/enum';
+import { TunnelEvent, WinstonColor, OSType, LogLevel } from '@/@types/enum';
 import { deviceManager } from '@/device-manager';
 import { Logger, TunnelLogger } from '@/utils/log';
 import { config } from '@/config';
@@ -38,7 +38,7 @@ export const startTunnel = async (cb?: StartTunnelCallback) => {
         } else if (event === TunnelEvent.AppDisconnect) {
           deviceManager.onAppDisconnect();
         } else if (event === TunnelEvent.TunnelLog && data) {
-          tunnelLog.info(data);
+          tunnelLog.verbose(data);
         }
 
         if (cb) cb(event, data);
@@ -96,11 +96,11 @@ export const killChildProcess = () => {
 type StartTunnelCallback = (event: TunnelEvent, data: unknown) => void;
 
 function getTunnelOption(): StartTunnelOption {
-  const { iWDPPort, verbose } = global.debugAppArgv;
+  const { iWDPPort, log } = global.debugAppArgv;
   const { iWDPStartPort, iWDPEndPort } = config;
   const iWDPParams = [
     '--no-frontend',
-    verbose ? '--debug' : '',
+    log === LogLevel.Silly ? '--debug' : '',
     `--config=null:${iWDPPort},:${iWDPStartPort}-${iWDPEndPort}`,
   ].filter(Boolean);
   let tunnelOption;

@@ -77,7 +77,7 @@ const init = async () => {
   try {
     fs.rmdirSync(cachePath, { recursive: true });
   } catch (e) {
-    log.warn('rm cache dir error');
+    if ((e as any).code !== 'ENOENT') log.error('rm cache dir error');
   }
   if (!config.isCluster) {
     const { importTunnel } = await import('@/child-process/import-addon');
