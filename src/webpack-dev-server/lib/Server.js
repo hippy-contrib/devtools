@@ -1261,8 +1261,8 @@ class Server {
       this.webSocketClient.on('ping', () => {
         this.webSocketClient.pong();
       });
-      this.webSocketClient.on('close', () => {
-        this.logger.warn('HMR ws client is closed! ');
+      this.webSocketClient.on('close', (code, reason) => {
+        this.logger.warn(`HMR ws client is closed(${code}), will try to reconnect if you modify source code. ${reason}`);
       });
       this.webSocketClient.on('error', (e) => {
         this.logger.warn('HMR ws error: ', e);

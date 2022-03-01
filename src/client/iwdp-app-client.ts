@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientEvent, WinstonColor } from '@/@types/enum';
+import { AppClientEvent, WinstonColor, WSCode } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
@@ -33,7 +33,7 @@ export class IWDPAppClient extends AppClient {
   }
 
   public destroy() {
-    if (this.ws?.readyState === WebSocket.OPEN) this.ws.close();
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.close(WSCode.AppClientDestroyed, 'IWDPAppClient is destroyed');
   }
 
   protected registerMessageListener() {
