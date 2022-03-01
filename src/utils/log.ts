@@ -13,11 +13,13 @@ export class Logger {
   private loggerInstance: WinstonLogger;
   private label: string;
   private color: string;
+  private hideInConsole: boolean;
 
-  public constructor(label = '', color?: string, logFilename?: string) {
+  public constructor(label = '', color?: string, logFilename?: string, hideInConsole?: boolean) {
     this.label = label;
     this.color = color || getRandomColor();
     this.logFilename = logFilename || '%DATE%.log';
+    this.hideInConsole = hideInConsole;
     this.initLoggerInstance();
   }
 
@@ -77,10 +79,12 @@ export class Logger {
           zippedArchive: false,
           maxSize: '20m',
           maxFiles: '7d',
+          level: LogLevel.Verbose,
         }),
-        new transports.Console({
-          level: global.debugAppArgv?.log || LogLevel.Info,
-        }),
+        !this.hideInConsole &&
+          new transports.Console({
+            level: global.debugAppArgv?.log || LogLevel.Info,
+          }),
       ].filter(Boolean),
     });
   }
@@ -88,7 +92,7 @@ export class Logger {
 
 export class TunnelLogger extends Logger {
   public constructor(label = '', color?: string, logFilename?: string) {
-    super(label, color, logFilename || '%DATE%.tunnel.log');
+    super(label, color, logFilename || '%DATE%.tunnel.log', true);
   }
 }
 

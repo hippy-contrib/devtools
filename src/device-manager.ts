@@ -1,13 +1,13 @@
 import { AppClientType, DeviceStatus } from '@/@types/enum';
 import { DeviceInfo } from '@/@types/device';
-import { Logger } from '@/utils/log';
+import { TunnelLogger } from '@/utils/log';
 import { getDBOperator } from '@/db';
 import { createTargetByDeviceInfo, patchDebugTarget } from '@/utils/debug-target';
 import { config } from '@/config';
 import { appClientManager } from '@/client/app-client-manager';
 import { cleanDebugTarget, subscribeCommand } from '@/controller/pub-sub-manager';
 
-const log = new Logger('device-manager');
+const log = new TunnelLogger('device-manager');
 
 class DeviceManager {
   private deviceList: DeviceInfo[] = [];
