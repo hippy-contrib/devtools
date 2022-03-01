@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { AppClientEvent } from '@/@types/enum';
+import { AppClientEvent, WSCode } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { AppClient } from './app-client';
 
@@ -20,7 +20,7 @@ export class WSAppClient extends AppClient {
   }
 
   public destroy() {
-    if (this.ws?.readyState === WebSocket.OPEN) this.ws.close();
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.close(WSCode.AppClientDestroyed, 'WSAppClient is destroyed');
   }
 
   protected registerMessageListener() {

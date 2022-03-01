@@ -204,7 +204,7 @@ export class SocketServer {
     internalSubscriber.subscribe((msg) => {
       if (msg === InternalChannelEvent.WSClose) {
         log.warn('close devtools ws connection');
-        ws.close();
+        ws.close(WSCode.ClosePage, 'the target page is closed');
         internalSubscriber.unsubscribe();
         internalSubscriber.disconnect();
       }
@@ -260,7 +260,7 @@ export class SocketServer {
       if (error) {
         log.error('WSAppClient error %j', error);
       }
-      cleanDebugTarget(clientId, code === WSCode.ClosePage);
+      cleanDebugTarget(clientId, code === WSCode.ClosePage || code === WSCode.CloseAbnormal);
     };
     ws.on('close', (code, reason) => onClose(code, reason));
     ws.on('error', (e) => onClose(null, null, e));

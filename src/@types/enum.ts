@@ -159,11 +159,14 @@ export enum HMREvent {
 }
 
 export enum WSCode {
+  // close without close frame, such as app is killed, or adb disconnected
+  CloseAbnormal = 1006,
   InvalidRequestParams = 4000,
   HMRServerClosed = 4001,
   NoDebugTarget = 4002,
   ClosePage = 4003,
   ReloadPage = 4004,
+  AppClientDestroyed = 4005,
 }
 
 export enum StaticFileStorage {
