@@ -1307,12 +1307,6 @@ class Server {
       this.logger.info('enable live reload');
     }
 
-    // const { isThrottled, throttledFn: sendFiles } = throttle(.bind(this), config.staticThrottleInterval);
-    // await sendFiles();
-    // if(isThrottled()) {
-    //   this.logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
-    // }
-
     const shouldEmit =
       stats &&
       (!stats.errors || stats.errors.length === 0) &&
@@ -1690,14 +1684,6 @@ class Server {
       };
     }
 
-    const totalSize = emitList.reduce((prev, curr) => prev += curr.content.length, 0);
-    if (!totalSize > config.maxStaticFileSize) {
-      this.logger.warn(`remote debug server accept max ${config.maxStaticFileSize/1024/1024 }MB of static resources, please minify you webpack output!`)
-      return {
-        hmrResources: [],
-        otherResources: [],
-      };
-    }
     const hmrResources = emitList.filter(item => item.isHMRResource);
     const otherResources = emitList.filter(item => !item.isHMRResource);
     return {

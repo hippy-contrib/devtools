@@ -71,10 +71,6 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
     ext1: hash,
     ext2: HMRReportExt2.Server,
   });
-  // const { throttledFn: throttledHMRFilesHandle, isThrottled } = throttle((hash, emitList) => {
-  //   saveHMRFiles(hash, emitList);
-  //   return Date.now();
-  // }, config.staticThrottleInterval);
 
   ws.on('message', async (msg: Buffer) => {
     try {
@@ -96,10 +92,6 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
       }
 
       await saveHMRFiles(hash, emitList);
-      // throttledHMRFilesHandle(hash, emitList);
-      // if (isThrottled()) {
-      //   return logger.warn('HMR files is throttled within %s second', config.staticThrottleInterval / 1000);
-      // }
       const msgStr = JSON.stringify(emitJSON);
       log.info('receive HMR msg from PC: %s', msgStr);
       if (emitJSON.messages?.length) publisher.publish(msgStr);
@@ -128,15 +120,6 @@ type TransFerFile = {
 };
 
 async function saveHMRFiles(hash: string, emitList: TransFerFile[]) {
-  const totalSize = emitList.reduce((prev, curr) => (prev += curr.content.length), 0);
-  if (totalSize > config.maxStaticFileSize) {
-    const error = `remote debug server accept max ${
-      config.maxStaticFileSize / 1024 / 1024
-    }MB of static resources, please minify you webpack output!`;
-    log.error(error);
-    throw new Error(error);
-  }
-
   return Promise.all(
     emitList.map(async ({ name, content }) => {
       const saveFn = {
