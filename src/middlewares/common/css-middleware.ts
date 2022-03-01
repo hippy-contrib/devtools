@@ -88,7 +88,7 @@ class CssDomainAdapter {
 
   public static conversionInlineStyle(style: ProtocolIOS90.CSS.CSSStyle): ProtocolChrome.CSS.CSSStyle {
     let totalCSSText = '';
-    style.cssProperties = style.cssProperties.reduce((ret, item) => {
+    style.cssProperties = (style.cssProperties || []).reduce((ret, item) => {
       if (CssDomainAdapter.shouldSkipStyle(item.name)) return ret;
 
       const cssText = `${item.name}: ${item.value}`;

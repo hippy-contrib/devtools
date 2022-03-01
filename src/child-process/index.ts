@@ -12,7 +12,6 @@ import { startAdbProxy } from './adb';
 
 const childProcessLog = new Logger('child-process', WinstonColor.Magenta);
 const tunnelLog = new TunnelLogger('tunnel', WinstonColor.BrightRed);
-const tunnelEventLog = new Logger('tunnel-event', WinstonColor.BrightCyan);
 let proxyProcess;
 
 export const TUNNEL_EVENT = 'message';
@@ -22,7 +21,7 @@ export const startTunnel = async (cb?: StartTunnelCallback) => {
   global.addon.addEventListener((event: TunnelEvent, data: unknown) => {
     try {
       if (event !== TunnelEvent.TunnelLog) {
-        tunnelEventLog.info('tunnel event: %s', event);
+        tunnelLog.info('tunnel event: %s', event);
       }
       if (event === TunnelEvent.ReceiveData) {
         tunnelEmitter.emit(TUNNEL_EVENT, data);
