@@ -38,15 +38,17 @@ export class MemoryPubSub implements IPublisher, ISubscriber {
   /**
    * 取消订阅
    */
-  public unsubscribe() {
-    pubsub.removeAllListeners(this.channel);
+  public unsubscribe(cb) {
+    if (cb) pubsub.off(this.channel, cb);
+    else pubsub.removeAllListeners(this.channel);
   }
 
   /**
    * 含通配符 * 的取消订阅
    */
-  public pUnsubscribe() {
-    pubsub.removeAllListeners(this.channel);
+  public pUnsubscribe(cb) {
+    if (cb) pubsub.off(this.channel, cb);
+    else pubsub.removeAllListeners(this.channel);
   }
 
   /**
