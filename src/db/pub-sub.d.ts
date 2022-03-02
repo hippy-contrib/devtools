@@ -4,9 +4,12 @@ export interface IPublisher {
 }
 
 export interface ISubscriber {
-  subscribe(cb: (message: string | Adapter.CDP.Res) => void): void;
-  pSubscribe(cb: (message: string, channel: string) => void): void;
-  unsubscribe(): void;
-  pUnsubscribe(): void;
+  subscribe(cb: SubCallback): void;
+  pSubscribe(cb: PSubCallback): void;
+  unsubscribe(cb?: SubCallback): void;
+  pUnsubscribe(cb?: PSubCallback): void;
   disconnect(): void;
 }
+
+type SubCallback = (message: string | Adapter.CDP.Res) => void;
+type PSubCallback = (message: string, channel: string) => void;

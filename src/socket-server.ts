@@ -167,7 +167,7 @@ export class SocketServer {
   }
 
   /**
-   * 将来自于 devtools 的 ws，通过 pub/sub 转发到 redis
+   * pipe devtools ws message to redis pub/sub
    */
   private onDevtoolsConnection(ws: MyWebSocket, wsUrlParams: DevtoolsWsUrlParams) {
     const { Subscriber, Publisher } = getDBOperator();
@@ -178,12 +178,10 @@ export class SocketServer {
     log.info('devtools connected, subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
 
     const downwardSubscriber = new Subscriber(downwardChannelId);
-    // internal channel 用于订阅 node 节点之间的事件，如 app ws close 时，通知 devtools ws close
+    // internal channel used to listen message between nodes, such as when app ws closed, notify devtools ws close
     const internalSubscriber = new Subscriber(internalChannelId);
     const publisher = new Publisher(upwardChannelId);
-    downwardSubscriber.unsubscribe();
-    internalSubscriber.unsubscribe();
-    downwardSubscriber.subscribe((msg) => {
+    const downwardHandler = (msg) => {
       ws.send(msg);
       try {
         const msgStr = msg as string;
@@ -200,15 +198,17 @@ export class SocketServer {
       } catch (e) {
         log.error('%s channel message are invalid JSON, %s', downwardChannelId, msg);
       }
-    });
-    internalSubscriber.subscribe((msg) => {
+    };
+    const internalHandler = (msg) => {
       if (msg === InternalChannelEvent.WSClose) {
         log.warn('close devtools ws connection');
         ws.close(WSCode.ClosePage, 'the target page is closed');
-        internalSubscriber.unsubscribe();
+        internalSubscriber.unsubscribe(internalHandler);
         internalSubscriber.disconnect();
       }
-    });
+    };
+    downwardSubscriber.subscribe(downwardHandler);
+    internalSubscriber.subscribe(internalHandler);
 
     // must Debugger.disable before devtools frontend connected, otherwise couldn't
     // receive Debugger.scriptParsed event.
@@ -217,20 +217,17 @@ export class SocketServer {
     ws.on('message', (msg) => {
       publisher.publish(msg.toString());
     });
-    const onClose = (code, reason, e?: Error) => {
+    ws.on('close', (code, reason) => {
       log.warn('devtools ws client close code %s, reason: %s, clientId: %s', code, reason, clientId);
-      if (e) log.error('devtools ws client error: %j', e);
       resumeCommands.map(publisher.publish.bind(publisher));
-      // 延时等 publisher 发布完成
+      // wait for publish finished
       process.nextTick(() => {
         publisher.disconnect();
-        downwardSubscriber.unsubscribe();
+        downwardSubscriber.unsubscribe(downwardHandler);
         downwardSubscriber.disconnect();
       });
-    };
-    ws.on('close', (code, reason) => onClose(code, reason));
-    // ws 标准规定 on error 后一定触发 on close，所以也要做清理
-    ws.on('error', (error) => onClose(null, null, error));
+    });
+    ws.on('error', (e) => log.error('devtools ws client error: %j', e));
   }
 
   /**
@@ -255,14 +252,10 @@ export class SocketServer {
 
     publishReloadCommand(debugTarget);
 
-    const onClose = (code: number, reason: string, error?) => {
+    ws.on('close', (code: number, reason: string) => {
       log.warn('WSAppClient closed: %j, reason: %s, clientId: %s', code, reason, clientId);
-      if (error) {
-        log.error('WSAppClient error %j', error);
-      }
       cleanDebugTarget(clientId, code === WSCode.ClosePage || code === WSCode.CloseAbnormal);
-    };
-    ws.on('close', (code, reason) => onClose(code, reason));
-    ws.on('error', (e) => onClose(null, null, e));
+    });
+    ws.on('error', (e) => log.error('WSAppClient error %j', e));
   }
 }

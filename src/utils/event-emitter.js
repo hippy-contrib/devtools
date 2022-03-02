@@ -305,7 +305,9 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
       clearEvent(this, evt);
     }
   } else {
-    for (let i = 0, events = [], { length } = listeners; i < length; i++) {
+    const events = [];
+    const { length } = listeners;
+    for (let i = 0; i < length; i++) {
       if (listeners[i].fn !== fn || (once && !listeners[i].once) || (context && listeners[i].context !== context)) {
         events.push(listeners[i]);
       }

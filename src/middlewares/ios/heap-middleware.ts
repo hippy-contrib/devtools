@@ -15,7 +15,7 @@ export const heapMiddleWareManager: MiddleWareManager = {
         method: IOS100Command.HeapEnable,
         params: {},
       });
-      log.info(`${IOS100Command.HeapEnable} res: `, msg);
+      log.verbose(`${IOS100Command.HeapEnable} res: `, msg);
       const convertedRes = {
         id: (msg as Adapter.CDP.Req).id,
         method: msg.method,
