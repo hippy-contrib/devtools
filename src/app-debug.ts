@@ -2,15 +2,16 @@ import fs from 'fs';
 import { Server as HTTPServer } from 'http';
 import kill from 'kill-port';
 import Koa from 'koa';
+import colors from 'colors/safe';
 import { initAppClient } from '@/client';
 import { SocketServer } from '@/socket-server';
 import { Logger } from '@/utils/log';
 import { initDbModel } from '@/db';
 import { routeApp } from '@/router';
 import { config } from '@/config';
-import { WinstonColor } from '@/@types/enum';
+import { WinstonColor, DevtoolsEnv } from '@/@types/enum';
 
-const log = new Logger('app-debug-server', WinstonColor.Yellow);
+const log = new Logger('debug-server', WinstonColor.Yellow);
 let server: HTTPServer;
 let socketServer: SocketServer;
 
@@ -19,8 +20,9 @@ let socketServer: SocketServer;
  */
 export const startDebugServer = async () => {
   log.info('start server argv: %j', global.debugAppArgv);
+  const { host, port, env } = global.debugAppArgv;
   await init();
-  const { host, port } = global.debugAppArgv;
+  if (env === DevtoolsEnv.Hippy) showHippyGuide();
   const app = new Koa();
   routeApp(app);
 
@@ -30,8 +32,7 @@ export const startDebugServer = async () => {
       const { startTunnel, startChrome } = await import('./child-process/index');
       await startTunnel();
       startChrome();
-    }
-    if (!config.isCluster) {
+
       const { startAdbProxy } = await import('./child-process/adb');
       startAdbProxy();
     }
@@ -98,4 +99,17 @@ const init = async () => {
       return process.exit(1);
     }
   }
+};
+
+const showHippyGuide = () => {
+  const url = `${config.domain}/extensions/home.html`;
+  log.info(
+    colors.bold[WinstonColor.Green](`hippy debug steps:
+1. start debug server by run 'npm run hippy:debug'
+2. start dev server by run 'npm run hippy:dev'
+3. open hippy pages with debugMode on mobile/emulator
+4. find connected debug targets on devtools home page: ${colors.underline[WinstonColor.Blue](url)}
+
+find full guide on ${colors.underline[WinstonColor.Blue]('https://hippyjs.org/#/guide/debug')}`),
+  );
 };

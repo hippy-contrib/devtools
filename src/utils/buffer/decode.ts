@@ -3,7 +3,7 @@ import { WinstonColor } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { EmitFile, HMRWSData } from './constant';
 
-const logger = new Logger('buffer-decoder', WinstonColor.Red);
+const logger = new Logger('buffer-decoder', WinstonColor.White);
 
 export const decodeHMRData = (buf: Buffer): HMRWSData => {
   const { offset, emitJSON } = decodeEmitJSON(0, buf);

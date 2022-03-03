@@ -39,7 +39,7 @@ const { argv } = yargs
   .option('open', {
     type: 'boolean',
     default: true,
-    descript: 'Auto open chrome debug page',
+    describe: 'Auto open chrome debug page',
   })
   .option('log', {
     type: 'string',

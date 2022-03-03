@@ -102,7 +102,7 @@ export enum DBType {
 export enum WinstonColor {
   BgRed = 'bgRed',
   Black = 'black',
-  Red = 'red',
+  // Red = 'red',
   Green = 'green',
   Yellow = 'yellow',
   Blue = 'blue',

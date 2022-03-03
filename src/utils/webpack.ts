@@ -28,18 +28,14 @@ export function normalizeWebpackConfig(versionId, config) {
 }
 
 function normalizeRemoteDebug(versionId, config) {
-  config.devServer.remote ||= {
+  config.devServer.remote = {
     protocol: 'http',
     host: '127.0.0.1',
     port: 38989,
     qrcode: false,
+    ...(config.devServer.remote || {}),
   };
   const { protocol, host, port, qrcode: qrcodeFn } = config.devServer.remote;
-
-  if (host && port && protocol === false) {
-    log.warn('you must config remote host, port and protocol!');
-    process.exit(1);
-  }
 
   // only print qrcode when use remote debug server
   const needVersionId = needPublicPathWithVersionId(host);
@@ -62,7 +58,7 @@ function normalizeRemoteDebug(versionId, config) {
 }
 
 function appendHMRPlugin(versionId: string, config) {
-  if (config.devServer.hot && config.devServer.liveReload === false) return;
+  if (!config.devServer.hot && !config.devServer.liveReload) return;
   const hotManifestPublicPath = getPublicPath(versionId, config.devServer.remote);
   const i = config.plugins.findIndex((plugin) => plugin.constructor.name === HippyHMRPlugin.name);
   if (i !== -1) {
@@ -73,10 +69,9 @@ function appendHMRPlugin(versionId: string, config) {
 
 /**
  * remote debug is enabled by default if enable webpack-dev-server
- * you could disable it by set `devServer.remote: false`
  */
 function isRemoteDebugEnabled(webpackConfig) {
-  return !(!webpackConfig.devServer || webpackConfig.devServer.remote === false);
+  return webpackConfig.devServer;
 }
 
 function printDebugInfo(qrcodeFn, { bundleUrl, homeUrl }) {
@@ -102,7 +97,7 @@ function printDebugInfo(qrcodeFn, { bundleUrl, homeUrl }) {
 
 /**
  * when use debug-server-next in local, no need to set webpack `publicPath` field,
- * only should set `hotManifestPublicPath` field
+ * only need set `hotManifestPublicPath` field
  */
 function needPublicPathWithVersionId(host) {
   return !(host === 'localhost' || host === '127.0.0.1');
@@ -116,9 +111,9 @@ function getPublicPath(versionId, { host, port, protocol }) {
 
 /**
  * hippy-dev process will save hmrPort to file,
- * hippy-debug process will auto reverse hmrPort when device re-connect.
+ * hippy-debug process will auto reverse hmrPort when device reconnect.
  */
-export async function saveHmrPort(hmrPort) {
+export async function saveDevPort(hmrPort) {
   const { cachePath } = config;
   fs.mkdirSync(cachePath, { recursive: true });
   return fs.writeFileSync(config.hmrPortPath, String(hmrPort));
