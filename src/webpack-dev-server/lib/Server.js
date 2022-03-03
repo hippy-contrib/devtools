@@ -15,6 +15,8 @@ const { HMREvent } = require('@/@types/enum');
 const { encodeHMRData } = require('@/utils/buffer');
 const { getWSProtocolByHttpProtocol } = require('@/utils/url');
 const { config } = require('@/config');
+const { saveDevPort } = require('@/utils/webpack');
+const { startAdbProxy } = require('@/child-process/adb');
 
 if (!process.env.WEBPACK_SERVE) {
   process.env.WEBPACK_SERVE = true;
@@ -882,6 +884,7 @@ class Server {
       this.setupProgressPlugin();
     }
 
+    this.setupAdbReverse();
     this.setupHooks();
     this.setupApp();
     this.setupHostHeaderCheck();
@@ -943,6 +946,11 @@ class Server {
     }
 
     return statsObj.toJson(stats);
+  }
+
+  async setupAdbReverse() {
+    await saveDevPort(this.options.port);
+    await startAdbProxy();
   }
 
   setupHooks() {
@@ -1253,7 +1261,7 @@ class Server {
       const webSocketURL = `${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.id}`;
       this.webSocketClient = new WebSocket(webSocketURL);
       this.webSocketClient.on('open', () => {
-        this.logger.info('HMR ws client is connected.');
+        this.logger.info('HMR websocket client is connected.');
         this.msgQueue.map((hmrData) => this.sendMessage(hmrData));
         this.msgQueue = [];
         resolve();
@@ -1262,11 +1270,11 @@ class Server {
         this.webSocketClient.pong();
       });
       this.webSocketClient.on('close', (code, reason) => {
-        this.logger.warn(`HMR ws client is closed(${code}), will try to reconnect if you modify source code. ${reason}`);
+        this.logger.warn(`HMR websocket is closed(${code}), will try to reconnect when you modify source code. ${reason}`);
       });
       this.webSocketClient.on('error', (e) => {
-        this.logger.warn('HMR ws error: ', e);
-        this.logger.warn('If debug-server is closed, please restart @hippy/debug-server-next');
+        this.logger.warn('HMR websocket error: ', e);
+        this.logger.warn('Hippy use @hippy/debug-server-next to transit HMR message, detect debug server not yet started, recommend to run `npm run hippy:debug` first!');
         if (this.webSocketClient.readyState === WebSocket.CLOSING) reject();
       });
     });
