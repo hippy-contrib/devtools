@@ -99,7 +99,7 @@ export abstract class AppClient extends EventEmitter {
    */
   protected downwardMessageHandler(msg: Adapter.CDP.Res): Promise<Adapter.CDP.Res> {
     try {
-      if ('id' in msg && 'result' in msg) {
+      if ('id' in msg) {
         const cache = this.msgIdMap.get(msg.id);
         if (cache?.method) msg.method = cache.method;
       }
@@ -134,10 +134,11 @@ export abstract class AppClient extends EventEmitter {
       sendToDevtools: (msg: Adapter.CDP.Res) => {
         if (!ignoreMethods.includes(msg.method))
           downwardLog.verbose(
-            '%s sendToDevtools %s %s',
+            '%s sendToDevtools %s %s %s',
             this.constructor.name,
             (msg as Adapter.CDP.CommandRes).id || '',
             msg.method,
+            'error' in msg ? 'not support' : '',
           );
         let performance;
         if ('id' in msg) {

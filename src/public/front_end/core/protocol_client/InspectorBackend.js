@@ -258,7 +258,7 @@ export class SessionRouter {
         const messageObject = ((typeof message === 'string') ? JSON.parse(message) : message);
         const method = messageObject.method;
         const { performance } = messageObject;
-        if(performance) {
+        if(globalThis.aegis && performance) {
           const { 
             devtoolsToDebugServer,
             debugServerReceiveFromDevtools,
@@ -273,7 +273,7 @@ export class SessionRouter {
           }
           function report (name, start, end) {
             if(name && start && end) {
-              aegis.reportTime({
+              globalThis.aegis.reportTime({
                 name,
                 duration: end - start,
                 ext1: method,
