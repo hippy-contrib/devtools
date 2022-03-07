@@ -39,20 +39,40 @@ function normalizeRemoteDebug(versionId, config) {
 
   // only print qrcode when use remote debug server
   const needVersionId = needPublicPathWithVersionId(host);
-  if (!needVersionId) return;
+  // if (!needVersionId) return;
 
   const publicPath = getPublicPath(versionId, config.devServer.remote);
   config.output.publicPath = publicPath;
   log.warn(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
 
+  const ignorePort = couldIgnorePort(protocol, port);
   const bundleUrl = makeUrl(`${config.output.publicPath}index.bundle`, {
-    debugUrl: makeUrl(`${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy`),
+    debugUrl: makeUrl(
+      `${getWSProtocolByHttpProtocol(protocol)}://${host}${ignorePort ? '' : `:${port}`}/debugger-proxy`,
+    ),
   });
-  const homeUrl = `${protocol}://${host}:${port}/extensions/home.html?hash=${versionId}`;
+  const homeUrl = `${protocol}://${host}${ignorePort ? '' : `:${port}`}/extensions/home.html?hash=${versionId}`;
 
   config.devServer.cb = () => {
     process.nextTick(() => {
-      printDebugInfo(qrcodeFn, { bundleUrl, homeUrl });
+      log.info('bundleUrl: %s', bold(green(bundleUrl)));
+      log.info('find debug page on: %s', bold(green(homeUrl)));
+
+      if (needVersionId && qrcodeFn && typeof qrcodeFn === 'function') {
+        const qrcodeStr = qrcodeFn(bundleUrl);
+        log.info('bundleUrl scheme: %s', bold(green(qrcodeStr)));
+        QRCode.toString(
+          qrcodeStr,
+          {
+            small: true,
+            type: 'terminal',
+          },
+          (e, qrcodeStr) => {
+            if (e) log.error('draw qrcode of bundleUrl failed: %j', e?.stack || e);
+            log.info('scheme qrcode:\n%s', qrcodeStr);
+          },
+        );
+      }
     });
   };
 }
@@ -74,27 +94,6 @@ function isRemoteDebugEnabled(webpackConfig) {
   return webpackConfig.devServer;
 }
 
-function printDebugInfo(qrcodeFn, { bundleUrl, homeUrl }) {
-  log.info('bundleUrl: %s', bold(green(bundleUrl)));
-  log.info('find debug page on: %s', bold(green(homeUrl)));
-
-  if (qrcodeFn && typeof qrcodeFn === 'function') {
-    const qrcodeStr = qrcodeFn(bundleUrl);
-    log.info('bundleUrl scheme: %s', bold(green(qrcodeStr)));
-    QRCode.toString(
-      qrcodeStr,
-      {
-        small: true,
-        type: 'terminal',
-      },
-      (e, qrcodeStr) => {
-        if (e) log.error('draw qrcode of bundleUrl failed: %j', e?.stack || e);
-        log.info('scheme qrcode:\n%s', qrcodeStr);
-      },
-    );
-  }
-}
-
 /**
  * when use debug-server-next in local, no need to set webpack `publicPath` field,
  * only need set `hotManifestPublicPath` field
@@ -105,8 +104,13 @@ function needPublicPathWithVersionId(host) {
 
 function getPublicPath(versionId, { host, port, protocol }) {
   if (host === DEFAULT_REMOTE.host) return `${PUBLIC_RESOURCE}${versionId}/`;
-  if (!needPublicPathWithVersionId(host)) return `${protocol}://${host}:${port}/`;
-  return `${protocol}://${host}:${port}/${versionId}/`;
+  const ignorePort = couldIgnorePort(protocol, port);
+  if (!needPublicPathWithVersionId(host)) return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/`;
+  return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/${versionId}/`;
+}
+
+function couldIgnorePort(protocol, port) {
+  return (protocol === 'https' && Number(port) === 443) || (protocol === 'http' && Number(port) === 80);
 }
 
 /**
