@@ -105,10 +105,10 @@ const findIOSPage = (debugTarget: DebugTarget, iOSPages: Array<IWDPPage>) => {
   const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
   return iOSPagesWithFlag.find(
     (iOSPage) =>
-      (debugTarget.appClientTypeList.includes(AppClientType.WS) &&
-        debugTarget.title === iOSPage.title &&
-        debugTarget.deviceName === iOSPage.device.deviceName) ||
-      (debugTarget.appClientTypeList[0] === AppClientType.Tunnel &&
+      // TODO doesn't support multiple device with same title
+      (debugTarget.appClientTypeList.includes(AppClientType.WS) && debugTarget.title === iOSPage.title) ||
+      // && debugTarget.deviceName === iOSPage.device.deviceName
+      (debugTarget.appClientTypeList.includes(AppClientType.Tunnel) &&
         debugTarget.deviceName === iOSPage.device.deviceName),
   );
 };
