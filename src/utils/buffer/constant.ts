@@ -35,6 +35,7 @@ export type HMRMessage = {
 export type HMRWSData = {
   emitList: EmitFile[];
   messages: HMRMessage[];
+  publicPath: string;
   performance?: {
     pcToServer?: number;
     serverReceive?: number;

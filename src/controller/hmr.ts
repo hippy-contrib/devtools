@@ -3,7 +3,7 @@ import path from 'path';
 import WebSocket from 'ws';
 // import { throttle } from '@/utils/throttle';
 import { WinstonColor, WSCode, StaticFileStorage, ReportEvent, HMRReportExt2, HMRSyncType } from '@/@types/enum';
-import { HMRWsParams } from '@/utils/url';
+import { HMRWsParams, getBaseFolderOfPublicPath } from '@/utils/url';
 import { Logger } from '@/utils/log';
 import { createHMRChannel } from '@/utils/pub-sub-channel';
 import { getDBOperator } from '@/db';
@@ -75,7 +75,7 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
   ws.on('message', async (msg: Buffer) => {
     try {
       const serverReceive = Date.now();
-      const { emitList, ...emitJSON } = decodeHMRData(msg);
+      const { emitList, publicPath, ...emitJSON } = decodeHMRData(msg);
       if (emitJSON.performance) {
         const { hadSyncBundleResource } = emitJSON;
         const { pcToServer } = emitJSON.performance;
@@ -91,7 +91,7 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
         aegis.reportTime(reportData);
       }
 
-      await saveHMRFiles(hash, emitList);
+      await saveHMRFiles(getBaseFolderOfPublicPath(publicPath), emitList);
       const msgStr = JSON.stringify(emitJSON);
       log.info('receive HMR msg from PC: %s', msgStr);
       if (emitJSON.messages?.length) publisher.publish(msgStr);
@@ -119,26 +119,26 @@ type TransFerFile = {
   content: Buffer;
 };
 
-async function saveHMRFiles(hash: string, emitList: TransFerFile[]) {
+async function saveHMRFiles(folder: string, emitList: TransFerFile[]) {
   return Promise.all(
     emitList.map(async ({ name, content }) => {
       const saveFn = {
         [StaticFileStorage.COS]: saveHMRFileToCOS,
         [StaticFileStorage.Local]: saveHMRFileToLocal,
       }[config.staticFileStorage];
-      return saveFn(hash, name, content);
+      return saveFn(folder, name, content);
     }),
   );
 }
 
-async function saveHMRFileToLocal(hash: string, name: string, content: Buffer) {
-  const fullFname = path.join(config.hmrStaticPath, hash, name);
+async function saveHMRFileToLocal(folder: string, name: string, content: Buffer) {
+  const fullFname = path.join(config.hmrStaticPath, folder, name);
   const cacheFolder = path.dirname(fullFname);
   await fs.promises.mkdir(cacheFolder, { recursive: true });
   return fs.promises.writeFile(fullFname, content);
 }
 
-async function saveHMRFileToCOS(hash: string, name: string, content: Buffer) {
-  const key = path.join(hash, name);
+async function saveHMRFileToCOS(folder: string, name: string, content: Buffer) {
+  const key = path.join(folder, name);
   cosUpload(key, content);
 }
