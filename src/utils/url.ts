@@ -1,3 +1,4 @@
+import { trim } from 'lodash';
 import { ClientRole, WinstonColor } from '@/@types/enum';
 import { Logger } from '@/utils/log';
 import { config } from '@/config';
@@ -104,3 +105,8 @@ export const getWSProtocolByHttpProtocol = (httpProtocol: string) =>
     https: 'wss',
     http: 'ws',
   }[httpProtocol] || 'ws');
+
+export const getBaseFolderOfPublicPath = (publicPath: string) => {
+  const url = new URL(publicPath, 'http://0.0.0.0');
+  return trim(url.pathname, '/');
+};

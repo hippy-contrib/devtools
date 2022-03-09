@@ -17,6 +17,7 @@ const { getWSProtocolByHttpProtocol } = require('@/utils/url');
 const { config } = require('@/config');
 const { saveDevPort } = require('@/utils/webpack');
 const { startAdbProxy } = require('@/child-process/adb');
+const { get } = require('lodash');
 
 if (!process.env.WEBPACK_SERVE) {
   process.env.WEBPACK_SERVE = true;
@@ -1673,7 +1674,10 @@ class Server {
   async sendMessage(hmrWsData) {
     if (this.webSocketClient) {
       if(this.webSocketClient.readyState === WebSocket.OPEN) {
-        const encoded = encodeHMRData(hmrWsData);
+        const encoded = encodeHMRData({
+          ...hmrWsData,
+          publicPath: get(this.compiler, 'options.output.publicPath'),
+        });
         this.webSocketClient.send(encoded);
       } else if(this.webSocketClient.readyState === WebSocket.CLOSED) {
         this.msgQueue.push(hmrWsData);

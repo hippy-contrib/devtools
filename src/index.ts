@@ -21,6 +21,8 @@ export const startDebugServer = (options?: DebugAppArgv) => {
     log: LogLevel.Info,
     env: DevtoolsEnv.Hippy,
     iWDPPort: 9000,
+    iWDPStartPort: 9200,
+    iWDPEndPort: 9300,
     ...(options || {}),
   };
   oldStartDebugServer();

@@ -31,6 +31,7 @@ export const routeApp = (app: Koa) => {
   const defaultStaicOption = {
     buffer: false,
     dynamic: true,
+    preload: false,
   };
   // devtools frontend resources
   app.use(
