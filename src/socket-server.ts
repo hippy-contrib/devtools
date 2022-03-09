@@ -210,8 +210,9 @@ export class SocketServer {
     downwardSubscriber.subscribe(downwardHandler);
     internalSubscriber.subscribe(internalHandler);
 
-    // must Debugger.disable before devtools frontend connected, otherwise couldn't
+    // for iOS, must invoke Debugger.disable before devtools frontend connected, otherwise couldn't
     // receive Debugger.scriptParsed event.
+    // for Android, both way is okay
     resumeCommands.map(publisher.publish.bind(publisher));
 
     ws.on('message', (msg) => {
@@ -250,11 +251,15 @@ export class SocketServer {
       subscribeCommand(debugTarget, ws);
     });
 
-    publishReloadCommand(debugTarget);
+    // when reload, iOS will create a new JSContext, so the debug protocol should resend
+    //
+    if (debugTarget.platform === DevicePlatform.IOS) publishReloadCommand(debugTarget);
 
     ws.on('close', (code: number, reason: string) => {
       log.warn('WSAppClient closed: %j, reason: %s, clientId: %s', code, reason, clientId);
-      cleanDebugTarget(clientId, code === WSCode.ClosePage || code === WSCode.CloseAbnormal);
+      // when reload page, keep frontend open to debug lifecycle of created
+      const closeDevtools = code === WSCode.ClosePage;
+      cleanDebugTarget(clientId, closeDevtools);
     });
     ws.on('error', (e) => log.error('WSAppClient error %j', e));
   }

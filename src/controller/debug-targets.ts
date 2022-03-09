@@ -4,7 +4,7 @@ import { createTargetByIWDPPage } from '@/utils/debug-target';
 import { getDBOperator } from '@/db';
 import { DebugTarget } from '@/@types/debug-target';
 import { DevicePlatform } from '@/@types/enum';
-import { SIMULATOR_DEVICE_NAME } from '@/@types/constants';
+// import { SIMULATOR_DEVICE_NAME } from '@/@types/constants';
 import { updateIWDPAppClient, subscribeByIWDP } from './pub-sub-manager';
 
 export class DebugTargetManager {
@@ -34,7 +34,8 @@ export class DebugTargetManager {
     // 追加 IWDP 获取到的 h5 页面
     const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
     const h5Pages = iOSPagesWithFlag.filter(
-      (iOSPage) => !iOSPage.shouldRemove && iOSPage.device.deviceName !== SIMULATOR_DEVICE_NAME,
+      // (iOSPage) => !iOSPage.shouldRemove && iOSPage.device.deviceName !== SIMULATOR_DEVICE_NAME,
+      (iOSPage) => !iOSPage.shouldRemove && !iOSPage.title.startsWith('HippyContext: '),
     );
     const h5DebugTargets = h5Pages.map(createTargetByIWDPPage);
     subscribeByIWDP(h5DebugTargets);
