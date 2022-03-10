@@ -986,6 +986,12 @@
             }
           ],
           "description": "Bundle URL and Debug URL QRCode, app could scan to open remote bundle and debug."
+        },
+        "proxy": {
+          "optional": true,
+          "type": "string",
+          "minLength": 1,
+          "description": "Remote debug proxy."
         }
       }
     }

@@ -11,6 +11,7 @@ const express = require('express');
 const { validate } = require('schema-utils');
 const schema = require('./options.json');
 const WebSocket = require('ws');
+const HttpsProxyAgent = require('https-proxy-agent');
 const { HMREvent } = require('@/@types/enum');
 const { encodeHMRData } = require('@/utils/buffer');
 const { getWSProtocolByHttpProtocol } = require('@/utils/url');
@@ -1258,9 +1259,16 @@ class Server {
   createWebSocketClient() {
     if(!this.options.remote) return;
     return new Promise((resolve, reject) => {
-      const { host, port, protocol } = this.options.remote;
+      const { host, port, protocol, proxy } = this.options.remote;
       const webSocketURL = `${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.id}`;
-      this.webSocketClient = new WebSocket(webSocketURL);
+      
+      // configure global proxy
+      // should set NODE_EXTRA_CA_CERTS env as your proxy server's rootCA to resolve full key chain
+      const proxyUrl = proxy || process.env.http_proxy;
+      const options = url.parse(proxyUrl);
+      const agent = proxyUrl && new HttpsProxyAgent(options);
+
+      this.webSocketClient = new WebSocket(webSocketURL, {agent});
       this.webSocketClient.on('open', () => {
         this.logger.info('HMR websocket client is connected.');
         this.msgQueue.map((hmrData) => this.sendMessage(hmrData));
@@ -1275,7 +1283,13 @@ class Server {
       });
       this.webSocketClient.on('error', (e) => {
         this.logger.warn('HMR websocket error: ', e);
-        this.logger.warn('Hippy use @hippy/debug-server-next to transit HMR message, detect debug server not yet started, recommend to run `npm run hippy:debug` first!');
+        if(host === '127.0.0.1' || host === 'localhost') {
+          this.logger.warn('Hippy use @hippy/debug-server-next to transit HMR message, connect to debug server failed, recommend to run `npm run hippy:debug` first!');
+        }
+          
+        if(e.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
+          this.logger.info(`if you are behind a proxy server(such as whistle, charles), you should run 'export NODE_EXTRA_CA_CERTS=<path_to_whistle_rootCA>' first to resolve full key chain!`)
+        }
         if (this.webSocketClient.readyState === WebSocket.CLOSING) reject();
       });
     });
