@@ -4,6 +4,7 @@
  *  CDP: chrome debug protocol
  */
 import request from 'request-promise';
+import { findLast } from 'lodash';
 import { AppClientType, ClientRole, DevicePlatform } from '@/@types/enum';
 import { config } from '@/config';
 import { makeUrl } from '@/utils/url';
@@ -103,7 +104,9 @@ const iWDPPagesFilter = (iWDPPage: IWDPPage) =>
 
 const findIOSPage = (debugTarget: DebugTarget, iOSPages: Array<IWDPPage>) => {
   const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
-  return iOSPagesWithFlag.find(
+  // should use last created JSContext
+  return findLast(
+    iOSPagesWithFlag,
     (iOSPage) =>
       // TODO doesn't support multiple device with same title
       (debugTarget.appClientTypeList.includes(AppClientType.WS) && debugTarget.title === iOSPage.title) ||
