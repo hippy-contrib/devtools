@@ -1,6 +1,6 @@
 {
   "name": "@hippy/debug-server-next",
-  "version": "0.2.23",
+  "version": "0.2.24",
   "description": "Debug server for hippy.",
   "repository": "https://github.com/hippy-contrib/debug-server-next",
   "homepage": "http://hippyjs.org",
@@ -56,6 +56,7 @@
     "express": "^4.17.1",
     "graceful-fs": "^4.2.6",
     "http-proxy-middleware": "^2.0.0",
+    "https-proxy-agent": "^5.0.0",
     "ipaddr.js": "^2.0.1",
     "kill-port": "^1.6.1",
     "koa": "^2.13.1",
