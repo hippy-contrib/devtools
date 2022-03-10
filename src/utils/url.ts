@@ -110,3 +110,8 @@ export const getBaseFolderOfPublicPath = (publicPath: string) => {
   const url = new URL(publicPath, 'http://0.0.0.0');
   return trim(url.pathname, '/');
 };
+
+export const getHomeUrl = () => {
+  const { env } = global.debugAppArgv;
+  return `${config.domain}/extensions/home.html?env=${env}`;
+}

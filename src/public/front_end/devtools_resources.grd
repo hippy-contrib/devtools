@@ -21,6 +21,9 @@
       <include file="Images/accelerometer-top.png" name="IMAGES_ACCELEROMETER_TOP_PNG" resource_path="Images/accelerometer-top.png" type="BINDATA" compress="false"/>
       <include file="Images/accessibility-icon.svg" name="IMAGES_ACCESSIBILITY_ICON_SVG" resource_path="Images/accessibility-icon.svg" type="BINDATA" compress="false"/>
       <include file="Images/add-icon.svg" name="IMAGES_ADD_ICON_SVG" resource_path="Images/add-icon.svg" type="BINDATA" compress="false"/>
+      <include file="Images/favicon-Hippy.png" name="IMAGES_FAVICON_HIPPY_PNG" resource_path="Images/favicon-Hippy.png" type="BINDATA" compress="false"/>
+      <include file="Images/favicon-TDF.png" name="IMAGES_FAVICON_TDF_PNG" resource_path="Images/favicon-TDF.png" type="BINDATA" compress="false"/>
+      <include file="Images/favicon-Voltron.png" name="IMAGES_FAVICON_VOLTRON_PNG" resource_path="Images/favicon-Voltron.png" type="BINDATA" compress="false"/>
       <include file="Images/align-content-center-icon.svg" name="IMAGES_ALIGN_CONTENT_CENTER_ICON_SVG" resource_path="Images/align-content-center-icon.svg" type="BINDATA" compress="false"/>
       <include file="Images/align-content-end-icon.svg" name="IMAGES_ALIGN_CONTENT_END_ICON_SVG" resource_path="Images/align-content-end-icon.svg" type="BINDATA" compress="false"/>
       <include file="Images/align-content-space-around-icon.svg" name="IMAGES_ALIGN_CONTENT_SPACE_AROUND_ICON_SVG" resource_path="Images/align-content-space-around-icon.svg" type="BINDATA" compress="false"/>

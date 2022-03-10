@@ -8,3 +8,4 @@ log
 coverage
 src/webpack-dev-server/client
 src/hmr
+.DS_Store

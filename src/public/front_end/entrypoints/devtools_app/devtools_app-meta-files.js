@@ -22,18 +22,20 @@ import '../../panels/developer_resources/developer_resources-meta.js';
 // import '../../panels/webauthn/webauthn-meta.js';
 // import '../../panels/web_audio/web_audio-meta.js';
 import '../inspector_main/inspector_main-meta.js';
-const env = decodeURIComponent(new URL(location.href).searchParams.get('env') || 'hippy');
-if (env === "hippy" /* Hippy */ || env === "voltron" /* Voltron */) {
+;
+const showTab = (tab) => window.DEVTOOLS_TABS.includes(tab);
+if (showTab("Network" /* Network */)) {
+    import('../../panels/network/network-meta.js');
+}
+if (showTab("Application" /* Application */)) {
+    import('../../panels/application/application-meta.js');
+}
+if (showTab("Elements" /* Elements */)) {
     import('../../panels/css_overview/css_overview-meta.js');
-    // import('../../panels/network/network-meta.js');
     import('../../panels/mobile_throttling/mobile_throttling-meta.js');
     import('../../panels/elements/elements-meta.js');
     import('../../panels/emulation/emulation-meta.js');
-    // import('../../panels/timeline/timeline-meta.js');
-    // import('../../panels/application/application-meta.js');
 }
-else if (env === "TDF" /* TDF */) {
-    import('../../panels/css_overview/css_overview-meta.js');
-    import('../../panels/elements/elements-meta.js');
-    import('../../panels/emulation/emulation-meta.js');
+if (showTab("CorePerformance" /* CorePerformance */)) {
+    // import('../../panels/timeline/timeline-meta.js');
 }

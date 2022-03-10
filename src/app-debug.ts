@@ -10,6 +10,7 @@ import { initDbModel } from '@/db';
 import { routeApp } from '@/router';
 import { config } from '@/config';
 import { WinstonColor, DevtoolsEnv } from '@/@types/enum';
+import { getHomeUrl } from '@/utils/url';
 
 const log = new Logger('debug-server', WinstonColor.Yellow);
 let server: HTTPServer;
@@ -102,13 +103,12 @@ const init = async () => {
 };
 
 const showHippyGuide = () => {
-  const url = `${config.domain}/extensions/home.html`;
   log.info(
     colors.bold[WinstonColor.Green](`hippy debug steps:
 1. start debug server by run 'npm run hippy:debug'
 2. start dev server by run 'npm run hippy:dev'
 3. open hippy pages with debugMode on mobile/emulator
-4. find connected debug targets on devtools home page: ${colors.underline[WinstonColor.Blue](url)}
+4. find connected debug targets on devtools home page: ${colors.underline[WinstonColor.Blue](getHomeUrl())}
 
 find full guide on ${colors.underline[WinstonColor.Blue]('https://hippyjs.org/#/guide/debug')}`),
   );
