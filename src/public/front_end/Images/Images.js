@@ -1,4 +1,4 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 const sheet = new CSSStyleSheet();
@@ -33,6 +33,9 @@ style.setProperty('--image-file-toolbarResizerVertical', 'url(\"' + new URL('./t
 style.setProperty('--image-file-touchCursor_2x', 'url(\"' + new URL('./touchCursor_2x.png', import.meta.url).toString() + '\")');
 style.setProperty('--image-file-touchCursor', 'url(\"' + new URL('./touchCursor.png', import.meta.url).toString() + '\")');
 style.setProperty('--image-file-whatsnew', 'url(\"' + new URL('./whatsnew.avif', import.meta.url).toString() + '\")');
+style.setProperty('--image-file-favicon-Hippy', 'url(\"' + new URL('./favicon-Hippy.png', import.meta.url).toString() + '\")');
+style.setProperty('--image-file-favicon-TDF', 'url(\"' + new URL('./favicon-TDF.png', import.meta.url).toString() + '\")');
+style.setProperty('--image-file-favicon-Voltron', 'url(\"' + new URL('./favicon-Voltron.png', import.meta.url).toString() + '\")');
 style.setProperty('--image-file-accelerometer-back', 'url(\"' + new URL(new URL('accelerometer-back.svg', import.meta.url).href, import.meta.url).toString() + '\")');
 style.setProperty('--image-file-accelerometer-front', 'url(\"' + new URL(new URL('accelerometer-front.svg', import.meta.url).href, import.meta.url).toString() + '\")');
 style.setProperty('--image-file-accessibility-icon', 'url(\"' + new URL(new URL('accessibility-icon.svg', import.meta.url).href, import.meta.url).toString() + '\")');

@@ -5,18 +5,18 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
-<meta charset="utf-8">
-<title>Hippy DevTools</title>
-<style>
-  @media (prefers-color-scheme: dark) {
-    body {
-      background-color: rgb(41 42 45);
+  <meta charset="utf-8" />
+  <title>DevTools</title>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: rgb(41 42 45);
+      }
     }
-  }
-</style>
-<link rel="icon" href="favicon.png">
-<meta name="referrer" content="no-referrer">
-<!-- <script src="//tam.cdn-go.cn/aegis-sdk/latest/aegis.min.js"></script>
+  </style>
+  <link rel="icon" href="favicon.png" />
+  <meta name="referrer" content="no-referrer" />
+  <!-- <script src="//tam.cdn-go.cn/aegis-sdk/latest/aegis.min.js"></script>
 <script type="text/javascript">
   window.aegis = new Aegis({
   id: 'yxqehauSsvzBZxdRmz',
@@ -24,5 +24,37 @@
   delay: 3000,
 })
 </script> -->
-<script type="module" src="./entrypoints/inspector/inspector.js"></script>
-<body class="undocked" id="-blink-dev-tools">
+  <script>
+    const tabConfig = {
+      Hippy: ['Console', 'Sources', 'JSMemory', 'Elements'],
+      Voltron: ['Console', 'Sources', 'JSMemory', 'Elements'],
+      TDF: [
+        'Console',
+        'Sources',
+        'JSMemory',
+        'Elements',
+        'CoreMemory',
+        'UIInspector',
+        'CorePerformance',
+      ],
+      TDFCore: ['UIInspector', 'CorePerformance', 'CoreMemory', 'CDPDebug'],
+    }
+    let env = new URL(location.href).searchParams.get('env') || 'hippy'
+    env = env.replace(env[0], env[0].toUpperCase());
+    globalThis.DEVTOOLS_TABS = tabConfig[env];
+    document.title = env + ' DevTools';
+
+    const link = document.querySelector('link[rel*="icon"') || document.createElement('link');
+    link.type = 'image/x-icon';
+    link.rel = 'shortcut icon';
+    const iconName = env === 'TDFCore' ? 'TDF' : env;
+    link.href = 'Images/favicon-' + iconName + '.png';
+    document.getElementsByTagName('head')[0].appendChild(link);
+  </script>
+  <script
+    type="module"
+    src="./entrypoints/inspector/inspector.js"
+  ></script>
+
+  <body class="undocked" id="-blink-dev-tools"></body>
+</html>

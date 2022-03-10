@@ -7,6 +7,7 @@ import { TunnelEvent, WinstonColor, OSType, LogLevel } from '@/@types/enum';
 import { deviceManager } from '@/device-manager';
 import { Logger, TunnelLogger } from '@/utils/log';
 import { config } from '@/config';
+import { getHomeUrl } from '@/utils/url';
 import { StartTunnelOption } from './addon-api';
 import { startAdbProxy } from './adb';
 
@@ -76,7 +77,7 @@ export const startIWDP = () => {
 export const startChrome = async () => {
   const { open: openChrome } = global.debugAppArgv;
   if (openChrome) {
-    const url = `${config.domain}/extensions/home.html`;
+    const url = getHomeUrl();
     try {
       open(url, { app: { name: open.apps.chrome } });
     } catch (e) {

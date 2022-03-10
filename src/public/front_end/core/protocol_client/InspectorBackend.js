@@ -238,9 +238,9 @@ export class SessionRouter {
             return;
         }
         session.callbacks.set(messageId, { callback, method });
-        messageObject.performance = {
-          devtoolsToDebugServer: Date.now(),
-        };
+        // (messageObject as any).performance = {
+        //   devtoolsToDebugServer: Date.now(),
+        // };
         this._connection.sendRawMessage(JSON.stringify(messageObject));
     }
     _sendRawMessageForTesting(method, params, callback) {
@@ -258,33 +258,29 @@ export class SessionRouter {
         const messageObject = ((typeof message === 'string') ? JSON.parse(message) : message);
         const method = messageObject.method;
         const { performance } = messageObject;
-        if(globalThis.aegis && performance) {
-          const { 
-            devtoolsToDebugServer,
-            debugServerReceiveFromDevtools,
-            debugServerToDevtools,
-          } = performance;
-          const devtoolsReceive = Date.now();
-          const ReportEvent = {
-            DevtoolsToDebugServer: 'devtools-to-debug-server',
-            DebugServerProxy: 'debug-server-proxy',
-            DebugServerToDevtools: 'debug-server-to-devtools',
-            CDPTotal: 'CDP-total',
-          }
-          function report (name, start, end) {
-            if(name && start && end) {
-              globalThis.aegis.reportTime({
-                name,
-                duration: end - start,
-                ext1: method,
-                ext2: ['localhost', '127.0.0.1'].includes(location.hostname) ? 'local' : 'remote',
-              });
+        if (window.aegis && performance) {
+            const { devtoolsToDebugServer, debugServerReceiveFromDevtools, debugServerToDevtools, } = performance;
+            const devtoolsReceive = Date.now();
+            const ReportEvent = {
+                DevtoolsToDebugServer: 'devtools-to-debug-server',
+                DebugServerProxy: 'debug-server-proxy',
+                DebugServerToDevtools: 'debug-server-to-devtools',
+                CDPTotal: 'CDP-total',
+            };
+            function report(name, start, end) {
+                if (name && start && end) {
+                    window.aegis?.reportTime({
+                        name,
+                        duration: end - start,
+                        ext1: method,
+                        ext2: ['localhost', '127.0.0.1'].includes(location.hostname) ? 'local' : 'remote',
+                    });
+                }
             }
-          }
-          report(ReportEvent.DevtoolsToDebugServer, devtoolsToDebugServer, debugServerReceiveFromDevtools);
-          report(ReportEvent.DebugServerProxy, debugServerReceiveFromDevtools, debugServerToDevtools);
-          report(ReportEvent.DebugServerToDevtools, debugServerToDevtools, devtoolsReceive);
-          report(ReportEvent.CDPTotal, devtoolsToDebugServer, devtoolsReceive);
+            report(ReportEvent.DevtoolsToDebugServer, devtoolsToDebugServer, debugServerReceiveFromDevtools);
+            report(ReportEvent.DebugServerProxy, debugServerReceiveFromDevtools, debugServerToDevtools);
+            report(ReportEvent.DebugServerToDevtools, debugServerToDevtools, devtoolsReceive);
+            report(ReportEvent.CDPTotal, devtoolsToDebugServer, devtoolsReceive);
         }
         // Send all messages to proxy connections.
         let suppressUnknownMessageErrors = false;
