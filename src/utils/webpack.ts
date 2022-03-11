@@ -6,7 +6,6 @@ import { green, yellow, bold } from 'colors/safe';
 import { Logger } from '@/utils/log';
 import { makeUrl, getWSProtocolByHttpProtocol } from '@/utils/url';
 import { config } from '@/config';
-import { PUBLIC_RESOURCE, DEFAULT_REMOTE } from '@/@types/constants';
 
 const log = new Logger('webpack-util');
 
@@ -33,14 +32,11 @@ function normalizeRemoteDebug(versionId, config) {
     host: '127.0.0.1',
     port: 38989,
     qrcode: false,
+    proxy: '',
+    dedicatedStore: false,
     ...(config.devServer.remote || {}),
   };
-  const { protocol, host, port, qrcode: qrcodeFn } = config.devServer.remote;
-
-  // only print qrcode when use remote debug server
-  const needVersionId = needPublicPathWithVersionId(host);
-  // if (!needVersionId) return;
-
+  const { protocol, host, port, qrcode: qrcodeFn, dedicatedStore } = config.devServer.remote;
   const publicPath = getPublicPath(versionId, config.devServer.remote);
   config.output.publicPath = publicPath;
   log.warn(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
@@ -55,12 +51,15 @@ function normalizeRemoteDebug(versionId, config) {
 
   config.devServer.cb = () => {
     process.nextTick(() => {
+      // only print qrcode when use remote debug server
+      const needVersionId = needPublicPathWithVersionId(host, dedicatedStore);
+      if (needVersionId) log.info('paste the following bundleUrl in app to open hippy page');
       log.info('bundleUrl: %s', bold(green(bundleUrl)));
       log.info('find debug page on: %s', bold(green(homeUrl)));
 
       if (needVersionId && qrcodeFn && typeof qrcodeFn === 'function') {
         const qrcodeStr = qrcodeFn(bundleUrl);
-        log.info('bundleUrl scheme: %s', bold(green(qrcodeStr)));
+        log.info('bundleUrl QRCode scheme: %s', bold(green(qrcodeStr)));
         QRCode.toString(
           qrcodeStr,
           {
@@ -68,7 +67,7 @@ function normalizeRemoteDebug(versionId, config) {
             type: 'terminal',
           },
           (e, qrcodeStr) => {
-            if (e) log.error('draw qrcode of bundleUrl failed: %j', e?.stack || e);
+            if (e) log.error('draw QRCode of bundleUrl failed: %j', e?.stack || e);
             log.info('scheme qrcode:\n%s', qrcodeStr);
           },
         );
@@ -78,12 +77,12 @@ function normalizeRemoteDebug(versionId, config) {
 }
 
 function appendHMRPlugin(versionId: string, config) {
-  if (!config.devServer.hot && !config.devServer.liveReload) return;
   const hotManifestPublicPath = getPublicPath(versionId, config.devServer.remote);
   const i = config.plugins.findIndex((plugin) => plugin.constructor.name === HippyHMRPlugin.name);
   if (i !== -1) {
     config.plugins.splice(i, 1);
   }
+  if (!config.devServer.hot && !config.devServer.liveReload) return;
   config.plugins.push(new HippyHMRPlugin({ hotManifestPublicPath }));
 }
 
@@ -95,17 +94,19 @@ function isRemoteDebugEnabled(webpackConfig) {
 }
 
 /**
- * when use debug-server-next in local, no need to set webpack `publicPath` field,
- * only need set `hotManifestPublicPath` field
+ * when use debug-server-next in local, publicPath will append versionId if set dedicatedStore === true
+ * and will always append versionId for remote
  */
-function needPublicPathWithVersionId(host) {
-  return !(host === 'localhost' || host === '127.0.0.1');
+function needPublicPathWithVersionId(host, dedicatedStore: boolean) {
+  const isLocal = host === 'localhost' || host === '127.0.0.1';
+  if (isLocal) return Boolean(dedicatedStore);
+  return true;
 }
 
-function getPublicPath(versionId, { host, port, protocol }) {
-  if (host === DEFAULT_REMOTE.host) return `${PUBLIC_RESOURCE}${versionId}/`;
+function getPublicPath(versionId, { host, port, protocol, dedicatedStore }) {
   const ignorePort = couldIgnorePort(protocol, port);
-  if (!needPublicPathWithVersionId(host)) return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/`;
+  if (!needPublicPathWithVersionId(host, dedicatedStore))
+    return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/`;
   return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/${versionId}/`;
 }
 

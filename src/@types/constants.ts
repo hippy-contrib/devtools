@@ -4,6 +4,4 @@ export const DEFAULT_REMOTE = {
   port: 443,
 };
 
-export const PUBLIC_RESOURCE = 'https://devtools.qq.com/';
-
 export const SIMULATOR_DEVICE_NAME = 'SIMULATOR';

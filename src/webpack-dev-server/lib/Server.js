@@ -19,6 +19,7 @@ const { config } = require('@/config');
 const { saveDevPort } = require('@/utils/webpack');
 const { startAdbProxy } = require('@/child-process/adb');
 const { get } = require('lodash');
+const colors = require('colors/safe');
 
 if (!process.env.WEBPACK_SERVE) {
   process.env.WEBPACK_SERVE = true;
@@ -1440,38 +1441,6 @@ class Server {
   }
 
   logStatus() {
-    const { isColorSupported, cyan, red } = require('colorette');
-
-    const getColorsOption = (compilerOptions) => {
-      let colorsEnabled;
-
-      if (compilerOptions.stats && typeof compilerOptions.stats.colors !== 'undefined') {
-        colorsEnabled = compilerOptions.stats;
-      } else {
-        colorsEnabled = isColorSupported;
-      }
-
-      return colorsEnabled;
-    };
-
-    const colors = {
-      info(useColor, msg) {
-        if (useColor) {
-          return cyan(msg);
-        }
-
-        return msg;
-      },
-      error(useColor, msg) {
-        if (useColor) {
-          return red(msg);
-        }
-
-        return msg;
-      },
-    };
-    const useColor = getColorsOption(this.getCompilerOptions());
-
     const protocol = this.options.server.type === 'http' ? 'http' : 'https';
     const { address, port } = this.server.address();
     const prettyPrintURL = (newHostname) => url.format({ protocol, hostname: newHostname, port, pathname: '/' });
@@ -1537,24 +1506,24 @@ class Server {
     this.logger.info('Project is running at:');
 
     if (server) {
-      this.logger.info(`Server: ${colors.info(useColor, server)}`);
+      this.logger.info(`Server: ${colors.cyan(server)}`);
     }
 
     if (localhost || loopbackIPv4 || loopbackIPv6) {
       const loopbacks = []
-        .concat(localhost ? [colors.info(useColor, localhost)] : [])
-        .concat(loopbackIPv4 ? [colors.info(useColor, loopbackIPv4)] : [])
-        .concat(loopbackIPv6 ? [colors.info(useColor, loopbackIPv6)] : []);
+        .concat(localhost ? [colors.cyan(localhost)] : [])
+        .concat(loopbackIPv4 ? [colors.cyan(loopbackIPv4)] : [])
+        .concat(loopbackIPv6 ? [colors.cyan(loopbackIPv6)] : []);
 
       this.logger.info(`Loopback: ${loopbacks.join(', ')}`);
     }
 
     if (networkUrlIPv4) {
-      this.logger.info(`On Your Network (IPv4): ${colors.info(useColor, networkUrlIPv4)}`);
+      this.logger.info(`On Your Network (IPv4): ${colors.cyan(networkUrlIPv4)}`);
     }
 
     if (networkUrlIPv6) {
-      this.logger.info(`On Your Network (IPv6): ${colors.info(useColor, networkUrlIPv6)}`);
+      this.logger.info(`On Your Network (IPv6): ${colors.cyan(networkUrlIPv6)}`);
     }
 
     if (this.options.open.length > 0) {
@@ -1565,8 +1534,7 @@ class Server {
 
     if (this.options.static && this.options.static.length > 0) {
       this.logger.info(
-        `Content not from webpack is served from '${colors.info(
-          useColor,
+        `Content not from webpack is served from '${colors.cyan(
           this.options.static.map((staticOption) => staticOption.directory).join(', '),
         )}' directory`,
       );
@@ -1574,7 +1542,7 @@ class Server {
 
     if (this.options.historyApiFallback) {
       this.logger.info(
-        `404s will fallback to '${colors.info(useColor, this.options.historyApiFallback.index || '/index.html')}'`,
+        `404s will fallback to '${colors.cyan(this.options.historyApiFallback.index || '/index.html')}'`,
       );
     }
 

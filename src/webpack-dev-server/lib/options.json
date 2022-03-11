@@ -990,8 +990,12 @@
         "proxy": {
           "optional": true,
           "type": "string",
-          "minLength": 1,
           "description": "Remote debug proxy."
+        },
+        "dedicatedStore": {
+          "optional": true,
+          "type": "boolean",
+          "description": "Store build resources into a dedicated subfolder, so could debug multiple project in the same time, by default is set false."
         }
       }
     }
