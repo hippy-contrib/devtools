@@ -454,6 +454,11 @@
       "description": "Enables Hot Module Replacement.",
       "link": "https://webpack.js.org/configuration/dev-server/#devserverhot"
     },
+    "Multiple": {
+      "type": "boolean",
+      "optional": true,
+      "description": "Support debug multiple project with only one debug server, by default is set false."
+    },
     "LiveReload": {
       "type": "boolean",
       "description": "Enables reload/refresh the page(s) when file changes are detected (enabled by default).",
@@ -991,11 +996,6 @@
           "optional": true,
           "type": "string",
           "description": "Remote debug proxy."
-        },
-        "dedicatedStore": {
-          "optional": true,
-          "type": "boolean",
-          "description": "Store build resources into a dedicated subfolder, so could debug multiple project in the same time, by default is set false."
         }
       }
     }
@@ -1033,6 +1033,9 @@
     },
     "hot": {
       "$ref": "#/definitions/Hot"
+    },
+    "multiple": {
+      "$ref": "#/definitions/Multiple"
     },
     "http2": {
       "$ref": "#/definitions/HTTP2"

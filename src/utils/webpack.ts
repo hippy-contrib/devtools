@@ -33,11 +33,10 @@ function normalizeRemoteDebug(versionId, config) {
     port: 38989,
     qrcode: false,
     proxy: '',
-    dedicatedStore: false,
     ...(config.devServer.remote || {}),
   };
-  const { protocol, host, port, qrcode: qrcodeFn, dedicatedStore } = config.devServer.remote;
-  const publicPath = getPublicPath(versionId, config.devServer.remote);
+  const { protocol, host, port, qrcode: qrcodeFn } = config.devServer.remote;
+  const publicPath = getPublicPath(versionId, config.devServer);
   config.output.publicPath = publicPath;
   log.warn(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
 
@@ -52,7 +51,7 @@ function normalizeRemoteDebug(versionId, config) {
   config.devServer.cb = () => {
     process.nextTick(() => {
       // only print qrcode when use remote debug server
-      const needVersionId = needPublicPathWithVersionId(host, dedicatedStore);
+      const needVersionId = needPublicPathWithVersionId(host, config.multiple);
       if (needVersionId) log.info('paste the following bundleUrl in app to open hippy page');
       log.info('bundleUrl: %s', bold(green(bundleUrl)));
       log.info('find debug page on: %s', bold(green(homeUrl)));
@@ -77,7 +76,7 @@ function normalizeRemoteDebug(versionId, config) {
 }
 
 function appendHMRPlugin(versionId: string, config) {
-  const hotManifestPublicPath = getPublicPath(versionId, config.devServer.remote);
+  const hotManifestPublicPath = getPublicPath(versionId, config.devServer);
   const i = config.plugins.findIndex((plugin) => plugin.constructor.name === HippyHMRPlugin.name);
   if (i !== -1) {
     config.plugins.splice(i, 1);
@@ -94,18 +93,18 @@ function isRemoteDebugEnabled(webpackConfig) {
 }
 
 /**
- * when use debug-server-next in local, publicPath will append versionId if set dedicatedStore === true
+ * when use debug-server-next in local, publicPath will append versionId if set devServer.multiple === true
  * and will always append versionId for remote
  */
-function needPublicPathWithVersionId(host, dedicatedStore: boolean) {
+function needPublicPathWithVersionId(host, multiple: boolean) {
   const isLocal = host === 'localhost' || host === '127.0.0.1';
-  if (isLocal) return Boolean(dedicatedStore);
+  if (isLocal) return Boolean(multiple);
   return true;
 }
 
-function getPublicPath(versionId, { host, port, protocol, dedicatedStore }) {
+function getPublicPath(versionId, {remote: { host, port, protocol }, multiple}) {
   const ignorePort = couldIgnorePort(protocol, port);
-  if (!needPublicPathWithVersionId(host, dedicatedStore))
+  if (!needPublicPathWithVersionId(host, multiple))
     return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/`;
   return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/${versionId}/`;
 }

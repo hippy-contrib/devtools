@@ -1,6 +1,6 @@
 {
   "name": "@hippy/debug-server-next",
-  "version": "0.2.24",
+  "version": "0.2.26",
   "description": "Debug server for hippy.",
   "repository": "https://github.com/hippy-contrib/debug-server-next",
   "homepage": "http://hippyjs.org",
@@ -13,10 +13,7 @@
     "hippy-dev": "dist/index-dev.js"
   },
   "scripts": {
-    "start": "nodemon --exec \"npm run dev\"",
     "hippy:debug": "cross-env TS_NODE_FILES=true node --inspect=127.0.0.1:7777 -r ts-node/register src/index-debug.ts",
-    "hippy:dev": "cross-env TS_NODE_FILES=true node --inspect-brk=127.0.0.1:7778 -r ts-node/register src/index-dev.ts",
-    "hippy:dev:dist": "cross-env TS_NODE_FILES=true node --inspect=127.0.0.1:7778 -r ts-node/register dist/index-dev",
     "build": "npm run build:client && npx gulp",
     "build:client": "cd src/webpack-dev-server && rimraf ./client/* && babel client-src/ --out-dir client/ --ignore \"client-src/webpack.config.js\" --ignore \"client-src/modules\" && webpack --config client-src/webpack.config.js",
     "watch": "gulp watch",
@@ -44,7 +41,6 @@
     "bonjour": "^3.5.0",
     "chokidar": "~3.5.2",
     "color-normalize": "^1.5.2",
-    "colorette": "^2.0.10",
     "colors": "1.4.0",
     "compression": "^1.7.4",
     "connect-history-api-fallback": "^1.6.0",
