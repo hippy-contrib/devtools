@@ -49,14 +49,12 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
     }
   });
 
-  ws.on('close', (code, reason) => onClose(code, reason));
-  ws.on('error', (e) => onClose(null, null, e));
-  function onClose(code: number, reason: string, error?) {
-    if (error) log.error('HMR client ws error: %s', error.stack || error);
+  ws.on('close', (code, reason) => {
     log.warn('HMR client ws closed, code: %s, reason: %s', code, reason);
     subscriber.unsubscribe();
     subscriber.disconnect();
-  }
+  });
+  ws.on('error', (e) => log.error('HMR client ws error: %s', e.stack || e));
 };
 
 export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) => {
@@ -100,17 +98,15 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
     }
   });
 
-  ws.on('close', (code, reason) => onClose(code, reason));
-  ws.on('error', (e) => onClose(null, null, e));
-  function onClose(code: number, reason: string, error?) {
-    if (error) log.error('HMR server ws error: %s', error.stack || error);
+  ws.on('close', (code, reason) => {
     log.warn('HMR server ws closed, code: %s, reason: %s', code, reason);
     publisher.publish(hmrCloseEvent);
     process.nextTick(() => {
       publisher.disconnect();
     });
     model.delete(hash);
-  }
+  });
+  ws.on('error', (e) => log.error('HMR server ws error: %s', e.stack || e));
 };
 
 type TransFerFile = {

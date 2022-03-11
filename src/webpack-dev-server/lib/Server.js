@@ -1266,8 +1266,7 @@ class Server {
       // configure global proxy
       // should set NODE_EXTRA_CA_CERTS env as your proxy server's rootCA to resolve full key chain
       const proxyUrl = proxy || process.env.http_proxy;
-      const options = url.parse(proxyUrl);
-      const agent = proxyUrl && new HttpsProxyAgent(options);
+      const agent = proxyUrl ? new HttpsProxyAgent(url.parse(proxyUrl)) : null;
 
       this.webSocketClient = new WebSocket(webSocketURL, {agent});
       this.webSocketClient.on('open', () => {

@@ -42,4 +42,4 @@ function rimrafAsync(fpath) {
 
 gulp.task('default', gulp.series(['clean', 'mkdir', 'compile', 'copy-resource', 'chmod']));
 
-gulp.task('watch', () => gulp.watch('src/**/*', gulp.series(['compile', 'copy-resource', 'chmod'])));
+gulp.task('watch', () => gulp.watch(['src/**/*', '!src/webpack-dev-server-client'], gulp.series(['compile', 'copy-resource', 'chmod'])));
