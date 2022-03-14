@@ -9,7 +9,7 @@ import { createHMRChannel } from '@/utils/pub-sub-channel';
 import { getDBOperator } from '@/db';
 import { config } from '@/config';
 import { decodeHMRData } from '@/utils/buffer';
-import { cosUpload } from '@/utils/cos';
+import { cosUpload, deleteObjects } from '@/utils/cos';
 import { aegis } from '@/utils/aegis';
 
 const log = new Logger('hmr-controller', WinstonColor.Blue);
@@ -69,6 +69,8 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
     ext1: hash,
     ext2: HMRReportExt2.Server,
   });
+  // store all synced dist file, and clean when hmr server disconnect
+  const distFiles: Set<string> = new Set();
 
   ws.on('message', async (msg: Buffer) => {
     try {
@@ -89,7 +91,11 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
         aegis.reportTime(reportData);
       }
 
-      await saveHMRFiles(getBaseFolderOfPublicPath(publicPath), emitList);
+      const folder = getBaseFolderOfPublicPath(publicPath);
+      emitList.forEach((file) => {
+        distFiles.add(path.join(folder, file.name));
+      });
+      await saveHMRFiles(folder, emitList);
       const msgStr = JSON.stringify(emitJSON);
       log.info('receive HMR msg from PC: %s', msgStr);
       if (emitJSON.messages?.length) publisher.publish(msgStr);
@@ -98,13 +104,14 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
     }
   });
 
-  ws.on('close', (code, reason) => {
+  ws.on('close', async (code, reason) => {
     log.warn('HMR server ws closed, code: %s, reason: %s', code, reason);
     publisher.publish(hmrCloseEvent);
     process.nextTick(() => {
       publisher.disconnect();
     });
     model.delete(hash);
+    cleanHMRFiles(Array.from(distFiles));
   });
   ws.on('error', (e) => log.error('HMR server ws error: %s', e.stack || e));
 };
@@ -136,5 +143,23 @@ async function saveHMRFileToLocal(folder: string, name: string, content: Buffer)
 
 async function saveHMRFileToCOS(folder: string, name: string, content: Buffer) {
   const key = path.join(folder, name);
-  cosUpload(key, content);
+  return cosUpload(key, content);
+}
+
+async function cleanHMRFiles(files: string[]) {
+  try {
+    if (config.staticFileStorage === StaticFileStorage.COS) {
+      await deleteObjects(files);
+    } else {
+      await Promise.all(
+        files.map((file) => {
+          const fullFname = path.join(config.hmrStaticPath, file);
+          return fs.promises.rm(fullFname, { force: true, recursive: true });
+        }),
+      );
+    }
+    log.warn('clean cached static resources! \n %j', files);
+  } catch (e) {
+    log.error('clean cached static resources failed! %j', (e as Error).stack || e);
+  }
 }
