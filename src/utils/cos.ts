@@ -116,6 +116,30 @@ export const cosUploadByStream = function (options: COSUploadByStreamOptions) {
   });
 };
 
+export const deleteObjects = function (keys: string[]) {
+  const { SecretId } = config.cos;
+  const { SecretKey } = config.cos;
+  const { Bucket } = config.cos;
+  const { Region } = config.cos;
+  const client = new COS({
+    SecretId,
+    SecretKey,
+  });
+  return new Promise((resolve, reject) => {
+    client.deleteMultipleObject(
+      {
+        Bucket,
+        Region,
+        Objects: keys.map((Key) => ({ Key })),
+      },
+      (err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      },
+    );
+  });
+};
+
 type COSUploadBaseOptions = {
   SecretId: string;
   SecretKey: string;
