@@ -11,7 +11,6 @@ const express = require('express');
 const { validate } = require('schema-utils');
 const schema = require('./options.json');
 const WebSocket = require('ws');
-const HttpsProxyAgent = require('https-proxy-agent');
 const { HMREvent } = require('@/@types/enum');
 const { encodeHMRData } = require('@/utils/buffer');
 const { getWSProtocolByHttpProtocol } = require('@/utils/url');
@@ -1262,13 +1261,8 @@ class Server {
     return new Promise((resolve, reject) => {
       const { host, port, protocol, proxy } = this.options.remote;
       const webSocketURL = `${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.id}`;
-      
-      // configure global proxy
-      // should set NODE_EXTRA_CA_CERTS env as your proxy server's rootCA to resolve full key chain
-      const proxyUrl = proxy || process.env.http_proxy;
-      const agent = proxyUrl ? new HttpsProxyAgent(url.parse(proxyUrl)) : null;
 
-      this.webSocketClient = new WebSocket(webSocketURL, {agent});
+      this.webSocketClient = new WebSocket(webSocketURL);
       this.webSocketClient.on('open', () => {
         this.logger.info('HMR websocket client is connected.');
         this.msgQueue.map((hmrData) => this.sendMessage(hmrData));
