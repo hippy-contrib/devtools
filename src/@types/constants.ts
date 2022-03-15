@@ -5,3 +5,9 @@ export const DEFAULT_REMOTE = {
 };
 
 export const SIMULATOR_DEVICE_NAME = 'SIMULATOR';
+
+/**
+ * add host header in IAS nginx config
+ * so server could distinguish intranet and extranet
+ */
+export const HOST_HEADER = 'X-IAS-HOST';

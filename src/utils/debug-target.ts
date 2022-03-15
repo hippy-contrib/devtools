@@ -49,17 +49,22 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
 /**
  * 通过 ws 连接 url 创建调试对象
  */
-export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams): DebugTarget => {
+export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams, host?: string): DebugTarget => {
   const { clientId, clientRole, contextName, deviceName, hash } = wsUrlParams;
+  // if node server is in remote cluster
+  // domain maybe devtools.qq.com or tdf-devtools.woa.com
+  // so get domain from host
+  const domain = config.isCluster ? `https://${host}` : config.domain;
+  const wsDomain = domain.replace('https://', 'wss://').replace('http://', 'ws://');
   let platform;
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
   if (clientRole === ClientRole.IOS) platform = DevicePlatform.IOS;
-  const wsUrl = makeUrl(`${config.wsDomain}${config.wsPath}`, {
+  const wsUrl = makeUrl(`${wsDomain}${config.wsPath}`, {
     clientId,
     role: ClientRole.Devtools,
     hash,
   });
-  const devtoolsFrontendUrl = makeUrl(`${config.domain}/front_end/inspector.html`, {
+  const devtoolsFrontendUrl = makeUrl(`${domain}/front_end/inspector.html`, {
     remoteFrontend: true,
     experiments: true,
     [config.wsProtocol]: wsUrlWithoutProtocol(wsUrl),
