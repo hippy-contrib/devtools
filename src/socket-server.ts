@@ -132,7 +132,8 @@ export class SocketServer {
    */
   private async onConnection(ws: MyWebSocket, req: IncomingMessage) {
     const wsUrlParams = parseWsUrl(req.url);
-
+    const host = ((req.headers.host || req.headers.Host) as string) || '';
+    log.info('onConnection headers %j \n host: %s', req.headers, host);
     ws.isAlive = true;
     ws.on('pong', () => {
       ws.isAlive = true;
@@ -145,7 +146,7 @@ export class SocketServer {
     } else if (clientRole === ClientRole.Devtools) {
       this.onDevtoolsConnection(ws, wsUrlParams as DevtoolsWsUrlParams);
     } else {
-      this.onAppConnection(ws, wsUrlParams as AppWsUrlParams);
+      this.onAppConnection(ws, wsUrlParams as AppWsUrlParams, host);
     }
 
     if (clientRole === ClientRole.Devtools) {
@@ -234,7 +235,7 @@ export class SocketServer {
   /**
    * app ws 连接，创建调试对象，并订阅上行调试消息
    */
-  private async onAppConnection(ws: MyWebSocket, wsUrlParams: AppWsUrlParams) {
+  private async onAppConnection(ws: MyWebSocket, wsUrlParams: AppWsUrlParams, host: string) {
     const { clientId, clientRole } = wsUrlParams;
     log.info('WSAppClient connected. %s', clientId);
     const platform = {
@@ -244,7 +245,7 @@ export class SocketServer {
     const useWS = appClientManager.shouldUseAppClientType(platform, AppClientType.WS);
     if (!useWS) return log.warn('current env is %s, ignore ws connection', global.debugAppArgv.env);
 
-    let debugTarget = createTargetByWsUrlParams(wsUrlParams);
+    let debugTarget = createTargetByWsUrlParams(wsUrlParams, host);
     // app ws 添加监听前可以执行异步操作，因为 app 建立连接后不会主动发送任何消息
     debugTarget = await patchRefAndSave(debugTarget);
     process.nextTick(() => {
