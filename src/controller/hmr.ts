@@ -148,6 +148,8 @@ async function saveHMRFileToCOS(folder: string, name: string, content: Buffer) {
 
 async function cleanHMRFiles(files: string[]) {
   try {
+    if (files.length === 0) return;
+    log.warn('clean cached static resources! \n %j', files);
     if (config.staticFileStorage === StaticFileStorage.COS) {
       await deleteObjects(files);
     } else {
@@ -158,7 +160,6 @@ async function cleanHMRFiles(files: string[]) {
         }),
       );
     }
-    log.warn('clean cached static resources! \n %j', files);
   } catch (e) {
     log.error('clean cached static resources failed! %j', (e as Error).stack || e);
   }
