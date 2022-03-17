@@ -4,7 +4,6 @@ import path from 'path';
 import moduleAlias from 'module-alias';
 moduleAlias.addAliases({
   '@': __dirname,
-  'package.json': '../package.json',
 });
 import yargs from 'yargs';
 import dotenv from 'dotenv';
@@ -13,7 +12,7 @@ import '@/utils/aegis';
 import { webpack } from '@/app-dev';
 import { getWebpackConfig } from '@/utils/webpack';
 import { Logger } from '@/utils/log';
-import { version } from 'package.json';
+import { version } from '../package.json';
 import './process-handler';
 
 const { argv } = yargs

@@ -4,7 +4,6 @@ import path from 'path';
 import moduleAlias from 'module-alias';
 moduleAlias.addAliases({
   '@': __dirname,
-  'package.json': '../package.json',
 });
 import yargs from 'yargs';
 // import detect from 'detect-port';
@@ -86,7 +85,7 @@ global.debugAppArgv = fullArgv;
 import '@/utils/aegis';
 import { Logger } from '@/utils/log';
 import { startDebugServer } from '@/app-debug';
-import { version } from 'package.json';
+import { version } from '../package.json';
 import './process-handler';
 const log = new Logger('entry');
 log.info('version: %s', version);

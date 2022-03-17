@@ -2,7 +2,6 @@
 import moduleAlias from 'module-alias';
 moduleAlias.addAliases({
   '@': __dirname,
-  'package.json': '../package.json',
 });
 import { DevtoolsEnv, LogLevel } from '@/@types/enum';
 import { DebugAppArgv } from '@/@types/app';

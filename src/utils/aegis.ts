@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import Aegis from 'aegis-node-sdk';
 import { config } from '@/config';
+import { version } from '../../package.json';
 
-/**
- * remove report because aegis could not access in npm registry
- */
-export const aegis = {
-  reportEvent: (argv: unknown) => {},
-  reportTime: (argv: unknown) => {},
-  report: (argv: unknown) => {},
-};
+export const aegis: any = new Aegis({
+  id: config.aegisId,
+  selector: {
+    type: 'host',
+  },
+  version,
+  protocol: 'http',
+});
 
 export const timeStart = (name: string) => {
   const start = Date.now();
