@@ -102,15 +102,17 @@ function needPublicPathWithVersionId(host, multiple: boolean) {
   return true;
 }
 
-function getPublicPath(versionId, {remote: { host, port, protocol }, multiple}) {
+function getPublicPath(versionId, { remote: { host, port, protocol }, multiple }) {
   const ignorePort = couldIgnorePort(protocol, port);
-  if (!needPublicPathWithVersionId(host, multiple))
-    return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/`;
+  if (!needPublicPathWithVersionId(host, multiple)) return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/`;
   return `${protocol}://${host}${ignorePort ? '' : `:${port}`}/${versionId}/`;
 }
 
 function couldIgnorePort(protocol, port) {
-  return (protocol === 'https' && Number(port) === 443) || (protocol === 'http' && Number(port) === 80);
+  const couldIgnore = (protocol === 'https' && Number(port) === 443) || (protocol === 'http' && Number(port) === 80);
+  log.silly(couldIgnore);
+  // TODO iOS doesn't support ignore port
+  return false;
 }
 
 /**
