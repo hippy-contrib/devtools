@@ -9,7 +9,7 @@ export const aegis: any = new Aegis({
     type: 'host',
   },
   version,
-  protocol: 'http',
+  // protocol: 'http',
 });
 
 export const timeStart = (name: string) => {

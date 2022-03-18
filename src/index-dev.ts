@@ -43,6 +43,7 @@ const log = new Logger('entry');
 log.info('version: %s', version);
 
 (async () => {
+  log.info('start dev argv: %j', fullArgv);
   const webpackConfig = await getWebpackConfig(fullArgv.config);
   webpack(webpackConfig);
 })();

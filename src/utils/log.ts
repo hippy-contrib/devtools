@@ -45,21 +45,16 @@ export class Logger {
 
   public error(...args) {
     this.log(LogLevel.Error, ...args);
-    const errMsg = args.reduce((prev, curr) => {
-      if (curr instanceof Error) {
-        prev += `\n${curr.stack}`;
-      } else if (typeof curr === 'string') {
-        prev += curr;
-      } else {
-        prev += String(curr);
-      }
-    }, '');
-    aegis.report(new Error(errMsg));
   }
 
   private log(level, ...args) {
     const msg = util.format(...args);
     this.loggerInstance.log(level, msg);
+    if (level === LogLevel.Error) {
+      aegis.report(new Error(msg));
+    } else if ([LogLevel.Warn, LogLevel.Info].includes(level)) {
+      aegis.infoAll(msg);
+    }
   }
 
   private initLoggerInstance() {
