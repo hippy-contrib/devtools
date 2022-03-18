@@ -52,7 +52,7 @@ export class Logger {
     this.loggerInstance.log(level, msg);
     if (level === LogLevel.Error) {
       aegis.report(new Error(msg));
-    } else if ([LogLevel.Warn, LogLevel.Info].includes(level)) {
+    } else if ([LogLevel.Warn].includes(level)) {
       aegis.infoAll(msg);
     }
   }
