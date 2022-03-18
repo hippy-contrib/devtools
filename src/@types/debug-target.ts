@@ -1,7 +1,7 @@
 import { DevicePlatform, AppClientType } from './enum';
 
 export interface DebugTarget {
-  // bundle version hash id, only relate to compilination machine id and process.env.PWD
+  // bundle version hash id, only relate to compilination machine id and process.cwd()
   hash?: string;
   // 和 bundleName 一一对应，reload 时终端也尽量保持不变
   clientId: string;

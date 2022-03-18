@@ -11,7 +11,7 @@ const log = new Logger('webpack-util');
 
 export async function getWebpackConfig(configPath) {
   let webpackConfig;
-  const webpackConfigPath = path.resolve(process.env.PWD, configPath);
+  const webpackConfigPath = path.resolve(process.cwd(), configPath);
   if (configPath && fs.existsSync(webpackConfigPath)) {
     webpackConfig = await import(webpackConfigPath);
   }
