@@ -32,9 +32,9 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
   });
 
   const subscriber = new Subscriber(createHMRChannel(hash));
-  subscriber.subscribe((msg) => {
+  const hmrHandler = (msg) => {
     if (msg === hmrCloseEvent) {
-      subscriber.unsubscribe();
+      subscriber.unsubscribe(hmrHandler);
       subscriber.disconnect();
       const reason = 'Hippy dev server closed, stop HMR!';
       ws.close(WSCode.HMRServerClosed, reason);
@@ -47,11 +47,12 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
       }
       ws.send(JSON.stringify(msgObj));
     }
-  });
+  };
+  subscriber.subscribe(hmrHandler);
 
   ws.on('close', (code, reason) => {
     log.warn('HMR client ws closed, code: %s, reason: %s', code, reason);
-    subscriber.unsubscribe();
+    subscriber.unsubscribe(hmrHandler);
     subscriber.disconnect();
   });
   ws.on('error', (e) => log.error('HMR client ws error: %s', e.stack || e));
@@ -95,7 +96,10 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
       emitList.forEach((file) => {
         distFiles.add(path.join(folder, file.name));
       });
-      await saveHMRFiles(folder, emitList);
+      if (emitList?.length) {
+        await saveHMRFiles(folder, emitList);
+      }
+
       const msgStr = JSON.stringify(emitJSON);
       log.info('receive HMR msg from PC: %s', msgStr);
       if (emitJSON.messages?.length) publisher.publish(msgStr);
