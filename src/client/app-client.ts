@@ -14,6 +14,7 @@ import { CDP_DOMAIN_LIST, getDomain } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
 import { composeMiddlewares } from '@/utils/middleware';
 import { createCDPPerformance } from '@/utils/aegis';
+import { config } from '@/config';
 
 const ignoreMethods = ['Page.screencastFrame', 'Page.screencastFrameAck'];
 // const filteredLog = new Logger('filtered', WinstonColor.Yellow);
@@ -146,11 +147,8 @@ export abstract class AppClient extends EventEmitter {
           performance = cache?.performance;
           if (performance) performance.debugServerToDevtools = Date.now();
         }
-
-        return this.emitMessageToDevtools({
-          ...msg,
-          performance,
-        });
+        if (config.showPerformance) msg.performance = performance;
+        return this.emitMessageToDevtools(msg);
       },
     };
     return composeMiddlewares(middlewareList)(middlewareContext);

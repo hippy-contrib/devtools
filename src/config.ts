@@ -27,6 +27,7 @@ export const config: Config = {
   },
   staticFileStorage: (process.env.StaticFileStorage as StaticFileStorage) || StaticFileStorage.Local,
   aegisId: 'yxqehauSsvzBZxdRmz',
+  showPerformance: false,
 };
 
 interface Config {
@@ -56,6 +57,7 @@ interface Config {
   };
   staticFileStorage: StaticFileStorage;
   aegisId: string;
+  showPerformance: boolean;
 }
 
 function getPublicDomain() {
