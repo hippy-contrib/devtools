@@ -73,7 +73,6 @@ export class SocketServer {
     const wss = new WSServer({
       noServer: true,
       path: config.wsPath,
-      maxPayload: config.wsMaxPayload,
     });
     this.wss = wss;
     this.server.on('upgrade', this.onUpgrade.bind(this));

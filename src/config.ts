@@ -4,7 +4,6 @@ import { StaticFileStorage } from '@/@types/enum';
 export const config: Config = {
   ...getPublicDomain(),
   wsPath: '/debugger-proxy',
-  wsMaxPayload: 25 * 1024 * 1024,
   cachePath: path.join(__dirname, 'cache'),
   hmrStaticPath: path.join(process.env.HMRStaticPath || __dirname, 'hmr'),
   logPath: path.join(__dirname, 'log'),
@@ -35,7 +34,6 @@ interface Config {
   wsDomain: string;
   wsProtocol: string;
   wsPath: string;
-  wsMaxPayload: number;
   cachePath: string;
   hmrStaticPath: string;
   logPath: string;
