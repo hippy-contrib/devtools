@@ -21,6 +21,7 @@ import '../../ui/legacy/components/object_ui/object_ui-meta.js';
 import '../../ui/legacy/components/perf_ui/perf_ui-meta.js';
 import '../../ui/legacy/components/quick_open/quick_open-meta.js';
 import '../../ui/legacy/components/source_frame/source_frame-meta.js';
+import '../../panels/vue_devtools/vue_devtools-meta.js';
 import '../main/main-meta.js';
 ;
 const showTab = (tab) => window.DEVTOOLS_TABS.includes(tab);
@@ -46,4 +47,7 @@ if (showTab("CorePerformance" /* CorePerformance */)) {
 }
 if (showTab("CDPDebug" /* CDPDebug */)) {
     import('../../panels/cdp_debug/cdp_debug-meta.js');
+}
+if (showTab("VueDevtools" /* VueDevtools */)) {
+    import('../../panels/vue_devtools/vue_devtools-meta.js');
 }

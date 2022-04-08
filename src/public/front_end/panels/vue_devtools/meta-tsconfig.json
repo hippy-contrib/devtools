@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/vue_devtools"},"files":["../../../../../../chrome-devtools/front_end/panels/vue_devtools/vue_devtools-meta.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}

@@ -26,7 +26,7 @@
 </script> -->
   <script>
     const tabConfig = {
-      Hippy: ['Console', 'Sources', 'JSMemory', 'Elements'],
+      Hippy: ['Console', 'Sources', 'JSMemory', 'Elements', 'VueDevtools'],
       Voltron: ['Console', 'Sources', 'JSMemory', 'Elements'],
       TDF: [
         'Console',
@@ -46,7 +46,7 @@
 
     const link = document.querySelector('link[rel*="icon"') || document.createElement('link');
     link.type = 'image/x-icon';
-    link.rel = 'shortcut icon';
+    link.rel = 'icon';
     const iconName = env === 'TDFCore' ? 'TDF' : env;
     link.href = 'Images/favicon-' + iconName + '.png';
     document.getElementsByTagName('head')[0].appendChild(link);
