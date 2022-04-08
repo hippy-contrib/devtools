@@ -43,6 +43,10 @@ export enum ClientRole {
   IOS = 'ios_client',
   HMRClient = 'hmr_client',
   HMRServer = 'hmr_server',
+  // WSClient invoke in hippy js runtime
+  JSRuntime = 'js_runtime',
+  // frontend vue devtools tab
+  VueDevtools = 'vue_devtools',
 }
 
 export const enum AppClientEvent {
@@ -176,10 +180,11 @@ export enum StaticFileStorage {
 
 export enum ReportEvent {
   COSUpload = 'cos-upload',
-  DevtoolsToDebugServer = 'devtools-to-debug-server',
-  DebugServerToDevtools = 'debug-server-to-devtools',
   RemoteDebug = 'remote-debug',
   RemoteHMR = 'remote-hmr',
+  VueDevtools = 'vue-devtools',
+  DevtoolsToDebugServer = 'devtools-to-debug-server',
+  DebugServerToDevtools = 'debug-server-to-devtools',
   PubSub = 'pub-sub',
   RedisConnection = 'redis-connection',
   RedisError = 'redis-error',

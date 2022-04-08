@@ -955,6 +955,10 @@
       "type": "string",
       "minLength": 1
     },
+    "VueDevtools": {
+      "type": "boolean",
+      "optional": true
+    },
     "Remote": {
       "type": "object",
       "properties": {
@@ -1075,6 +1079,9 @@
     },
     "remote": {
       "$ref": "#/definitions/Remote"
+    },
+    "vueDevtools": {
+      "$ref": "#/definitions/VueDevtools"
     },
     "cb": {
       "instanceof": "Function"

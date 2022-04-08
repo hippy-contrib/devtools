@@ -6,6 +6,7 @@ import { green, yellow, bold } from 'colors/safe';
 import { Logger } from '@/utils/log';
 import { makeUrl, getWSProtocolByHttpProtocol } from '@/utils/url';
 import { config } from '@/config';
+export * from './inject-entry';
 
 const log = new Logger('webpack-util');
 
