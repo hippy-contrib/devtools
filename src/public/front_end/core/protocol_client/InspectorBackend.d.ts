@@ -117,6 +117,7 @@ export declare class SessionRouter {
         proxyConnection: ((Connection | undefined) | null);
     }>;
     _pendingScripts: (() => void)[];
+    _clientId: string;
     constructor(connection: Connection);
     registerSession(target: TargetBase, sessionId: string, proxyConnection?: Connection | null): void;
     unregisterSession(sessionId: string): void;

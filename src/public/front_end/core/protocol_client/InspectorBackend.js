@@ -157,6 +157,7 @@ export class SessionRouter {
     _pendingLongPollingMessageIds;
     _sessions;
     _pendingScripts;
+    _clientId;
     constructor(connection) {
         this._connection = connection;
         this._lastMessageId = 1;
@@ -173,6 +174,11 @@ export class SessionRouter {
                 session.target.dispose(reason);
             }
         });
+        const url = new URL(window.location.href);
+        const wsParam = url.searchParams.get('ws');
+        const wssParam = url.searchParams.get('wss');
+        const newUrl = new URL(wsParam ? `ws://${wsParam}` : `wss://${wssParam}`);
+        this._clientId = newUrl.searchParams.get('clientId');
     }
     registerSession(target, sessionId, proxyConnection) {
         // Only the Audits panel uses proxy connections. If it is ever possible to have multiple active at the
@@ -257,6 +263,17 @@ export class SessionRouter {
         }
         const messageObject = ((typeof message === 'string') ? JSON.parse(message) : message);
         const method = messageObject.method;
+        if (method === 'TDFRuntime.enableVueDevtools') {
+            window.dispatchEvent(new Event('TDFRuntime.enableVueDevtools'));
+            if (window.aegis) {
+                window.aegis.reportEvent({
+                    name: 'vue-devtools-enable',
+                    ext1: this._clientId,
+                    ext2: messageObject.params.contextName,
+                });
+            }
+            return;
+        }
         const { performance } = messageObject;
         if (window.aegis && performance) {
             const { devtoolsToDebugServer, debugServerReceiveFromDevtools, debugServerToDevtools, } = performance;
