@@ -193,6 +193,7 @@ export class SocketServer {
     const downwardSubscriber = new Subscriber(downwardChannelId);
     // internal channel used to listen message between nodes, such as when app ws closed, notify devtools ws close
     const internalSubscriber = new Subscriber(internalChannelId);
+    const internalPublisher = new Publisher(internalChannelId);
     const publisher = new Publisher(upwardChannelId);
     const downwardHandler = (msg) => {
       ws.send(msg);
@@ -213,7 +214,7 @@ export class SocketServer {
       }
     };
     const internalHandler = (msg) => {
-      if (msg === InternalChannelEvent.WSClose) {
+      if (msg === InternalChannelEvent.AppWSClose) {
         log.warn('close devtools ws connection');
         ws.close(WSCode.ClosePage, 'the target page is closed');
         internalSubscriber.unsubscribe(internalHandler);
@@ -222,6 +223,7 @@ export class SocketServer {
     };
     downwardSubscriber.subscribe(downwardHandler);
     internalSubscriber.subscribe(internalHandler);
+    internalPublisher.publish(InternalChannelEvent.DevtoolsConnected);
 
     // for iOS, must invoke Debugger.disable before devtools frontend connected, otherwise couldn't
     // receive Debugger.scriptParsed event.

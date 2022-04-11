@@ -125,7 +125,8 @@ export enum WinstonColor {
 }
 
 export enum InternalChannelEvent {
-  WSClose = 'WSClose',
+  AppWSClose = 'AppWSClose',
+  DevtoolsConnected = 'DevtoolsConnected',
 }
 
 export enum ChromeLogLevel {

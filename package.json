@@ -1,6 +1,6 @@
 {
   "name": "@hippy/debug-server-next",
-  "version": "0.2.34-alpha.3",
+  "version": "0.2.34",
   "description": "Debug server for hippy.",
   "repository": "https://github.com/hippy-contrib/debug-server-next",
   "homepage": "http://hippyjs.org",
@@ -74,7 +74,7 @@
     "serve-index": "^1.9.1",
     "sockjs": "^0.3.21",
     "spdy": "^4.0.2",
-    "tdf-devtools-protocol": "^0.0.36",
+    "tdf-devtools-protocol": "latest",
     "tslib": "^2.3.0",
     "url": "^0.11.0",
     "webpack-dev-middleware": "^5.2.1",

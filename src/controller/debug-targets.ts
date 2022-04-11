@@ -11,14 +11,19 @@ export class DebugTargetManager {
   public static debugTargets: DebugTarget[] = [];
 
   /**
-   * 查询所有连接的调试对象
+   * find all debugTargets
+   *
+   * @static
+   * @param {string} hash auth control
+   * @param {boolean} [ignoreHash=false] only use in server side, for vue-devtools find current debug ContextName
+   * @memberof DebugTargetManager
    */
-  public static getDebugTargets = async (hash: string): Promise<DebugTarget[]> => {
+  public static getDebugTargets = async (hash: string, ignoreHash = false): Promise<DebugTarget[]> => {
     const { iWDPPort } = global.debugAppArgv;
     const { DB } = getDBOperator();
     const db = new DB(config.redis.debugTargetTable);
     let getDebugTargetPromise;
-    if (config.isCluster) {
+    if (config.isCluster && !ignoreHash) {
       getDebugTargetPromise = hash ? db.find('hash', hash) : Promise.resolve([]);
     } else {
       getDebugTargetPromise = db.getAll();
@@ -44,10 +49,17 @@ export class DebugTargetManager {
   };
 
   /**
-   * 根据 clientId 查询调试对象
+   * find debugTarget by clientId
+   *
+   * @static
+   * @param {string} clientId
+   * @param {string} hash auth control
+   * @param {boolean} [ignoreHash=false] only use in server side, for vue-devtools find current debug ContextName
+   * @return {*}
+   * @memberof DebugTargetManager
    */
-  public static async findDebugTarget(clientId: string, hash: string) {
-    const debugTargets = await DebugTargetManager.getDebugTargets(hash);
+  public static async findDebugTarget(clientId: string, hash: string, ignoreHash = false) {
+    const debugTargets = await DebugTargetManager.getDebugTargets(hash, ignoreHash);
     return debugTargets.find((target) => target.clientId === clientId);
   }
 }
