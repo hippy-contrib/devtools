@@ -31,6 +31,14 @@ export type HMRWsParams = {
   clientRole: ClientRole;
 };
 
+export type JSRuntimeWsUrlParams = {
+  // in hippy runtime, frontend get clientId by gtk in $start callback
+  clientId: string;
+  pathname: string;
+  clientRole: ClientRole;
+  contextName: string;
+};
+
 export type WsUrlParams = AppWsUrlParams | DevtoolsWsUrlParams | HMRWsParams;
 
 /**
@@ -76,7 +84,7 @@ export const getWsInvalidReason = (wsUrlParams: WsUrlParams): string => {
   // if (clientRole === ClientRole.Devtools && !('hash' in wsUrlParams) && config.isCluster)
   //   return 'invalid ws connection, you ws url should carry `hash` query params!';
   if (clientRole === ClientRole.IOS && !contextName) return 'invalid iOS connection, should request with contextName!';
-  if (!clientId) return 'invalid ws connection!';
+  if (clientRole !== ClientRole.JSRuntime && !clientId) return 'invalid ws connection!';
   return '';
 };
 
@@ -114,4 +122,4 @@ export const getBaseFolderOfPublicPath = (publicPath: string) => {
 export const getHomeUrl = () => {
   const { env } = global.debugAppArgv;
   return `${config.domain}/extensions/home.html?env=${env}`;
-}
+};

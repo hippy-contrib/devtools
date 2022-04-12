@@ -190,3 +190,10 @@ export const publishReloadCommand = (debugTarget: DebugTarget) => {
     });
   }, 2000);
 };
+
+export const publishRes = (clientId: string, res: Adapter.CDP.Res) => {
+  const downwardChannelId = createDownwardChannel(clientId);
+  const { Publisher } = getDBOperator();
+  const downPublisher = new Publisher(downwardChannelId);
+  downPublisher.publish(JSON.stringify(res));
+};

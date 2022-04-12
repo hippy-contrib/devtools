@@ -18,12 +18,20 @@ import { DebugTargetManager } from '@/controller/debug-targets';
 import { subscribeCommand, cleanDebugTarget, cleanAllDebugTargets } from '@/controller/pub-sub-manager';
 import { Logger } from '@/utils/log';
 import { createDownwardChannel, createUpwardChannel, createInternalChannel } from '@/utils/pub-sub-channel';
-import { parseWsUrl, getWsInvalidReason, AppWsUrlParams, DevtoolsWsUrlParams, HMRWsParams } from '@/utils/url';
+import {
+  parseWsUrl,
+  getWsInvalidReason,
+  AppWsUrlParams,
+  DevtoolsWsUrlParams,
+  HMRWsParams,
+  JSRuntimeWsUrlParams,
+} from '@/utils/url';
 import { createTargetByWsUrlParams, patchRefAndSave } from '@/utils/debug-target';
 import { config } from '@/config';
 import { onHMRClientConnection, onHMRServerConnection } from '@/controller/hmr';
 import { MyWebSocket } from '@/@types/socker-server';
 import { publishReloadCommand } from '@/utils/reload-adapter';
+import { onVueClientConnection } from '@/controller/vue-devtools';
 
 const heartbeatInterval = 30000;
 // 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
@@ -137,7 +145,12 @@ export class SocketServer {
     ws.on('pong', () => {
       ws.isAlive = true;
     });
+
     const { clientRole } = wsUrlParams;
+    if ([ClientRole.JSRuntime, ClientRole.VueDevtools].includes(clientRole)) {
+      onVueClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
+      return;
+    }
     if (clientRole === ClientRole.HMRClient) {
       onHMRClientConnection(ws, wsUrlParams as HMRWsParams);
     } else if (clientRole === ClientRole.HMRServer) {
@@ -180,6 +193,7 @@ export class SocketServer {
     const downwardSubscriber = new Subscriber(downwardChannelId);
     // internal channel used to listen message between nodes, such as when app ws closed, notify devtools ws close
     const internalSubscriber = new Subscriber(internalChannelId);
+    const internalPublisher = new Publisher(internalChannelId);
     const publisher = new Publisher(upwardChannelId);
     const downwardHandler = (msg) => {
       ws.send(msg);
@@ -200,7 +214,7 @@ export class SocketServer {
       }
     };
     const internalHandler = (msg) => {
-      if (msg === InternalChannelEvent.WSClose) {
+      if (msg === InternalChannelEvent.AppWSClose) {
         log.warn('close devtools ws connection');
         ws.close(WSCode.ClosePage, 'the target page is closed');
         internalSubscriber.unsubscribe(internalHandler);
@@ -209,6 +223,7 @@ export class SocketServer {
     };
     downwardSubscriber.subscribe(downwardHandler);
     internalSubscriber.subscribe(internalHandler);
+    internalPublisher.publish(InternalChannelEvent.DevtoolsConnected);
 
     // for iOS, must invoke Debugger.disable before devtools frontend connected, otherwise couldn't
     // receive Debugger.scriptParsed event.

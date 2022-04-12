@@ -162,7 +162,10 @@ global.startHMR = () => {
   socket(socketURL, onSocketMessage, options.reconnect);
 };
 
-// need delay for hippy WebSocket constructor mount to global object
+/**
+ * need delay for hippy WebSocket constructor mount to global object
+ * or append this entry after Hippy-Vue SDK
+ */
 setTimeout(() => {
   global.startHMR();
 }, 1000);

@@ -4,7 +4,7 @@
   },
   "compilerOptions": {
     "rootDir": ".",
-    "target": "es6",
+    "target": "ES2019",
     "module": "CommonJS",
     "strict": true,
     "jsx": "preserve",

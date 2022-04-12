@@ -6,6 +6,9 @@ import { ReportEvent } from '@/@types/enum';
 import { timeStart } from '@/utils/aegis';
 
 const log = new Logger('cos-util');
+const baseCosOption = {
+  Domain: '{Bucket}.cos-internal.{Region}.tencentcos.cn',
+};
 
 export const enum COSErrorCode {
   ParamsMiss = -1,
@@ -35,6 +38,7 @@ export const cosUploadByBuffer = function (options: COSUploadByBufferOptions) {
   const timeEnd = timeStart(ReportEvent.COSUpload);
   return new Promise((resolve, reject) => {
     const client = new COS({
+      ...baseCosOption,
       SecretId,
       SecretKey,
     });
@@ -122,6 +126,7 @@ export const deleteObjects = function (keys: string[]) {
   const { Bucket } = config.cos;
   const { Region } = config.cos;
   const client = new COS({
+    ...baseCosOption,
     SecretId,
     SecretKey,
   });

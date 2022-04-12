@@ -21,5 +21,7 @@ export const upwardChannelToDownwardChannel = (upwardChannelId: string) =>
 
 export const createHMRChannel = (hash: string) => `HMR-${hash}`;
 
+export const createVueDevtoolsChannel = (clientId: string) => createChannel(clientId, 'vue-devtools', '_');
+
 const createChannel = (clientId: string, extensionName?: string, spliter?: string) =>
   `${clientId}${spliter}${extensionName || defaultExtensionName}`;

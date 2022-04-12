@@ -13,9 +13,9 @@ const schema = require('./options.json');
 const WebSocket = require('ws');
 const { HMREvent } = require('@/@types/enum');
 const { encodeHMRData } = require('@/utils/buffer');
-const { getWSProtocolByHttpProtocol } = require('@/utils/url');
+const { getWSProtocolByHttpProtocol, makeUrl } = require('@/utils/url');
 const { config } = require('@/config');
-const { saveDevPort } = require('@/utils/webpack');
+const { saveDevPort, injectEntry } = require('@/utils/webpack');
 const { startAdbProxy } = require('@/child-process/adb');
 const { get } = require('lodash');
 const colors = require('colors/safe');
@@ -176,8 +176,21 @@ class Server {
 
   addAdditionalEntries(compiler) {
     if(!this.options.remote) return;
+    const {appendEntries: hmrAppendEntries, prependEntries: hmrPrependEntries} = this.addHMREntries(compiler);
+    const {appendEntries: vueAppendEntries, prependEntries: vuePrependEntries} = this.addVueDevtoolsEntries();
+    
+    // must ensure correct inject sequence, because the append entries depend on the prepend and original entries.
+    injectEntry(
+      compiler, 
+      undefined, 
+      [...hmrPrependEntries, ...vuePrependEntries],
+      [...hmrAppendEntries, ...vueAppendEntries], 
+    );
+  }
 
-    const additionalEntries = [];
+  addHMREntries(compiler) {
+    const appendEntries = [];
+    const prependEntries = [];
     const isWebTarget = compiler.options.externalsPresets
       ? compiler.options.externalsPresets.web
       : [
@@ -216,74 +229,31 @@ class Server {
 
       webSocketURL = searchParams.toString();
 
-      additionalEntries.push(`${require.resolve('../client/index.js')}?${webSocketURL}`);
+      appendEntries.push(`${require.resolve('../client/index.js')}?${webSocketURL}`);
     }
 
     if (this.options.hot) {
       let hotEntry;
-
       if (this.options.hot === 'only') {
         hotEntry = require.resolve('../client/hot/only-dev-server');
       } else if (this.options.hot) {
         hotEntry = require.resolve('../client/hot/dev-server');
       }
-
-      additionalEntries.push(hotEntry);
+      appendEntries.push(hotEntry);
     }
+    return { appendEntries, prependEntries };
+  }
 
-    const webpack = compiler.webpack || require('webpack');
-
-    // use a hook to add entries if available
-    if (typeof webpack.EntryPlugin !== 'undefined') {
-      for (const additionalEntry of additionalEntries) {
-        new webpack.EntryPlugin(compiler.context, additionalEntry, {
-          // eslint-disable-next-line no-undefined
-          name: undefined,
-        }).apply(compiler);
-      }
-    } else {
-      // TODO remove after drop webpack v4 support
-      /**
-       * prependEntry Method for webpack 4
-       * @param {Entry} originalEntry
-       * @param {Entry} newAdditionalEntries
-       * @returns {Entry}
-       */
-      const prependEntry = (originalEntry, newAdditionalEntries) => {
-        if (typeof originalEntry === 'function') {
-          return () => Promise.resolve(originalEntry()).then((entry) => prependEntry(entry, newAdditionalEntries));
-        }
-
-        if (typeof originalEntry === 'object' && !Array.isArray(originalEntry)) {
-          /** @type {Object<string,string>} */
-          const clone = {};
-
-          Object.keys(originalEntry).forEach((key) => {
-            // entry[key] should be a string here
-            const entryDescription = originalEntry[key];
-
-            clone[key] = prependEntry(entryDescription, newAdditionalEntries);
-          });
-
-          return clone;
-        }
-
-        // in this case, entry is a string or an array.
-        // make sure that we do not add duplicates.
-        /** @type {Entry} */
-        const entriesClone = additionalEntries.slice(0);
-
-        [].concat(originalEntry).forEach((newEntry) => {
-          if (!entriesClone.includes(newEntry)) {
-            entriesClone.push(newEntry);
-          }
-        });
-
-        return entriesClone;
-      };
-
-      compiler.options.entry = prependEntry(compiler.options.entry || './src', additionalEntries);
-      compiler.hooks.entryOption.call(compiler.options.context, compiler.options.entry);
+  addVueDevtoolsEntries() {
+    if(!this.options.vueDevtools) return {appendEntries: [], prependEntries: []};
+    const { host, port, protocol } = this.options.remote;
+    const vueBackend = makeUrl(require.resolve('@hippy/hippy-vue-devtools-plugin/lib/backend'), {
+      host, port, protocol
+    });
+    const vueHook = require.resolve('@hippy/hippy-vue-devtools-plugin/lib/hook');
+    return {
+      appendEntries: [vueBackend], 
+      prependEntries: [vueHook]
     }
   }
 

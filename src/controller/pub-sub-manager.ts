@@ -130,10 +130,10 @@ export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean,
 
   const { publisherMap, upwardSubscriber, internalPublisher } = channelInfo;
   if (closeDevtools) {
-    internalPublisher.publish(InternalChannelEvent.WSClose);
+    internalPublisher.publish(InternalChannelEvent.AppWSClose);
   }
   Array.from(publisherMap.values()).forEach((publisher) => publisher.disconnect());
-  // need some delay for the finish of `InternalChannelEvent.WSClose` event
+  // need some delay for the finish of `InternalChannelEvent.AppWSClose` event
   process.nextTick(() => {
     upwardSubscriber.pUnsubscribe();
     upwardSubscriber.disconnect();

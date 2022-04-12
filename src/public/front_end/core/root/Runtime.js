@@ -30,6 +30,7 @@ export const mappingForLayoutTests = new Map([
     ['panels/ui_inspector', 'ui_inspector'],
     ['panels/cdp_debug', 'cdp_debug'],
     ['panels/core_performance', 'core_performance'],
+    ['panels/vue_devtools', 'vue_devtools'],
     ['panels/elements', 'elements'],
     ['panels/emulation', 'emulation'],
     ['panels/mobile_throttling', 'mobile_throttling'],
