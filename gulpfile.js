@@ -24,7 +24,7 @@ gulp.task('chmod', () =>
   gulp.src(['dist/index-debug.js', 'dist/index-dev.js']).pipe(chmod(0o755)).pipe(gulp.dest('dist')),
 );
 
-gulp.task('clean', () => Promise.all([rimrafAsync('dist'), rimrafAsync('src/cache'), rimrafAsync('src/log')]));
+gulp.task('clean', () => Promise.all([rimrafAsync('dist'), rimrafAsync('src/cache'), rimrafAsync('src/log'), rimrafAsync('src/hmr')]));
 
 function rimrafAsync(fpath) {
   return new Promise((resolve, reject) => {
