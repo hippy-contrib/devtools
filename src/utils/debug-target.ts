@@ -176,3 +176,15 @@ export const removeDebugTarget = async (clientId: string) => {
   const db = new DB<DebugTarget>(config.redis.debugTargetTable);
   return db.delete(clientId);
 };
+
+export const updateDebugTarget = async (clientId: string, partialDebugTarget: Partial<DebugTarget>) => {
+  const { DB } = getDBOperator();
+  const db = new DB<DebugTarget>(config.redis.debugTargetTable);
+  const oldDebugTarget = await db.get(clientId);
+  const updated: DebugTarget = {
+    ...oldDebugTarget,
+    ...partialDebugTarget,
+  };
+  await db.upsert(clientId, updated);
+  return updated;
+};

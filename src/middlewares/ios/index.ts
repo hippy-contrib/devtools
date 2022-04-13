@@ -3,6 +3,7 @@ import { cssMiddleWareManager } from '../common/css-middleware';
 import { tdfHeapMiddleWareManager } from '../common/heap-middleware';
 import { MiddleWareManager } from '../middleware-context';
 import { tdfLogMiddleWareManager } from '../common/tdf-log-middleware';
+import { tdfRuntimeMiddleWareManager } from '../common/tdf-runtime-middleware';
 import { debuggerMiddleWareManager } from './debugger-middleware';
 import { heapMiddleWareManager } from './heap-middleware';
 import { logMiddleWareManager } from './log-middleware';
@@ -19,4 +20,5 @@ export const iOSMiddleWareManager: MiddleWareManager = merge(
   traceMiddleWareManager,
   heapMiddleWareManager,
   cssMiddleWareManager,
+  tdfRuntimeMiddleWareManager,
 );

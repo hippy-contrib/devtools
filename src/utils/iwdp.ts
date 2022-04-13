@@ -108,7 +108,10 @@ const findIOSPage = (debugTarget: DebugTarget, iOSPages: Array<IWDPPage>) => {
   return findLast(
     iOSPagesWithFlag,
     (iOSPage) =>
-      // TODO doesn't support multiple device with same title
+      /**
+       * TODO doesn't support multiple device with same title
+       * this will cause updating debugTargets deviceInfo confused in list page
+       */
       (debugTarget.appClientTypeList.includes(AppClientType.WS) && debugTarget.title === iOSPage.title) ||
       // && debugTarget.deviceName === iOSPage.device.deviceName
       (debugTarget.appClientTypeList.includes(AppClientType.Tunnel) &&
