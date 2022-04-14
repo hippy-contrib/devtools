@@ -1,12 +1,17 @@
 export const enum DevtoolsEnv {
+  // include hippy 2.x, hippy 3.x (voltron, native)
   Hippy = 'hippy',
-  Voltron = 'voltron',
-  TDF = 'TDF',
   TDFCore = 'TDFCore',
+  HippyTDF = 'HippyTDF',
+}
+
+export enum DebugTunnel {
+  TCP = 'TCP',
+  WS = 'WS',
 }
 
 export enum DevicePlatform {
-  Unkonwn = '0',
+  Unknown = '0',
   IOS = '1',
   Android = '2',
 }
@@ -106,7 +111,7 @@ export enum DBType {
 export enum WinstonColor {
   BgRed = 'bgRed',
   Black = 'black',
-  // Red = 'red',
+  Red = 'red',
   Green = 'green',
   Yellow = 'yellow',
   Blue = 'blue',

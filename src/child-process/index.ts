@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import path from 'path';
 import os from 'os';
 import open from 'open';
+import colors from 'colors/safe';
 import { TunnelEvent, WinstonColor, OSType, LogLevel } from '@/@types/enum';
 import { deviceManager } from '@/device-manager';
 import { Logger, TunnelLogger } from '@/utils/log';
@@ -28,6 +29,12 @@ export const startTunnel = async (cb?: StartTunnelCallback) => {
         tunnelEmitter.emit(TUNNEL_EVENT, data);
       } else {
         if ([TunnelEvent.RemoveDevice, TunnelEvent.AddDevice].indexOf(event) !== -1) {
+          if (event === TunnelEvent.RemoveDevice) {
+            childProcessLog.warn(colors.bold[WinstonColor.Red]('device disconnected'));
+          }
+          if (event === TunnelEvent.AddDevice) {
+            childProcessLog.info(colors.bold[WinstonColor.Green]('device connected'));
+          }
           deviceManager.getDeviceList();
           if (event === TunnelEvent.AddDevice) {
             // 每次设备连接后，运行 adb reverse

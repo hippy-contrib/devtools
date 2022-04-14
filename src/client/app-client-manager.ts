@@ -55,3 +55,11 @@ export type AppClientFullOption = AppClientOption & {
 };
 
 export type AppClientFullOptionOmicCtx = Omit<AppClientFullOption, 'urlParsedContext'>;
+
+export type FrameworkConfig = {
+  useAllDomain: boolean;
+  ignoreDomains: string[];
+  acceptDomains: string[];
+  platform: DevicePlatform;
+  Ctor: AppClient;
+};

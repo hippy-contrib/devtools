@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Aegis from 'aegis-node-sdk';
+import Aegis from '@/patch/aegis';
 import { config } from '@/config';
 import { version } from '../../package.json';
 

@@ -4,11 +4,12 @@ import { AppClientEvent, DevicePlatform, ErrorCode, MiddlewareType, WinstonColor
 import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
-  MiddleWareManager,
   UrlParsedContext,
   requestId,
   MiddleWareContext,
   MiddleWare,
+  androidMiddleWareManager,
+  iOSMiddleWareManager,
 } from '@/middlewares';
 import { CDP_DOMAIN_LIST, getDomain } from '@/utils/cdp';
 import { Logger } from '@/utils/log';
@@ -16,6 +17,7 @@ import { composeMiddlewares } from '@/utils/middleware';
 import { createCDPPerformance } from '@/utils/aegis';
 import { config } from '@/config';
 
+// ignore log the following method, because of frequency
 const ignoreMethods = ['Page.screencastFrame', 'Page.screencastFrameAck'];
 // const filteredLog = new Logger('filtered', WinstonColor.Yellow);
 const downwardLog = new Logger('↓↓↓', WinstonColor.BrightRed);
@@ -27,16 +29,12 @@ export interface AppClient {
 }
 
 /**
- * app client 通道，负责调试协议至 app 端的收发。目前包括三个通道，分别由三个子类实现：
- *    - tunnel 通道：c++ addon 实现
- *    - ws 通道：手 Q 采用此通道
- *    - IWDP 通道：TDF iOS 采用此通道
+ * app client message tunnel
  **/
 export abstract class AppClient extends EventEmitter {
   public id: string;
   protected isClosed = false;
   protected platform: DevicePlatform;
-  private middleWareManager: MiddleWareManager;
   private urlParsedContext: UrlParsedContext;
   private acceptDomains: string[] = CDP_DOMAIN_LIST;
   private ignoreDomains: string[] = [];
@@ -49,24 +47,22 @@ export abstract class AppClient extends EventEmitter {
       performance: Adapter.Performance;
     }
   > = new Map();
+  private get middleWareManager() {
+    return {
+      [DevicePlatform.Android]: androidMiddleWareManager,
+      [DevicePlatform.IOS]: iOSMiddleWareManager,
+    }[this.platform];
+  }
 
   public constructor(
     id,
-    {
-      useAllDomain = true,
-      acceptDomains,
-      ignoreDomains = [],
-      middleWareManager,
-      urlParsedContext,
-      platform,
-    }: AppClientOption,
+    { useAllDomain = true, acceptDomains, ignoreDomains = [], urlParsedContext, platform }: AppClientOption,
   ) {
     super();
     this.id = id;
     this.useAllDomain = useAllDomain;
     this.acceptDomains = acceptDomains;
     this.ignoreDomains = ignoreDomains;
-    this.middleWareManager = middleWareManager;
     this.urlParsedContext = urlParsedContext;
     this.platform = platform;
   }
@@ -89,7 +85,6 @@ export abstract class AppClient extends EventEmitter {
       }),
     });
     const middlewareList = this.getMiddlewareList(MiddlewareType.Upward, method);
-    // 上行的具体协议的处理交给中间件去适配，最后分发到 app 端
     return this.middlewareMessageHandler(middlewareList, msg);
   }
 
@@ -214,7 +209,6 @@ export type AppClientOption = {
   ignoreDomains?: string[];
   ws?: WebSocket;
   iWDPWsUrl?: string;
-  middleWareManager: MiddleWareManager;
   urlParsedContext: UrlParsedContext;
   platform: DevicePlatform;
 };
