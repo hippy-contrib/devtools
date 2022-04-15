@@ -29,7 +29,7 @@ UI.ViewManager.registerViewExtension({
     id: 'custom-vue-devtools',
     title: () => 'Vue Devtools',
     commandPrompt: () => 'show Vue Devtools',
-    persistence: "permanent" /* PERMANENT */,
+    persistence: "closeable" /* PERMANENT */,
     order: 500,
     async loadView() {
         const VueDevtools = await loadVueDevtoolsModule();

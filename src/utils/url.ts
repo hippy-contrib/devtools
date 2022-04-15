@@ -80,10 +80,15 @@ export const getWsInvalidReason = (wsUrlParams: WsUrlParams): string => {
     return 'invalid HMR ws params, must connect with hash field!';
   }
 
-  const { clientId, contextName } = wsUrlParams as AppWsUrlParams | DevtoolsWsUrlParams;
+  const { clientId } = wsUrlParams as AppWsUrlParams | DevtoolsWsUrlParams;
   // if (clientRole === ClientRole.Devtools && !('hash' in wsUrlParams) && config.isCluster)
   //   return 'invalid ws connection, you ws url should carry `hash` query params!';
-  if (clientRole === ClientRole.IOS && !contextName) return 'invalid iOS connection, should request with contextName!';
+
+  /**
+   * no need to validate contextName, because iOS hippy v3.0 couldn't get contextName when debug connection
+   * contextName will update by TDFRuntime.updateContextInfo event
+   */
+  // if (clientRole === ClientRole.IOS && !contextName) return 'invalid iOS connection, should request with contextName!';
   if (clientRole !== ClientRole.JSRuntime && !clientId) return 'invalid ws connection!';
   return '';
 };

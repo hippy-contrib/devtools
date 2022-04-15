@@ -163,7 +163,7 @@ export const decreaseRefAndSave = async (clientId: string): Promise<DebugTarget>
   debugTarget.ref -= 1;
   log.info('decrease debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
   if (debugTarget.ref <= 0) {
-    db.delete(clientId);
+    await db.delete(clientId);
     log.info('debugTarget ref is 0, should delete, clientId: %s', clientId);
     return;
   }
@@ -175,4 +175,16 @@ export const removeDebugTarget = async (clientId: string) => {
   const { DB } = getDBOperator();
   const db = new DB<DebugTarget>(config.redis.debugTargetTable);
   return db.delete(clientId);
+};
+
+export const updateDebugTarget = async (clientId: string, partialDebugTarget: Partial<DebugTarget>) => {
+  const { DB } = getDBOperator();
+  const db = new DB<DebugTarget>(config.redis.debugTargetTable);
+  const oldDebugTarget = await db.get(clientId);
+  const updated: DebugTarget = {
+    ...oldDebugTarget,
+    ...partialDebugTarget,
+  };
+  await db.upsert(clientId, updated);
+  return updated;
 };

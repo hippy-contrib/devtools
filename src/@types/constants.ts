@@ -11,3 +11,16 @@ export const SIMULATOR_DEVICE_NAME = 'SIMULATOR';
  * so server could distinguish intranet and extranet
  */
 export const HOST_HEADER = 'X-IAS-HOST';
+
+// custom implement domain list
+export const customDomains = [
+  'Page',
+  'DOM',
+  'CSS',
+  'Overlay',
+  'TDFInspector',
+  'TDFPerformance',
+  'TDFMemory',
+  'TDFLog',
+  'TDFRuntime',
+];

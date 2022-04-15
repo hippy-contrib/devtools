@@ -10,7 +10,7 @@ import { config } from '@/config';
 const log = new Logger('router');
 
 export const routeApp = (app: Koa) => {
-  const { staticPath, entry } = global.debugAppArgv;
+  const { static: staticPath, entry } = global.debugAppArgv;
 
   app.use(bodyParser());
 

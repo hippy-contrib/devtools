@@ -39,7 +39,7 @@
     "@hippy/hippy-hmr-plugin": "latest",
     "@hippy/hippy-vue-devtools-plugin": "latest",
     "@koa/cors": "^3.1.0",
-    "aegis-node-sdk": "^1.21.7",
+    "axios": "^0.26.1",
     "bonjour": "^3.5.0",
     "chokidar": "~3.5.2",
     "color-normalize": "^1.5.2",

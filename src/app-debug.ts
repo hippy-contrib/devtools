@@ -1,6 +1,5 @@
 import fs from 'fs';
 import { Server as HTTPServer } from 'http';
-import kill from 'kill-port';
 import Koa from 'koa';
 import colors from 'colors/safe';
 import { initAppClient } from '@/client';
@@ -9,7 +8,7 @@ import { Logger } from '@/utils/log';
 import { initDbModel } from '@/db';
 import { routeApp } from '@/router';
 import { config } from '@/config';
-import { WinstonColor, DevtoolsEnv } from '@/@types/enum';
+import { WinstonColor, DevtoolsEnv, DebugTunnel } from '@/@types/enum';
 import { getHomeUrl } from '@/utils/url';
 
 const log = new Logger('debug-server', WinstonColor.Yellow);
@@ -21,8 +20,9 @@ let socketServer: SocketServer;
  */
 export const startDebugServer = async () => {
   log.info('start server argv: %j', global.debugAppArgv);
-  const { host, port, env } = global.debugAppArgv;
   await init();
+  
+  const { host, port, env } = global.debugAppArgv;
   if (env === DevtoolsEnv.Hippy) showHippyGuide();
   const app = new Koa();
   routeApp(app);
@@ -72,9 +72,10 @@ export const stopServer = async (exitProcess = false, ...arg) => {
 };
 
 /**
- * 服务初始化
+ * init DB, directory, Tunnel.node, AppClient
  */
 const init = async () => {
+  normalizeArgv();
   const { cachePath, hmrStaticPath } = config;
   try {
     fs.rmdirSync(cachePath, { recursive: true });
@@ -89,17 +90,6 @@ const init = async () => {
   await fs.promises.mkdir(hmrStaticPath, { recursive: true });
   initDbModel();
   initAppClient();
-
-  const { port, iWDPPort, clearAddrInUse } = global.debugAppArgv;
-  if (clearAddrInUse) {
-    try {
-      await kill(port, 'tcp');
-      await kill(iWDPPort, 'tcp');
-    } catch (e) {
-      log.error('Address %s %s already in use! %s', port, iWDPPort, (e as Error)?.stack);
-      return process.exit(1);
-    }
-  }
 };
 
 const showHippyGuide = () => {
@@ -112,4 +102,17 @@ const showHippyGuide = () => {
 
 find full guide on ${colors.underline[WinstonColor.Blue]('https://hippyjs.org/#/guide/debug')}`),
   );
+};
+
+/**
+ * set default tunnel in different framework
+ */
+const normalizeArgv = () => {
+  const { env, tunnel } = global.debugAppArgv;
+  if (tunnel) return;
+  if ([DevtoolsEnv.Hippy, DevtoolsEnv.HippyTDF].includes(env)) {
+    global.debugAppArgv.tunnel = DebugTunnel.WS;
+  } else if (env === DevtoolsEnv.TDFCore) {
+    global.debugAppArgv.tunnel = DebugTunnel.TCP;
+  }
 };

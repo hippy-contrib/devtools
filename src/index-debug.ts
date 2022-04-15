@@ -6,10 +6,10 @@ moduleAlias.addAliases({
   '@': __dirname,
 });
 import yargs from 'yargs';
-// import detect from 'detect-port';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
-import { DevtoolsEnv, LogLevel } from '@/@types/enum';
+import { DevtoolsEnv, DebugTunnel, LogLevel } from '@/@types/enum';
+import { DebugAppArgv } from '@/@types/app.d';
 
 const { argv } = yargs
   .alias('v', 'version')
@@ -65,19 +65,18 @@ const { argv } = yargs
     type: 'string',
     default: DevtoolsEnv.Hippy,
     describe: 'Debug framework',
-    choices: [DevtoolsEnv.Hippy, DevtoolsEnv.Voltron, DevtoolsEnv.TDF, DevtoolsEnv.TDFCore],
+    choices: [DevtoolsEnv.Hippy, DevtoolsEnv.TDFCore, DevtoolsEnv.HippyTDF],
+  })
+  .option('tunnel', {
+    type: 'string',
+    describe: 'Debug protocol transport, by default Hippy use WS, TDFCore use TCP, HippyTDF use WS',
+    choices: [DebugTunnel.WS, DebugTunnel.TCP],
   })
   .epilog(`Copyright (C) 2017-${new Date().getFullYear()} THL A29 Limited, a Tencent company.`);
 
-type Argv = typeof argv & {
-  version: string;
-  help: string;
-};
-const fullArgv = argv as Argv;
-if (fullArgv.help) yargs.showHelp().exit(0, null);
-if (fullArgv.version) yargs.version().exit(0, null);
-
-global.debugAppArgv = fullArgv;
+global.debugAppArgv = argv as unknown as DebugAppArgv;
+if (debugAppArgv.help) yargs.showHelp().exit(0, null);
+if (debugAppArgv.version) yargs.version().exit(0, null);
 
 /**
  * import after global.debugAppArgv is set
@@ -90,12 +89,4 @@ import './process-handler';
 const log = new Logger('entry');
 log.info('version: %s', version);
 
-(async () => {
-  // const { iWDPPort } = global.debugAppArgv;
-  // const port = await detect(iWDPPort);
-  // if (port !== iWDPPort) {
-  //   global.debugAppArgv.iWDPPort = port;
-  //   log.warn('iWDPPort was changed to %d, because %d is occupied!', port, iWDPPort);
-  // }
-  startDebugServer();
-})();
+startDebugServer();

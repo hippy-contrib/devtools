@@ -31,6 +31,17 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: [
+        'src/@types'
+      ],
+      rules: {
+        '@typescript-eslint/triple-slash-reference': 'off',
+        'no-var': 'off',
+      }
+    }
+  ],
   env: {
     // 指定代码的运行环境
     browser: true,
