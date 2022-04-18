@@ -10,6 +10,7 @@ import { routeApp } from '@/router';
 import { config } from '@/config';
 import { WinstonColor, DevtoolsEnv, DebugTunnel } from '@/@types/enum';
 import { getHomeUrl } from '@/utils/url';
+import { isPortInUse } from '@/utils/port';
 
 const log = new Logger('debug-server', WinstonColor.Yellow);
 let server: HTTPServer;
@@ -21,7 +22,7 @@ let socketServer: SocketServer;
 export const startDebugServer = async () => {
   log.info('start server argv: %j', global.debugAppArgv);
   await init();
-  
+
   const { host, port, env } = global.debugAppArgv;
   if (env === DevtoolsEnv.Hippy) showHippyGuide();
   const app = new Koa();
@@ -76,6 +77,7 @@ export const stopServer = async (exitProcess = false, ...arg) => {
  */
 const init = async () => {
   normalizeArgv();
+  await checkPort();
   const { cachePath, hmrStaticPath } = config;
   try {
     fs.rmdirSync(cachePath, { recursive: true });
@@ -114,5 +116,14 @@ const normalizeArgv = () => {
     global.debugAppArgv.tunnel = DebugTunnel.WS;
   } else if (env === DevtoolsEnv.TDFCore) {
     global.debugAppArgv.tunnel = DebugTunnel.TCP;
+  }
+};
+
+const checkPort = async () => {
+  const { port } = global.debugAppArgv;
+  const inUse = await isPortInUse(port);
+  if (inUse) {
+    log.error('EADDRINUSE: port %d is in use!', port);
+    process.exit(1);
   }
 };
