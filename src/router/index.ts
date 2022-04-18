@@ -28,7 +28,7 @@ export const routeApp = (app: Koa) => {
   const debugTargetsRouter = getDebugTargetsRouter();
   app.use(debugTargetsRouter.routes()).use(debugTargetsRouter.allowedMethods());
 
-  const defaultStaicOption = {
+  const defaultStaticOption = {
     buffer: false,
     dynamic: true,
     preload: false,
@@ -36,14 +36,14 @@ export const routeApp = (app: Koa) => {
   // devtools frontend resources
   app.use(
     staticCache(path.join(__dirname, '../public'), {
-      ...defaultStaicOption,
+      ...defaultStaticOption,
       maxAge: 60 * 60,
     }),
   );
   // hmr resources
   app.use(
     staticCache(config.hmrStaticPath, {
-      ...defaultStaicOption,
+      ...defaultStaticOption,
       maxAge: 60 * 60,
     }),
   );
@@ -53,5 +53,5 @@ export const routeApp = (app: Koa) => {
   if (staticPath) servePath = path.resolve(staticPath);
   else servePath = path.resolve(path.dirname(entry));
   log.info(`serve bundle: ${entry}; serve folder: ${servePath}`);
-  app.use(staticCache(servePath, defaultStaicOption));
+  app.use(staticCache(servePath, defaultStaticOption));
 };
