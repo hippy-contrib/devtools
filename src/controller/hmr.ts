@@ -17,7 +17,7 @@ const hmrCloseEvent = 'HMR_SERVER_CLOSED';
 
 export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
-  log.info('HMR client connected, hash: %s', hash);
+  log.verbose('HMR client connected, hash: %s', hash);
   const { Subscriber, DB } = getDBOperator();
   const bundle = await new DB(config.redis.bundleTable).get(hash);
   if (!bundle) {
@@ -40,7 +40,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
       ws.close(WSCode.HMRServerClosed, reason);
       log.warn(reason);
     } else {
-      log.info('receive HMR msg from redis: %s', msg);
+      log.verbose('receive HMR msg from redis: %s', msg);
       const msgObj = JSON.parse(msg.toString());
       if (msgObj.performance) {
         msgObj.performance.serverToApp = Date.now();
@@ -60,7 +60,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
 
 export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
-  log.info('HMR server connected, hash: %s', hash);
+  log.verbose('HMR server connected, hash: %s', hash);
   const { Publisher, DB } = getDBOperator();
   const model = new DB(config.redis.bundleTable);
   model.upsert(hash, { hash });
@@ -101,7 +101,7 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
       }
 
       const msgStr = JSON.stringify(emitJSON);
-      log.info('receive HMR msg from PC: %s', msgStr);
+      log.verbose('receive HMR msg from PC: %s', msgStr);
       if (emitJSON.messages?.length) publisher.publish(msgStr);
     } catch (e) {
       log.error('decodeHMRData failed: ', (e as any)?.stack || e);

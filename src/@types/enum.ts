@@ -224,3 +224,8 @@ export enum LogLevel {
   Debug = 'debug',
   Silly = 'silly',
 }
+
+export enum GatewayFamily {
+  V4 = 'v4',
+  V6 = 'v6',
+}

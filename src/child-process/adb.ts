@@ -15,7 +15,7 @@ export const startAdbProxy = async () => {
       const data = fs.readFileSync(config.hmrPortPath);
       hmrPort = data.toString();
     } catch (e) {
-      log.warn('hmrPort file does not exist.');
+      log.verbose('hmrPort file does not exist.');
     }
   }
   const { port } = global.debugAppArgv || {};

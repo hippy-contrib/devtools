@@ -188,7 +188,7 @@ const addChannelItem = (debugTarget: DebugTarget) => {
 const createUpwardSubscriber = (clientId) => {
   const { Subscriber } = getDBOperator();
   const upwardChannelId = createUpwardChannel(clientId, '*');
-  log.info('subscribe to redis channel %s', upwardChannelId);
+  log.verbose('subscribe to redis channel %s', upwardChannelId);
   return new Subscriber(upwardChannelId);
 };
 
@@ -227,7 +227,7 @@ const createAppClientList = (debugTarget: DebugTarget, ws?: WebSocket): AppClien
           );
           return;
         }
-        log.info(`create app client ${AppClientCtor.name}`);
+        log.verbose(`create app client ${AppClientCtor.name}`);
         const appClient = new AppClientCtor(clientId, newOption);
         appClientList.push(appClient);
         return appClient;

@@ -13,7 +13,7 @@ const log = new Logger('vue-devtools', WinstonColor.Yellow);
 
 export const onVueClientConnection = async (ws: WebSocket, wsUrlParams: JSRuntimeWsUrlParams | DevtoolsWsUrlParams) => {
   const { contextName, clientRole, clientId } = wsUrlParams;
-  log.info('%s connected, clientId: %s', clientRole, clientId);
+  log.verbose('%s connected, clientId: %s', clientRole, clientId);
   const { Subscriber, Publisher } = getDBOperator();
   aegis.reportEvent({
     name: ReportEvent.VueDevtools,

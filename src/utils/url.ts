@@ -70,7 +70,6 @@ export const parseWsUrl = (reqUrl: string): WsUrlParams => {
  */
 export const getWsInvalidReason = (wsUrlParams: WsUrlParams): string => {
   const { clientRole, pathname } = wsUrlParams;
-  log.info('clientRole: %s', clientRole);
 
   if (pathname !== config.wsPath) return 'invalid ws connection path!';
   if (!Object.values(ClientRole).includes(clientRole)) return 'invalid client role!';
