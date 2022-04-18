@@ -6,8 +6,8 @@ const log = new Logger('child-process');
 export const exec = (cmd: string, argv?: string[], options?: SpawnOptionsWithoutStdio) =>
   new Promise((resolve, reject) => {
     const cp = spawn(cmd, argv, options);
-    cp.stdout.on('data', (msg) => log.info(msg.toString()));
-    cp.stderr.on('data', (err) => log.warn(err.toString()));
+    cp.stdout.on('data', (msg) => console.info(msg.toString()));
+    cp.stderr.on('data', (err) => console.warn(err.toString()));
     cp.on('error', (err) => {
       log.error('spawn child process error: %s', err.stack);
       reject(err);

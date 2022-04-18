@@ -29,7 +29,6 @@ export const startDebugServer = async () => {
   routeApp(app);
 
   server = app.listen(port, host, async () => {
-    log.info('start debug server success.');
     if (!config.isCluster) {
       const { startTunnel, startChrome } = await import('./child-process/index');
       await startTunnel();

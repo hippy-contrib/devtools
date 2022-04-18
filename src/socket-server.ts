@@ -140,7 +140,6 @@ export class SocketServer {
   private async onConnection(ws: MyWebSocket, req: IncomingMessage) {
     const wsUrlParams = parseWsUrl(req.url);
     const host = ((req.headers.host || req.headers.Host) as string) || '';
-    log.info('onConnection headers %j \n host: %s', req.headers, host);
     ws.isAlive = true;
     ws.on('pong', () => {
       ws.isAlive = true;
@@ -175,7 +174,7 @@ export class SocketServer {
   private async checkDebugTargetExist(wsUrlParams: DevtoolsWsUrlParams): Promise<boolean> {
     const { clientId, hash } = wsUrlParams;
     const debugTarget = await DebugTargetManager.findDebugTarget(clientId, hash);
-    log.info('checkDebugTargetExist debug target: %j', debugTarget);
+    log.verbose('checkDebugTargetExist debug target: %j', debugTarget);
     return Boolean(debugTarget);
   }
 
@@ -188,7 +187,7 @@ export class SocketServer {
     const downwardChannelId = createDownwardChannel(clientId, extensionName);
     const upwardChannelId = createUpwardChannel(clientId, extensionName);
     const internalChannelId = createInternalChannel(clientId, '');
-    log.info('devtools connected, subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
+    log.verbose('devtools connected, subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
 
     const downwardSubscriber = new Subscriber(downwardChannelId);
     // internal channel used to listen message between nodes, such as when app ws closed, notify devtools ws close
@@ -251,7 +250,7 @@ export class SocketServer {
    */
   private async onAppConnection(ws: MyWebSocket, wsUrlParams: AppWsUrlParams, host: string) {
     const { clientId, clientRole } = wsUrlParams;
-    log.info('WSAppClient connected. %s', clientId);
+    log.verbose('WSAppClient connected. %s', clientId);
     const platform = {
       [ClientRole.Android]: DevicePlatform.Android,
       [ClientRole.IOS]: DevicePlatform.IOS,

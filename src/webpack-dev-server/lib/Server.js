@@ -6,16 +6,15 @@ const url = require('url');
 const util = require('util');
 const fs = require('graceful-fs');
 const ipaddr = require('ipaddr.js');
-const defaultGateway = require('default-gateway');
 const express = require('express');
 const { validate } = require('schema-utils');
 const schema = require('./options.json');
 const WebSocket = require('ws');
-const { HMREvent } = require('@/@types/enum');
+const { HMREvent, GatewayFamily } = require('@/@types/enum');
 const { encodeHMRData } = require('@/utils/buffer');
 const { getWSProtocolByHttpProtocol, makeUrl } = require('@/utils/url');
-const { config } = require('@/config');
 const { saveDevPort, injectEntry } = require('@/utils/webpack');
+const { internalIP, internalIPSync } = require('@/utils/ip');
 const { startAdbProxy } = require('@/child-process/adb');
 const { get } = require('lodash');
 const colors = require('colors/safe');
@@ -73,48 +72,15 @@ class Server {
     return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(URL);
   }
 
-  static findIp(gateway) {
-    const gatewayIp = ipaddr.parse(gateway);
-
-    // Look for the matching interface in all local interfaces.
-    for (const addresses of Object.values(os.networkInterfaces())) {
-      for (const { cidr } of addresses) {
-        const net = ipaddr.parseCIDR(cidr);
-
-        if (net[0] && net[0].kind() === gatewayIp.kind() && gatewayIp.match(net)) {
-          return net[0].toString();
-        }
-      }
-    }
-  }
-
-  static async internalIP(family) {
-    try {
-      const { gateway } = await defaultGateway[family]();
-      return Server.findIp(gateway);
-    } catch {
-      // ignore
-    }
-  }
-
-  static internalIPSync(family) {
-    try {
-      const { gateway } = defaultGateway[family].sync();
-      return Server.findIp(gateway);
-    } catch {
-      // ignore
-    }
-  }
-
   static async getHostname(hostname) {
     if (hostname === 'local-ip') {
-      return (await Server.internalIP('v4')) || (await Server.internalIP('v6')) || '0.0.0.0';
+      return (await internalIP(GatewayFamily.V4)) || (await internalIP(GatewayFamily.V6)) || '0.0.0.0';
     }
     if (hostname === 'local-ipv4') {
-      return (await Server.internalIP('v4')) || '0.0.0.0';
+      return (await internalIP(GatewayFamily.V4)) || '0.0.0.0';
     }
     if (hostname === 'local-ipv6') {
-      return (await Server.internalIP('v6')) || '::';
+      return (await internalIP(GatewayFamily.V6)) || '::';
     }
 
     return hostname || 'localhost';
@@ -1438,13 +1404,13 @@ class Server {
     if (parsedIP.range() === 'unspecified') {
       localhost = prettyPrintURL('localhost');
 
-      const networkIPv4 = Server.internalIPSync('v4');
+      const networkIPv4 = internalIPSync(GatewayFamily.V4);
 
       if (networkIPv4) {
         networkUrlIPv4 = prettyPrintURL(networkIPv4);
       }
 
-      const networkIPv6 = Server.internalIPSync('v6');
+      const networkIPv6 = internalIPSync(GatewayFamily.V6);
 
       if (networkIPv6) {
         networkUrlIPv6 = prettyPrintURL(networkIPv6);
