@@ -36,6 +36,7 @@ export abstract class AppClient extends EventEmitter {
   protected isClosed = false;
   protected platform: DevicePlatform;
   private urlParsedContext: UrlParsedContext;
+  private cacheContext: Record<string, any> = {};
   private acceptDomains: string[] = CDP_DOMAIN_LIST;
   private ignoreDomains: string[] = [];
   private useAllDomain = true;
@@ -116,6 +117,7 @@ export abstract class AppClient extends EventEmitter {
     // 创建中间件上下文，中间件中可以通过调用 sendToApp, sendToDevtools 将调试协议分发到接收端
     const middlewareContext: MiddleWareContext = {
       ...this.urlParsedContext,
+      ...this.cacheContext,
       msg: msgBeforeAdapter,
       sendToApp: (msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> => {
         if (!msg.id) {
@@ -145,6 +147,9 @@ export abstract class AppClient extends EventEmitter {
         if (config.showPerformance) msg.performance = performance;
         return this.emitMessageToDevtools(msg);
       },
+      setContext: (key: string, value: unknown) => {
+        this.cacheContext[key] = value;
+      }
     };
     return composeMiddlewares(middlewareList)(middlewareContext);
   }

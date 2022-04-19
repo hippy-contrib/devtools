@@ -7,6 +7,7 @@ export const logMiddleWareManager: MiddleWareManager = {
     [IOS100Event.ConsoleMessageAdded]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes<ProtocolIOS100.Console.MessageAddedEvent>;
       const { message } = eventRes.params;
+
       let type;
       if (message.type === 'log') {
         type = {
@@ -20,11 +21,26 @@ export const logMiddleWareManager: MiddleWareManager = {
         type = message.type;
       }
 
+      // if (message.source === 'console-api') {
+      //   const logEntry: ProtocolChrome.Runtime.ConsoleAPICalledEvent = {
+      //     type: type as any,
+      //     stackTrace: transformStacktrace(message.stackTrace),
+      //     timestamp: Math.floor(new Date().getTime()),
+      //     executionContextId: 1,
+      //     args: (message.parameters || []) as any,
+      //   };
+      //   setContext('lastConsoleMessage', logEntry);
+      //   return sendToDevtools({
+      //     method: ChromeEvent.RuntimeConsoleAPICalled,
+      //     params: logEntry,
+      //   });
+      // }
+
       const consoleMessage: ProtocolChrome.Log.LogEntry = {
         // 这里自动生成的类型没有定义 enum，而是用的联合类型，导致类型不同，所以使用 any 转换
         source: message.source as any,
         level: type,
-        text: message.text,
+        text: '',
         lineNumber: message.line,
         timestamp: new Date().getTime(),
         url: message.url,
@@ -72,3 +88,17 @@ export const logMiddleWareManager: MiddleWareManager = {
       }),
   },
 };
+
+function transformStacktrace(callFrames): ProtocolChrome.Runtime.StackTrace {
+  if (!callFrames) {
+    return;
+  }
+
+  return {
+    callFrames,
+    // Optional
+    // description?: string;
+    // parent?: StackTrace;
+    // parentId?: StackTraceId;
+  };
+}
