@@ -58,7 +58,7 @@ export const cssMiddleWareManager: MiddleWareManager = {
   },
 };
 
-class CssDomainAdapter {
+export class CssDomainAdapter {
   private static skipStyleList = ['backgroundImage', 'transform', 'shadowOffset'];
 
   public static intToRGBA(int32Color: number): string {
@@ -129,18 +129,44 @@ class CssDomainAdapter {
 
   /**
    * rgba 中 alpha 百分比转为小数点形式
+   *
+   * input:
+   *   rgb(165 21 21)
+   *   rgb(183 12 12 / 95%)
+   *   rgb(100% 0% 0% / 50%)
+   *   rgba(0 0 255 / 50%)
+   *   rgba(2, 0, 0, 0)
+   *   rgba(100%, 0%, 0%, 50%)
+   * output: rgba(r, g, b, a)
    */
   public static transformRGBA(colorText: string): string {
     return colorText.trim().replace(/^rgba?\(([^()]+)\)$/i, (s, p1) => {
-      const flag = p1.includes(',') ? ',' : ' ';
-      const channelList = p1.split(flag);
-      const r = channelList[0];
-      const g = channelList[1];
-      const b = channelList[2];
-      let a = channelList.length > 3 ? channelList[channelList.length - 1] : 1;
-      if (a.toString().includes('%')) {
-        a = parseInt(a, 10) / 100;
+      let r: string;
+      let g: string;
+      let b: string;
+      let a: string;
+      if (p1.includes('/')) {
+        const [rgb, alpha] = p1.split(/\s*\/\s*/);
+        a = alpha;
+        [r, g, b] = rgb.split(' ');
+      } else {
+        const spliter = p1.includes(',') ? ',' : ' ';
+        [r, g, b, a] = p1.split(spliter);
       }
+      a ||= '1';
+
+      [r, g, b] = [r, g, b].map((value) => {
+        if (value.toString().includes('%')) {
+          return Math.floor((parseInt(value, 10) / 100) * 255).toString();
+        }
+        return value.trim();
+      });
+      if (a.toString().includes('%')) {
+        a = (parseInt(a, 10) / 100).toString();
+      } else {
+        a = a.trim();
+      }
+
       return `rgba(${r}, ${g}, ${b}, ${a})`;
     });
   }

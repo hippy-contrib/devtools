@@ -94,7 +94,7 @@ class Server {
     const pRetry = require('p-retry');
     const portfinder = require('portfinder');
 
-    portfinder.basePort = process.env.WEBPACK_DEV_SERVER_BASE_PORT || 38988;
+    portfinder.basePort = process.env.WEBPACK_DEV_SERVER_BASE_PORT || 39000;
 
     // Try to find unused port and listen on it for 3 times,
     // if port is not specified in options.
