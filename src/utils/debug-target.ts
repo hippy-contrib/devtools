@@ -161,10 +161,10 @@ export const decreaseRefAndSave = async (clientId: string): Promise<DebugTarget>
   const debugTarget = await db.get(clientId);
   if (!debugTarget) return;
   debugTarget.ref -= 1;
-  log.info('decrease debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
+  log.verbose('decrease debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
   if (debugTarget.ref <= 0) {
     await db.delete(clientId);
-    log.info('debugTarget ref is 0, should delete, clientId: %s', clientId);
+    log.verbose('debugTarget ref is 0, should delete, clientId: %s', clientId);
     return;
   }
   await db.upsert(clientId, debugTarget);

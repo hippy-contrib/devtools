@@ -51,7 +51,7 @@ export const onVueClientConnection = async (ws: WebSocket, wsUrlParams: JSRuntim
   const publisher = new Publisher(channel);
   const subscriber = new Subscriber(channel);
   const handler = (msg) => {
-    log.verbose('receive %s message: %s', clientRole, msg);
+    log.debug('receive %s message: %s', clientRole, msg);
     ws.send(msg.toString());
   };
   subscriber.subscribe(handler);

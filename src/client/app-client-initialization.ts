@@ -15,13 +15,13 @@ export const initAppClient = () => {
   });
   appClientManager.addIOSAppClientOption({
     useAllDomain: false,
-    ignoreDomains: customDomains,
+    acceptDomains: customDomains,
     Ctor: DefaultCtor,
     platform: DevicePlatform.IOS,
   });
   appClientManager.addIOSAppClientOption({
     useAllDomain: false,
-    acceptDomains: customDomains,
+    ignoreDomains: customDomains,
     Ctor: IWDPAppClient,
     platform: DevicePlatform.IOS,
   });
