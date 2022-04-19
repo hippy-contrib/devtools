@@ -41,7 +41,7 @@ export const onVueClientConnection = async (ws: WebSocket, wsUrlParams: JSRuntim
       publishRes(clientId, {
         method: TdfEvent.TDFRuntimeEnableVueDevtools,
         params: {
-          contextName: debugTarget.title,
+          contextName: debugTarget?.title,
         },
       });
     }

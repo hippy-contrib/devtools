@@ -15,6 +15,9 @@ export interface MiddleWareContext extends UrlParsedContext {
   msg: Adapter.CDP.Req | Adapter.CDP.Res;
   sendToApp: (msg: Adapter.CDP.Req) => Promise<Adapter.CDP.Res>;
   sendToDevtools: (msg: Adapter.CDP.Res) => Promise<Adapter.CDP.Res>;
+  // update context field, used to store debug instance info,
+  // such as last lastConsoleMessage
+  setContext: (key: string, value: unknown) => void;
 }
 
 export type MiddleWare = (ctx: MiddleWareContext, next?: () => Promise<Adapter.CDP.Res>) => Promise<Adapter.CDP.Res>;
