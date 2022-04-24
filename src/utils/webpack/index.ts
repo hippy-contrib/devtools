@@ -6,6 +6,9 @@ import { green, yellow, bold } from 'colors/safe';
 import { Logger } from '@/utils/log';
 import { makeUrl, getWSProtocolByHttpProtocol } from '@/utils/url';
 import { config } from '@/config';
+import { getAllLocalHostname } from '@/utils/ip';
+import { isPortInUse } from '@/utils/port';
+import { exec } from '@/utils/process';
 export * from './inject-entry';
 
 const log = new Logger('webpack-util');
@@ -36,6 +39,10 @@ function normalizeRemoteDebug(versionId, config) {
     proxy: '',
     ...(config.devServer.remote || {}),
   };
+  config.devServer.autoLaunchHippyDebug ??= true;
+  if (config.devServer.autoLaunchHippyDebug) {
+    autoLaunchHippyDebug(config.devServer.remote);
+  }
 
   const { protocol, host, port, qrcode: qrcodeFn } = config.devServer.remote;
   const publicPath = getPublicPath(versionId, config.devServer);
@@ -125,4 +132,16 @@ export async function saveDevPort(hmrPort) {
   const { cachePath } = config;
   fs.mkdirSync(cachePath, { recursive: true });
   return fs.writeFileSync(config.hmrPortPath, String(hmrPort));
+}
+
+/**
+ * auto launch hippy:debug if remote.host is local hostname
+ */
+async function autoLaunchHippyDebug({ protocol, host, port }) {
+  if (protocol !== 'http') return;
+  const hostList = await getAllLocalHostname();
+  if (!hostList.includes(host)) return;
+  const inUse = await isPortInUse(port);
+  if (inUse) return;
+  exec('node', [path.join(__dirname, '../../../dist/index-debug.js'), '--port', port]);
 }
