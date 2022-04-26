@@ -1241,7 +1241,11 @@ class Server {
     if(allResource.length === 0) return;
 
     const syncQueue = [];
-    if (this.hadSyncBundleResource) {
+    /**
+     * hot reload will always sync all file
+     * hmr will sync all file at first time, in other case will sync patch files in priority 
+     */
+    if (this.hadSyncBundleResource && this.options.hot) {
       syncQueue.push(hmrResources, otherResources);
     } else {
       syncQueue.push(allResource);

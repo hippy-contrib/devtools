@@ -4,9 +4,7 @@ import applyReload from './apply-reload';
 
 function reloadApp({ hot, liveReload }, status) {
   const { currentHash, previousHash } = status;
-  const isInitial = currentHash.indexOf(previousHash) >= 0;
-
-  if (isInitial) return;
+  if (currentHash === previousHash) return;
 
   if (hot) {
     log.info('App hot update...');
