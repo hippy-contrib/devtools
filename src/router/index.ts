@@ -1,6 +1,7 @@
 import path from 'path';
 import cors from '@koa/cors';
 import staticCache from 'koa-static-cache';
+import serve from 'koa-static';
 import bodyParser from 'koa-bodyparser';
 import Koa from 'koa';
 import { Logger } from '@/utils/log';
@@ -41,17 +42,12 @@ export const routeApp = (app: Koa) => {
     }),
   );
   // hmr resources
-  app.use(
-    staticCache(config.hmrStaticPath, {
-      ...defaultStaticOption,
-      maxAge: 60 * 60,
-    }),
-  );
+  app.use(serve(config.hmrStaticPath));
 
   // bundle resources
   let servePath;
   if (staticPath) servePath = path.resolve(staticPath);
   else servePath = path.resolve(path.dirname(entry));
   log.info(`serve bundle: ${entry}; serve folder: ${servePath}`);
-  app.use(staticCache(servePath, defaultStaticOption));
+  app.use(serve(servePath));
 };

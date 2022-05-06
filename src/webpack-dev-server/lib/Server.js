@@ -934,8 +934,13 @@ class Server {
           content = info;
         }
 
+        /**
+         * targetName may be absolute or relative path
+         * target file name must be relative to outputPath
+         */
+        const name = path.relative(this.compiler.outputPath, path.resolve(this.compiler.outputPath, targetName))
         this.emitMap.set(targetName, {
-          name: targetName,
+          name,
           content: content,
           isHMRResource: (/hot-update\.js(on)?(\.map)?$/.test(file)),
         });

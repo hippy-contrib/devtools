@@ -10,7 +10,8 @@ import { routeApp } from '@/router';
 import { config } from '@/config';
 import { WinstonColor, DevtoolsEnv, DebugTunnel } from '@/@types/enum';
 import { getHomeUrl } from '@/utils/url';
-import { isPortInUse } from '@/utils/port';
+import { checkPort } from '@/utils/port';
+import { rmFolder } from '@/utils/file';
 
 const log = new Logger('debug-server', WinstonColor.Yellow);
 let server: HTTPServer;
@@ -78,11 +79,11 @@ const init = async () => {
   normalizeArgv();
   await checkPort();
   const { cachePath, hmrStaticPath } = config;
-  try {
-    fs.rmdirSync(cachePath, { recursive: true });
-  } catch (e) {
-    if ((e as any).code !== 'ENOENT') log.error('rm cache dir error');
-  }
+
+  // clean all unused file
+  rmFolder(cachePath);
+  rmFolder(hmrStaticPath);
+
   if (!config.isCluster) {
     const { importTunnel } = await import('@/child-process/import-addon');
     await importTunnel();
@@ -118,11 +119,4 @@ const normalizeArgv = () => {
   }
 };
 
-const checkPort = async () => {
-  const { port } = global.debugAppArgv;
-  const inUse = await isPortInUse(port);
-  if (inUse) {
-    log.error('EADDRINUSE: port %d is in use!', port);
-    process.exit(1);
-  }
-};
+
