@@ -139,7 +139,7 @@ async function saveHMRFiles(folder: string, emitList: TransFerFile[]) {
 }
 
 async function saveHMRFileToLocal(folder: string, name: string, content: Buffer) {
-  const fullFname = path.join(config.hmrStaticPath, folder, name);
+  const fullFname = path.resolve(config.hmrStaticPath, folder, name);
   const cacheFolder = path.dirname(fullFname);
   await fs.promises.mkdir(cacheFolder, { recursive: true });
   return fs.promises.writeFile(fullFname, content);

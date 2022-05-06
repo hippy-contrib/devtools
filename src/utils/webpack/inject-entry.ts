@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-import type { Compiler, Configuration, Entry, EntryFunc } from 'webpack';
+import { Compiler, Configuration, Entry, EntryFunc } from '@/@types/webpack';
 
 /**
  * inject entry to webpack config
@@ -33,9 +33,9 @@ function injectEntryWebpack5(
   const entry: any = typeof options.entry === 'function' ? options.entry() : Promise.resolve(options.entry);
 
   options.entry = () =>
-    entry.then((e: any) => {
+    entry.then((entryObj: any) => {
       function injectOneEntry(entryName: string) {
-        const injectEntry: typeof e[string] | undefined = e[entryName];
+        const injectEntry: typeof entryObj[string] | undefined = entryObj[entryName];
         if (!injectEntry?.import) {
           throw new Error(
             `Could not find an entry named '${entryName}'. See https://webpack.js.org/concepts/entry-points/ for an overview of webpack entries.`,
@@ -47,16 +47,17 @@ function injectEntryWebpack5(
         appends.forEach((append) => {
           if (!injectEntry.import.includes(append)) injectEntry.import.push(append);
         });
-        return e;
+        return entryObj;
       }
 
       if (entryName) {
         injectOneEntry(entryName);
       } else {
-        Object.keys(e).forEach((entryName) => {
+        Object.keys(entryObj).forEach((entryName) => {
           injectOneEntry(entryName);
         });
       }
+      return entryObj;
     });
 }
 
