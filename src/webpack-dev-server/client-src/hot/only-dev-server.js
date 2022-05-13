@@ -34,10 +34,7 @@ if (module.hot) {
             },
             onErrored(data) {
               log('error', data.error);
-              log(
-                'warning',
-                `Ignored an error while updating module ${data.moduleId} (${data.type})`,
-              );
+              log('warning', `Ignored an error while updating module ${data.moduleId} (${data.type})`);
             },
           })
           .then((renewedModules) => {

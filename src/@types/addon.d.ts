@@ -18,20 +18,25 @@
  * limitations under the License.
  */
 
-interface IWDPPage {
-  devtoolsFrontendUrl: string;
-  faviconUrl: string;
-  thumbnailUrl: string;
-  title: string;
-  url: string;
-  webSocketDebuggerUrl: string;
-  appId: string;
-  device: IWDPDevice;
+import { TunnelEvent } from './enum';
+import { DeviceInfo } from './device.d';
+
+export interface Addon {
+  addEventListener: (cb: (event: TunnelEvent, data: unknown) => void) => void;
+  tunnelStart: (option: StartTunnelOption) => void;
+  getDeviceList: (cb: (devices: Array<DeviceInfo>) => void) => void;
+  selectDevice: (deviceId: string) => void;
+  sendMsg: (msg: string) => void;
 }
 
-interface IWDPDevice {
-  deviceId: string;
-  deviceName: string;
-  deviceOSVersion: string;
-  url: string;
+export interface StartTunnelOption {
+  adb_path: string;
+  iwdp: {
+    iwdp_params: string[];
+    iwdp_listen_port: string;
+    iwdp_path?: string;
+  };
+  only_use_iwdp: number;
+  iproxy_path?: string;
+  idevice_info_path?: string;
 }

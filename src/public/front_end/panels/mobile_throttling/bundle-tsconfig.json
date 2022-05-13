@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/mobile_throttling"},"files":["../../../../../../chrome-devtools/front_end/panels/mobile_throttling/mobile_throttling.ts"],"references":[{"path":"./mobile_throttling-tsconfig.json"}]}

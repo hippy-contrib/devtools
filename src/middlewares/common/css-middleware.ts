@@ -1,11 +1,31 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import color from 'color-normalize';
-import { ChromeCommand } from 'tdf-devtools-protocol/dist/types/enum-chrome-mapping';
+import { ChromeCommand } from '@hippy/devtools-protocol/dist/types/enum-chrome-mapping';
 import { MiddleWareManager } from '../middleware-context';
 
 export const cssMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [ChromeCommand.CSSGetMatchedStylesForNode]: ({ msg, sendToDevtools }) => {
-      // 类型收窄
+      // narrow down type
       const commandRes = msg as Adapter.CDP.CommandRes<ProtocolIOS90.CSS.GetInlineStylesForNodeResponse>;
       commandRes.result.inlineStyle = CssDomainAdapter.conversionInlineStyle(commandRes.result.inlineStyle);
       return sendToDevtools(commandRes);
@@ -128,8 +148,6 @@ export class CssDomainAdapter {
   }
 
   /**
-   * rgba 中 alpha 百分比转为小数点形式
-   *
    * input:
    *   rgb(165 21 21)
    *   rgb(183 12 12 / 95%)
@@ -137,7 +155,9 @@ export class CssDomainAdapter {
    *   rgba(0 0 255 / 50%)
    *   rgba(2, 0, 0, 0)
    *   rgba(100%, 0%, 0%, 50%)
+   *
    * output: rgba(r, g, b, a)
+   *         r, g, b, a are int number
    */
   public static transformRGBA(colorText: string): string {
     return colorText.trim().replace(/^rgba?\(([^()]+)\)$/i, (s, p1) => {

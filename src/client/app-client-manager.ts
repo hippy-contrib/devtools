@@ -1,46 +1,51 @@
-import { AppClientType, DevicePlatform } from '@/@types/enum';
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { AppClientType, DevicePlatform } from '@debug-server-next/@types/enum';
 import { AppClient, AppClientOption } from './app-client';
 
 /**
- * 管理不同调试器的 AppClient 通道
+ * manage enabled AppClient list of different framework
  */
 class AppClientManager {
   private androidAppClientOptionList: AppClientFullOptionOmicCtx[] = [];
   private iOSAppClientOptionList: AppClientFullOptionOmicCtx[] = [];
 
-  /**
-   * 添加安卓 AppClient 构造器 option
-   */
   public addAndroidAppClientOption(appClientOption: AppClientFullOptionOmicCtx) {
     this.androidAppClientOptionList.push(appClientOption);
   }
 
-  /**
-   * 根据平台查询 AppClient 构造器 options
-   */
   public getAppClientOptions(platform: DevicePlatform) {
     if (platform === DevicePlatform.Android) return this.androidAppClientOptionList;
     if (platform === DevicePlatform.IOS) return this.iOSAppClientOptionList;
   }
 
-  /**
-   * 添加 iOS AppClient 构造器 option
-   */
   public addIOSAppClientOption(appClientOption: AppClientFullOptionOmicCtx) {
     this.iOSAppClientOptionList.push(appClientOption);
   }
 
-  /**
-   * 清空 AppClient 构造器 options
-   */
   public clear() {
     this.androidAppClientOptionList = [];
     this.iOSAppClientOptionList = [];
   }
 
-  /**
-   * 根据平台查询是否 AppClientType 可用
-   */
   public shouldUseAppClientType(platform: DevicePlatform, type: AppClientType): boolean {
     const options: AppClientFullOptionOmicCtx[] = this.getAppClientOptions(platform);
     return Boolean(options.find((item) => item.Ctor.name === type));
@@ -50,7 +55,6 @@ class AppClientManager {
 export const appClientManager = new AppClientManager();
 
 export type AppClientFullOption = AppClientOption & {
-  // 构造器外部注入，可在 TDF 上做扩展
   Ctor: new (id: string, option: AppClientOption) => AppClient;
 };
 

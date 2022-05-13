@@ -1,10 +1,29 @@
-import { config } from '@/config';
-import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
-import { createTargetByIWDPPage } from '@/utils/debug-target';
-import { getDBOperator } from '@/db';
-import { DebugTarget } from '@/@types/debug-target';
-import { DevicePlatform } from '@/@types/enum';
-// import { SIMULATOR_DEVICE_NAME } from '@/@types/constants';
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { config } from '@debug-server-next/config';
+import { getIWDPPages, patchIOSTarget } from '@debug-server-next/utils/iwdp';
+import { createTargetByIWDPPage } from '@debug-server-next/utils/debug-target';
+import { getDBOperator } from '@debug-server-next/db';
+import { DebugTarget } from '@debug-server-next/@types/debug-target';
+import { DevicePlatform } from '@debug-server-next/@types/enum';
 import { updateIWDPAppClient, subscribeByIWDP } from './pub-sub-manager';
 
 export class DebugTargetManager {
@@ -14,7 +33,7 @@ export class DebugTargetManager {
    * find all debugTargets
    *
    * @static
-   * @param {string} hash auth control
+   * @param {string} hash to filter list
    * @param {boolean} [ignoreHash=false] only use in server side, for vue-devtools find current debug ContextName
    * @memberof DebugTargetManager
    */
@@ -36,7 +55,7 @@ export class DebugTargetManager {
         updateIWDPAppClient(targets[i]);
       }
     });
-    // 追加 IWDP 获取到的 h5 页面
+    // append H5 pages from IWDP
     const iOSPagesWithFlag = iOSPages as Array<IWDPPage & { shouldRemove?: boolean }>;
     const h5Pages = iOSPagesWithFlag.filter(
       // (iOSPage) => !iOSPage.shouldRemove && iOSPage.device.deviceName !== SIMULATOR_DEVICE_NAME,

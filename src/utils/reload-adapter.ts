@@ -1,8 +1,28 @@
-import { ChromeCommand, ChromeEvent, TdfCommand } from 'tdf-devtools-protocol/dist/types';
-import { getDBOperator } from '@/db';
-import { createUpwardChannel, createDownwardChannel } from '@/utils/pub-sub-channel';
-import { DebugTarget } from '@/@types/debug-target';
-import { createCDPPerformance } from '@/utils/aegis';
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ChromeCommand, ChromeEvent, TdfCommand } from '@hippy/devtools-protocol/dist/types';
+import { getDBOperator } from '@debug-server-next/db';
+import { createUpwardChannel, createDownwardChannel } from '@debug-server-next/utils/pub-sub-channel';
+import { DebugTarget } from '@debug-server-next/@types/debug-target';
+import { createCDPPerformance } from '@debug-server-next/utils/aegis';
 import { GlobalId } from './global-id';
 
 const reloadCommandId = new GlobalId(-10000, -1);
@@ -175,6 +195,28 @@ const reloadEvent = [
   },
 ];
 
+const mockCmdId = -100000;
+export const resumeCommands = [
+  {
+    id: mockCmdId,
+    method: TdfCommand.TDFRuntimeResume,
+    params: {},
+    performance: createCDPPerformance(),
+  },
+  {
+    id: mockCmdId - 1,
+    method: ChromeCommand.DebuggerDisable,
+    params: {},
+    performance: createCDPPerformance(),
+  },
+  {
+    id: mockCmdId - 2,
+    method: ChromeCommand.RuntimeDisable,
+    params: {},
+    performance: createCDPPerformance(),
+  },
+];
+
 export const publishReloadCommand = (debugTarget: DebugTarget) => {
   setTimeout(() => {
     const { clientId } = debugTarget;
@@ -198,26 +240,3 @@ export const publishRes = (clientId: string, res: Adapter.CDP.Res) => {
   const downPublisher = new Publisher(downwardChannelId);
   downPublisher.publish(JSON.stringify(res));
 };
-
-// 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
-const mockCmdId = -100000;
-export const resumeCommands = [
-  {
-    id: mockCmdId,
-    method: TdfCommand.TDFRuntimeResume,
-    params: {},
-    performance: createCDPPerformance(),
-  },
-  {
-    id: mockCmdId - 1,
-    method: ChromeCommand.DebuggerDisable,
-    params: {},
-    performance: createCDPPerformance(),
-  },
-  {
-    id: mockCmdId - 2,
-    method: ChromeCommand.RuntimeDisable,
-    params: {},
-    performance: createCDPPerformance(),
-  },
-];

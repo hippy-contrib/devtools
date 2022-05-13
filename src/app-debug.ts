@@ -1,25 +1,42 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import fs from 'fs';
 import { Server as HTTPServer } from 'http';
 import Koa from 'koa';
 import colors from 'colors/safe';
-import { initAppClient } from '@/client';
-import { SocketServer } from '@/socket-server';
-import { Logger } from '@/utils/log';
-import { initDbModel } from '@/db';
-import { routeApp } from '@/router';
-import { config } from '@/config';
-import { WinstonColor, DevtoolsEnv, DebugTunnel } from '@/@types/enum';
-import { getHomeUrl } from '@/utils/url';
-import { checkPort } from '@/utils/port';
-import { rmFolder } from '@/utils/file';
+import { initAppClient } from '@debug-server-next/client';
+import { SocketServer } from '@debug-server-next/socket-server';
+import { Logger } from '@debug-server-next/utils/log';
+import { initDbModel } from '@debug-server-next/db';
+import { routeApp } from '@debug-server-next/router';
+import { config } from '@debug-server-next/config';
+import { WinstonColor, DevtoolsEnv, DebugTunnel } from '@debug-server-next/@types/enum';
+import { getHomeUrl } from '@debug-server-next/utils/url';
+import { checkPort } from '@debug-server-next/utils/port';
+import { rmFolder } from '@debug-server-next/utils/file';
 
 const log = new Logger('debug-server', WinstonColor.Yellow);
 let server: HTTPServer;
 let socketServer: SocketServer;
 
-/**
- * 开启调试服务
- */
 export const startDebugServer = async () => {
   log.info('start server argv: %j', global.debugAppArgv);
   await init();
@@ -52,9 +69,6 @@ export const startDebugServer = async () => {
   });
 };
 
-/**
- * 停止调试服务
- */
 export const stopServer = async (exitProcess = false, ...arg) => {
   try {
     log.info('stopServer %j', arg);
@@ -85,7 +99,7 @@ const init = async () => {
   rmFolder(hmrStaticPath);
 
   if (!config.isCluster) {
-    const { importTunnel } = await import('@/child-process/import-addon');
+    const { importTunnel } = await import('@debug-server-next/child-process/import-addon');
     await importTunnel();
   }
   await fs.promises.mkdir(cachePath, { recursive: true });
@@ -118,5 +132,3 @@ const normalizeArgv = () => {
     global.debugAppArgv.tunnel = DebugTunnel.TCP;
   }
 };
-
-

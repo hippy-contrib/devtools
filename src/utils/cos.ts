@@ -1,9 +1,29 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import Stream from 'stream';
 import COS from 'cos-nodejs-sdk-v5';
-import { Logger } from '@/utils/log';
-import { config } from '@/config';
-import { ReportEvent } from '@/@types/enum';
-import { timeStart } from '@/utils/aegis';
+import { Logger } from '@debug-server-next/utils/log';
+import { config } from '@debug-server-next/config';
+import { ReportEvent } from '@debug-server-next/@types/enum';
+import { timeStart } from '@debug-server-next/utils/aegis';
 
 const log = new Logger('cos-util');
 const baseCosOption = {
@@ -17,10 +37,10 @@ export const enum COSErrorCode {
   EmptyFileError = -4,
 }
 const ErrorMsg = {
-  [COSErrorCode.ParamsMiss]: '参数缺失（origin，passWord，filePath，stream是必填参数）',
-  [COSErrorCode.UploadStreamError]: '上传失败（流处理异常）',
-  [COSErrorCode.UploadError]: '上传失败',
-  [COSErrorCode.EmptyFileError]: '文件为空, 已忽略',
+  [COSErrorCode.ParamsMiss]: 'miss params (origin，passWord，filePath，stream are required fields)',
+  [COSErrorCode.UploadStreamError]: 'upload fail (stream error)',
+  [COSErrorCode.UploadError]: 'upload fail',
+  [COSErrorCode.EmptyFileError]: 'empty file is ignored',
 };
 
 export const cosUpload = (key: string, buffer: Buffer) =>
@@ -87,6 +107,7 @@ export const cosUploadByStream = function (options: COSUploadByStreamOptions) {
     stream.on('data', (chunk) => {
       chunkArr.push(chunk);
     });
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     stream.on('end', async () => {
       const buffer = Buffer.concat(chunkArr);
       const byteSize = buffer.byteLength;

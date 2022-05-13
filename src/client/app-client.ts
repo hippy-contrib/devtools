@@ -1,6 +1,33 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
-import { AppClientEvent, DevicePlatform, ErrorCode, MiddlewareType, WinstonColor } from '@/@types/enum';
+import { ChromeCommand } from '@hippy/devtools-protocol/dist/types';
+import {
+  AppClientEvent,
+  DevicePlatform,
+  ErrorCode,
+  MiddlewareType,
+  WinstonColor,
+} from '@debug-server-next/@types/enum';
 import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
@@ -10,16 +37,15 @@ import {
   MiddleWare,
   androidMiddleWareManager,
   iOSMiddleWareManager,
-} from '@/middlewares';
-import { CDP_DOMAIN_LIST, getDomain } from '@/utils/cdp';
-import { Logger } from '@/utils/log';
-import { composeMiddlewares } from '@/utils/middleware';
-import { createCDPPerformance } from '@/utils/aegis';
-import { config } from '@/config';
+} from '@debug-server-next/middlewares';
+import { CDP_DOMAIN_LIST, getDomain } from '@debug-server-next/utils/cdp';
+import { Logger } from '@debug-server-next/utils/log';
+import { composeMiddlewares } from '@debug-server-next/utils/middleware';
+import { createCDPPerformance } from '@debug-server-next/utils/aegis';
+import { config } from '@debug-server-next/config';
 
-// ignore log the following method, because of frequency
-const ignoreMethods = ['Page.screencastFrame', 'Page.screencastFrameAck'];
-// const filteredLog = new Logger('filtered', WinstonColor.Yellow);
+// ignore log the following method, because of high frequency
+const ignoreMethods = [ChromeCommand.PageScreencastFrame, ChromeCommand.PageScreencastFrameAck];
 const downwardLog = new Logger('↓↓↓', WinstonColor.BrightRed);
 const upwardLog = new Logger('↑↑↑', WinstonColor.BrightGreen);
 
@@ -48,6 +74,7 @@ export abstract class AppClient extends EventEmitter {
       performance: Adapter.Performance;
     }
   > = new Map();
+
   private get middleWareManager() {
     return {
       [DevicePlatform.Android]: androidMiddleWareManager,
@@ -69,13 +96,10 @@ export abstract class AppClient extends EventEmitter {
   }
 
   /**
-   * 调试协议经过中间件的适配后，上行发送至 app 端
+   * send debug protocol to app side
    */
   public sendToApp(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res> {
-    if (!this.filter(msg)) {
-      // filteredLog.info(`'${msg.method}' is filtered in app client type: ${this.constructor.name}`);
-      return Promise.reject(ErrorCode.DomainFiltered);
-    }
+    if (!this.filter(msg)) return Promise.reject(ErrorCode.DomainFiltered);
 
     const { id, method } = msg;
     this.msgIdMap.set(id, {
@@ -92,7 +116,7 @@ export abstract class AppClient extends EventEmitter {
   public destroy() {}
 
   /**
-   * 下行协议适配 handler
+   * receive debug protocol from app side
    */
   protected downwardMessageHandler(msg: Adapter.CDP.Res): Promise<Adapter.CDP.Res> {
     try {
@@ -111,10 +135,9 @@ export abstract class AppClient extends EventEmitter {
   }
 
   /**
-   * 通过中间件处理上下行消息
+   * use middleware process debug protocol
    */
   private middlewareMessageHandler(middlewareList: MiddleWare[], msgBeforeAdapter: Adapter.CDP.Res | Adapter.CDP.Req) {
-    // 创建中间件上下文，中间件中可以通过调用 sendToApp, sendToDevtools 将调试协议分发到接收端
     const middlewareContext: MiddleWareContext = {
       ...this.urlParsedContext,
       ...this.cacheContext,
@@ -149,13 +172,13 @@ export abstract class AppClient extends EventEmitter {
       },
       setContext: (key: string, value: unknown) => {
         this.cacheContext[key] = value;
-      }
+      },
     };
     return composeMiddlewares(middlewareList)(middlewareContext);
   }
 
   /**
-   * 协议下行发送至 devtools 端
+   * emit debug protocol to devtools frontend
    */
   private emitMessageToDevtools(msg: Adapter.CDP.Res) {
     if (!msg) return Promise.reject(ErrorCode.EmptyCommand);
@@ -169,7 +192,7 @@ export abstract class AppClient extends EventEmitter {
   }
 
   /**
-   * 上行协议 filter，通过才放行
+   * filter upward msg by protocol domain
    */
   private filter(msg: Adapter.CDP.Req) {
     if (this.useAllDomain) return true;
@@ -185,7 +208,7 @@ export abstract class AppClient extends EventEmitter {
   }
 
   /**
-   * 根据调试协议查询注册的中间件列表
+   * get registered protocol middlewares by protocol method
    */
   private getMiddlewareList(type: MiddlewareType, method: string) {
     let middlewareList = {
@@ -198,12 +221,12 @@ export abstract class AppClient extends EventEmitter {
   }
 
   /**
-   * 每个通道的消息发送方式不同，需要子类实现实现
+   * send method implement by child class
    */
   protected abstract sendHandler(msg: Adapter.CDP.Req): Promise<Adapter.CDP.Res>;
 
   /**
-   * AppClient 子类收到消息后，需调用父类的 downwardMessageHandler
+   * on method implement by child class, should invoke downwardMessageHandler
    */
   protected abstract registerMessageListener(): void;
 }

@@ -1,15 +1,35 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
 import os from 'os';
 import open from 'open';
 import colors from 'colors/safe';
-import { TunnelEvent, WinstonColor, OSType, LogLevel } from '@/@types/enum';
-import { deviceManager } from '@/device-manager';
-import { Logger, TunnelLogger } from '@/utils/log';
-import { config } from '@/config';
-import { getHomeUrl } from '@/utils/url';
-import { StartTunnelOption } from './addon-api';
+import { TunnelEvent, WinstonColor, OSType, LogLevel } from '@debug-server-next/@types/enum';
+import { deviceManager } from '@debug-server-next/device-manager';
+import { Logger, TunnelLogger } from '@debug-server-next/utils/log';
+import { config } from '@debug-server-next/config';
+import { getHomeUrl } from '@debug-server-next/utils/url';
+import { StartTunnelOption } from '@debug-server-next/@types/addon';
 import { startAdbProxy } from './adb';
 
 const childProcessLog = new Logger('child-process', WinstonColor.Magenta);
@@ -37,7 +57,7 @@ export const startTunnel = async (cb?: StartTunnelCallback) => {
           }
           deviceManager.getDeviceList();
           if (event === TunnelEvent.AddDevice) {
-            // 每次设备连接后，运行 adb reverse
+            // every time device connect, auto run adb reverse
             startAdbProxy();
           }
         } else if (event === TunnelEvent.AppConnect) {

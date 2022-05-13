@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/third_party/acorn-loose"},"files":["../../../../../../chrome-devtools/front_end/third_party/acorn-loose/acorn-loose.ts"],"references":[{"path":"./acorn-loose-tsconfig.json"},{"path":"../acorn/bundle-tsconfig.json"}]}

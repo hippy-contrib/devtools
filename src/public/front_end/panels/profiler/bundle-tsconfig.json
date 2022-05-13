@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/profiler"},"files":["../../../../../../chrome-devtools/front_end/panels/profiler/profiler.ts"],"references":[{"path":"./profiler-tsconfig.json"}]}

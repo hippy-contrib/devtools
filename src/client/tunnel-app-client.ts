@@ -1,8 +1,31 @@
-import { Logger } from '@/utils/log';
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { Logger } from '@debug-server-next/utils/log';
 import { AppClient } from './app-client';
 
 const log = new Logger('app-client:tunnel');
 
+/**
+ * Communicate with app by TCP, implement by Tunnel.node
+ */
 export class TunnelAppClient extends AppClient {
   private requestPromiseMap: Adapter.RequestPromiseMap = new Map();
 
@@ -16,7 +39,7 @@ export class TunnelAppClient extends AppClient {
 
   protected async registerMessageListener() {
     const { tunnelEmitter, TUNNEL_EVENT } = await import('../child-process/index');
-    // TODO tunnel 暂不支持多调试实例，这里暂时移除上一个实例的事件监听
+    // TODO tunnel doesn't support multiple debug instance, so remove last listeners
     tunnelEmitter.removeAllListeners(TUNNEL_EVENT);
     tunnelEmitter.on(TUNNEL_EVENT, async (data) => {
       let msgObject: Adapter.CDP.Res;

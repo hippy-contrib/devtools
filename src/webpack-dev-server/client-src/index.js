@@ -109,9 +109,8 @@ const onSocketMessage = {
       log.warn(printableWarnings[i]);
     }
 
-    const needShowOverlayForWarnings =      typeof options.overlay === 'boolean'
-      ? options.overlay
-      : options.overlay && options.overlay.warnings;
+    const needShowOverlayForWarnings =
+      typeof options.overlay === 'boolean' ? options.overlay : options.overlay && options.overlay.warnings;
 
     if (needShowOverlayForWarnings) {
       show('warning', warnings);
@@ -136,9 +135,8 @@ const onSocketMessage = {
       log.error(printableErrors[i]);
     }
 
-    const needShowOverlayForErrors =      typeof options.overlay === 'boolean'
-      ? options.overlay
-      : options.overlay && options.overlay.errors;
+    const needShowOverlayForErrors =
+      typeof options.overlay === 'boolean' ? options.overlay : options.overlay && options.overlay.errors;
 
     if (needShowOverlayForErrors) {
       show('error', errors);

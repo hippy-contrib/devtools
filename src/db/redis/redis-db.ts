@@ -1,16 +1,35 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { createClient } from 'redis';
-import { config } from '@/config';
-import { Logger } from '@/utils/log';
-import { WinstonColor, ReportEvent } from '@/@types/enum';
-import { timeStart } from '@/utils/aegis';
+import { config } from '@debug-server-next/config';
+import { Logger } from '@debug-server-next/utils/log';
+import { WinstonColor, ReportEvent } from '@debug-server-next/@types/enum';
+import { timeStart } from '@debug-server-next/utils/aegis';
 import { BaseDB } from '../base-db';
 
 const log = new Logger('redis-model', WinstonColor.BrightCyan);
 export type RedisClient = ReturnType<typeof createClient>;
 
 /**
- * 封装 redis 的增删查改接口（注：value 统一存储为 hashmap 格式）
- * 线上环境多机部署时用此模型
+ * all data is store as redis hashmap
  */
 export class RedisDB<T> extends BaseDB<T> {
   /**
@@ -25,12 +44,11 @@ export class RedisDB<T> extends BaseDB<T> {
   private static opQueue: Array<Function> = [];
 
   /**
-   * 初始化数据库连接
+   * init redis connection
    */
   private static async init() {
     try {
       RedisDB.client = createMyClient();
-      // ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
       const timeEnd = timeStart(ReportEvent.RedisConnection);
       await RedisDB.client.connect();
       timeEnd();
@@ -63,9 +81,6 @@ export class RedisDB<T> extends BaseDB<T> {
     });
   }
 
-  /**
-   * 查询 hashmap 的所有 value
-   */
   public async getAll(): Promise<T[]> {
     return this.queueWrap<T[]>(async (resolve) => {
       const hashmap: Record<string, string> = await RedisDB.client.hGetAll(this.key);

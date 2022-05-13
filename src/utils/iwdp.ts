@@ -1,31 +1,45 @@
-/**
- * 缩写说明：
- *  IWDP: ios webkit debug proxy
- *  CDP: chrome debug protocol
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 import request from 'request-promise';
 import { findLast } from 'lodash';
-import { AppClientType, ClientRole, DevicePlatform } from '@/@types/enum';
-import { config } from '@/config';
-import { makeUrl } from '@/utils/url';
-import { Logger } from '@/utils/log';
-import { sleep } from '@/utils/timer';
-import { DebugTarget } from '@/@types/debug-target';
-import { wsUrlWithoutProtocol } from '@/utils/debug-target';
+import { AppClientType, ClientRole, DevicePlatform } from '@debug-server-next/@types/enum';
+import { config } from '@debug-server-next/config';
+import { makeUrl } from '@debug-server-next/utils/url';
+import { Logger } from '@debug-server-next/utils/log';
+import { sleep } from '@debug-server-next/utils/timer';
+import { DebugTarget } from '@debug-server-next/@types/debug-target';
+import { wsUrlWithoutProtocol } from '@debug-server-next/utils/debug-target';
 
 const log = new Logger('IWDP-util');
 
 /**
- * 获取所有 usb 连接设备的 IWDP 页面列表
+ * get all IWDP pages of connected iOS device
  */
 export const getIWDPPages = async (iWDPPort): Promise<IWDPPage[]> => {
   if (config.isCluster) return [];
   try {
-    // IWDP 检查页面列表会稍有延迟，这里简单做下 sleep
+    // IWDP detect page maybe slow, do some sleep
     await sleep(800);
     const deviceList = await request({
       url: '/json',
-      // IWDP 必定是本地启动的服务，因为必须通过 USB 连接才能检测到设备
       baseUrl: `http://127.0.0.1:${iWDPPort}`,
       json: true,
     });
@@ -80,7 +94,7 @@ export const patchIOSTarget = (debugTarget: DebugTarget, iOSPages: Array<IWDPPag
 };
 
 /**
- * 获取一台设备的 IWDP 页面列表
+ * get IWDP pages of one device
  */
 const getDeviceIWDPPages = async (device: IWDPDevice): Promise<IWDPPage[]> => {
   const port = device.url.match(/:(\d+)/)[1];

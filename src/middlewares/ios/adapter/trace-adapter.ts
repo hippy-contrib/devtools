@@ -1,16 +1,31 @@
-/**
- * jsc 的 trace 数据结构： JscStack
- * jsc 没 1ms 采样 1 次，JscTrace 表示一个采样点
- * JscFrame 表示当前采样点的调用栈，按叶节点到根节点排序
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
  *
- * v8 的 trace 数据结构：V8Stack，是一个一维数组
- * 用 PH 值表示调用栈的开始结束
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import { PH } from '@/@types/enum';
-import { Logger } from '@/utils/log';
+import { PH } from '@debug-server-next/@types/enum';
+import { Logger } from '@debug-server-next/utils/log';
 
 const log = new Logger('trace-adapter');
+
+/**
+ * call stack of current sampling point, sort from leaf node to root node
+ */
 interface JscFrame {
   sourceID: string;
   name: string;
@@ -23,11 +38,17 @@ interface JscFrame {
   };
 }
 
+/**
+ * JSCore sample call stack every 1ms, sample type: JscTrace
+ */
 interface JscTrace {
   timestamp: number;
   stackFrames: JscFrame[];
 }
 
+/**
+ * JSCore trace data
+ */
 interface JscStack {
   timestamp: number;
   samples: {
@@ -47,6 +68,9 @@ interface V8Frame {
   ts: number;
 }
 
+/**
+ * V8 trace data
+ */
 type V8Stack = V8Frame[];
 
 interface JscTreeNode {

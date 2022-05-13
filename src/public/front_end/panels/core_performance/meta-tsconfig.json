@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/core_performance"},"files":["../../../../../../chrome-devtools/front_end/panels/core_performance/core_performance-meta.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}

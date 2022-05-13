@@ -1,19 +1,36 @@
-import { DeviceInfo } from '@/@types/device';
-import { ChromePageType, DevicePlatform, ClientRole, AppClientType } from '@/@types/enum';
-import { makeUrl, AppWsUrlParams } from '@/utils/url';
-import { config } from '@/config';
-import { DebugTarget } from '@/@types/debug-target';
-import { getIWDPPages, patchIOSTarget } from '@/utils/iwdp';
-import { getDBOperator } from '@/db';
-import { Logger } from '@/utils/log';
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { DeviceInfo } from '@debug-server-next/@types/device';
+import { ChromePageType, DevicePlatform, ClientRole, AppClientType } from '@debug-server-next/@types/enum';
+import { makeUrl, AppWsUrlParams } from '@debug-server-next/utils/url';
+import { config } from '@debug-server-next/config';
+import { DebugTarget } from '@debug-server-next/@types/debug-target';
+import { getIWDPPages, patchIOSTarget } from '@debug-server-next/utils/iwdp';
+import { getDBOperator } from '@debug-server-next/db';
+import { Logger } from '@debug-server-next/utils/log';
 
 const log = new Logger('debug-target-util');
 
-/**
- * 通过 device 信息创建调试对象
- */
 export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
-  // 通过 tunnel 创建的 target，暂时使用 devicename 作为调试对象 id，后续终端重构后使用 targetCreated 事件抛出的 id
+  // TODO tunnel doesn't support multiple device, so we use device name as debug target clientId
   const clientId = device.devicename;
   const wsUrl = makeUrl(`${config.wsDomain}${config.wsPath}`, {
     clientId,
@@ -46,9 +63,6 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
   };
 };
 
-/**
- * 通过 ws 连接 url 创建调试对象
- */
 export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams, host?: string): DebugTarget => {
   const { clientId, clientRole, contextName, deviceName, hash } = wsUrlParams;
   // if node server is in remote cluster
@@ -89,9 +103,6 @@ export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams, host?: st
   };
 };
 
-/**
- * 通过 IWDP 获取到的页面创建调试对象
- */
 export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
   const iWDPWsUrl = iWDPPage.webSocketDebuggerUrl;
   const wsUrl = makeUrl(`${config.wsDomain}${config.wsPath}`, {
@@ -125,8 +136,7 @@ export const createTargetByIWDPPage = (iWDPPage: IWDPPage): DebugTarget => {
 };
 
 /**
- * 补充完整 debugTarget 信息。
- * 当 iOS 根据 device 创建出调试对象时，用 IWDP 获取到的额外信息加以补充
+ * append IWDP info to debugTarget
  */
 export const patchDebugTarget = async (debugTarget: DebugTarget) => {
   if (debugTarget.platform === DevicePlatform.IOS) {

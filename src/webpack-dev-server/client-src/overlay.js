@@ -2,9 +2,7 @@
 // They, in turn, got inspired by webpack-hot-middleware (https://github.com/glenjamin/webpack-hot-middleware).
 
 // Successful compilation.
-function hide() {
-
-}
+function hide() {}
 
 function formatProblem(type, item) {
   let header = type === 'warning' ? 'WARNING' : 'ERROR';
@@ -24,9 +22,7 @@ function formatProblem(type, item) {
 
     header += `${
       moduleName || file
-        ? ` in ${moduleName ? `${moduleName}${file ? ` (${file})` : ''}` : file}${
-          loc ? ` ${loc}` : ''
-        }`
+        ? ` in ${moduleName ? `${moduleName}${file ? ` (${file})` : ''}` : file}${loc ? ` ${loc}` : ''}`
         : ''
     }`;
     body += item.message || '';
@@ -36,8 +32,6 @@ function formatProblem(type, item) {
 }
 
 // Compilation with errors (e.g. syntax error or missing modules).
-function show() {
-  
-}
+function show() {}
 
 export { formatProblem, show, hide };

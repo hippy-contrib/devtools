@@ -1,16 +1,32 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { BaseDB } from '../base-db';
 
 /**
- * 封装数据增删查改，数据统一存储为 redis hashmap 类型
- * 本地开发或单机部署时用此模型，数据保存在内存中
+ * store data in memory, all value use redis hashmap type
  */
 export class MemoryDB<T> extends BaseDB<T> {
   private static hashmapStore: Map<string, Map<string, unknown>> = new Map();
   private static listStore: Map<string, Array<unknown>> = new Map();
 
-  /**
-   * 本地无需做初始化，暂写作空实现
-   */
   public async init() {}
 
   public async get(field: string): Promise<T> {

@@ -7,11 +7,11 @@ const { merge } = require('webpack-merge');
 
 const library = webpack.webpack
   ? {
-    library: {
-      // type: "module",
-      type: 'commonjs',
-    },
-  }
+      library: {
+        // type: "module",
+        type: 'commonjs',
+      },
+    }
   : { libraryTarget: 'umd' };
 
 const baseForModules = {

@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/panels/input"},"files":["../../../../../../chrome-devtools/front_end/panels/input/input.ts"],"references":[{"path":"./input-tsconfig.json"}]}
