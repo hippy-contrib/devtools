@@ -29,6 +29,7 @@
  */
 /* eslint-disable rulesdir/no_underscored_properties */
 import { NodeURL } from './NodeURL.js';
+// import {ConsoleModel} from '../sdk/ConsoleModel.js';
 export const DevToolsStubErrorCode = -32015;
 // TODO(dgozman): we are not reporting generic errors in tests, but we should
 // instead report them and just have some expected errors in test expectations.
@@ -273,7 +274,12 @@ export class SessionRouter {
                 });
             }
             return;
+        } else if (method === 'Log.cleared') {
+          // debugger
+          // ConsoleModel.instance().requestClearMessages();
+          // return;
         }
+
         const { performance } = messageObject;
         if (window.aegis && performance) {
             const { devtoolsToDebugServer, debugServerReceiveFromDevtools, debugServerToDevtools, } = performance;
