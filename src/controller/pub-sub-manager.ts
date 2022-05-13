@@ -26,6 +26,7 @@ import { Logger } from '@/utils/log';
 import { IPublisher, ISubscriber } from '@/db/pub-sub';
 import { decreaseRefAndSave, removeDebugTarget } from '@/utils/debug-target';
 import { aegis } from '@/utils/aegis';
+import { saveLogProtocol, isLogProtocol, getHistoryLogProtocol } from '@/utils/log-protocol';
 
 const log = new Logger('pub-sub-manager', WinstonColor.BrightGreen);
 
@@ -40,6 +41,9 @@ const channelMap: Map<
     publisherMap: Map<string, IPublisher>;
     // channel for multiple node publisher, when the WSAppClient is closed, we could publish close event to devtools
     internalPublisher: IPublisher;
+    // channel for multiple node publisher, when devtools connect, we could re-Pub all history log
+    internalSubscriber: ISubscriber;
+    // subscriber with glob character '*', subscribe all devtools client message
     upwardSubscriber: ISubscriber;
     debugTarget: DebugTarget;
     appClientList: AppClient[];
@@ -65,7 +69,8 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
     ext2: DevicePlatform[platform],
   });
 
-  const { appClientList, downwardChannelSet, cmdIdChannelIdMap, upwardSubscriber } = channelMap.get(clientId);
+  const { appClientList, downwardChannelSet, cmdIdChannelIdMap, upwardSubscriber, internalSubscriber, publisherMap } =
+    channelMap.get(clientId);
 
   createAppClientList(debugTarget, ws);
 
@@ -109,6 +114,37 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
       if (handler) handler(msg);
     });
   });
+
+  // publish history logs
+  const internalHandler = async (msg) => {
+    if (msg === InternalChannelEvent.DevtoolsConnected) {
+      const list = await getHistoryLogProtocol(clientId);
+      if (!list.length) return;
+
+      downwardChannelSet.forEach((channelId) => {
+        if (!publisherMap.has(channelId)) {
+          const { Publisher } = getDBOperator();
+          const publisher = new Publisher(channelId);
+          publisherMap.set(channelId, publisher);
+        }
+        const publisher = publisherMap.get(channelId);
+
+        // TODO mock a clear protocol before all history logs
+        publisher.publish(
+          JSON.stringify({
+            method: 'Log.cleared',
+            params: {},
+          }),
+        );
+
+        list.forEach((log) => {
+          publisher.publish(log);
+        });
+      });
+    }
+  };
+  internalSubscriber.unsubscribe(internalHandler);
+  internalSubscriber.subscribe(internalHandler);
 };
 
 /**
@@ -170,16 +206,18 @@ export const subscribeByIWDP = (debugTargets: DebugTarget[]) => {
 
 const addChannelItem = (debugTarget: DebugTarget) => {
   const { clientId } = debugTarget;
-  const { Publisher } = getDBOperator();
+  const { Publisher, Subscriber } = getDBOperator();
   const internalChannelId = createInternalChannel(clientId, '');
   const upwardSubscriber = createUpwardSubscriber(clientId);
   const internalPublisher = new Publisher(internalChannelId);
+  const internalSubscriber = new Subscriber(internalChannelId);
   channelMap.set(clientId, {
     downwardChannelSet: new Set(),
     cmdIdChannelIdMap: new Map(),
     publisherMap: new Map(),
     upwardSubscriber,
     internalPublisher,
+    internalSubscriber,
     debugTarget,
     appClientList: [],
   });
@@ -291,8 +329,12 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
   }
 };
 
+/**
+ * downward message handler
+ */
 const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Adapter.CDP.Res & { ts?: number }) => {
-  const channelInfo = channelMap.get(debugTarget.clientId);
+  const { clientId, platform } = debugTarget;
+  const channelInfo = channelMap.get(clientId);
   if (!channelInfo) {
     return log.error('channelInfo does not exist!');
   }
@@ -313,8 +355,13 @@ const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Ada
     publisher.publish(msgStr);
   } else {
     if (downwardChannelSet.size === 0) {
-      downwardChannelSet.add(createDownwardChannel(debugTarget.clientId));
+      downwardChannelSet.add(createDownwardChannel(clientId));
     }
+
+    if (platform === DevicePlatform.IOS && isLogProtocol(msg.method)) {
+      saveLogProtocol(clientId, msgStr);
+    }
+
     // broadcast to all channel, because could'n determine the receiver of EventRes
     downwardChannelSet.forEach((channelId) => {
       if (!publisherMap.has(channelId)) {

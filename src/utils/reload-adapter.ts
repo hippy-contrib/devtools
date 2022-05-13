@@ -1,7 +1,8 @@
-import { ChromeCommand, ChromeEvent } from 'tdf-devtools-protocol/dist/types';
+import { ChromeCommand, ChromeEvent, TdfCommand } from 'tdf-devtools-protocol/dist/types';
 import { getDBOperator } from '@/db';
 import { createUpwardChannel, createDownwardChannel } from '@/utils/pub-sub-channel';
 import { DebugTarget } from '@/@types/debug-target';
+import { createCDPPerformance } from '@/utils/aegis';
 import { GlobalId } from './global-id';
 
 const reloadCommandId = new GlobalId(-10000, -1);
@@ -197,3 +198,26 @@ export const publishRes = (clientId: string, res: Adapter.CDP.Res) => {
   const downPublisher = new Publisher(downwardChannelId);
   downPublisher.publish(JSON.stringify(res));
 };
+
+// 断开连接后不再发送调试指令，不会出现 id 混乱，所以 command id 可以 mock 一个
+const mockCmdId = -100000;
+export const resumeCommands = [
+  {
+    id: mockCmdId,
+    method: TdfCommand.TDFRuntimeResume,
+    params: {},
+    performance: createCDPPerformance(),
+  },
+  {
+    id: mockCmdId - 1,
+    method: ChromeCommand.DebuggerDisable,
+    params: {},
+    performance: createCDPPerformance(),
+  },
+  {
+    id: mockCmdId - 2,
+    method: ChromeCommand.RuntimeDisable,
+    params: {},
+    performance: createCDPPerformance(),
+  },
+];

@@ -961,6 +961,7 @@ export function registerCommands(inspectorBackend) {
         RecurringHandler: 'recurringHandler'
     });
     inspectorBackend.registerEvent('Log.entryAdded', ['entry']);
+    inspectorBackend.registerEvent('Log.cleared', []);
     inspectorBackend.registerCommand('Log.clear', [], []);
     inspectorBackend.registerCommand('Log.disable', [], []);
     inspectorBackend.registerCommand('Log.enable', [], []);

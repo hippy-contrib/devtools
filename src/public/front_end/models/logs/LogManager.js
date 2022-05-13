@@ -19,6 +19,7 @@ export class LogManager {
     modelAdded(logModel) {
         const eventListeners = [];
         eventListeners.push(logModel.addEventListener(SDK.LogModel.Events.EntryAdded, this.logEntryAdded, this));
+        eventListeners.push(logModel.addEventListener(SDK.LogModel.Events.Clear, this.clear, this));
         modelToEventListeners.set(logModel, eventListeners);
     }
     modelRemoved(logModel) {
@@ -60,5 +61,9 @@ export class LogManager {
         else {
             SDK.ConsoleModel.ConsoleModel.instance().addMessage(consoleMessage);
         }
+    }
+
+    clear() {
+      SDK.ConsoleModel.ConsoleModel.instance()._clear()
     }
 }

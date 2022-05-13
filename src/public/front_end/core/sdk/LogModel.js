@@ -32,11 +32,16 @@ export class LogModel extends SDKModel {
     requestClear() {
         this._logAgent.invoke_clear();
     }
+    cleared() {
+      console.log('cleared -----');
+      this.dispatchEventToListeners(Events.Clear);
+    }
 }
 // TODO(crbug.com/1167717): Make this a const enum again
 // eslint-disable-next-line rulesdir/const_enum
 export var Events;
 (function (Events) {
     Events["EntryAdded"] = "EntryAdded";
+    Events["Clear"] = "Clear";
 })(Events || (Events = {}));
 SDKModel.register(LogModel, { capabilities: Capability.Log, autostart: true });

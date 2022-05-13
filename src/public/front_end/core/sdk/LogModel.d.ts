@@ -9,5 +9,6 @@ export declare class LogModel extends SDKModel implements ProtocolProxyApi.LogDi
     requestClear(): void;
 }
 export declare enum Events {
-    EntryAdded = "EntryAdded"
+    EntryAdded = "EntryAdded",
+    Clear = "Clear"
 }
