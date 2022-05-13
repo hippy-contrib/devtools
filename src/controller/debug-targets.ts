@@ -38,7 +38,7 @@ export class DebugTargetManager {
    * @memberof DebugTargetManager
    */
   public static getDebugTargets = async (hash: string, ignoreHash = false): Promise<DebugTarget[]> => {
-    const { iWDPPort } = global.debugAppArgv;
+    const { iWDPPort, enableIOS } = global.debugAppArgv;
     const { DB } = getDBOperator();
     const db = new DB(config.redis.debugTargetTable);
     let getDebugTargetPromise;
@@ -48,7 +48,10 @@ export class DebugTargetManager {
       getDebugTargetPromise = db.getAll();
     }
 
-    const [targets, iOSPages] = await Promise.all([getDebugTargetPromise, getIWDPPages(iWDPPort)]);
+    const [targets, iOSPages] = await Promise.all([
+      getDebugTargetPromise,
+      enableIOS ? getIWDPPages(iWDPPort) : Promise.resolve([]),
+    ]);
     targets.forEach((target, i) => {
       if (target.platform === DevicePlatform.IOS) {
         targets[i] = patchIOSTarget(target, iOSPages);
