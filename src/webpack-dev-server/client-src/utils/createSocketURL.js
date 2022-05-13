@@ -6,7 +6,7 @@ function createSocketURL(parsedURL) {
   return url.format({
     protocol: protocol || 'ws:',
     hostname: hostname || 'localhost',
-    port: port,
+    port,
     pathname: pathname || '/ws',
     slashes: true,
     query: {

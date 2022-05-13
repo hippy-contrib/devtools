@@ -3,9 +3,10 @@ let logLevel = 'info';
 function dummy() {}
 
 function shouldLog(level) {
-  const shouldLog =    (logLevel === 'info' && level === 'info')
-    || (['info', 'warning'].indexOf(logLevel) >= 0 && level === 'warning')
-    || (['info', 'warning', 'error'].indexOf(logLevel) >= 0 && level === 'error');
+  const shouldLog =
+    (logLevel === 'info' && level === 'info') ||
+    (['info', 'warning'].indexOf(logLevel) >= 0 && level === 'warning') ||
+    (['info', 'warning', 'error'].indexOf(logLevel) >= 0 && level === 'error');
   return shouldLog;
 }
 
@@ -48,7 +49,8 @@ module.exports.formatError = function (err) {
   const { stack } = err;
   if (!stack) {
     return message;
-  } if (stack.indexOf(message) < 0) {
+  }
+  if (stack.indexOf(message) < 0) {
     return `${message}\n${stack}`;
   }
   return stack;

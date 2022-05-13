@@ -3,14 +3,11 @@
 	Author Tobias Koppers @sokra
 */
 module.exports = function (updatedModules, renewedModules) {
-  const unacceptedModules = updatedModules.filter(moduleId => renewedModules && renewedModules.indexOf(moduleId) < 0);
+  const unacceptedModules = updatedModules.filter((moduleId) => renewedModules && renewedModules.indexOf(moduleId) < 0);
   const log = require('./log');
 
   if (unacceptedModules.length > 0) {
-    log(
-      'warning',
-      '[HMR] The following modules couldn\'t be hot updated: (They would need a full reload!)',
-    );
+    log('warning', "[HMR] The following modules couldn't be hot updated: (They would need a full reload!)");
     unacceptedModules.forEach((moduleId) => {
       log('warning', `[HMR]  - ${moduleId}`);
     });
@@ -30,7 +27,7 @@ module.exports = function (updatedModules, renewedModules) {
         log('info', `[HMR]  - ${moduleId}`);
       }
     });
-    const numberIds = renewedModules.every(moduleId => typeof moduleId === 'number');
+    const numberIds = renewedModules.every((moduleId) => typeof moduleId === 'number');
     if (numberIds) {
       log('info', '[HMR] Consider using the NamedModulesPlugin for module names.');
     }

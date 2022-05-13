@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/third_party/marked"},"files":["../../../../../../chrome-devtools/front_end/third_party/marked/marked.ts"],"references":[{"path":"./marked-tsconfig.json"}]}

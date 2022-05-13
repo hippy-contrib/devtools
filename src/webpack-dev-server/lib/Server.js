@@ -1,3 +1,6 @@
+/**
+ * copy form webpack-dev-server, modify to support Hippy HMR
+ */
 'use strict';
 
 const os = require('os');
@@ -8,16 +11,16 @@ const fs = require('graceful-fs');
 const ipaddr = require('ipaddr.js');
 const express = require('express');
 const { validate } = require('schema-utils');
-const schema = require('./options.json');
 const WebSocket = require('ws');
-const { HMREvent, GatewayFamily } = require('@/@types/enum');
-const { encodeHMRData } = require('@/utils/buffer');
-const { getWSProtocolByHttpProtocol, makeUrl } = require('@/utils/url');
-const { saveDevPort, injectEntry } = require('@/utils/webpack');
-const { internalIP, internalIPSync } = require('@/utils/ip');
-const { startAdbProxy } = require('@/child-process/adb');
 const { get } = require('lodash');
 const colors = require('colors/safe');
+const { HMREvent, GatewayFamily } = require('@debug-server-next/@types/enum');
+const { encodeHMRData } = require('@debug-server-next/utils/buffer');
+const { getWSProtocolByHttpProtocol, makeUrl } = require('@debug-server-next/utils/url');
+const { saveDevPort, injectEntry } = require('@debug-server-next/utils/webpack');
+const { internalIP, internalIPSync } = require('@debug-server-next/utils/ip');
+const { startAdbProxy } = require('@debug-server-next/child-process/adb');
+const schema = require('./options.json');
 
 if (!process.env.WEBPACK_SERVE) {
   process.env.WEBPACK_SERVE = true;
@@ -141,16 +144,16 @@ class Server {
   }
 
   addAdditionalEntries(compiler) {
-    if(!this.options.remote) return;
-    const {appendEntries: hmrAppendEntries, prependEntries: hmrPrependEntries} = this.addHMREntries(compiler);
-    const {appendEntries: vueAppendEntries, prependEntries: vuePrependEntries} = this.addVueDevtoolsEntries();
-    
+    if (!this.options.remote) return;
+    const { appendEntries: hmrAppendEntries, prependEntries: hmrPrependEntries } = this.addHMREntries(compiler);
+    const { appendEntries: vueAppendEntries, prependEntries: vuePrependEntries } = this.addVueDevtoolsEntries();
+
     // must ensure correct inject sequence, because the append entries depend on the prepend and original entries.
     injectEntry(
-      compiler, 
-      undefined, 
+      compiler,
+      undefined,
       [...hmrPrependEntries, ...vuePrependEntries],
-      [...hmrAppendEntries, ...vueAppendEntries], 
+      [...hmrAppendEntries, ...vueAppendEntries],
     );
   }
 
@@ -211,16 +214,18 @@ class Server {
   }
 
   addVueDevtoolsEntries() {
-    if(!this.options.vueDevtools) return {appendEntries: [], prependEntries: []};
+    if (!this.options.vueDevtools) return { appendEntries: [], prependEntries: [] };
     const { host, port, protocol } = this.options.remote;
     const vueBackend = makeUrl(require.resolve('@hippy/hippy-vue-devtools-plugin/lib/backend'), {
-      host, port, protocol
+      host,
+      port,
+      protocol,
     });
     const vueHook = require.resolve('@hippy/hippy-vue-devtools-plugin/lib/hook');
     return {
-      appendEntries: [vueBackend], 
-      prependEntries: [vueHook]
-    }
+      appendEntries: [vueBackend],
+      prependEntries: [vueHook],
+    };
   }
 
   getCompilerOptions() {
@@ -772,14 +777,16 @@ class Server {
 
       if (this.webSocketClient) {
         this.sendMessage({
-          messages: [{
-            type: HMREvent.ProgressUpdate, 
-            data: {
-              percent,
-              msg,
-              pluginName,
-            }
-          }]
+          messages: [
+            {
+              type: HMREvent.ProgressUpdate,
+              data: {
+                percent,
+                msg,
+                pluginName,
+              },
+            },
+          ],
         });
       }
 
@@ -897,9 +904,11 @@ class Server {
     });
     this.compiler.hooks.invalid.tap('webpack-dev-server', () => {
       this.sendMessage({
-        messages: [{
-          type: HMREvent.Invalid,
-        }]
+        messages: [
+          {
+            type: HMREvent.Invalid,
+          },
+        ],
       });
     });
     this.compiler.hooks.done.tap('webpack-dev-server', async (stats) => {
@@ -1198,10 +1207,12 @@ class Server {
   }
 
   createWebSocketClient() {
-    if(!this.options.remote) return;
+    if (!this.options.remote) return;
     return new Promise((resolve, reject) => {
       const { host, port, protocol, proxy } = this.options.remote;
-      const webSocketURL = `${getWSProtocolByHttpProtocol(protocol)}://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.id}`;
+      const webSocketURL = `${getWSProtocolByHttpProtocol(
+        protocol,
+      )}://${host}:${port}/debugger-proxy?role=hmr_server&hash=${this.options.id}`;
 
       this.webSocketClient = new WebSocket(webSocketURL);
       this.webSocketClient.on('open', () => {
@@ -1214,16 +1225,22 @@ class Server {
         this.webSocketClient.pong();
       });
       this.webSocketClient.on('close', (code, reason) => {
-        this.logger.warn(`HMR websocket is closed(${code}), will try to reconnect when you modify source code. ${reason}`);
+        this.logger.warn(
+          `HMR websocket is closed(${code}), will try to reconnect when you modify source code. ${reason}`,
+        );
       });
       this.webSocketClient.on('error', (e) => {
         this.logger.warn('HMR websocket error: ', e);
-        if(host === '127.0.0.1' || host === 'localhost') {
-          this.logger.warn('Hippy use @hippy/debug-server-next to transit HMR message, connect to debug server failed, recommend to run `npm run hippy:debug` first!');
+        if (host === '127.0.0.1' || host === 'localhost') {
+          this.logger.warn(
+            'Hippy use @hippy/debug-server-next to transit HMR message, connect to debug server failed, recommend to run `npm run hippy:debug` first!',
+          );
         }
-          
-        if(e.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
-          this.logger.info(`if you are behind a proxy server(such as whistle, charles), you should run 'export NODE_EXTRA_CA_CERTS=<path_to_whistle_rootCA>' first to resolve full key chain!`)
+
+        if (e.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
+          this.logger.info(
+            `if you are behind a proxy server(such as whistle, charles), you should run 'export NODE_EXTRA_CA_CERTS=<path_to_whistle_rootCA>' first to resolve full key chain!`,
+          );
         }
         if (this.webSocketClient.readyState === WebSocket.CLOSING) reject();
       });
@@ -1236,14 +1253,16 @@ class Server {
     }
 
     const stats = this.getWebpackStats(this.stats);
-    const messages = [{
-      type: HMREvent.Hash,
-      data: stats.hash,
-    }];
+    const messages = [
+      {
+        type: HMREvent.Hash,
+        data: stats.hash,
+      },
+    ];
 
     const { hmrResources, otherResources } = this.getEmitList();
     const allResource = [...otherResources, ...hmrResources];
-    if(allResource.length === 0) return;
+    if (allResource.length === 0) return;
 
     const syncQueue = [];
     /**
@@ -1259,7 +1278,7 @@ class Server {
     const hmrData = {
       emitList: syncQueue.shift(),
       messages,
-    }
+    };
 
     if (this.options.hot === true || this.options.hot === 'only') {
       this.logger.info('enable HMR');
@@ -1285,24 +1304,24 @@ class Server {
 
       if (stats.errors.length > 0 || stats.warnings.length > 0) {
         const hasErrors = stats.errors.length > 0;
-  
+
         if (stats.warnings.length > 0) {
           let params;
-  
+
           if (hasErrors) {
             params = { preventReloading: true };
           }
-          
+
           messages.push({
             type: HMREvent.Warnings,
             data: stats.warnings,
             params,
           });
         }
-  
+
         if (stats.errors.length > 0) {
           messages.push({
-            type: HMREvent.Errors, 
+            type: HMREvent.Errors,
             data: stats.errors,
           });
         }
@@ -1317,11 +1336,11 @@ class Server {
       ...hmrData,
       hadSyncBundleResource: this.hadSyncBundleResource,
     });
-    if(syncQueue.length) {
+    if (syncQueue.length) {
       this.sendMessage({
         emitList: syncQueue.pop(),
         hadSyncBundleResource: true,
-      })
+      });
     }
     this.hadSyncBundleResource = true;
   }
@@ -1593,13 +1612,13 @@ class Server {
   // eslint-disable-next-line class-methods-use-this
   async sendMessage(hmrWsData) {
     if (this.webSocketClient) {
-      if(this.webSocketClient.readyState === WebSocket.OPEN) {
+      if (this.webSocketClient.readyState === WebSocket.OPEN) {
         const encoded = encodeHMRData({
           ...hmrWsData,
           publicPath: get(this.compiler, 'options.output.publicPath'),
         });
         this.webSocketClient.send(encoded);
-      } else if(this.webSocketClient.readyState === WebSocket.CLOSED) {
+      } else if (this.webSocketClient.readyState === WebSocket.CLOSED) {
         this.msgQueue.push(hmrWsData);
         this.createWebSocketClient();
       }
@@ -1607,7 +1626,7 @@ class Server {
   }
 
   getEmitList() {
-    const {emitMap} = this;
+    const { emitMap } = this;
     const emitList = Array.from(emitMap.values());
     if (!emitList || emitList.length === 0) {
       return {
@@ -1616,8 +1635,8 @@ class Server {
       };
     }
 
-    const hmrResources = emitList.filter(item => item.isHMRResource);
-    const otherResources = emitList.filter(item => !item.isHMRResource);
+    const hmrResources = emitList.filter((item) => item.isHMRResource);
+    const otherResources = emitList.filter((item) => !item.isHMRResource);
     return {
       hmrResources,
       otherResources,
@@ -1634,10 +1653,10 @@ class Server {
         this.sendMessage({
           messages: [
             {
-              type: HMREvent.StaticChanged, 
-              data: item
-            }
-          ]
+              type: HMREvent.StaticChanged,
+              data: item,
+            },
+          ],
         });
       });
     }

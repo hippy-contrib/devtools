@@ -19,14 +19,14 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "typeRoots": ["src/@types", "node_modules/@types", "node_modules/tdf-devtools-protocol/@types"],
+    "typeRoots": ["src/@types", "node_modules/@types", "node_modules/@hippy/devtools-protocol/@types"],
     "paths": {
       "tslib": ["node_modules/tslib/tslib.d.ts"],
       "*": ["*", "node_modules/*", "src/@types/*"],
-      "@/*": ["src/*"]
+      "@debug-server-next/*": ["src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts", "package.json", "node_modules/tdf-devtools-protocol/**/*", "src/utils/event-emitter.js", "src/utils/sender.js"],
-  "exclude": ["!node_modules/tdf-devtools-protocol"]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "global.d.ts", "package.json", "node_modules/@hippy/devtools-protocol/**/*", "src/utils/event-emitter.js", "src/utils/sender.js"],
+  "exclude": ["!node_modules/@hippy/devtools-protocol"]
 }

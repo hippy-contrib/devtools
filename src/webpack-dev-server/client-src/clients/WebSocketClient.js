@@ -2,7 +2,7 @@ import { log } from '../utils/log';
 
 export default class WebSocketClient {
   constructor(url) {
-    log.info('hmr url: ', url)
+    log.info('hmr url: ', url);
     this.client = new global.WebSocket(url);
     this.client.onerror = (error) => {
       log.error(error);

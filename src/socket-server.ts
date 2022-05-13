@@ -1,11 +1,31 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { Server as HTTPServer, IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { Server as WSServer } from 'ws';
-import { ClientRole, WinstonColor, WSCode } from '@/@types/enum';
-import { DebugTargetManager } from '@/controller/debug-targets';
-import { cleanAllDebugTargets } from '@/controller/pub-sub-manager';
-import { onDevtoolsConnection, onAppConnection } from '@/controller/chrome-devtools';
-import { Logger } from '@/utils/log';
+import { ClientRole, WinstonColor, WSCode } from '@debug-server-next/@types/enum';
+import { DebugTargetManager } from '@debug-server-next/controller/debug-targets';
+import { cleanAllDebugTargets } from '@debug-server-next/controller/pub-sub-manager';
+import { onDevtoolsConnection, onAppConnection } from '@debug-server-next/controller/chrome-devtools';
+import { Logger } from '@debug-server-next/utils/log';
 import {
   parseWsUrl,
   getWsInvalidReason,
@@ -13,21 +33,18 @@ import {
   DevtoolsWsUrlParams,
   HMRWsParams,
   JSRuntimeWsUrlParams,
-} from '@/utils/url';
-import { config } from '@/config';
-import { onHMRClientConnection, onHMRServerConnection } from '@/controller/hmr';
-import { MyWebSocket } from '@/@types/socker-server';
-import { onVueClientConnection } from '@/controller/vue-devtools';
+} from '@debug-server-next/utils/url';
+import { config } from '@debug-server-next/config';
+import { onHMRClientConnection, onHMRServerConnection } from '@debug-server-next/controller/hmr';
+import { MyWebSocket } from '@debug-server-next/@types/socker-server';
+import { onVueClientConnection } from '@debug-server-next/controller/vue-devtools';
 
 const heartbeatInterval = 30000;
+
 const log = new Logger('socket-server', WinstonColor.Cyan);
 
 /**
- * ws 调试服务，支持远程调试（无线模式，使用 ws 通道）、本地调试（有线模式，使用 tunnel 数据通道）
- * 通过 redis pub/sub 实现多点部署时的消息分发，上下行消息根据 clientId 来建立 redis channel 进行分发
- * 本地安装 npm 包部署时（单点部署），不存储 redis，而是直接保存在内存中
- *
- * 设计方案： https://iwiki.woa.com/pages/viewpage.action?pageId=1222336167
+ * Debug WebSocket server, support deploy in multiple node server, use Redis Pub/Sub broadcast message
  */
 export class SocketServer {
   private wss: WSServer;
@@ -38,9 +55,6 @@ export class SocketServer {
     this.server = server;
   }
 
-  /**
-   * 开启调试服务
-   */
   public start() {
     const wss = new WSServer({
       noServer: true,
@@ -73,9 +87,6 @@ export class SocketServer {
     }, heartbeatInterval);
   }
 
-  /**
-   * 关闭调试服务，并清理当前节点连接的调试对象缓存
-   */
   public async close() {
     await cleanAllDebugTargets();
     this.wss.close(() => {
@@ -84,7 +95,7 @@ export class SocketServer {
   }
 
   private onUpgrade(req: IncomingMessage, socket: Socket, head: Buffer) {
-    log.info('onUpgrade, ws url: %s', req.url);
+    log.verbose('onUpgrade, ws url: %s', req.url);
     const wsUrlParams = parseWsUrl(req.url);
     const reason = getWsInvalidReason(wsUrlParams);
     if (reason) {
@@ -98,8 +109,7 @@ export class SocketServer {
   }
 
   /**
-   * ⚠️ 给 ws 添加事件监听前，不要执行异步操作，否则会遗漏消息
-   * 事件监听后，再异步判断是否合法，不合法则关闭
+   * ⚠️: don't do async operation before subscribe, otherwise will miss message
    */
   private async onConnection(ws: MyWebSocket, req: IncomingMessage) {
     const wsUrlParams = parseWsUrl(req.url);

@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/models/timeline_model"},"files":["../../../../../../chrome-devtools/front_end/models/timeline_model/timeline_model-legacy.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}

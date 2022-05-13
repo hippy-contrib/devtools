@@ -1,6 +1,26 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import WebSocket from 'ws';
 import { differenceBy } from 'lodash';
-import { IWDPAppClient } from '@/client/iwdp-app-client';
+import { IWDPAppClient } from '@debug-server-next/client/iwdp-app-client';
 import {
   AppClientType,
   AppClientEvent,
@@ -9,24 +29,24 @@ import {
   WinstonColor,
   DevicePlatform,
   ReportEvent,
-} from '@/@types/enum';
-import { getDBOperator } from '@/db';
-import { appClientManager, AppClient } from '@/client';
-import { AppClientOption } from '@/client/app-client';
-import { AppClientFullOptionOmicCtx } from '@/client/app-client-manager';
-import { debugTargetToUrlParsedContext } from '@/middlewares';
-import { DebugTarget } from '@/@types/debug-target';
+} from '@debug-server-next/@types/enum';
+import { getDBOperator } from '@debug-server-next/db';
+import { appClientManager, AppClient } from '@debug-server-next/client';
+import { AppClientOption } from '@debug-server-next/client/app-client';
+import { AppClientFullOptionOmicCtx } from '@debug-server-next/client/app-client-manager';
+import { debugTargetToUrlParsedContext } from '@debug-server-next/middlewares';
+import { DebugTarget } from '@debug-server-next/@types/debug-target';
 import {
   upwardChannelToDownwardChannel,
   createUpwardChannel,
   createInternalChannel,
   createDownwardChannel,
-} from '@/utils/pub-sub-channel';
-import { Logger } from '@/utils/log';
-import { IPublisher, ISubscriber } from '@/db/pub-sub';
-import { decreaseRefAndSave, removeDebugTarget } from '@/utils/debug-target';
-import { aegis } from '@/utils/aegis';
-import { saveLogProtocol, isLogProtocol, getHistoryLogProtocol } from '@/utils/log-protocol';
+} from '@debug-server-next/utils/pub-sub-channel';
+import { Logger } from '@debug-server-next/utils/log';
+import { IPublisher, ISubscriber } from '@debug-server-next/db/pub-sub';
+import { decreaseRefAndSave, removeDebugTarget } from '@debug-server-next/utils/debug-target';
+import { aegis } from '@debug-server-next/utils/aegis';
+import { saveLogProtocol, isLogProtocol, getHistoryLogProtocol } from '@debug-server-next/utils/log-protocol';
 
 const log = new Logger('pub-sub-manager', WinstonColor.BrightGreen);
 

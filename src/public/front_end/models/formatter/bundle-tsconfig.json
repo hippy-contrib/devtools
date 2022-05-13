@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/models/formatter"},"files":["../../../../../../chrome-devtools/front_end/models/formatter/formatter.ts"],"references":[{"path":"./formatter-tsconfig.json"}]}

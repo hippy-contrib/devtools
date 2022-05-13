@@ -1,7 +1,27 @@
-import { TdfEvent } from 'tdf-devtools-protocol/dist/types/enum-tdf-mapping';
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { TdfEvent } from '@hippy/devtools-protocol/dist/types/enum-tdf-mapping';
 import { blue, black } from 'colors/safe';
-import { ChromeEvent } from 'tdf-devtools-protocol/dist/types/enum-chrome-mapping';
-import { Logger } from '@/utils/log';
+import { ChromeEvent } from '@hippy/devtools-protocol/dist/types/enum-chrome-mapping';
+import { Logger } from '@debug-server-next/utils/log';
 import { MiddleWareManager } from '../middleware-context';
 
 const log = new Logger('tdf-log-middleware');
@@ -37,12 +57,11 @@ export const tdfLogMiddleWareManager: MiddleWareManager = {
 };
 
 const convertTDFLogToChromeLog = (log: ProtocolTdf.TDFLog.LogInfo): ProtocolChrome.Log.LogEntry => {
-  // app 端回包单位为纳秒，需换算为毫秒， 1 毫秒 = 1000000 纳秒
+  // 1ms = 1000000ns
   const timestamp = `${new Date(Math.floor(log.timestamp / 1000000)).toLocaleString()}(${log.timestamp})`;
   const logPrefixTemp = `[${timestamp}] [${log.level}] [${log.source}] `;
   const logPrefix = log.module ? `${logPrefixTemp}[${log.module}] ` : `${logPrefixTemp}`;
   const consoleMessage = {
-    // 脚本生成的类型声明使用了联合类型，为了方便处理直接转为 any
     source: 'other' as any,
     level: 'info' as any,
     text: `${blue(logPrefix)}${black(log.message)}`,

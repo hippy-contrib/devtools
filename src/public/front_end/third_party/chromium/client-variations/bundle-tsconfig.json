@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../../chrome-devtools/front_end/third_party/chromium/client-variations"},"files":["../../../../../../../chrome-devtools/front_end/third_party/chromium/client-variations/client-variations.ts"],"references":[{"path":"./client-variations-tsconfig.json"}]}

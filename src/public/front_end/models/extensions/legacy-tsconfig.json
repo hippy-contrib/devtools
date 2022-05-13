@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/models/extensions"},"files":["../../../../../../chrome-devtools/front_end/models/extensions/extensions-legacy.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}

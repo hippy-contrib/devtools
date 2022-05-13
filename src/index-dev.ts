@@ -1,17 +1,17 @@
 #!/usr/bin/env node
-/* eslint-disable import/first -- 本文件禁用，要在入口最前面注册别名，后面的 import 才能使用别名；另外要先加载 dotenv，才能创建 redis 连接 */
+/* eslint-disable import/first -- should add module alias before use */
 import path from 'path';
 import moduleAlias from 'module-alias';
 moduleAlias.addAliases({
-  '@': __dirname,
+  '@debug-server-next': __dirname,
 });
 import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
-import '@/utils/aegis';
-import { webpack } from '@/app-dev';
-import { getWebpackConfig } from '@/utils/webpack';
-import { Logger } from '@/utils/log';
+import '@debug-server-next/utils/aegis';
+import { webpack } from '@debug-server-next/app-dev';
+import { getWebpackConfig } from '@debug-server-next/utils/webpack';
+import { Logger } from '@debug-server-next/utils/log';
 import { version } from '../package.json';
 import './process-handler';
 

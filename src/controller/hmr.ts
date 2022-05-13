@@ -1,20 +1,49 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import fs from 'fs';
 import path from 'path';
 import WebSocket from 'ws';
-// import { throttle } from '@/utils/throttle';
-import { WinstonColor, WSCode, StaticFileStorage, ReportEvent, HMRReportExt2, HMRSyncType } from '@/@types/enum';
-import { HMRWsParams, getBaseFolderOfPublicPath } from '@/utils/url';
-import { Logger } from '@/utils/log';
-import { createHMRChannel } from '@/utils/pub-sub-channel';
-import { getDBOperator } from '@/db';
-import { config } from '@/config';
-import { decodeHMRData } from '@/utils/buffer';
-import { cosUpload, deleteObjects } from '@/utils/cos';
-import { aegis } from '@/utils/aegis';
+import {
+  WinstonColor,
+  WSCode,
+  StaticFileStorage,
+  ReportEvent,
+  HMRReportExt2,
+  HMRSyncType,
+} from '@debug-server-next/@types/enum';
+import { HMRWsParams, getBaseFolderOfPublicPath } from '@debug-server-next/utils/url';
+import { Logger } from '@debug-server-next/utils/log';
+import { createHMRChannel } from '@debug-server-next/utils/pub-sub-channel';
+import { getDBOperator } from '@debug-server-next/db';
+import { config } from '@debug-server-next/config';
+import { decodeHMRData } from '@debug-server-next/utils/buffer';
+import { cosUpload, deleteObjects } from '@debug-server-next/utils/cos';
+import { aegis } from '@debug-server-next/utils/aegis';
 
 const log = new Logger('hmr-controller', WinstonColor.Blue);
 const hmrCloseEvent = 'HMR_SERVER_CLOSED';
 
+/**
+ * Pub/Sub HMR msg to client side
+ */
 export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
   log.verbose('HMR client connected, hash: %s', hash);
@@ -58,6 +87,9 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
   ws.on('error', (e) => log.error('HMR client ws error: %s', e.stack || e));
 };
 
+/**
+ * Pub/Sub HMR msg to server side
+ */
 export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
   log.verbose('HMR server connected, hash: %s', hash);
@@ -70,7 +102,7 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
     ext1: hash,
     ext2: HMRReportExt2.Server,
   });
-  // store all synced dist file, and clean when hmr server disconnect
+  // store all synced dist file, and clean when HMR server disconnect
   const distFiles: Set<string> = new Set();
 
   ws.on('message', async (msg: Buffer) => {

@@ -1,8 +1,28 @@
-/**
- * ⚠️ Publisher, Subscriber 必须 connect 之后再开始发布订阅，否则会先进入 PubSub mode，不能发送 AUTH 命令
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-import { Logger } from '@/utils/log';
-import { IPublisher, ISubscriber } from '@/db/pub-sub';
+
+/**
+ * ⚠️ publish and subscribe must behind connection, otherwise redis client will change to PubSub mode, could not send AUTH command
+ */
+import { Logger } from '@debug-server-next/utils/log';
+import { IPublisher, ISubscriber } from '@debug-server-next/db/pub-sub';
 import { RedisClient, RedisDB, listenRedisEvent } from './redis-db';
 
 const log = new Logger('redis-pub-sub');
@@ -25,22 +45,16 @@ export class RedisPublisher implements IPublisher {
     this.init();
   }
 
-  /**
-   * 发布 message 到 channel
-   */
   public publish(message: string | Adapter.CDP.Req) {
     if (this.isConnected) this.realPublish(message);
     else this.queue.push(message);
   }
 
   /**
-   * 断开连接。暂写作空实现，redis 进入 PubSub mode 后，不能发送其他任何指令
+   * nullish, redis could send other command in PubSub mode
    */
   public disconnect() {}
 
-  /**
-   * 真正的 publish 到 redis
-   */
   private realPublish(message: string | Adapter.CDP.Req) {
     const msgStr = typeof message !== 'string' ? JSON.stringify(message) : message;
     try {
@@ -51,7 +65,7 @@ export class RedisPublisher implements IPublisher {
   }
 
   /**
-   * 初始化数据库连接，建立后清空 publish 队列
+   * init redis connection, will clear publish queue if connected
    */
   private async init() {
     await this.client.connect();
@@ -79,39 +93,30 @@ export class RedisSubscriber implements ISubscriber {
     this.init();
   }
 
-  /**
-   * 订阅到 channel
-   */
   public subscribe(cb) {
     if (this.isConnected) this.client.subscribe(this.channel, cb);
     else this.operateQueue.push([this.subscribe, cb]);
   }
 
   /**
-   * 含通配符 * 的订阅
+   * subscribe channel with glob character, such as `*`
    */
   public pSubscribe(cb) {
     if (this.isConnected) this.client.pSubscribe(this.channel, cb);
     else this.operateQueue.push([this.pSubscribe, cb]);
   }
 
-  /**
-   * 取消订阅
-   */
   public unsubscribe = () => this.client.unsubscribe(this.channel);
 
-  /**
-   * 取消订阅含通配符 * 的 channel
-   */
   public pUnsubscribe = () => this.client.pUnsubscribe(this.channel);
 
   /**
-   * 断开连接。暂写作空实现，redis 进入 PubSub mode 后，不能发送其他任何指令
+   * nullish, redis could send other command in PubSub mode
    */
   public disconnect = () => {};
 
   /**
-   * 初始化数据库连接，建立后清空提前调用的指令队列
+   * init redis connection, will clear subscribe queue if connected
    */
   private async init() {
     if (this.isConnected) return;

@@ -4,7 +4,6 @@ import { log } from './utils/log';
 let retries = 0;
 let maxRetries = 10;
 let client = null;
-let aegis
 
 const socket = function initSocket(url, handlers, reconnect) {
   client = new WebSocketClient(url);
@@ -42,13 +41,13 @@ const socket = function initSocket(url, handlers, reconnect) {
     retries = 0;
     const hmrData = JSON.parse(data);
     log.info(hmrData);
-    if(!hmrData.messages || hmrData.messages.length === 0) return;
+    if (!hmrData.messages || hmrData.messages.length === 0) return;
 
-    hmrData.messages.forEach(message => {
+    hmrData.messages.forEach((message) => {
       if (handlers[message.type]) {
         handlers[message.type](message.data, message.params);
       }
-    })
+    });
   });
 };
 

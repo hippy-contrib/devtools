@@ -1,5 +1,5 @@
 /**
- * 本文件 copy 自 eventemitter3，修改以支持 redis 风格的通配符
+ * copy from eventemitter3, modify to support redis glob character
  */
 
 'use strict';

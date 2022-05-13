@@ -1,5 +1,25 @@
-import { ChromeCommand, ChromeEvent, IOS100Event, IOS90Command } from 'tdf-devtools-protocol/dist/types';
-import { ChromeLogLevel } from '@/@types/enum';
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ChromeCommand, ChromeEvent, IOS100Event, IOS90Command } from '@hippy/devtools-protocol/dist/types';
+import { ChromeLogLevel } from '@debug-server-next/@types/enum';
 import { MiddleWareManager } from '../middleware-context';
 
 export const logMiddleWareManager: MiddleWareManager = {
@@ -37,7 +57,6 @@ export const logMiddleWareManager: MiddleWareManager = {
       // }
 
       const consoleMessage: ProtocolChrome.Log.LogEntry = {
-        // 这里自动生成的类型没有定义 enum，而是用的联合类型，导致类型不同，所以使用 any 转换
         source: message.source as any,
         level: type,
         text: '',
@@ -88,17 +107,3 @@ export const logMiddleWareManager: MiddleWareManager = {
       }),
   },
 };
-
-function transformStacktrace(callFrames): ProtocolChrome.Runtime.StackTrace {
-  if (!callFrames) {
-    return;
-  }
-
-  return {
-    callFrames,
-    // Optional
-    // description?: string;
-    // parent?: StackTrace;
-    // parentId?: StackTraceId;
-  };
-}

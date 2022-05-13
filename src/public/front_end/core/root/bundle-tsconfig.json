@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/core/root"},"files":["../../../../../../chrome-devtools/front_end/core/root/root.ts"],"references":[{"path":"./root-tsconfig.json"}]}

@@ -1,14 +1,34 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import fs from 'fs';
 import path from 'path';
 import HippyHMRPlugin from '@hippy/hippy-hmr-plugin';
 import QRCode from 'qrcode';
 import { green, yellow, bold } from 'colors/safe';
-import { Logger } from '@/utils/log';
-import { makeUrl, getWSProtocolByHttpProtocol } from '@/utils/url';
-import { config } from '@/config';
-import { getAllLocalHostname } from '@/utils/ip';
-import { isPortInUse } from '@/utils/port';
-import { exec } from '@/utils/process';
+import { Logger } from '@debug-server-next/utils/log';
+import { makeUrl, getWSProtocolByHttpProtocol } from '@debug-server-next/utils/url';
+import { config } from '@debug-server-next/config';
+import { getAllLocalHostname } from '@debug-server-next/utils/ip';
+import { isPortInUse } from '@debug-server-next/utils/port';
+import { exec } from '@debug-server-next/utils/process';
 export * from './inject-entry';
 
 const log = new Logger('webpack-util');

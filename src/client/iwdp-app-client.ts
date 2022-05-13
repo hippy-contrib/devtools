@@ -1,12 +1,32 @@
+/*
+ * Tencent is pleased to support the open source community by making
+ * Hippy available.
+ *
+ * Copyright (C) 2017-2019 THL A29 Limited, a Tencent company.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import WebSocket from 'ws';
-import { AppClientEvent, WinstonColor, WSCode } from '@/@types/enum';
-import { Logger } from '@/utils/log';
+import { AppClientEvent, WinstonColor, WSCode } from '@debug-server-next/@types/enum';
+import { Logger } from '@debug-server-next/utils/log';
 import { AppClient } from './app-client';
 
 const log = new Logger('app-client:IWDP', WinstonColor.BrightBlue);
 
 /**
- * IWDP 调试通道，通过 ws client 与 IWDP server 建立连接
+ * Communicate with app by IWDP
  */
 export class IWDPAppClient extends AppClient {
   public url: string;
@@ -101,7 +121,7 @@ export class IWDPAppClient extends AppClient {
   }
 
   /**
-   * 与 IWDP server 建立连接
+   * connect to IWDP server
    */
   private connect() {
     if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return;

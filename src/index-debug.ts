@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-/* eslint-disable import/first -- 本文件禁用，要在入口最前面注册别名，后面的 import 才能使用别名；另外要先加载 dotenv，才能创建 redis 连接 */
+/* eslint-disable import/first -- should add module alias before use */
 import path from 'path';
 import moduleAlias from 'module-alias';
 moduleAlias.addAliases({
-  '@': __dirname,
+  '@debug-server-next': __dirname,
 });
 import yargs from 'yargs';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, './.env') });
-import { DevtoolsEnv, DebugTunnel, LogLevel } from '@/@types/enum';
-import { DebugAppArgv } from '@/@types/app.d';
+import { DevtoolsEnv, DebugTunnel, LogLevel } from '@debug-server-next/@types/enum';
+import { DebugAppArgv } from '@debug-server-next/@types/app.d';
 
 const { argv } = yargs
   .alias('v', 'version')
@@ -39,6 +39,11 @@ const { argv } = yargs
     type: 'boolean',
     default: true,
     describe: 'Auto open chrome debug page',
+  })
+  .option('enableIOS', {
+    type: 'boolean',
+    default: true,
+    describe: 'Enable debug iOS by chrome, by default is enabled. Notice Safari and Chrome could not work at the same time, so if you want debug iOS by safari, you must disable chrome by set false.',
   })
   .option('log', {
     type: 'string',
@@ -81,9 +86,9 @@ if (debugAppArgv.version) yargs.version().exit(0, null);
 /**
  * import after global.debugAppArgv is set
  */
-import '@/utils/aegis';
-import { Logger } from '@/utils/log';
-import { startDebugServer } from '@/app-debug';
+import '@debug-server-next/utils/aegis';
+import { Logger } from '@debug-server-next/utils/log';
+import { startDebugServer } from '@debug-server-next/app-debug';
 import { version } from '../package.json';
 import './process-handler';
 const log = new Logger('entry');

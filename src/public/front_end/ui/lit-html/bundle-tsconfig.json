@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../chrome-devtools/front_end/ui/lit-html"},"files":["../../../../../../chrome-devtools/front_end/ui/lit-html/lit-html.ts"],"references":[{"path":"./lit-html-tsconfig.json"}]}

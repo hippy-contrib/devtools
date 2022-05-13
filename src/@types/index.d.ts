@@ -1,3 +1,3 @@
 /// <reference path="./app.d.ts" />
-/// <reference types="tdf-devtools-protocol" />
+/// <reference types="@hippy/devtools-protocol" />
 declare module '*.node';
