@@ -60,7 +60,7 @@ export class MemoryDB<T> extends BaseDB<T> {
   }
 
   public async getList(): Promise<T[]> {
-    const list = MemoryDB.listStore.get(this.key);
+    const list = MemoryDB.listStore.get(this.key) || [];
     return list as T[];
   }
 

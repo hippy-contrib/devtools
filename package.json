@@ -1,6 +1,6 @@
 {
 	"name": "@hippy/debug-server-next",
-  "version": "0.2.44",
+	"version": "0.2.45",
 	"description": "Debug server for hippy.",
 	"repository": "https://github.com/hippy-contrib/debug-server-next",
 	"homepage": "http://hippyjs.org",
@@ -66,7 +66,7 @@
 		"koa": "^2.13.1",
 		"koa-bodyparser": "^4.3.0",
 		"koa-router": "^10.0.0",
-    "koa-static": "^5.0.0",
+		"koa-static": "^5.0.0",
 		"koa-static-cache": "^5.1.4",
 		"lodash": "^4.17.21",
 		"module-alias": "^2.2.2",
