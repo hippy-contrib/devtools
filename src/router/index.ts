@@ -24,6 +24,7 @@ import staticCache from 'koa-static-cache';
 import serve from 'koa-static';
 import bodyParser from 'koa-bodyparser';
 import Koa from 'koa';
+import { getModuleFolder } from '@debug-server-next/utils/file';
 import { Logger } from '@debug-server-next/utils/log';
 import { getDebugTargetsRouter } from '@debug-server-next/router/debug-targets';
 import { config } from '@debug-server-next/config';
@@ -57,7 +58,7 @@ export const routeApp = (app: Koa) => {
 
   // chrome devtools
   app.use(
-    staticCache(path.resolve('node_modules/@hippy/chrome-devtools/out/Release/gen'), {
+    staticCache(getModuleFolder('@hippy/chrome-devtools', 'out/Release/gen'), {
       ...defaultStaticOption,
       maxAge: 60 * 60,
     }),
@@ -65,7 +66,7 @@ export const routeApp = (app: Koa) => {
 
   // vue devtools
   app.use(
-    staticCache(path.resolve('node_modules/@hippy/vue-devtools/dist'), {
+    staticCache(getModuleFolder('@hippy/vue-devtools', 'dist'), {
       ...defaultStaticOption,
       maxAge: 60 * 60,
     }),
@@ -73,7 +74,7 @@ export const routeApp = (app: Koa) => {
 
   // chrome devtools extensions
   app.use(
-    staticCache(path.resolve('node_modules/@hippy/chrome-devtools-extensions/dist'), {
+    staticCache(getModuleFolder('@hippy/chrome-devtools-extensions', 'dist'), {
       ...defaultStaticOption,
       maxAge: 60 * 60,
     }),

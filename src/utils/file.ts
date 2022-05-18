@@ -19,6 +19,7 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 
 export const rmFolder = (fpath: string) => {
   try {
@@ -27,3 +28,9 @@ export const rmFolder = (fpath: string) => {
     if ((e as any).code !== 'ENOENT') console.error('rm dir error, %s', fpath);
   }
 };
+
+/**
+ * use the internal require() machinery to look up the location of a module folder
+ */
+export const getModuleFolder = (pkg: string, dir = '') =>
+  path.join(path.dirname(require.resolve(path.join(pkg, 'package.json'))), dir);
