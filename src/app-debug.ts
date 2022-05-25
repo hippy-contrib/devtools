@@ -20,6 +20,7 @@
 
 import fs from 'fs';
 import { Server as HTTPServer } from 'http';
+import kill from 'kill-port';
 import Koa from 'koa';
 import colors from 'colors/safe';
 import { initAppClient } from '@debug-server-next/client';
@@ -70,6 +71,15 @@ export const startDebugServer = async () => {
 };
 
 export const stopServer = async (exitProcess = false, ...arg) => {
+  const { iWDPPort } = global.debugAppArgv || {};
+  if (iWDPPort) {
+    try {
+      await kill(iWDPPort, 'tcp');
+    } catch (e) {
+      log.error('kill port %d failed, %s', iWDPPort, (e as Error).stack || e);
+    }
+  }
+
   try {
     log.info('stopServer %j', arg);
     if (socketServer) {

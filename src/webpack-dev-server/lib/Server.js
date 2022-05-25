@@ -147,13 +147,14 @@ class Server {
     if (!this.options.remote) return;
     const { appendEntries: hmrAppendEntries, prependEntries: hmrPrependEntries } = this.addHMREntries(compiler);
     const { appendEntries: vueAppendEntries, prependEntries: vuePrependEntries } = this.addVueDevtoolsEntries();
+    const { appendEntries: reactAppendEntries, prependEntries: reactPrependEntries } = this.addReactDevtoolsEntries();
 
     // must ensure correct inject sequence, because the append entries depend on the prepend and original entries.
     injectEntry(
       compiler,
       undefined,
-      [...hmrPrependEntries, ...vuePrependEntries],
-      [...hmrAppendEntries, ...vueAppendEntries],
+      [...hmrPrependEntries, ...vuePrependEntries, ...reactPrependEntries],
+      [...hmrAppendEntries, ...vueAppendEntries, ...reactAppendEntries],
     );
   }
 
@@ -225,6 +226,20 @@ class Server {
     return {
       appendEntries: [vueBackend],
       prependEntries: [vueHook],
+    };
+  }
+
+  addReactDevtoolsEntries() {
+    if (!this.options.reactDevtools) return { appendEntries: [], prependEntries: [] };
+    const { host, port, protocol } = this.options.remote;
+    const reactBackend = makeUrl(require.resolve('@hippy/hippy-react-devtools-plugin/lib/backend'), {
+      host,
+      port,
+      protocol,
+    });
+    return {
+      appendEntries: [],
+      prependEntries: [reactBackend],
     };
   }
 

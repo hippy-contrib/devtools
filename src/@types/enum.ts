@@ -70,8 +70,10 @@ export enum ClientRole {
   HMRServer = 'hmr_server',
   // WSClient invoke in hippy js runtime
   JSRuntime = 'js_runtime',
+  ReactJSRuntime = 'react_js_runtime',
   // frontend vue devtools tab
   VueDevtools = 'vue_devtools',
+  ReactDevtools = 'react_devtools',
 }
 
 export const enum AppClientEvent {
@@ -209,6 +211,7 @@ export enum ReportEvent {
   RemoteDebug = 'remote-debug',
   RemoteHMR = 'remote-hmr',
   VueDevtools = 'vue-devtools',
+  ReactDevtools = 'react-devtools',
   DevtoolsToDebugServer = 'devtools-to-debug-server',
   DebugServerToDevtools = 'debug-server-to-devtools',
   PubSub = 'pub-sub',

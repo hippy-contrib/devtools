@@ -72,6 +72,14 @@ export const routeApp = (app: Koa) => {
     }),
   );
 
+  // react devtools
+  app.use(
+    staticCache(getModuleFolder('@hippy/react-devtools', 'dist'), {
+      ...defaultStaticOption,
+      maxAge: 60 * 60,
+    }),
+  );
+
   // chrome devtools extensions
   app.use(
     staticCache(getModuleFolder('@hippy/chrome-devtools-extensions', 'dist'), {

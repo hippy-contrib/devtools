@@ -41,6 +41,8 @@ import {
   createUpwardChannel,
   createInternalChannel,
   createDownwardChannel,
+  vueDevtoolsExtensionName,
+  reactDevtoolsExtensionName,
 } from '@debug-server-next/utils/pub-sub-channel';
 import { Logger } from '@debug-server-next/utils/log';
 import { IPublisher, ISubscriber } from '@debug-server-next/db/pub-sub';
@@ -106,6 +108,9 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
    */
   newUpwardSubscriber.pSubscribe((message: string, upwardChannelId: string) => {
     if (!upwardChannelId) return log.warn('pSubscribe without channelId');
+    if (upwardChannelId.includes(vueDevtoolsExtensionName) || upwardChannelId.includes(reactDevtoolsExtensionName))
+      return log.verbose('ignore vue/react channel');
+
     let msgObj: Adapter.CDP.Req;
     try {
       msgObj = JSON.parse(message);

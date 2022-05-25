@@ -23,6 +23,9 @@ const upwardSpliter = '_up_';
 const internalSpliter = '_internal_';
 const defaultExtensionName = 'default';
 
+export const vueDevtoolsExtensionName = 'vue-devtools';
+export const reactDevtoolsExtensionName = 'react-devtools';
+
 export const createDownwardChannel = (clientId: string, extensionName?: string) =>
   createChannel(clientId, extensionName, downwardSpliter);
 
@@ -37,7 +40,9 @@ export const upwardChannelToDownwardChannel = (upwardChannelId: string) =>
 
 export const createHMRChannel = (hash: string) => `HMR-${hash}`;
 
-export const createVueDevtoolsChannel = (clientId: string) => createChannel(clientId, 'vue-devtools', '_');
+export const createVueDevtoolsChannel = (clientId: string) => createChannel(clientId, vueDevtoolsExtensionName, '_');
+export const createReactDevtoolsChannel = (clientId: string, direction = '') =>
+  createChannel(clientId, reactDevtoolsExtensionName, `_${direction}_`);
 
 const createChannel = (clientId: string, extensionName?: string, spliter?: string) =>
   `${clientId}${spliter}${extensionName || defaultExtensionName}`;

@@ -959,6 +959,10 @@
       "type": "boolean",
       "optional": true
     },
+    "ReactDevtools": {
+      "type": "boolean",
+      "optional": true
+    },
     "Remote": {
       "type": "object",
       "properties": {
@@ -1082,6 +1086,9 @@
     },
     "vueDevtools": {
       "$ref": "#/definitions/VueDevtools"
+    },
+    "reactDevtools": {
+      "$ref": "#/definitions/ReactDevtools"
     },
     "cb": {
       "instanceof": "Function"
