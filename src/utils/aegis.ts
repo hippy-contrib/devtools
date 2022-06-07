@@ -28,6 +28,7 @@ export const aegis: any = new Aegis({
     type: 'host',
   },
   version,
+  ext3: config.isCluster ? 'remote' : 'local',
   // protocol: 'http',
 });
 
@@ -40,7 +41,6 @@ export const timeStart = (name: string) => {
       name,
       duration,
       ...ext,
-      ext3: config.isCluster ? 'remote' : 'local',
     });
   };
 };
