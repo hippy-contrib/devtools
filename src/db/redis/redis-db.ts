@@ -41,7 +41,7 @@ export class RedisDB<T> extends BaseDB<T> {
    */
   public static client;
   private static isInited = false;
-  private static opQueue: Array<Function> = [];
+  private static opQueue: Array<{ op: Function; resolve: Function; reject: Function }> = [];
 
   /**
    * init redis connection
@@ -53,7 +53,7 @@ export class RedisDB<T> extends BaseDB<T> {
       await RedisDB.client.connect();
       timeEnd();
       RedisDB.isInited = true;
-      await Promise.all(RedisDB.opQueue.map(async (op) => await op()));
+      await Promise.all(RedisDB.opQueue.map(async ({ op, resolve, reject }) => await op(resolve, reject)));
       RedisDB.opQueue = [];
     } catch (e) {
       log.error('connect redis failed: %s', (e as Error).stack || e);
@@ -71,6 +71,7 @@ export class RedisDB<T> extends BaseDB<T> {
     return this.queueWrap<T>(async (resolve) => {
       const hashmap: Record<string, string> = await RedisDB.client.hGetAll(this.key);
       const item = hashmap[field];
+      if (!item) return resolve(null);
       try {
         const itemObj: T = JSON.parse(item);
         return resolve(itemObj);
@@ -165,7 +166,7 @@ export class RedisDB<T> extends BaseDB<T> {
   private async queueWrap<T>(op): Promise<T> {
     return new Promise((resolve, reject) => {
       if (RedisDB.isInited) return op(resolve, reject);
-      RedisDB.opQueue.push(op);
+      RedisDB.opQueue.push({ op, resolve, reject });
     });
   }
 }

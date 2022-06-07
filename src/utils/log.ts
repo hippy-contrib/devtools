@@ -70,11 +70,13 @@ export class Logger {
   private log(level, ...args) {
     const msg = util.format(...args);
     this.loggerInstance.log(level, msg);
-    if (level === LogLevel.Error) {
-      aegis.report(new Error(msg));
-    } else if ([LogLevel.Warn].includes(level)) {
-      aegis.infoAll(msg);
-    }
+    try {
+      if (level === LogLevel.Error) {
+        aegis.report(new Error(msg));
+      } else if ([LogLevel.Warn].includes(level)) {
+        aegis.infoAll(msg);
+      }
+    } catch (e) {}
   }
 
   private initLoggerInstance() {

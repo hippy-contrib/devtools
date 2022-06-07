@@ -59,6 +59,7 @@ function normalizeRemoteDebug(versionId, config) {
     proxy: '',
     ...(config.devServer.remote || {}),
   };
+  config.devServer.remote.port = Number(config.devServer.remote.port);
   config.devServer.autoLaunchHippyDebug ??= true;
   if (config.devServer.autoLaunchHippyDebug) {
     autoLaunchHippyDebug(config.devServer.remote);

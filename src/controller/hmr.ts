@@ -20,6 +20,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { promisify } from 'util';
 import WebSocket from 'ws';
 import {
   WinstonColor,
@@ -194,7 +195,7 @@ async function cleanHMRFiles(files: string[]) {
       await Promise.all(
         files.map((file) => {
           const fullFname = path.join(config.hmrStaticPath, file);
-          return fs.promises.rm(fullFname, { force: true, recursive: true });
+          return promisify(fs.rm)(fullFname, { force: true, recursive: true });
         }),
       );
     }
