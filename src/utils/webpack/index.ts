@@ -171,7 +171,7 @@ async function autoLaunchHippyDebug({ protocol, host, port }) {
     if (osType === OSType.Darwin) checkPortCMD = `lsof -i :${port}`;
     else if (osType === OSType.Windows) checkPortCMD = `netstat -aon|findstr "${port}"`;
 
-    return log.warn('hippy-debug port %d is in use, please check by run %s', port, checkPortCMD);
+    return log.warn(bold(yellow(`hippy-debug port ${port} is in use, please check by run "${checkPortCMD}"`)));
   }
   exec('node', [path.join(__dirname, '../../../dist/index-debug.js'), '--port', port]);
 }
