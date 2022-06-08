@@ -146,26 +146,31 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
       const list = await getHistoryLogProtocol(clientId);
       if (!list.length) return;
 
-      downwardChannelSet.forEach((channelId) => {
-        if (!publisherMap.has(channelId)) {
-          const { Publisher } = getDBOperator();
-          const publisher = new Publisher(channelId);
-          publisherMap.set(channelId, publisher);
-        }
-        const publisher = publisherMap.get(channelId);
+      /**
+       * delay to send history log after ConsoleModel of devtools is ready
+       */
+      setTimeout(() => {
+        downwardChannelSet.forEach((channelId) => {
+          if (!publisherMap.has(channelId)) {
+            const { Publisher } = getDBOperator();
+            const publisher = new Publisher(channelId);
+            publisherMap.set(channelId, publisher);
+          }
+          const publisher = publisherMap.get(channelId);
 
-        // TODO mock a clear protocol before all history logs
-        publisher.publish(
-          JSON.stringify({
-            method: 'Log.cleared',
-            params: {},
-          }),
-        );
+          // TODO mock a clear protocol before all history logs
+          publisher.publish(
+            JSON.stringify({
+              method: 'Log.cleared',
+              params: {},
+            }),
+          );
 
-        list.forEach((log) => {
-          publisher.publish(log);
+          list.forEach((log) => {
+            publisher.publish(log);
+          });
         });
-      });
+      }, 1500);
     }
   };
   internalSubscriber.unsubscribe(internalHandler);

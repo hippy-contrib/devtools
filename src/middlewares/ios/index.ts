@@ -29,6 +29,7 @@ import { heapMiddleWareManager } from './heap-middleware';
 import { logMiddleWareManager } from './log-middleware';
 import { runtimeMiddleWareManager } from './runtime-middleware';
 import { traceMiddleWareManager } from './trace-middleware';
+import { pageMiddleWareManager } from './page-middleware';
 
 export const iOSMiddleWareManager: MiddleWareManager = merge(
   {},
@@ -41,4 +42,5 @@ export const iOSMiddleWareManager: MiddleWareManager = merge(
   heapMiddleWareManager,
   cssMiddleWareManager,
   tdfRuntimeMiddleWareManager,
+  pageMiddleWareManager,
 );

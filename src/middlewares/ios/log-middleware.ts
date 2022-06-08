@@ -24,7 +24,7 @@ import { MiddleWareManager } from '../middleware-context';
 
 export const logMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
-    [IOS100Event.ConsoleMessageAdded]: ({ msg, sendToDevtools }) => {
+    [IOS100Event.ConsoleMessageAdded]: ({ msg, sendToDevtools, setContext }) => {
       const eventRes = msg as Adapter.CDP.EventRes<ProtocolIOS100.Console.MessageAddedEvent>;
       const { message } = eventRes.params;
 
@@ -41,20 +41,23 @@ export const logMiddleWareManager: MiddleWareManager = {
         type = message.type;
       }
 
-      // if (message.source === 'console-api') {
-      //   const logEntry: ProtocolChrome.Runtime.ConsoleAPICalledEvent = {
-      //     type: type as any,
-      //     stackTrace: transformStacktrace(message.stackTrace),
-      //     timestamp: Math.floor(new Date().getTime()),
-      //     executionContextId: 1,
-      //     args: (message.parameters || []) as any,
-      //   };
-      //   setContext('lastConsoleMessage', logEntry);
-      //   return sendToDevtools({
-      //     method: ChromeEvent.RuntimeConsoleAPICalled,
-      //     params: logEntry,
-      //   });
-      // }
+      /**
+       * Runtime.consoleAPICalled support style format in console api
+       */
+      if (message.source === 'console-api') {
+        const logEntry: ProtocolChrome.Runtime.ConsoleAPICalledEvent = {
+          type: type as any,
+          stackTrace: transformStacktrace(message.stackTrace),
+          timestamp: Math.floor(new Date().getTime()),
+          executionContextId: 1,
+          args: (message.parameters || []) as any,
+        };
+        setContext('lastConsoleMessage', logEntry);
+        return sendToDevtools({
+          method: ChromeEvent.RuntimeConsoleAPICalled,
+          params: logEntry,
+        });
+      }
 
       const consoleMessage: ProtocolChrome.Log.LogEntry = {
         source: message.source as any,
@@ -107,3 +110,17 @@ export const logMiddleWareManager: MiddleWareManager = {
       }),
   },
 };
+
+function transformStacktrace(callFrames): ProtocolChrome.Runtime.StackTrace {
+  if (!callFrames) {
+    return;
+  }
+
+  return {
+    callFrames,
+    // Optional
+    // description?: string;
+    // parent?: StackTrace;
+    // parentId?: StackTraceId;
+  };
+}
