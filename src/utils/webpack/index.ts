@@ -20,6 +20,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import HippyHMRPlugin from '@hippy/hippy-hmr-plugin';
 import QRCode from 'qrcode';
 import { green, yellow, bold } from 'colors/safe';
@@ -29,6 +30,7 @@ import { config } from '@debug-server-next/config';
 import { getAllLocalHostname } from '@debug-server-next/utils/ip';
 import { isPortInUse } from '@debug-server-next/utils/port';
 import { exec } from '@debug-server-next/utils/process';
+import { OSType } from '@debug-server-next/@types/enum';
 export * from './inject-entry';
 
 const log = new Logger('webpack-util');
@@ -163,6 +165,13 @@ async function autoLaunchHippyDebug({ protocol, host, port }) {
   const hostList = await getAllLocalHostname();
   if (!hostList.includes(host)) return;
   const inUse = await isPortInUse(port);
-  if (inUse) return;
+  if (inUse) {
+    const osType = os.type();
+    let checkPortCMD;
+    if (osType === OSType.Darwin) checkPortCMD = `lsof -i :${port}`;
+    else if (osType === OSType.Windows) checkPortCMD = `netstat -aon|findstr "${port}"`;
+
+    return log.warn('hippy-debug port %d is in use, please check by run %s', port, checkPortCMD);
+  }
   exec('node', [path.join(__dirname, '../../../dist/index-debug.js'), '--port', port]);
 }

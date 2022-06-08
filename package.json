@@ -1,6 +1,6 @@
 {
 	"name": "@hippy/debug-server-next",
-	"version": "0.3.2-alpha.1",
+	"version": "0.3.3",
 	"description": "Debug server for hippy.",
 	"repository": "https://github.com/hippy-contrib/debug-server-next",
 	"homepage": "http://hippyjs.org",
