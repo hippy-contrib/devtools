@@ -19,8 +19,7 @@
  */
 
 import { ChromeCommand, ChromeEvent } from '@hippy/devtools-protocol/dist/types/enum-chrome-mapping';
-import { IOS90Command } from '@hippy/devtools-protocol/dist/types/enum-ios-9.0-mapping';
-import { contextId, requestId } from '@debug-server-next/utils/global-id';
+import { contextId } from '@debug-server-next/utils/global-id';
 import { MiddleWareManager } from '../middleware-context';
 import { getLastScriptEval } from './debugger-middleware';
 
@@ -107,16 +106,7 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
     },
   },
   upwardMiddleWareListMap: {
-    [ChromeCommand.RuntimeCompileScript]: async ({ msg, sendToApp, sendToDevtools }) => {
-      const eventRes = msg as Adapter.CDP.EventRes;
-      await sendToApp({
-        id: requestId.create(),
-        method: IOS90Command.RuntimeEvaluate,
-        params: {
-          expression: eventRes.params.expression,
-          contextId: eventRes.params.executionContextId,
-        },
-      });
+    [ChromeCommand.RuntimeCompileScript]: async ({ msg, sendToDevtools }) => {
       const convertedRes = {
         id: (msg as Adapter.CDP.Req).id,
         method: msg.method,
@@ -127,6 +117,27 @@ export const runtimeMiddleWareManager: MiddleWareManager = {
       };
       sendToDevtools(convertedRes);
       return convertedRes;
+    },
+    [ChromeCommand.RuntimeEvaluate]: async ({ msg, sendToApp }) => {
+      const req = msg as Adapter.CDP.Req;
+      return sendToApp({
+        id: req.id,
+        method: req.method,
+        params: {
+          expression: req.params.expression,
+          generatePreview: req.params.generatePreview,
+          includeCommandLineAPI: req.params.includeCommandLineAPI,
+          doNotPauseOnExceptionsAndMuteConsole: req.params.doNotPauseOnExceptionsAndMuteConsole,
+          objectGroup: req.params.objectGroup,
+          returnByValue: req.params.returnByValue,
+          saveResult: req.params.saveResult,
+          /**
+           * must set contextId is null, so the eval script will run in current JSContext
+           */
+          // uniqueContextId: null,
+          // contextId: null,
+        },
+      });
     },
   },
 };
