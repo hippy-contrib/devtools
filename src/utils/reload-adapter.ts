@@ -218,19 +218,18 @@ export const resumeCommands = [
 ];
 
 export const publishReloadCommand = (debugTarget: DebugTarget) => {
-  setTimeout(() => {
+  setTimeout(async () => {
     const { clientId } = debugTarget;
     const upwardChannelId = createUpwardChannel(clientId);
     const downwardChannelId = createDownwardChannel(clientId);
     const { Publisher } = getDBOperator();
     const publisher = new Publisher(upwardChannelId);
     const downPublisher = new Publisher(downwardChannelId);
-    reloadCommand.forEach((command) => {
-      publisher.publish(JSON.stringify(command));
-    });
-    reloadEvent.forEach((event) => {
-      downPublisher.publish(JSON.stringify(event));
-    });
+    await Promise.all(reloadCommand.map(publisher.publish.bind(publisher)));
+    await Promise.all(reloadEvent.map(downPublisher.publish.bind(downPublisher)));
+
+    publisher.disconnect();
+    downPublisher.disconnect();
   }, 2000);
 };
 

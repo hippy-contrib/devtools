@@ -67,19 +67,10 @@ export const onReactClientConnection = async (
    *  1. backend connect: reload frontend UI, ignore previous devtools instance
    *  2. frontend connect: activate backend, start dispatch debug protocol
    */
-  if (clientRole === ClientRole.ReactJSRuntime) {
-    publisher.publish(
-      JSON.stringify({
-        event: ReactDevtoolsEvent.BackendConnect,
-      }),
-    );
-  } else {
-    publisher.publish(
-      JSON.stringify({
-        event: ReactDevtoolsEvent.FrontendConnect,
-      }),
-    );
-  }
+  publisher.publish({
+    event:
+      clientRole === ClientRole.ReactJSRuntime ? ReactDevtoolsEvent.BackendConnect : ReactDevtoolsEvent.FrontendConnect,
+  });
 
   ws.on('message', async (msg) => {
     const msgStr = msg.toString();
@@ -88,8 +79,8 @@ export const onReactClientConnection = async (
 
   ws.on('close', (code, reason) => {
     log.warn('%s ws closed, code: %s, reason: %s', clientRole, code, reason);
-    subscriber.unsubscribe(handler);
     subscriber.disconnect();
+    publisher.disconnect();
   });
   ws.on('error', (e) => log.error('JSRuntime ws error: %s', e.stack || e));
 };

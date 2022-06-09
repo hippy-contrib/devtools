@@ -183,7 +183,7 @@ export const listenRedisEvent = (client) => {
   });
   client.on(RedisClientEvent.Connect, () => log.info('redis connected'));
   client.on(RedisClientEvent.Ready, () => log.info('redis ready'));
-  client.on(RedisClientEvent.End, () => log.warn('redis disconnect by quit() or disconnect()'));
+  client.on(RedisClientEvent.End, () => log.info('redis disconnect by quit() or disconnect()'));
   client.on(RedisClientEvent.Reconnecting, () => {
     log.warn('redis reconnecting');
   });

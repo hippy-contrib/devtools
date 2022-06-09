@@ -29,8 +29,6 @@ const log = new Logger('redis-pub-sub');
 
 export class RedisPublisher implements IPublisher {
   private client: RedisClient;
-  private queue: Array<string | Adapter.CDP.Req> = [];
-  private isConnected = false;
   private channel: string;
 
   public constructor(channel: string) {
@@ -42,44 +40,35 @@ export class RedisPublisher implements IPublisher {
     this.channel = channel;
     this.client = RedisDB.client.duplicate();
     listenRedisEvent(this.client);
-    this.init();
   }
 
-  public publish(message: string | Adapter.CDP.Req) {
-    if (this.isConnected) this.realPublish(message);
-    else this.queue.push(message);
-  }
-
-  /**
-   * nullish, redis could send other command in PubSub mode
-   */
-  public disconnect() {}
-
-  private realPublish(message: string | Adapter.CDP.Req) {
+  public async publish(message: string | Adapter.CDP.Data) {
+    await this.connect();
     const msgStr = typeof message !== 'string' ? JSON.stringify(message) : message;
     try {
-      this.client.publish(this.channel, msgStr);
+      if (this.client.isOpen) await this.client.publish(this.channel, msgStr);
     } catch (e) {
       log.error('publish %s to channel %s error: %s', msgStr, this.channel, (e as Error).stack);
     }
   }
 
   /**
-   * init redis connection, will clear publish queue if connected
+   * nullish, redis could send other command in PubSub mode
    */
-  private async init() {
+  public async disconnect() {
+    if (this.client.isOpen) await this.client.quit();
+  }
+
+  private async connect() {
+    if (this.client.isOpen) return;
     await this.client.connect();
     log.info('redis publisher client created, %s', this.channel);
-    this.isConnected = true;
-    this.queue.forEach(this.realPublish.bind(this));
   }
 }
 
 export class RedisSubscriber implements ISubscriber {
   private client: RedisClient;
   private channel: string;
-  private isConnected = false;
-  private operateQueue: Array<[Function, Function]> = [];
 
   public constructor(channel: string) {
     if (!channel) {
@@ -90,43 +79,44 @@ export class RedisSubscriber implements ISubscriber {
     this.channel = channel;
     this.client = RedisDB.client.duplicate();
     listenRedisEvent(this.client);
-    this.init();
   }
 
-  public subscribe(cb) {
-    if (this.isConnected) this.client.subscribe(this.channel, cb);
-    else this.operateQueue.push([this.subscribe, cb]);
+  public async subscribe(cb) {
+    await this.connect();
+    if (this.client.isOpen) await this.client.subscribe(this.channel, cb);
   }
 
   /**
    * subscribe channel with glob character, such as `*`
    */
-  public pSubscribe(cb) {
-    if (this.isConnected) this.client.pSubscribe(this.channel, cb);
-    else this.operateQueue.push([this.pSubscribe, cb]);
+  public async pSubscribe(cb) {
+    await this.connect();
+    if (this.client.isOpen) await this.client.pSubscribe(this.channel, cb);
   }
 
-  public unsubscribe = () => this.client.unsubscribe(this.channel);
+  public async unsubscribe() {
+    if (this.client.isOpen) await this.client.unsubscribe(this.channel);
+  }
 
-  public pUnsubscribe = () => this.client.pUnsubscribe(this.channel);
+  public async pUnsubscribe() {
+    if (this.client.isOpen) await this.client.pUnsubscribe(this.channel);
+  }
 
   /**
    * nullish, redis could send other command in PubSub mode
    */
-  public disconnect = () => {};
+  public async disconnect() {
+    if (this.client.isOpen) {
+      // must unsubscribe first, other will receive error: `Cannot send commands in PubSub mode`
+      await this.client.unsubscribe();
+      await this.client.pUnsubscribe();
+      await this.client.quit();
+    }
+  }
 
-  /**
-   * init redis connection, will clear subscribe queue if connected
-   */
-  private async init() {
-    if (this.isConnected) return;
+  private async connect() {
+    if (this.client.isOpen) return;
     await this.client.connect();
     log.info('redis subscriber client created, %s', this.channel);
-    this.isConnected = true;
-    if (this.operateQueue) {
-      this.operateQueue.forEach(([fn, cb]) => {
-        fn.call(this, cb);
-      });
-    }
   }
 }

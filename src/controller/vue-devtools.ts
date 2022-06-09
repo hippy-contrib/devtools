@@ -86,17 +86,16 @@ export const onVueClientConnection = async (ws: WebSocket, wsUrlParams: JSRuntim
     if (msgStr) publisher.publish(msgStr);
   });
 
-  ws.on('close', (code, reason) => {
+  ws.on('close', async (code, reason) => {
     log.warn('%s ws closed, code: %s, reason: %s', clientRole, code, reason);
-    subscriber.unsubscribe(handler);
-    subscriber.disconnect();
+    await subscriber.disconnect();
     if (reason.indexOf('client') !== -1) {
-      publisher.publish(JSON.stringify([VueDevtoolsEvent.DevtoolsDisconnect]));
+      await publisher.publish(JSON.stringify([VueDevtoolsEvent.DevtoolsDisconnect]));
     }
     if (clientRole === ClientRole.JSRuntime) {
-      internalSubscriber.unsubscribe(internalHandler);
-      internalSubscriber.disconnect();
+      await internalSubscriber.disconnect();
     }
+    await publisher.disconnect();
   });
   ws.on('error', (e) => log.error('JSRuntime ws error: %s', e.stack || e));
 };

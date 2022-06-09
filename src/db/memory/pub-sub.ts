@@ -33,33 +33,35 @@ export class MemoryPubSub implements IPublisher, ISubscriber {
     this.channel = channel;
   }
 
-  public publish(message: string | Adapter.CDP.Req) {
+  public async connect() {}
+
+  public async publish(message: string | Adapter.CDP.Req) {
     let msgStr: string;
     if (typeof message !== 'string') msgStr = JSON.stringify(message);
     else msgStr = message;
     pubsub.emit(this.channel, msgStr, null, null, null, null);
   }
 
-  public subscribe(cb) {
+  public async subscribe(cb) {
     pubsub.on(this.channel, cb);
   }
 
   /**
    * subscribe channel with glob character, such as `*`
    */
-  public pSubscribe(cb) {
+  public async pSubscribe(cb) {
     pubsub.on(this.channel, cb);
   }
 
-  public unsubscribe(cb) {
+  public async unsubscribe(cb) {
     if (cb) pubsub.off(this.channel, cb);
     else pubsub.removeAllListeners(this.channel);
   }
 
-  public pUnsubscribe(cb) {
+  public async pUnsubscribe(cb) {
     if (cb) pubsub.off(this.channel, cb);
     else pubsub.removeAllListeners(this.channel);
   }
 
-  public disconnect() {}
+  public async disconnect() {}
 }

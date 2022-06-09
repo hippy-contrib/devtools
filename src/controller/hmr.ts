@@ -64,7 +64,6 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
   const subscriber = new Subscriber(createHMRChannel(hash));
   const hmrHandler = (msg) => {
     if (msg === hmrCloseEvent) {
-      subscriber.unsubscribe(hmrHandler);
       subscriber.disconnect();
       const reason = 'Hippy dev server closed, stop HMR!';
       ws.close(WSCode.HMRServerClosed, reason);
@@ -82,7 +81,6 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
 
   ws.on('close', (code, reason) => {
     log.warn('HMR client ws closed, code: %s, reason: %s', code, reason);
-    subscriber.unsubscribe(hmrHandler);
     subscriber.disconnect();
   });
   ws.on('error', (e) => log.error('HMR client ws error: %s', e.stack || e));
@@ -145,10 +143,8 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
 
   ws.on('close', async (code, reason) => {
     log.warn('HMR server ws closed, code: %s, reason: %s', code, reason);
-    publisher.publish(hmrCloseEvent);
-    process.nextTick(() => {
-      publisher.disconnect();
-    });
+    await publisher.publish(hmrCloseEvent);
+    publisher.disconnect();
     model.delete(hash);
     cleanHMRFiles(Array.from(distFiles));
   });

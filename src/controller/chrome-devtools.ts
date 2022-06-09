@@ -84,8 +84,8 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
     if (msg === InternalChannelEvent.AppWSClose) {
       log.warn('close devtools ws connection');
       ws.close(WSCode.ClosePage, 'the target page is closed');
-      internalSubscriber.unsubscribe(internalHandler);
       internalSubscriber.disconnect();
+      internalPublisher.disconnect();
     }
   };
   downwardSubscriber.subscribe(downwardHandler);
@@ -100,15 +100,14 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
   ws.on('message', (msg) => {
     publisher.publish(msg.toString());
   });
-  ws.on('close', (code, reason) => {
+  ws.on('close', async (code, reason) => {
     log.warn('devtools ws client close code %s, reason: %s, clientId: %s', code, reason, clientId);
-    resumeCommands.map(publisher.publish.bind(publisher));
+    await Promise.all(resumeCommands.map(publisher.publish.bind(publisher)));
     // wait for publish finished
-    process.nextTick(() => {
-      publisher.disconnect();
-      downwardSubscriber.unsubscribe(downwardHandler);
-      downwardSubscriber.disconnect();
-    });
+    publisher.disconnect();
+    downwardSubscriber.disconnect();
+    internalSubscriber.disconnect();
+    internalPublisher.disconnect();
   });
   ws.on('error', (e) => log.error('devtools ws client error: %j', e));
 };

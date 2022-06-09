@@ -18,17 +18,19 @@
  * limitations under the License.
  */
 
-export interface IPublisher {
-  publish(message: string | Adapter.CDP.Req): void;
-  disconnect(): void;
+interface IPubSub {
+  public disconnect(): Promise<void>;
 }
 
-export interface ISubscriber {
-  subscribe(cb: SubCallback): void;
-  pSubscribe(cb: PSubCallback): void;
-  unsubscribe(cb?: SubCallback): void;
-  pUnsubscribe(cb?: PSubCallback): void;
-  disconnect(): void;
+export interface IPublisher extends IPubSub {
+  public publish(message: string | Adapter.CDP.Data): Promise<void>;
+}
+
+export interface ISubscriber extends IPubSub {
+  public subscribe(cb: SubCallback): Promise<void>;
+  public pSubscribe(cb: PSubCallback): Promise<void>;
+  public unsubscribe(cb?: SubCallback): Promise<void>;
+  public pUnsubscribe(cb?: PSubCallback): Promise<void>;
 }
 
 type SubCallback = (message: string | Adapter.CDP.Res) => void;

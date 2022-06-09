@@ -65,10 +65,7 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
 
 export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams, host?: string): DebugTarget => {
   const { clientId, clientRole, contextName, deviceName, hash } = wsUrlParams;
-  // if node server is in remote cluster
-  // domain maybe devtools.qq.com or tdf-devtools.woa.com
-  // so get domain from host
-  const domain = config.isCluster ? `https://${host}` : config.domain;
+  const domain = getDomainFromHostHeader(host);
   const wsDomain = domain.replace('https://', 'wss://').replace('http://', 'ws://');
   let platform;
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
@@ -198,3 +195,13 @@ export const updateDebugTarget = async (clientId: string, partialDebugTarget: Pa
   await db.upsert(clientId, updated);
   return updated;
 };
+
+function getDomainFromHostHeader(host: string) {
+  // if node server is in remote cluster
+  // domain maybe devtools.qq.com or tdf-devtools.woa.com
+  // so get domain from host field, which is get from ws upgrade request header
+  let protocol = 'https';
+  if (/((\d+(\.)?)+|localhost)/.test(host)) protocol = 'http';
+  const domain = config.isCluster ? `${protocol}://${host}` : config.domain;
+  return domain;
+}

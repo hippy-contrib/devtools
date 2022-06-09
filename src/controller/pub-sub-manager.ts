@@ -81,9 +81,7 @@ const channelMap: Map<
 export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket) => {
   const { clientId, title, platform } = debugTarget;
   if (!channelMap.has(clientId)) addChannelItem(debugTarget);
-  else {
-    if (isIWDPPage(clientId)) return;
-  }
+  else if (isIWDPPage(clientId)) return;
 
   aegis.reportEvent({
     name: ReportEvent.RemoteDebug,
@@ -96,17 +94,13 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
 
   createAppClientList(debugTarget, ws);
 
-  upwardSubscriber.pUnsubscribe();
-  upwardSubscriber.disconnect();
-  const newUpwardSubscriber = createUpwardSubscriber(clientId);
-  channelMap.get(clientId).upwardSubscriber = newUpwardSubscriber;
-
   /**
    * subscribe upward message.
    * because there maybe multiple devtools client, such as multiple chrome extensions,
    * we need use batch subscribe (pSubscribe)
    */
-  newUpwardSubscriber.pSubscribe((message: string, upwardChannelId: string) => {
+  upwardSubscriber.pUnsubscribe();
+  upwardSubscriber.pSubscribe((message: string, upwardChannelId: string) => {
     if (!upwardChannelId) return log.warn('pSubscribe without channelId');
     if (upwardChannelId.includes(vueDevtoolsExtensionName) || upwardChannelId.includes(reactDevtoolsExtensionName))
       return log.verbose('ignore vue/react channel');
@@ -142,39 +136,37 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
 
   // publish history logs
   const internalHandler = async (msg) => {
-    if (msg === InternalChannelEvent.DevtoolsConnected) {
-      const list = await getHistoryLogProtocol(clientId);
-      if (!list.length) return;
+    if (msg !== InternalChannelEvent.DevtoolsConnected) return;
 
-      /**
-       * delay to send history log after ConsoleModel of devtools is ready
-       */
-      setTimeout(() => {
-        downwardChannelSet.forEach((channelId) => {
-          if (!publisherMap.has(channelId)) {
-            const { Publisher } = getDBOperator();
-            const publisher = new Publisher(channelId);
-            publisherMap.set(channelId, publisher);
-          }
-          const publisher = publisherMap.get(channelId);
+    const list = await getHistoryLogProtocol(clientId);
+    if (!list.length) return;
 
-          // TODO mock a clear protocol before all history logs
-          publisher.publish(
-            JSON.stringify({
-              method: 'Log.cleared',
-              params: {},
-            }),
-          );
+    /**
+     * delay to send history log after ConsoleModel of devtools is ready
+     */
+    setTimeout(() => {
+      downwardChannelSet.forEach(async (channelId) => {
+        if (!publisherMap.has(channelId)) {
+          const { Publisher } = getDBOperator();
+          const publisher = new Publisher(channelId);
+          publisherMap.set(channelId, publisher);
+        }
+        const publisher = publisherMap.get(channelId);
 
-          list.forEach((log) => {
-            publisher.publish(log);
-          });
+        /**
+         * mock a clear protocol to clear existed history logs
+         */
+        await publisher.publish({
+          method: 'Log.cleared',
+          params: {},
         });
-      }, 1500);
-    }
+
+        await list.map(publisher.publish.bind(publisher));
+      });
+    }, 1500);
   };
-  internalSubscriber.unsubscribe(internalHandler);
-  internalSubscriber.subscribe(internalHandler);
+  await internalSubscriber.unsubscribe(internalHandler);
+  await internalSubscriber.subscribe(internalHandler);
 };
 
 /**
@@ -194,18 +186,16 @@ export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean,
   const channelInfo = channelMap.get(clientId);
   if (!channelInfo) return;
 
-  const { publisherMap, upwardSubscriber, internalPublisher } = channelInfo;
+  const { publisherMap, upwardSubscriber, internalPublisher, internalSubscriber } = channelInfo;
   if (closeDevtools) {
-    internalPublisher.publish(InternalChannelEvent.AppWSClose);
+    await internalPublisher.publish(InternalChannelEvent.AppWSClose);
   }
+
   Array.from(publisherMap.values()).forEach((publisher) => publisher.disconnect());
-  // need some delay for the finish of `InternalChannelEvent.AppWSClose` event
-  process.nextTick(() => {
-    upwardSubscriber.pUnsubscribe();
-    upwardSubscriber.disconnect();
-    internalPublisher.disconnect();
-    channelMap.delete(clientId);
-  });
+  upwardSubscriber.disconnect();
+  internalPublisher.disconnect();
+  internalSubscriber.disconnect();
+  channelMap.delete(clientId);
 };
 
 /**
