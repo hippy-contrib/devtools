@@ -30,7 +30,7 @@ export const traceMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [IOS100Event.ScriptProfilerTrackingComplete]: ({ msg, sendToDevtools }) => {
       const eventRes = msg as Adapter.CDP.EventRes;
-      log.info(`onPerformanceProfileCompleteEvent, msg = ${eventRes}`);
+      log.verbose(`onPerformanceProfileCompleteEvent, msg = ${eventRes}`);
       const traceAdapter = new TraceAdapter();
       const v8json = traceAdapter.jsc2v8(eventRes.params);
       return sendToDevtools({

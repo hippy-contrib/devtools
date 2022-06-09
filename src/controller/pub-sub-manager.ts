@@ -176,7 +176,7 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
 export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean, cleanCache = false) => {
   if (cleanCache) {
     await removeDebugTarget(clientId);
-    log.info('removeDebugTarget %s', clientId);
+    log.verbose('removeDebugTarget %s', clientId);
     return;
   }
 
@@ -212,7 +212,7 @@ let oldIWDPDebugTargets: DebugTarget[] = [];
  */
 export const subscribeByIWDP = (debugTargets: DebugTarget[]) => {
   const outdatedDebugTargets = differenceBy(oldIWDPDebugTargets, debugTargets, 'clientId');
-  if (outdatedDebugTargets.length) log.info('outdatedDebugTargets %j', outdatedDebugTargets);
+  if (outdatedDebugTargets.length) log.verbose('outdatedDebugTargets %j', outdatedDebugTargets);
   outdatedDebugTargets.forEach(({ clientId }) => {
     cleanDebugTarget(clientId, true);
   });
@@ -266,7 +266,7 @@ const createAppClientList = (debugTarget: DebugTarget, ws?: WebSocket): AppClien
         if (outdatedAppClientIndex !== -1) {
           const outdatedAppClient = appClientList.splice(outdatedAppClientIndex, 1)[0];
           outdatedAppClient.destroy();
-          log.info('%s is outdated, re-constructor now', outdatedAppClient.constructor.name);
+          log.verbose('%s is outdated, re-constructor now', outdatedAppClient.constructor.name);
         }
         const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
         const newOption: AppClientOption = {
@@ -314,7 +314,7 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
   const outdatedIWDPAppClientIndex = appClientList.findIndex((item) => item.constructor.name === AppClientType.IWDP);
   if (hasIWDPAppClient) {
     if (outdatedIWDPAppClientIndex === -1) {
-      log.info('append IWDPAppClient');
+      log.verbose('append IWDPAppClient');
       const {} = iWDPOption;
       const iWDPAppClient = new AppClientCtor(clientId, {
         ...option,
@@ -340,7 +340,7 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
       appClientList.push(appClient);
       appClient.removeAllListeners(AppClientEvent.Message);
       appClient.on(AppClientEvent.Message, (msg) => getAppClientMessageHandler(debugTarget)(msg));
-      log.info(`create app client ${AppClientCtor.name}, update iWDPWsUrl to %s`, debugTarget.iWDPWsUrl);
+      log.verbose(`create app client ${AppClientCtor.name}, update iWDPWsUrl to %s`, debugTarget.iWDPWsUrl);
     }
   } else if (outdatedIWDPAppClientIndex !== -1) {
     const outdated = appClientList.splice(outdatedIWDPAppClientIndex, 1)[0];

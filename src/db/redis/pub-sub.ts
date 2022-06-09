@@ -62,7 +62,7 @@ export class RedisPublisher implements IPublisher {
   private async connect() {
     if (this.client.isOpen) return;
     await this.client.connect();
-    log.info('redis publisher client created, %s', this.channel);
+    log.verbose('redis publisher client created, %s', this.channel);
   }
 }
 
@@ -110,13 +110,17 @@ export class RedisSubscriber implements ISubscriber {
       // must unsubscribe first, other will receive error: `Cannot send commands in PubSub mode`
       await this.client.unsubscribe();
       await this.client.pUnsubscribe();
-      await this.client.quit();
+      try {
+        await this.client.quit();
+      } catch (e) {
+        log.warn(`redis disconnect error %j`, e || (e as Error).stack);
+      }
     }
   }
 
   private async connect() {
     if (this.client.isOpen) return;
     await this.client.connect();
-    log.info('redis subscriber client created, %s', this.channel);
+    log.verbose('redis subscriber client created, %s', this.channel);
   }
 }

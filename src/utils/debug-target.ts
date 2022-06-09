@@ -63,9 +63,9 @@ export const createTargetByDeviceInfo = (device: DeviceInfo): DebugTarget => {
   };
 };
 
-export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams, host?: string): DebugTarget => {
+export const createTargetByWsUrlParams = (wsUrlParams: AppWsUrlParams, host: string): DebugTarget => {
   const { clientId, clientRole, contextName, deviceName, hash } = wsUrlParams;
-  const domain = getDomainFromHostHeader(host);
+  const domain = getDomainFromHeader(host);
   const wsDomain = domain.replace('https://', 'wss://').replace('http://', 'ws://');
   let platform;
   if (clientRole === ClientRole.Android) platform = DevicePlatform.Android;
@@ -155,7 +155,7 @@ export const patchRefAndSave = async (newDebugTarget: DebugTarget): Promise<Debu
   const debugTarget = newDebugTarget;
   if (oldDebugTarget) {
     debugTarget.ref = oldDebugTarget.ref + 1;
-    log.info('increase debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
+    log.verbose('increase debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
   }
   const patched = await patchDebugTarget(debugTarget);
   await db.upsert(clientId, patched);
@@ -196,12 +196,12 @@ export const updateDebugTarget = async (clientId: string, partialDebugTarget: Pa
   return updated;
 };
 
-function getDomainFromHostHeader(host: string) {
+function getDomainFromHeader(host: string) {
   // if node server is in remote cluster
   // domain maybe devtools.qq.com or tdf-devtools.woa.com
-  // so get domain from host field, which is get from ws upgrade request header
+  // so get domain from host field of request header
   let protocol = 'https';
-  if (/((\d+(\.)?)+|localhost)/.test(host)) protocol = 'http';
+  if (/^((\d+(\.)?)+|localhost)/.test(host)) protocol = 'http';
   const domain = config.isCluster ? `${protocol}://${host}` : config.domain;
   return domain;
 }

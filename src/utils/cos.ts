@@ -81,7 +81,7 @@ export const cosUploadByBuffer = function (options: COSUploadByBufferOptions) {
             msg: ErrorMsg[COSErrorCode.UploadError],
           });
         } else {
-          log.info('upload to cos suc, location: %s, statusCode %s', data.Location, data.statusCode);
+          log.verbose('upload to cos suc, location: %s, statusCode %s', data.Location, data.statusCode);
           resolve({
             code: 0,
             msg: '',

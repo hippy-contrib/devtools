@@ -46,29 +46,29 @@ class DeviceManager {
    * app connection, add debugTarget and subscribe upward protocol
    */
   public async onAppConnect() {
-    log.info('app connect, %j', this.deviceList);
+    log.verbose('app connect, %j', this.deviceList);
     const device = this.deviceList[0];
     if (!device) return log.warn('no device connect!');
 
     const useTunnel = appClientManager.shouldUseAppClientType(device.platform, AppClientType.Tunnel);
-    log.info('useTunnel %j, is connected %j', useTunnel, device.physicalstatus === DeviceStatus.Connected);
+    log.verbose('useTunnel %j, is connected %j', useTunnel, device.physicalstatus === DeviceStatus.Connected);
     if (device.physicalstatus === DeviceStatus.Connected && useTunnel) {
       try {
         let debugTarget = createTargetByDeviceInfo(device);
         debugTarget = await patchDebugTarget(debugTarget);
         const { DB } = getDBOperator();
-        log.info('before upsert db %j', debugTarget);
+        log.verbose('before upsert db %j', debugTarget);
         new DB(config.redis.debugTargetTable).upsert(debugTarget.clientId, debugTarget);
         subscribeCommand(debugTarget);
       } catch (e) {
-        log.info('app connect e, %j, %j', (e as any)?.stack, e);
+        log.error('app connect e, %j, %j', (e as any)?.stack, e);
       }
     }
   }
 
   public async getDeviceList() {
     global.addon.getDeviceList((devices: DeviceInfo[]) => {
-      log.info('getDeviceList: %j', devices);
+      log.verbose('getDeviceList: %j', devices);
       this.deviceList = devices;
       if (devices.length) {
         const isDeviceDisconnect = devices[0].physicalstatus === DeviceStatus.Disconnected;
@@ -77,7 +77,7 @@ class DeviceManager {
         // TODO tunnel doesn't support multiple device, so just select the first one
         const device = this.deviceList[0];
         const deviceId = device.deviceid;
-        log.info(`selectDevice ${deviceId}`);
+        log.verbose(`selectDevice ${deviceId}`);
         global.addon.selectDevice(deviceId);
       }
     });

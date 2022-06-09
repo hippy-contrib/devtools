@@ -43,7 +43,7 @@ export const startTunnel = async (cb?: StartTunnelCallback) => {
   global.addon.addEventListener((event: TunnelEvent, data: unknown) => {
     try {
       if (event !== TunnelEvent.TunnelLog) {
-        tunnelLog.info('tunnel event: %s', event);
+        tunnelLog.verbose('tunnel event: %s', event);
       }
       if (event === TunnelEvent.ReceiveData) {
         tunnelEmitter.emit(TUNNEL_EVENT, data);
@@ -88,13 +88,13 @@ export const startIWDP = () => {
   proxyProcess.unref();
 
   childProcessLog.info(`start IWDP on port ${iWDPPort}`);
-  proxyProcess.stdout.on('data', (msg) => childProcessLog.info(msg.toString()));
-  proxyProcess.stderr.on('data', (msg) => childProcessLog.error(msg.toString()));
+  proxyProcess.stdout.on('data', (msg) => childProcessLog.verbose(msg.toString()));
+  proxyProcess.stderr.on('data', (msg) => childProcessLog.verbose(msg.toString()));
   proxyProcess.on('error', (e) => {
     childProcessLog.error('IWDP error: %s', e?.stack);
   });
   proxyProcess.on('message', (msg) => {
-    childProcessLog.info('IWDP message: %j', msg);
+    childProcessLog.verbose('IWDP message: %j', msg);
   });
   proxyProcess.on('close', (code) => {
     childProcessLog.warn(`IWDP close with code: ${code}`);
@@ -115,7 +115,7 @@ export const startChrome = async () => {
 
 export const killChildProcess = () => {
   if (!proxyProcess) return;
-  childProcessLog.warn('on log.info server exit, do some clean...');
+  childProcessLog.warn('server exit, do some clean...');
   proxyProcess?.kill('SIGKILL');
   proxyProcess = null;
 };

@@ -76,7 +76,7 @@ export class IWDPAppClient extends AppClient {
     this.ws.on('open', () => {
       this.isConnecting = false;
       this.startPing();
-      log.info(`IWDPAppClient ws opened: ${this.url}`);
+      log.verbose(`IWDPAppClient ws opened: ${this.url}`);
       for (const { msg, resolve, reject } of this.msgBuffer) {
         const msgStr = JSON.stringify(msg);
         this.ws.send(msgStr);
