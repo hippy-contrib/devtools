@@ -36,7 +36,7 @@ const log = new Logger('vue-devtools', WinstonColor.Yellow);
  */
 export const onVueClientConnection = async (ws: WebSocket, wsUrlParams: JSRuntimeWsUrlParams | DevtoolsWsUrlParams) => {
   const { contextName, clientRole, clientId } = wsUrlParams;
-  log.verbose('%s connected, clientId: %s', clientRole, clientId);
+  log.info('%s connected', clientRole);
   const { Subscriber, Publisher } = getDBOperator();
   aegis.reportEvent({
     name: ReportEvent.VueDevtools,
@@ -74,7 +74,6 @@ export const onVueClientConnection = async (ws: WebSocket, wsUrlParams: JSRuntim
   const publisher = new Publisher(channel);
   const subscriber = new Subscriber(channel);
   const handler = (msg) => {
-    log.debug('receive %s message: %s', clientRole, msg);
     ws.send(msg.toString());
   };
   subscriber.subscribe(handler);
@@ -87,7 +86,7 @@ export const onVueClientConnection = async (ws: WebSocket, wsUrlParams: JSRuntim
   });
 
   ws.on('close', async (code, reason) => {
-    log.warn('%s ws closed, code: %s, reason: %s', clientRole, code, reason);
+    log.info('%s closed. code: %s, reason: %s', clientRole, code, reason);
     await subscriber.disconnect();
     if (reason.indexOf('client') !== -1) {
       await publisher.publish(JSON.stringify([VueDevtoolsEvent.DevtoolsDisconnect]));

@@ -101,7 +101,7 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
    */
   upwardSubscriber.pUnsubscribe();
   upwardSubscriber.pSubscribe((message: string, upwardChannelId: string) => {
-    if (!upwardChannelId) return log.warn('pSubscribe without channelId');
+    if (!upwardChannelId) return log.verbose('pSubscribe without channelId');
     if (upwardChannelId.includes(vueDevtoolsExtensionName) || upwardChannelId.includes(reactDevtoolsExtensionName))
       return log.verbose('ignore vue/react channel');
 
@@ -276,11 +276,11 @@ const createAppClientList = (debugTarget: DebugTarget, ws?: WebSocket): AppClien
           ws,
         };
         if (AppClientCtor.name === AppClientType.WS && !ws) {
-          log.warn('WSAppClient constructor option need ws');
+          log.verbose('WSAppClient constructor option need ws');
           return;
         }
         if (AppClientCtor.name === AppClientType.IWDP && !debugTarget.iWDPWsUrl) {
-          log.warn(
+          log.verbose(
             'IWDPAppClient constructor option need iWDPWsUrl, if you are debug iOS without USB, please ignore this warning.',
           );
           return;
@@ -345,7 +345,7 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
   } else if (outdatedIWDPAppClientIndex !== -1) {
     const outdated = appClientList.splice(outdatedIWDPAppClientIndex, 1)[0];
     outdated.destroy();
-    log.warn('IWDPAppClient is outdated and destroyed!');
+    log.verbose('IWDPAppClient is outdated and destroyed!');
   }
 };
 

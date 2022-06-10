@@ -36,7 +36,7 @@ export const onReactClientConnection = async (
   wsUrlParams: JSRuntimeWsUrlParams | DevtoolsWsUrlParams,
 ) => {
   const { contextName, clientRole, clientId } = wsUrlParams;
-  log.verbose('%s connected, clientId: %s', clientRole, clientId);
+  log.info('%s connected', clientRole);
   const { Subscriber, Publisher } = getDBOperator();
   aegis.reportEvent({
     name: ReportEvent.ReactDevtools,
@@ -57,7 +57,6 @@ export const onReactClientConnection = async (
   }
 
   const handler = (msg) => {
-    log.verbose('receive %s message: %s', clientRole, msg);
     ws.send(msg.toString());
   };
   subscriber.subscribe(handler);
@@ -78,7 +77,7 @@ export const onReactClientConnection = async (
   });
 
   ws.on('close', (code, reason) => {
-    log.warn('%s ws closed, code: %s, reason: %s', clientRole, code, reason);
+    log.info('%s closed. code: %s, reason: %s', clientRole, code, reason);
     subscriber.disconnect();
     publisher.disconnect();
   });

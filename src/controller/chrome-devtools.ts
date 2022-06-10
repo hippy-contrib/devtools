@@ -54,7 +54,8 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
   const downwardChannelId = createDownwardChannel(clientId, extensionName);
   const upwardChannelId = createUpwardChannel(clientId, extensionName);
   const internalChannelId = createInternalChannel(clientId, '');
-  log.verbose('devtools connected, subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
+  log.info('devtools connected');
+  log.verbose('subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
 
   const downwardSubscriber = new Subscriber(downwardChannelId);
   // internal channel used to listen message between nodes, such as when app ws closed, notify devtools ws close
@@ -82,7 +83,7 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
 
   const internalHandler = (msg) => {
     if (msg === InternalChannelEvent.AppWSClose) {
-      log.warn('close devtools ws connection');
+      log.verbose('close devtools ws connection');
       ws.close(WSCode.ClosePage, 'the target page is closed');
       internalSubscriber.disconnect();
       internalPublisher.disconnect();
@@ -101,7 +102,7 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
     publisher.publish(msg.toString());
   });
   ws.on('close', async (code, reason) => {
-    log.warn('devtools ws client close code %s, reason: %s, clientId: %s', code, reason, clientId);
+    log.info('devtools closed. code: %s, reason: %s', code, reason);
     await Promise.all(resumeCommands.map(publisher.publish.bind(publisher)));
     // wait for publish finished
     publisher.disconnect();
@@ -113,14 +114,14 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
 };
 
 export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlParams, host: string) => {
-  const { clientId, clientRole } = wsUrlParams;
-  log.verbose('WSAppClient connected. %s', clientId);
+  const { clientId, clientRole, contextName } = wsUrlParams;
+  log.info('app connected. %s', contextName);
   const platform = {
     [ClientRole.Android]: DevicePlatform.Android,
     [ClientRole.IOS]: DevicePlatform.IOS,
   }[clientRole];
   const useWS = appClientManager.shouldUseAppClientType(platform, AppClientType.WS);
-  if (!useWS) return log.warn('current env is %s, ignore ws connection', global.debugAppArgv.env);
+  if (!useWS) return log.verbose('current env is %s, ignore ws connection', global.debugAppArgv.env);
 
   let debugTarget = createTargetByWsUrlParams(wsUrlParams, host);
   debugTarget = await patchRefAndSave(debugTarget);
@@ -132,7 +133,7 @@ export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlPara
   if (debugTarget.platform === DevicePlatform.IOS) publishReloadCommand(debugTarget);
 
   ws.on('close', (code: number, reason: string) => {
-    log.warn('WSAppClient closed: %j, reason: %s, clientId: %s', code, reason, clientId);
+    log.info('app closed. code: %j, reason: %s, contextName: %s', code, reason, contextName);
     clearLogProtocol(clientId);
     // when reload page, keep frontend open to debug lifecycle of created
     const closeDevtools = code === WSCode.ClosePage;

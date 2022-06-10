@@ -30,8 +30,8 @@ export const exec = (
 ): Promise<ChildProcessWithoutNullStreams> =>
   new Promise((resolve, reject) => {
     const cp = spawn(cmd, argv, options);
-    cp.stdout.on('data', (msg) => log.verbose(msg.toString()));
-    cp.stderr.on('data', (err) => log.verbose(err.toString()));
+    cp.stdout.on('data', (msg) => console.log(msg.toString().replace(/\n$/, '')));
+    cp.stderr.on('data', (err) => console.log(err.toString().replace(/\n$/, '')));
     cp.on('error', (err) => {
       log.error('spawn child process error: %s', err.stack);
       reject(err);

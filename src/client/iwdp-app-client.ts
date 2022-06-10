@@ -90,7 +90,7 @@ export class IWDPAppClient extends AppClient {
       this.isConnecting = false;
       this.isClosed = true;
       this.emit(AppClientEvent.Close);
-      log.warn('IWDPAppClient ws close!');
+      log.verbose('IWDPAppClient ws close!');
     });
 
     this.ws.on('error', (e) => {

@@ -70,7 +70,7 @@ function normalizeRemoteDebug(versionId, config) {
   const { protocol, host, port, qrcode: qrcodeFn } = config.devServer.remote;
   const publicPath = getPublicPath(versionId, config.devServer);
   config.output.publicPath = publicPath;
-  log.warn(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
+  log.info(bold(yellow(`webpack publicPath is set as: ${config.output.publicPath}`)));
 
   const ignorePort = couldIgnorePort(protocol, port);
   const bundleUrl = makeUrl(`${config.output.publicPath}index.bundle`, {

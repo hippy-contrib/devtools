@@ -47,11 +47,11 @@ const hmrCloseEvent = 'HMR_SERVER_CLOSED';
  */
 export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
-  log.verbose('HMR client connected, hash: %s', hash);
+  log.info('HMR client connected');
   const { Subscriber, DB } = getDBOperator();
   const bundle = await new DB(config.redis.bundleTable).get(hash);
   if (!bundle) {
-    const reason = 'Hippy dev server not started, not support HMR!';
+    const reason = 'hippy-dev not started, not support HMR!';
     ws.close(WSCode.InvalidRequestParams, reason);
     return log.warn(reason);
   }
@@ -80,7 +80,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
   subscriber.subscribe(hmrHandler);
 
   ws.on('close', (code, reason) => {
-    log.warn('HMR client ws closed, code: %s, reason: %s', code, reason);
+    log.info('HMR client closed. code: %s, reason: %s', code, reason);
     subscriber.disconnect();
   });
   ws.on('error', (e) => log.error('HMR client ws error: %s', e.stack || e));
@@ -91,7 +91,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
  */
 export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) => {
   const { hash } = wsUrlParams;
-  log.verbose('HMR server connected, hash: %s', hash);
+  log.info('HMR server connected');
   const { Publisher, DB } = getDBOperator();
   const model = new DB(config.redis.bundleTable);
   model.upsert(hash, { hash });
@@ -142,7 +142,7 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
   });
 
   ws.on('close', async (code, reason) => {
-    log.warn('HMR server ws closed, code: %s, reason: %s', code, reason);
+    log.info('HMR server closed. code: %s, reason: %s', code, reason);
     await publisher.publish(hmrCloseEvent);
     publisher.disconnect();
     model.delete(hash);
@@ -184,7 +184,7 @@ async function saveHMRFileToCOS(folder: string, name: string, content: Buffer) {
 async function cleanHMRFiles(files: string[]) {
   try {
     if (files.length === 0) return;
-    log.warn('clean cached static resources! \n %j', files);
+    log.verbose('clean cached static resources! \n %j', files);
     if (config.staticFileStorage === StaticFileStorage.COS) {
       await deleteObjects(files);
     } else {
