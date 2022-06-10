@@ -173,5 +173,7 @@ async function autoLaunchHippyDebug({ protocol, host, port }) {
 
     return log.warn(bold(yellow(`hippy-debug port ${port} is in use, please check by run "${checkPortCMD}"`)));
   }
-  exec('node', [path.join(__dirname, '../../../dist/index-debug.js'), '--port', port]);
+  const cp = await exec('node', [path.join(__dirname, '../../../dist/index-debug.js'), '--port', port]);
+  if (!global.__CHILD_PROCESS__) global.__CHILD_PROCESS__ = [];
+  global.__CHILD_PROCESS__.push(cp);
 }

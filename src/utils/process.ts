@@ -18,12 +18,16 @@
  * limitations under the License.
  */
 
-import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
+import { spawn, SpawnOptionsWithoutStdio, ChildProcessWithoutNullStreams } from 'child_process';
 import { Logger } from './log';
 
 const log = new Logger('child-process');
 
-export const exec = (cmd: string, argv?: string[], options?: SpawnOptionsWithoutStdio) =>
+export const exec = (
+  cmd: string,
+  argv?: string[],
+  options?: SpawnOptionsWithoutStdio,
+): Promise<ChildProcessWithoutNullStreams> =>
   new Promise((resolve, reject) => {
     const cp = spawn(cmd, argv, options);
     cp.stdout.on('data', (msg) => log.verbose(msg.toString()));

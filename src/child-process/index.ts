@@ -114,6 +114,9 @@ export const startChrome = async () => {
 };
 
 export const killChildProcess = () => {
+  global.__CHILD_PROCESS__.forEach((cp) => {
+    cp?.kill('SIGKILL');
+  });
   if (!proxyProcess) return;
   childProcessLog.warn('server exit, do some clean...');
   proxyProcess?.kill('SIGKILL');
