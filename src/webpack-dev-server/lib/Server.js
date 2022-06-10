@@ -1259,7 +1259,8 @@ class Server {
         }
         if (this.webSocketClient.readyState === WebSocket.CLOSING) reject();
       });
-    });
+    })
+    .catch(e => {});
   }
 
   async sendStatsWithOption() {

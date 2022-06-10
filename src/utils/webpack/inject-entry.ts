@@ -35,21 +35,38 @@ export const injectEntry = (
   appends: string[] = [],
 ): void => {
   const currentWebpack = (compiler as any).webpack || webpack;
-  const { options } = compiler;
   if (!currentWebpack.version || currentWebpack.version.startsWith('4')) {
-    injectEntryWebpack4(options, entryName, prepends, appends);
+    injectEntryWebpack4(compiler, entryName, prepends, appends);
   } else {
-    injectEntryWebpack5(options, entryName, prepends, appends);
+    injectEntryWebpack5(compiler, entryName, prepends, appends);
   }
   compiler.hooks.entryOption.call(compiler.options.context, compiler.options.entry);
 };
 
 function injectEntryWebpack5(
-  options: Compiler['options'],
+  compiler: Compiler,
   entryName?: string,
   prepends: string[] = [],
   appends: string[] = [],
 ): void {
+  const { options } = compiler;
+
+  /**
+   * EntryPlugin will prepend entry to the head of entry list
+   * when use EntryPlugin muti-times, such as `new EntryPlugin(a), new EntryPlugin(EntryPlugin)`,
+   * the final entry will be like `[a, b, originalEntry]`
+   * And EntryPlugin will have higher priority than change compiler.option.entry array,
+   * so use EntryPlugin could ensure stable of entry sequence
+   */
+  const { EntryPlugin } = webpack;
+  if (EntryPlugin) {
+    // Prepended entries does not care about injection order,
+    prepends.forEach((entry) => {
+      new EntryPlugin(compiler.context, entry, { name: undefined }).apply(compiler as any);
+    });
+    prepends = [];
+  }
+
   const entry: any = typeof options.entry === 'function' ? options.entry() : Promise.resolve(options.entry);
 
   options.entry = () =>
@@ -82,11 +99,12 @@ function injectEntryWebpack5(
 }
 
 function injectEntryWebpack4(
-  options: Compiler['options'],
+  compiler: Compiler,
   entryName?: string,
   prepends: string[] = [],
   appends: string[] = [],
 ): void {
+  const { options } = compiler;
   function injectEntry(entry: Exclude<Configuration['entry'], EntryFunc>): string[] | Entry {
     switch (typeof entry) {
       case 'undefined': {
