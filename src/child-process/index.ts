@@ -22,8 +22,8 @@ import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
 import os from 'os';
-import open from 'open';
 import colors from 'colors/safe';
+import { startBrowserProcess } from '@debug-server-next/utils/open';
 import { TunnelEvent, WinstonColor, OSType, LogLevel } from '@debug-server-next/@types/enum';
 import { deviceManager } from '@debug-server-next/device-manager';
 import { Logger, TunnelLogger } from '@debug-server-next/utils/log';
@@ -106,7 +106,7 @@ export const startChrome = async () => {
   if (openChrome) {
     const url = getHomeUrl();
     try {
-      open(url, { app: { name: open.apps.chrome } });
+      startBrowserProcess(undefined, url);
     } catch (e) {
       childProcessLog.error('open %s by chrome failed, please open manually, %s', url, (e as Error)?.stack);
     }
@@ -114,7 +114,7 @@ export const startChrome = async () => {
 };
 
 export const killChildProcess = () => {
-  global.__CHILD_PROCESS__.forEach((cp) => {
+  global.__CHILD_PROCESS__?.forEach((cp) => {
     cp?.kill('SIGKILL');
   });
   if (!proxyProcess) return;
