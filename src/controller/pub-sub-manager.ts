@@ -115,7 +115,9 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
     cmdIdChannelIdMap.set(msgObj.id, downwardChannelId);
     downwardChannelSet.add(downwardChannelId);
 
-    const { appClientList: latestAppClientList } = channelMap.get(clientId);
+    const channelInfo = channelMap.get(clientId);
+    if (!channelInfo) return;
+    const { appClientList: latestAppClientList } = channelInfo;
     latestAppClientList.forEach((appClient) => {
       appClient.sendToApp(msgObj).catch((e) => {
         if (e !== ErrorCode.DomainFiltered) {
@@ -191,11 +193,13 @@ export const cleanDebugTarget = async (clientId: string, closeDevtools: boolean,
     await internalPublisher.publish(InternalChannelEvent.AppWSClose);
   }
 
-  Array.from(publisherMap.values()).forEach((publisher) => publisher.disconnect());
-  upwardSubscriber.disconnect();
-  internalPublisher.disconnect();
-  internalSubscriber.disconnect();
-  channelMap.delete(clientId);
+  process.nextTick(() => {
+    Array.from(publisherMap.values()).forEach((publisher) => publisher.disconnect());
+    upwardSubscriber.disconnect();
+    internalPublisher.disconnect();
+    internalSubscriber.disconnect();
+    channelMap.delete(clientId);
+  });
 };
 
 /**
@@ -314,35 +318,55 @@ export const updateIWDPAppClient = (debugTarget: DebugTarget) => {
   const outdatedIWDPAppClientIndex = appClientList.findIndex((item) => item.constructor.name === AppClientType.IWDP);
   if (hasIWDPAppClient) {
     if (outdatedIWDPAppClientIndex === -1) {
-      log.verbose('append IWDPAppClient');
-      const {} = iWDPOption;
-      const iWDPAppClient = new AppClientCtor(clientId, {
-        ...option,
-        urlParsedContext: debugTargetToUrlParsedContext(debugTarget),
-        iWDPWsUrl: debugTarget.iWDPWsUrl,
-      });
-      appClientList.push(iWDPAppClient);
-      iWDPAppClient.on(AppClientEvent.Message, (msg) => getAppClientMessageHandler(debugTarget)(msg));
+      appendIWDPAppClient();
     } else {
-      const iWDPAppClient = appClientList[outdatedIWDPAppClientIndex] as IWDPAppClient;
-      if (iWDPAppClient.url === debugTarget.iWDPWsUrl) return;
-
-      const outdatedAppClient = appClientList.splice(outdatedIWDPAppClientIndex, 1)[0];
-      outdatedAppClient.destroy();
-
-      const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
-      const newOption: AppClientOption = {
-        ...option,
-        urlParsedContext,
-        iWDPWsUrl: debugTarget.iWDPWsUrl,
-      };
-      const appClient = new AppClientCtor(clientId, newOption);
-      appClientList.push(appClient);
-      appClient.removeAllListeners(AppClientEvent.Message);
-      appClient.on(AppClientEvent.Message, (msg) => getAppClientMessageHandler(debugTarget)(msg));
-      log.verbose(`create app client ${AppClientCtor.name}, update iWDPWsUrl to %s`, debugTarget.iWDPWsUrl);
+      updateIWDPAppClient();
     }
   } else if (outdatedIWDPAppClientIndex !== -1) {
+    removeIWDPAppClient();
+  } else {
+    appendIWDPAppClient();
+  }
+
+  function appendIWDPAppClient() {
+    log.verbose('append IWDPAppClient');
+    if (!debugTarget.iWDPWsUrl) {
+      return log.verbose('debugTarget.iWDPWsUrl is null, could not debug jscore');
+    }
+    const {} = iWDPOption;
+    const iWDPAppClient = new AppClientCtor(clientId, {
+      ...option,
+      urlParsedContext: debugTargetToUrlParsedContext(debugTarget),
+      iWDPWsUrl: debugTarget.iWDPWsUrl,
+    });
+    appClientList.push(iWDPAppClient);
+    iWDPAppClient.on(AppClientEvent.Message, (msg) => getAppClientMessageHandler(debugTarget)(msg));
+  }
+
+  function updateIWDPAppClient() {
+    const iWDPAppClient = appClientList[outdatedIWDPAppClientIndex] as IWDPAppClient;
+    if (iWDPAppClient.url === debugTarget.iWDPWsUrl) return;
+
+    const outdatedAppClient = appClientList.splice(outdatedIWDPAppClientIndex, 1)[0];
+    outdatedAppClient.destroy();
+
+    if (!debugTarget.iWDPWsUrl) {
+      return log.verbose('debugTarget.iWDPWsUrl is null, could not debug jscore');
+    }
+    const urlParsedContext = debugTargetToUrlParsedContext(debugTarget);
+    const newOption: AppClientOption = {
+      ...option,
+      urlParsedContext,
+      iWDPWsUrl: debugTarget.iWDPWsUrl,
+    };
+    const appClient = new AppClientCtor(clientId, newOption);
+    appClientList.push(appClient);
+    appClient.removeAllListeners(AppClientEvent.Message);
+    appClient.on(AppClientEvent.Message, (msg) => getAppClientMessageHandler(debugTarget)(msg));
+    log.verbose(`create app client ${AppClientCtor.name}, update iWDPWsUrl to %s`, debugTarget.iWDPWsUrl);
+  }
+
+  function removeIWDPAppClient() {
     const outdated = appClientList.splice(outdatedIWDPAppClientIndex, 1)[0];
     outdated.destroy();
     log.verbose('IWDPAppClient is outdated and destroyed!');

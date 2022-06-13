@@ -57,7 +57,6 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
   }
   aegis.reportEvent({
     name: ReportEvent.RemoteHMR,
-    ext1: hash,
     ext2: HMRReportExt2.Client,
   });
 
@@ -98,7 +97,6 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
   const publisher = new Publisher(createHMRChannel(hash));
   aegis.reportEvent({
     name: ReportEvent.RemoteHMR,
-    ext1: hash,
     ext2: HMRReportExt2.Server,
   });
   // store all synced dist file, and clean when HMR server disconnect
