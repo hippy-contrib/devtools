@@ -115,8 +115,12 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
     cmdIdChannelIdMap.set(msgObj.id, downwardChannelId);
     downwardChannelSet.add(downwardChannelId);
 
+    /**
+     * when devtools publish resumeCommands, maybe app had closed
+     */
     const channelInfo = channelMap.get(clientId);
     if (!channelInfo) return;
+
     const { appClientList: latestAppClientList } = channelInfo;
     latestAppClientList.forEach((appClient) => {
       appClient.sendToApp(msgObj).catch((e) => {

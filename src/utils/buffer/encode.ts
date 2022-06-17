@@ -32,9 +32,9 @@ export const encodeHMRData = (data: HMRWSData) => {
 };
 
 const encodeEmitFiles = (emitList: EmitFile[] = []) => {
-  const fileNumLen = 1;
+  const fileNumLen = 2;
   const headBuf = Buffer.alloc(fileNumLen);
-  headBuf.writeUInt8(emitList.length);
+  headBuf.writeUInt16BE(emitList.length);
 
   const fileBuffers = emitList.map(genFileBufferWithLen);
   return Buffer.concat([headBuf, ...fileBuffers]);

@@ -35,8 +35,8 @@ export const decodeHMRData = (buf: Buffer): HMRWSData => {
 };
 
 const decodeEmitFiles = (offset: number, buf: Buffer): EmitFile[] => {
-  const fileNum = buf.readUInt8(offset);
-  offset += 1;
+  const fileNum = buf.readUInt16BE(offset);
+  offset += 2;
   const emitList = [];
   for (let i = 0; i < fileNum; i++) {
     const fnameLen = buf.readUInt8(offset);

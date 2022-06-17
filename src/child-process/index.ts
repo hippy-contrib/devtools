@@ -54,12 +54,10 @@ export const startTunnel = async (cb?: StartTunnelCallback) => {
           }
           if (event === TunnelEvent.AddDevice) {
             childProcessLog.info(colors.bold[WinstonColor.Green]('device connected'));
-          }
-          deviceManager.getDeviceList();
-          if (event === TunnelEvent.AddDevice) {
             // every time device connect, auto run adb reverse
             startAdbProxy();
           }
+          deviceManager.getDeviceList();
         } else if (event === TunnelEvent.AppConnect) {
           deviceManager.onAppConnect();
         } else if (event === TunnelEvent.AppDisconnect) {

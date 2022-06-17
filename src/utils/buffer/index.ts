@@ -28,7 +28,7 @@
  * | lenOfContentLength   | 1                    | UInt8    |
  * | JSONContentLength    | lenOfContentLength   | UInt8    |
  * | JSONContent          | JSONContentLength    | Buffer   |
- * | fileNum              | 1                    | UInt8    |     // emit files
+ * | fileNum              | 2                    | UInt16BE |     // emit files
  * | lenOfFname_i         | 1                    | UInt8    |
  * | fileName_i           | lenOfFname_i         | String   |
  * | lenOfContentLength_i | 1                    | UInt8    |
