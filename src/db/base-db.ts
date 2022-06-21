@@ -33,6 +33,7 @@ export abstract class BaseDB<T = unknown> {
    */
   public abstract upsert(field: string, value: string | Object);
   public abstract delete(field: string);
+  // public abstract updatePartial(field: string, partial: Object);
 
   /**
    * redis list operate

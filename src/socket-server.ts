@@ -21,11 +21,13 @@
 import { Server as HTTPServer, IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { Server as WSServer } from 'ws';
-import { ClientRole, WinstonColor, WSCode } from '@debug-server-next/@types/enum';
+import { ClientRole, WinstonColor } from '@debug-server-next/@types/enum';
 import { DebugTargetManager } from '@debug-server-next/controller/debug-targets';
 import { cleanAllDebugTargets } from '@debug-server-next/controller/pub-sub-manager';
 import { onDevtoolsConnection, onAppConnection } from '@debug-server-next/controller/chrome-devtools';
 import { Logger } from '@debug-server-next/utils/log';
+import { DebugTarget } from '@debug-server-next/@types/debug-target';
+import { createTargetByWsUrlParams, patchRefAndSave } from '@debug-server-next/utils/debug-target';
 import {
   parseWsUrl,
   getWsInvalidReason,
@@ -68,9 +70,6 @@ export class SocketServer {
     wss.on('error', (e: Error) => {
       log.error('wss error: %s', (e as Error)?.stack);
     });
-    wss.on('upgrade', (response: IncomingMessage) => {
-      log.info('wss upgrade: %j', response);
-    });
     wss.on('close', () => {
       clearInterval(this.interval);
     });
@@ -95,8 +94,9 @@ export class SocketServer {
     });
   }
 
-  private onUpgrade(req: IncomingMessage, socket: Socket, head: Buffer) {
+  private async onUpgrade(req: IncomingMessage, socket: Socket, head: Buffer) {
     log.verbose('onUpgrade, ws url: %s', req.url);
+    const host = ((req.headers.host || req.headers.Host) as string) || '';
     const wsUrlParams = parseWsUrl(req.url);
     const reason = getWsInvalidReason(wsUrlParams);
     if (reason) {
@@ -104,40 +104,8 @@ export class SocketServer {
       return socket.destroy();
     }
 
-    this.wss.handleUpgrade(req, socket, head, (ws) => {
-      this.wss.emit('connection', ws, req);
-    });
-  }
-
-  /**
-   * ⚠️: don't do async operation before subscribe, otherwise will miss message
-   */
-  private async onConnection(ws: MyWebSocket, req: IncomingMessage) {
-    const wsUrlParams = parseWsUrl(req.url);
-    const host = ((req.headers.host || req.headers.Host) as string) || '';
-    ws.isAlive = true;
-    ws.on('pong', () => {
-      ws.isAlive = true;
-    });
-
     const { clientRole } = wsUrlParams;
-    if ([ClientRole.JSRuntime, ClientRole.VueDevtools].includes(clientRole)) {
-      onVueClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
-      return;
-    }
-    if ([ClientRole.ReactJSRuntime, ClientRole.ReactDevtools].includes(clientRole)) {
-      onReactClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
-      return;
-    }
-    if (clientRole === ClientRole.HMRClient) {
-      onHMRClientConnection(ws, wsUrlParams as HMRWsParams);
-    } else if (clientRole === ClientRole.HMRServer) {
-      onHMRServerConnection(ws, wsUrlParams as HMRWsParams);
-    } else if (clientRole === ClientRole.Devtools) {
-      onDevtoolsConnection(ws, wsUrlParams as DevtoolsWsUrlParams);
-    } else {
-      onAppConnection(ws, wsUrlParams as AppWsUrlParams, host);
-    }
+    let debugTarget: DebugTarget;
 
     if (clientRole === ClientRole.Devtools) {
       const params = wsUrlParams as DevtoolsWsUrlParams;
@@ -145,8 +113,46 @@ export class SocketServer {
       if (!exist) {
         const reason = `debugTarget not exist! ${params.clientId}`;
         log.warn(reason);
-        ws.close(WSCode.NoDebugTarget, reason);
+        return socket.destroy();
       }
+    } else if ([ClientRole.IOS, ClientRole.Android].includes(clientRole)) {
+      debugTarget = createTargetByWsUrlParams(wsUrlParams as AppWsUrlParams, host);
+      await patchRefAndSave(debugTarget);
+    }
+
+    this.wss.handleUpgrade(req, socket, head, (ws) => {
+      this.wss.emit('connection', ws, req, debugTarget);
+    });
+  }
+
+  /**
+   * ⚠️: don't do async operation before subscribe, otherwise will miss message
+   */
+  private async onConnection(ws: MyWebSocket, req: IncomingMessage, debugTarget: DebugTarget) {
+    const wsUrlParams = parseWsUrl(req.url);
+    ws.isAlive = true;
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
+
+    const { clientRole } = wsUrlParams;
+    if ([ClientRole.JSRuntime, ClientRole.VueDevtools].includes(clientRole)) {
+      return onVueClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
+    }
+    if ([ClientRole.ReactJSRuntime, ClientRole.ReactDevtools].includes(clientRole)) {
+      return onReactClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
+    }
+    if (clientRole === ClientRole.HMRClient) {
+      return onHMRClientConnection(ws, wsUrlParams as HMRWsParams);
+    }
+    if (clientRole === ClientRole.HMRServer) {
+      return onHMRServerConnection(ws, wsUrlParams as HMRWsParams);
+    }
+    if (clientRole === ClientRole.Devtools) {
+      return onDevtoolsConnection(ws, wsUrlParams as DevtoolsWsUrlParams);
+    }
+    if ([ClientRole.IOS, ClientRole.Android].includes(clientRole)) {
+      return onAppConnection(ws, wsUrlParams as AppWsUrlParams, debugTarget);
     }
   }
 

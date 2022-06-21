@@ -62,8 +62,6 @@ export class WSAppClient extends AppClient {
     });
 
     this.ws.on('close', () => {
-      this.isClosed = true;
-      log.verbose(`WSAppClient closed. ${this.id}`);
       this.emit(AppClientEvent.Close);
     });
   }

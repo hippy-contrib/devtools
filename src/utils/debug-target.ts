@@ -151,14 +151,17 @@ export const patchRefAndSave = async (newDebugTarget: DebugTarget): Promise<Debu
   const { DB } = getDBOperator();
   const { clientId } = newDebugTarget;
   const db = new DB<DebugTarget>(config.redis.debugTargetTable);
+  const patched = await patchDebugTarget(newDebugTarget);
+
   const oldDebugTarget = await db.get(clientId);
-  const debugTarget = newDebugTarget;
   if (oldDebugTarget) {
-    debugTarget.ref = oldDebugTarget.ref + 1;
-    log.verbose('increase debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
+    patched.ref = oldDebugTarget.ref + 1;
   }
-  const patched = await patchDebugTarget(debugTarget);
+
   await db.upsert(clientId, patched);
+  if (oldDebugTarget) {
+    log.verbose('increase debugTarget ref, clientId: %s, ref: %s', clientId, patched.ref);
+  }
   return patched;
 };
 
@@ -171,7 +174,6 @@ export const decreaseRefAndSave = async (clientId: string): Promise<DebugTarget>
   log.verbose('decrease debugTarget ref, clientId: %s, ref: %s', clientId, debugTarget.ref);
   if (debugTarget.ref <= 0) {
     await db.delete(clientId);
-    log.verbose('debugTarget ref is 0, should delete, clientId: %s', clientId);
     return;
   }
   await db.upsert(clientId, debugTarget);

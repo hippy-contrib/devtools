@@ -384,7 +384,7 @@ const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Ada
   const { clientId, platform } = debugTarget;
   const channelInfo = channelMap.get(clientId);
   if (!channelInfo) {
-    return log.error('channelInfo does not exist!');
+    return log.verbose('channelInfo does not exist, maybe app page is closed!');
   }
   const { downwardChannelSet, cmdIdChannelIdMap, publisherMap } = channelInfo;
   msg.ts = Date.now();

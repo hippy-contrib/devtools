@@ -161,6 +161,8 @@ class Server {
   addHMREntries(compiler) {
     const appendEntries = [];
     const prependEntries = [];
+    if(!this.options.hot && !this.options.liveReload) return { appendEntries, prependEntries };
+
     const isWebTarget = compiler.options.externalsPresets
       ? compiler.options.externalsPresets.web
       : [
@@ -216,6 +218,7 @@ class Server {
 
   addVueDevtoolsEntries() {
     if (!this.options.vueDevtools) return { appendEntries: [], prependEntries: [] };
+    
     const { host, port, protocol } = this.options.remote;
     const vueBackend = makeUrl(require.resolve('@hippy/hippy-vue-devtools-plugin/lib/backend'), {
       host,
@@ -231,6 +234,7 @@ class Server {
 
   addReactDevtoolsEntries() {
     if (!this.options.reactDevtools) return { appendEntries: [], prependEntries: [] };
+
     const { host, port, protocol } = this.options.remote;
     const reactBackend = makeUrl(require.resolve('@hippy/hippy-react-devtools-plugin/lib/backend'), {
       host,

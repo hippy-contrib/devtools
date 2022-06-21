@@ -32,13 +32,13 @@ import { getDBOperator } from '@debug-server-next/db';
 import { appClientManager } from '@debug-server-next/client';
 import { subscribeCommand, cleanDebugTarget } from '@debug-server-next/controller/pub-sub-manager';
 import { Logger } from '@debug-server-next/utils/log';
+import { DebugTarget } from '@debug-server-next/@types/debug-target';
 import {
   createDownwardChannel,
   createUpwardChannel,
   createInternalChannel,
 } from '@debug-server-next/utils/pub-sub-channel';
 import { AppWsUrlParams, DevtoolsWsUrlParams } from '@debug-server-next/utils/url';
-import { createTargetByWsUrlParams, patchRefAndSave } from '@debug-server-next/utils/debug-target';
 import { MyWebSocket } from '@debug-server-next/@types/socker-server';
 import { publishReloadCommand, resumeCommands } from '@debug-server-next/utils/reload-adapter';
 import { clearLogProtocol } from '@debug-server-next/utils/log-protocol';
@@ -113,7 +113,7 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
   ws.on('error', (e) => log.error('devtools ws client error: %j', e));
 };
 
-export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlParams, host: string) => {
+export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlParams, debugTarget: DebugTarget) => {
   const { clientId, clientRole, contextName } = wsUrlParams;
   log.info('app connected. %s', contextName);
   const platform = {
@@ -123,11 +123,7 @@ export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlPara
   const useWS = appClientManager.shouldUseAppClientType(platform, AppClientType.WS);
   if (!useWS) return log.verbose('current env is %s, ignore ws connection', global.debugAppArgv.env);
 
-  let debugTarget = createTargetByWsUrlParams(wsUrlParams, host);
-  debugTarget = await patchRefAndSave(debugTarget);
-  process.nextTick(() => {
-    subscribeCommand(debugTarget, ws);
-  });
+  subscribeCommand(debugTarget, ws);
 
   // when reload, iOS will create a new JSContext, so the debug protocol should resend
   if (debugTarget.platform === DevicePlatform.IOS) publishReloadCommand(debugTarget);

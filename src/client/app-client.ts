@@ -59,7 +59,6 @@ export interface AppClient {
  **/
 export abstract class AppClient extends EventEmitter {
   public id: string;
-  protected isClosed = false;
   protected platform: DevicePlatform;
   private urlParsedContext: UrlParsedContext;
   private cacheContext: Record<string, any> = {};
