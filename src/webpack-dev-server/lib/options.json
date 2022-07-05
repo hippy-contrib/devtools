@@ -1006,6 +1006,26 @@
           "description": "Remote debug proxy."
         }
       }
+    },
+    "InjectJSDevtools": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "domains": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
     }
   },
   "additionalProperties": false,
@@ -1095,6 +1115,9 @@
     },
     "autoLaunchHippyDebug": {
       "type": "boolean"
+    },
+    "injectJSDevtools": {
+      "$ref": "#/definitions/InjectJSDevtools"
     }
   }
 }

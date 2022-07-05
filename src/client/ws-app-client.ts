@@ -48,11 +48,12 @@ export class WSAppClient extends AppClient {
 
   protected registerMessageListener() {
     this.ws.on('message', async (msg: string) => {
+      const msgStr = msg.toString();
       let msgObj: Adapter.CDP.Res;
       try {
-        msgObj = JSON.parse(msg);
+        msgObj = JSON.parse(msgStr);
       } catch (e) {
-        log.error(`parse WSAppClient json message error: ${msg}`);
+        return log.error(`parse WSAppClient json message error: ${msg}`);
       }
 
       const res = await this.downwardMessageHandler(msgObj);

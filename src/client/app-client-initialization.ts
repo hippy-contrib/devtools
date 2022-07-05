@@ -19,7 +19,7 @@
  */
 
 import { DevicePlatform, DebugTunnel } from '@debug-server-next/@types/enum';
-import { customDomains } from '@debug-server-next/@types/constants';
+import { customDomains, vanillaJSDomains } from '@debug-server-next/@types/constants';
 import { appClientManager } from './app-client-manager';
 import { IWDPAppClient } from './iwdp-app-client';
 import { TunnelAppClient } from './tunnel-app-client';
@@ -29,20 +29,22 @@ export const initAppClient = () => {
   const { tunnel, enableIOS } = global.debugAppArgv;
   const DefaultCtor = tunnel === DebugTunnel.WS ? WSAppClient : TunnelAppClient;
   appClientManager.addAndroidAppClientOption({
-    useAllDomain: true,
+    useAllDomain: false,
+    ignoreDomains: vanillaJSDomains,
     Ctor: DefaultCtor,
     platform: DevicePlatform.Android,
   });
   appClientManager.addIOSAppClientOption({
     useAllDomain: false,
     acceptDomains: customDomains,
+    ignoreDomains: vanillaJSDomains,
     Ctor: DefaultCtor,
     platform: DevicePlatform.IOS,
   });
-  if(enableIOS) {
+  if (enableIOS) {
     appClientManager.addIOSAppClientOption({
       useAllDomain: false,
-      ignoreDomains: customDomains,
+      ignoreDomains: customDomains.concat(vanillaJSDomains),
       Ctor: IWDPAppClient,
       platform: DevicePlatform.IOS,
     });

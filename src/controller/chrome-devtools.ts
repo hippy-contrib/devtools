@@ -41,7 +41,7 @@ import {
 import { AppWsUrlParams, DevtoolsWsUrlParams } from '@debug-server-next/utils/url';
 import { MyWebSocket } from '@debug-server-next/@types/socker-server';
 import { publishReloadCommand, resumeCommands } from '@debug-server-next/utils/reload-adapter';
-import { clearLogProtocol } from '@debug-server-next/utils/log-protocol';
+import { clearHistoryProtocol } from '@debug-server-next/utils/history-event-protocol';
 
 const log = new Logger('chrome-devtools', WinstonColor.Cyan);
 
@@ -130,7 +130,7 @@ export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlPara
 
   ws.on('close', (code: number, reason: string) => {
     log.info('app closed. code: %j, reason: %s, contextName: %s', code, reason, contextName);
-    clearLogProtocol(clientId);
+    clearHistoryProtocol(clientId);
     // when reload page, keep frontend open to debug lifecycle of created
     const closeDevtools = code === WSCode.ClosePage;
     cleanDebugTarget(clientId, closeDevtools);

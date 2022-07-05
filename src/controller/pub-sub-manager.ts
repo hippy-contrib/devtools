@@ -45,10 +45,14 @@ import {
   reactDevtoolsExtensionName,
 } from '@debug-server-next/utils/pub-sub-channel';
 import { Logger } from '@debug-server-next/utils/log';
-import { IPublisher, ISubscriber } from '@debug-server-next/db/pub-sub';
+import { IPublisher, ISubscriber, PSubCallback, SubCallback } from '@debug-server-next/db/pub-sub';
 import { decreaseRefAndSave, removeDebugTarget } from '@debug-server-next/utils/debug-target';
 import { aegis } from '@debug-server-next/utils/aegis';
-import { saveLogProtocol, isLogProtocol, getHistoryLogProtocol } from '@debug-server-next/utils/log-protocol';
+import {
+  saveHistoryProtocol,
+  isHistoryProtocol,
+  getHistoryProtocol,
+} from '@debug-server-next/utils/history-event-protocol';
 
 const log = new Logger('pub-sub-manager', WinstonColor.BrightGreen);
 
@@ -69,6 +73,7 @@ const channelMap: Map<
     upwardSubscriber: ISubscriber;
     debugTarget: DebugTarget;
     appClientList: AppClient[];
+    upwardSubHandlerMap: Map<string, { [key: string]: PSubCallback | SubCallback }>;
   }
 > = new Map();
 
@@ -89,8 +94,7 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
     ext2: DevicePlatform[platform],
   });
 
-  const { appClientList, downwardChannelSet, cmdIdChannelIdMap, upwardSubscriber, internalSubscriber, publisherMap } =
-    channelMap.get(clientId);
+  const { appClientList, upwardSubHandlerMap, upwardSubscriber, internalSubscriber } = channelMap.get(clientId);
 
   createAppClientList(debugTarget, ws);
 
@@ -99,37 +103,16 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
    * because there maybe multiple devtools client, such as multiple chrome extensions,
    * we need use batch subscribe (pSubscribe)
    */
-  upwardSubscriber.pUnsubscribe();
-  upwardSubscriber.pSubscribe((message: string, upwardChannelId: string) => {
-    if (!upwardChannelId) return log.verbose('pSubscribe without channelId');
-    if (upwardChannelId.includes(vueDevtoolsExtensionName) || upwardChannelId.includes(reactDevtoolsExtensionName))
-      return log.verbose('ignore vue/react channel');
+  if (!upwardSubHandlerMap.has(clientId)) {
+    const upwardSubHandler = createUpwardSubHandler(clientId);
+    const internalHandler = createInternalHandler(clientId);
+    upwardSubHandlerMap.set(clientId, { upwardSubHandler, internalHandler });
+  }
+  const { upwardSubHandler, internalHandler } = upwardSubHandlerMap.get(clientId);
 
-    let msgObj: Adapter.CDP.Req;
-    try {
-      msgObj = JSON.parse(message);
-    } catch (e) {
-      log.error('%s channel message are invalid JSON, %s', upwardChannelId, message);
-    }
-    const downwardChannelId = upwardChannelToDownwardChannel(upwardChannelId);
-    cmdIdChannelIdMap.set(msgObj.id, downwardChannelId);
-    downwardChannelSet.add(downwardChannelId);
-
-    /**
-     * when devtools publish resumeCommands, maybe app had closed
-     */
-    const channelInfo = channelMap.get(clientId);
-    if (!channelInfo) return;
-
-    const { appClientList: latestAppClientList } = channelInfo;
-    latestAppClientList.forEach((appClient) => {
-      appClient.sendToApp(msgObj).catch((e) => {
-        if (e !== ErrorCode.DomainFiltered) {
-          return log.error('%s app client send error: %j', appClient.constructor.name, e);
-        }
-      });
-    });
-  });
+  // must unsubscribe first to avoid subscribe multiple times
+  upwardSubscriber.pUnsubscribe(upwardSubHandler);
+  upwardSubscriber.pSubscribe(upwardSubHandler);
 
   // publish downward message to devtools frontend
   appClientList.forEach((appClient) => {
@@ -141,38 +124,8 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
   });
 
   // publish history logs
-  const internalHandler = async (msg) => {
-    if (msg !== InternalChannelEvent.DevtoolsConnected) return;
-
-    const list = await getHistoryLogProtocol(clientId);
-    if (!list.length) return;
-
-    /**
-     * delay to send history log after ConsoleModel of devtools is ready
-     */
-    setTimeout(() => {
-      downwardChannelSet.forEach(async (channelId) => {
-        if (!publisherMap.has(channelId)) {
-          const { Publisher } = getDBOperator();
-          const publisher = new Publisher(channelId);
-          publisherMap.set(channelId, publisher);
-        }
-        const publisher = publisherMap.get(channelId);
-
-        /**
-         * mock a clear protocol to clear existed history logs
-         */
-        await publisher.publish({
-          method: 'Log.cleared',
-          params: {},
-        });
-
-        await list.map(publisher.publish.bind(publisher));
-      });
-    }, 1500);
-  };
-  await internalSubscriber.unsubscribe(internalHandler);
-  await internalSubscriber.subscribe(internalHandler);
+  await internalSubscriber.unsubscribe(internalHandler as SubCallback);
+  await internalSubscriber.subscribe(internalHandler as SubCallback);
 };
 
 /**
@@ -248,6 +201,7 @@ const addChannelItem = (debugTarget: DebugTarget) => {
     internalSubscriber,
     debugTarget,
     appClientList: [],
+    upwardSubHandlerMap: new Map(),
   });
 };
 
@@ -406,8 +360,8 @@ const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Ada
       downwardChannelSet.add(createDownwardChannel(clientId));
     }
 
-    if (platform === DevicePlatform.IOS && isLogProtocol(msg.method)) {
-      saveLogProtocol(clientId, msgStr);
+    if (platform === DevicePlatform.IOS && isHistoryProtocol(msg.method, platform)) {
+      saveHistoryProtocol(clientId, msgStr);
     }
 
     // broadcast to all channel, because could'n determine the receiver of EventRes
@@ -425,4 +379,79 @@ const getAppClientMessageHandler = (debugTarget: DebugTarget) => async (msg: Ada
 const isIWDPPage = (clientId: string) => {
   const { appClientList } = channelMap.get(clientId);
   return appClientList?.length === 1 && appClientList[0].constructor.name === AppClientType.IWDP;
+};
+
+const createUpwardSubHandler = (clientId) => (message: string, upwardChannelId: string) => {
+  const { downwardChannelSet, cmdIdChannelIdMap } = channelMap.get(clientId);
+  if (!upwardChannelId) return log.verbose('pSubscribe without channelId');
+  if (upwardChannelId.includes(vueDevtoolsExtensionName) || upwardChannelId.includes(reactDevtoolsExtensionName))
+    return log.verbose('ignore vue/react channel');
+
+  let msgObj: Adapter.CDP.Req;
+  try {
+    msgObj = JSON.parse(message);
+  } catch (e) {
+    log.error('%s channel message are invalid JSON, %s', upwardChannelId, message);
+  }
+  const downwardChannelId = upwardChannelToDownwardChannel(upwardChannelId);
+  cmdIdChannelIdMap.set(msgObj.id, downwardChannelId);
+  downwardChannelSet.add(downwardChannelId);
+
+  /**
+   * when devtools publish resumeCommands, maybe app had closed
+   */
+  const channelInfo = channelMap.get(clientId);
+  if (!channelInfo) return;
+
+  const { appClientList: latestAppClientList } = channelInfo;
+  latestAppClientList.forEach((appClient) => {
+    appClient.sendToApp(msgObj).catch((e) => {
+      if (e !== ErrorCode.DomainFiltered) {
+        return log.error('%s app client send error: %j', appClient.constructor.name, e);
+      }
+    });
+  });
+};
+
+const createInternalHandler = (clientId) => async (msg) => {
+  const { downwardChannelSet, publisherMap, debugTarget } = channelMap.get(clientId);
+  const { platform } = debugTarget;
+
+  if (msg !== InternalChannelEvent.DevtoolsConnected) return;
+
+  const list = await getHistoryProtocol(clientId);
+  if (!list.length) return;
+
+  /**
+   * delay to send history log after ConsoleModel of devtools is ready
+   */
+  setTimeout(() => {
+    downwardChannelSet.forEach(async (channelId) => {
+      if (!publisherMap.has(channelId)) {
+        const { Publisher } = getDBOperator();
+        const publisher = new Publisher(channelId);
+        publisherMap.set(channelId, publisher);
+      }
+      const publisher = publisherMap.get(channelId);
+
+      /**
+       * mock a clear protocol to clear existed history logs in console panel
+       */
+      if (platform !== DevicePlatform.Android) {
+        await publisher.publish({
+          method: 'Log.cleared',
+          params: {},
+        });
+      }
+
+      list.forEach((item) => {
+        try {
+          const cmd = JSON.parse(item);
+          if (!cmd.method?.startsWith('Network.')) {
+            publisher.publish(item);
+          }
+        } catch (e) {}
+      });
+    });
+  }, 1500);
 };

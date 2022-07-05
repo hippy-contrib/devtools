@@ -28,6 +28,7 @@ const pubsub = new EventEmitter();
 
 export class MemoryPubSub implements IPublisher, ISubscriber {
   private channel: string;
+  private subscribeHandler: Function;
 
   public constructor(channel: string) {
     this.channel = channel;
@@ -43,6 +44,7 @@ export class MemoryPubSub implements IPublisher, ISubscriber {
   }
 
   public async subscribe(cb) {
+    this.subscribeHandler = cb;
     pubsub.on(this.channel, cb);
   }
 
@@ -50,18 +52,25 @@ export class MemoryPubSub implements IPublisher, ISubscriber {
    * subscribe channel with glob character, such as `*`
    */
   public async pSubscribe(cb) {
+    this.subscribeHandler = cb;
     pubsub.on(this.channel, cb);
   }
 
-  public async unsubscribe(cb) {
-    if (cb) pubsub.off(this.channel, cb);
+  public async unsubscribe(cb?) {
+    const handler = cb || this.subscribeHandler;
+    if (handler) pubsub.off(this.channel, handler);
     else pubsub.removeAllListeners(this.channel);
   }
 
-  public async pUnsubscribe(cb) {
-    if (cb) pubsub.off(this.channel, cb);
+  public async pUnsubscribe(cb?) {
+    const handler = cb || this.subscribeHandler;
+    if (handler) pubsub.off(this.channel, handler);
     else pubsub.removeAllListeners(this.channel);
   }
 
-  public async disconnect() {}
+  public async disconnect() {
+    // auto unsubscribe for Subscriber
+    if (this.subscribeHandler) this.unsubscribe(this.subscribeHandler);
+    if (this.subscribeHandler) this.pUnsubscribe(this.subscribeHandler);
+  }
 }

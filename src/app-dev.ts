@@ -35,6 +35,7 @@ export const webpack = async (webpackConfig, cb?) => {
   if (webpackConfig.devServer) {
     webpackConfig.devServer.id = id;
   }
+  // @ts-ignore
   const compiler = oldWebpack(webpackConfig);
   const WebpackDevServer = (await import('./webpack-dev-server/lib/Server')).default;
   const webpackDevServer = new WebpackDevServer(webpackConfig.devServer, compiler, (err, stats) => {

@@ -63,6 +63,10 @@ function normalizeRemoteDebug(versionId, config) {
   };
   config.devServer.remote.port = Number(config.devServer.remote.port);
   config.devServer.autoLaunchHippyDebug ??= true;
+  config.devServer.injectJSDevtools ??= {
+    domains: [],
+  };
+
   if (config.devServer.autoLaunchHippyDebug) {
     autoLaunchHippyDebug(config.devServer.remote);
   }

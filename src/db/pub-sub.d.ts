@@ -33,5 +33,5 @@ export interface ISubscriber extends IPubSub {
   public pUnsubscribe(cb?: PSubCallback): Promise<void>;
 }
 
-type SubCallback = (message: string | Adapter.CDP.Res) => void;
-type PSubCallback = (message: string, channel: string) => void;
+export type SubCallback = (message: string | Adapter.CDP.Res) => void;
+export type PSubCallback = (message: string, channel: string) => void;

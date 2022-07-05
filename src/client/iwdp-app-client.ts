@@ -59,9 +59,10 @@ export class IWDPAppClient extends AppClient {
   protected registerMessageListener() {
     if (!this.ws) return;
     this.ws.on('message', async (msg: string) => {
+      const msgStr = msg.toString();
       let msgObj: Adapter.CDP.Res;
       try {
-        msgObj = JSON.parse(msg);
+        msgObj = JSON.parse(msgStr);
         const res = await this.downwardMessageHandler(msgObj);
         if (!('id' in msgObj)) return;
         const requestPromise = this.requestPromiseMap.get(msgObj.id);

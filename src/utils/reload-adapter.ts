@@ -195,22 +195,22 @@ const reloadEvent = [
   },
 ];
 
-const mockCmdId = -100000;
+const resumeCommandId = new GlobalId(-100000, -1);
 export const resumeCommands = [
   {
-    id: mockCmdId,
+    id: resumeCommandId.create(),
     method: TdfCommand.TDFRuntimeResume,
     params: {},
     performance: createCDPPerformance(),
   },
   {
-    id: mockCmdId - 1,
+    id: resumeCommandId.create(),
     method: ChromeCommand.DebuggerDisable,
     params: {},
     performance: createCDPPerformance(),
   },
   {
-    id: mockCmdId - 2,
+    id: resumeCommandId.create(),
     method: ChromeCommand.RuntimeDisable,
     params: {},
     performance: createCDPPerformance(),

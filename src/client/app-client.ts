@@ -31,6 +31,7 @@ import {
 import {
   defaultDownwardMiddleware,
   defaultUpwardMiddleware,
+  errorDownwardMiddleware,
   UrlParsedContext,
   requestId,
   MiddleWareContext,
@@ -88,8 +89,8 @@ export abstract class AppClient extends EventEmitter {
     super();
     this.id = id;
     this.useAllDomain = useAllDomain;
-    this.acceptDomains = acceptDomains;
-    this.ignoreDomains = ignoreDomains;
+    this.acceptDomains = acceptDomains || [];
+    this.ignoreDomains = ignoreDomains || [];
     this.urlParsedContext = urlParsedContext;
     this.platform = platform;
   }
@@ -192,18 +193,26 @@ export abstract class AppClient extends EventEmitter {
 
   /**
    * filter upward msg by protocol domain
+   * whiteList - blackList = acceptDomain - ignoreDomain
    */
   private filter(msg: Adapter.CDP.Req) {
     if (this.useAllDomain) return true;
     const { method } = msg;
     const domain = getDomain(method);
 
+    let isIgnoreDomain;
+    let isAcceptDomain;
     if (this.ignoreDomains.length) {
-      const isIgnoreDomain = this.ignoreDomains.indexOf(domain) !== -1 || this.ignoreDomains.indexOf(method) !== -1;
-      return !isIgnoreDomain;
+      isIgnoreDomain = this.ignoreDomains.indexOf(domain) !== -1 || this.ignoreDomains.indexOf(method) !== -1;
     }
-    const isAcceptDomain = this.acceptDomains.indexOf(domain) !== -1 || this.acceptDomains.indexOf(method) !== -1;
-    return isAcceptDomain;
+    if (this.acceptDomains.length) {
+      isAcceptDomain = this.acceptDomains.indexOf(domain) !== -1 || this.acceptDomains.indexOf(method) !== -1;
+    } else {
+      isAcceptDomain = true;
+    }
+
+    if (isAcceptDomain) return !isIgnoreDomain;
+    return false;
   }
 
   /**
@@ -216,7 +225,11 @@ export abstract class AppClient extends EventEmitter {
     }[type][method];
     if (!middlewareList) middlewareList = [];
     if (!Array.isArray(middlewareList)) middlewareList = [middlewareList];
-    return [...middlewareList, type === MiddlewareType.Upward ? defaultUpwardMiddleware : defaultDownwardMiddleware];
+
+    if (type === MiddlewareType.Upward) {
+      return [...middlewareList, defaultUpwardMiddleware];
+    }
+    return [errorDownwardMiddleware, ...middlewareList, defaultDownwardMiddleware];
   }
 
   /**

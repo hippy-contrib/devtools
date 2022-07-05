@@ -41,6 +41,7 @@ import { onHMRClientConnection, onHMRServerConnection } from '@debug-server-next
 import { MyWebSocket } from '@debug-server-next/@types/socker-server';
 import { onVueClientConnection } from '@debug-server-next/controller/vue-devtools';
 import { onReactClientConnection } from '@debug-server-next/controller/react-devtools';
+import { onVanillaJSClientConnection } from '@debug-server-next/controller/vanilla-js-devtools';
 
 const heartbeatInterval = 30000;
 
@@ -138,6 +139,9 @@ export class SocketServer {
     const { clientRole } = wsUrlParams;
     if ([ClientRole.JSRuntime, ClientRole.VueDevtools].includes(clientRole)) {
       return onVueClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
+    }
+    if ([ClientRole.VanillaJSRuntime].includes(clientRole)) {
+      return onVanillaJSClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
     }
     if ([ClientRole.ReactJSRuntime, ClientRole.ReactDevtools].includes(clientRole)) {
       return onReactClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);

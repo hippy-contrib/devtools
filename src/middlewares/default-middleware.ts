@@ -29,6 +29,11 @@ export const defaultDownwardMiddleware: MiddleWare = async ({ msg, sendToDevtool
   return sendToDevtools(msg as Adapter.CDP.Res);
 };
 
+export const errorDownwardMiddleware: MiddleWare = async ({ msg, sendToDevtools }, next) => {
+  if ('error' in msg) return sendToDevtools(msg);
+  return next();
+};
+
 /**
  * send to app
  */

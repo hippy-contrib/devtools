@@ -38,3 +38,41 @@ export const customDomains = [
   'TDFLog',
   'TDFRuntime',
 ];
+
+// domain only implement by vanilla js
+export const vanillaJSDomains = ['Network', 'DOMStorage', 'Storage'];
+
+export const LOG_PROTOCOLS = [
+  'Runtime.callFunctionOn',
+  'Runtime.compileScript',
+  'Runtime.discardConsoleEntries',
+  'Runtime.enable',
+  'Runtime.evaluate',
+  'Runtime.getIsolateId',
+  'Runtime.getProperties',
+  'Runtime.releaseObject',
+  'Runtime.releaseObjectGroup',
+  'Runtime.runIfWaitingForDebugger',
+];
+
+export const VANILLA_JS_METHODS = [
+  // 'Log.enable',
+  // 'Log.clear',
+  // 'Log.startViolationsReport',
+  'Network.deleteCookies',
+  'Network.setCookie',
+  'Network.enable',
+  'Network.getCookies',
+  'Network.getResponseBody',
+  'DOMStorage.clear',
+  'DOMStorage.enable',
+  'DOMStorage.getDOMStorageItems',
+  'DOMStorage.removeDOMStorageItem',
+  'DOMStorage.setDOMStorageItem',
+  // 'IndexedDB.enable',
+  // 'IndexedDB.requestDatabaseNames',
+  // 'Inspector.enable',
+  'Storage.trackCacheStorageForOrigin',
+  'Storage.trackIndexedDBForOrigin',
+  'Storage.clearDataForOrigin',
+];

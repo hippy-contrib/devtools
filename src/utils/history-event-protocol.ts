@@ -19,7 +19,7 @@
  */
 
 /**
- * cache all logs to redis to support for history log for iOS, android V8 support history log natively.
+ * cache all history event to redis to support for history protocol for iOS, android V8 support history log natively.
  *
  * if devtools had not attached, cache all history logs to redis,
  * clean cached data when app disconnect,
@@ -30,26 +30,38 @@
 import { ChromeEvent, IOS100Event } from '@hippy/devtools-protocol/dist/types';
 import { getDBOperator } from '@debug-server-next/db';
 import { config } from '@debug-server-next/config';
+import { DevicePlatform } from '@debug-server-next/@types/enum';
 
-const getLogKey = (clientId: string) => `${config.redis.logTablePrefix}${clientId}`;
+const getHistoryKey = (clientId: string) => `${config.redis.logTablePrefix}${clientId}`;
 
-export const isLogProtocol = (method: string) =>
-  [ChromeEvent.RuntimeConsoleAPICalled, ChromeEvent.LogEntryAdded, IOS100Event.ConsoleMessageAdded].includes(method);
+/**
+ * cache log, network event when devtools have not opened,
+ * those protocol is dispatched in app create lifecycle
+ */
+export const isHistoryProtocol = (method: string, platform: DevicePlatform) => {
+  if (
+    platform === DevicePlatform.IOS &&
+    [ChromeEvent.RuntimeConsoleAPICalled, ChromeEvent.LogEntryAdded, IOS100Event.ConsoleMessageAdded].includes(method)
+  )
+    return true;
+  if (method?.startsWith('Network.')) return true;
+  return false;
+};
 
-export const saveLogProtocol = async (clientId: string, msg: string) => {
+export const saveHistoryProtocol = async (clientId: string, msg: string) => {
   const { DB } = getDBOperator();
-  const db = new DB<string>(getLogKey(clientId));
+  const db = new DB<string>(getHistoryKey(clientId));
   await db.rPush(msg);
 };
 
-export const clearLogProtocol = async (clientId: string) => {
+export const clearHistoryProtocol = async (clientId: string) => {
   const { DB } = getDBOperator();
-  const db = new DB<string>(getLogKey(clientId));
+  const db = new DB<string>(getHistoryKey(clientId));
   await db.clearList();
 };
 
-export const getHistoryLogProtocol = async (clientId: string) => {
+export const getHistoryProtocol = async (clientId: string) => {
   const { DB } = getDBOperator();
-  const db = new DB<string>(getLogKey(clientId));
+  const db = new DB<string>(getHistoryKey(clientId));
   return await db.getList();
 };

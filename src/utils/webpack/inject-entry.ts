@@ -18,8 +18,7 @@
  * limitations under the License.
  */
 
-import webpack from 'webpack';
-import { Compiler, Configuration, Entry, EntryFunc } from '@debug-server-next/@types/webpack';
+import webpack, { Compiler, Configuration, Entry, EntryFunc } from 'webpack';
 
 /**
  * inject entry to webpack config
@@ -53,11 +52,14 @@ function injectEntryWebpack5(
 
   /**
    * EntryPlugin will prepend entry to the head of entry list
-   * when use EntryPlugin muti-times, such as `new EntryPlugin(a), new EntryPlugin(EntryPlugin)`,
+   * when use EntryPlugin muti-times, such as `new EntryPlugin(a), new EntryPlugin(b)`,
    * the final entry will be like `[a, b, originalEntry]`
    * And EntryPlugin will have higher priority than change compiler.option.entry array,
    * so use EntryPlugin could ensure stable of entry sequence
+   *
+   * EntryPlugin is available in webpack 5+
    */
+  // @ts-ignore
   const { EntryPlugin } = webpack;
   if (EntryPlugin) {
     // Prepended entries does not care about injection order,
@@ -78,7 +80,7 @@ function injectEntryWebpack5(
             `Could not find an entry named '${entryName}'. See https://webpack.js.org/concepts/entry-points/ for an overview of webpack entries.`,
           );
         }
-        prepends.forEach((prepend) => {
+        prepends.reverse().forEach((prepend) => {
           if (!injectEntry.import.includes(prepend)) injectEntry.import.unshift(prepend);
         });
         appends.forEach((append) => {
@@ -117,7 +119,7 @@ function injectEntryWebpack4(
       }
       case 'object': {
         if (Array.isArray(entry)) {
-          prepends.forEach((file) => {
+          prepends.reverse().forEach((file) => {
             if (!entry.includes(file)) entry.unshift(file);
           });
           appends.forEach((file) => {

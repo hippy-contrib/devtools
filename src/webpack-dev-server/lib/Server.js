@@ -148,13 +148,14 @@ class Server {
     const { appendEntries: hmrAppendEntries, prependEntries: hmrPrependEntries } = this.addHMREntries(compiler);
     const { appendEntries: vueAppendEntries, prependEntries: vuePrependEntries } = this.addVueDevtoolsEntries();
     const { appendEntries: reactAppendEntries, prependEntries: reactPrependEntries } = this.addReactDevtoolsEntries();
-
+    const { appendEntries: jsAppendEntries, prependEntries: jsPrependEntries } = this.addVanillaJSDevtoolsEntries();
+    
     // must ensure correct inject sequence, because the append entries depend on the prepend and original entries.
     injectEntry(
       compiler,
       undefined,
-      [...hmrPrependEntries, ...vuePrependEntries, ...reactPrependEntries],
-      [...hmrAppendEntries, ...vueAppendEntries, ...reactAppendEntries],
+      [...hmrPrependEntries, ...vuePrependEntries, ...reactPrependEntries, ...jsPrependEntries],
+      [...hmrAppendEntries, ...vueAppendEntries, ...reactAppendEntries, ...jsAppendEntries],
     );
   }
 
@@ -244,6 +245,24 @@ class Server {
     return {
       appendEntries: [],
       prependEntries: [reactBackend],
+    };
+  }
+
+  addVanillaJSDevtoolsEntries() {
+    if (!this.options.injectJSDevtools) return { appendEntries: [], prependEntries: [] };
+    
+    const { domains } = this.options.injectJSDevtools;
+    const { host, port, protocol } = this.options.remote;
+    
+    const vanillaJSBackend = makeUrl(require.resolve('@hippy/vanilla-js-devtools/dist/index.js'), {
+      domains: JSON.stringify(domains),
+      host,
+      port,
+      protocol,
+    });
+    return {
+      appendEntries: [],
+      prependEntries: [vanillaJSBackend],
     };
   }
 
