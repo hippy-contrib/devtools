@@ -19,7 +19,7 @@
  */
 
 import { trim } from 'lodash';
-import { ClientRole } from '@debug-server-next/@types/enum';
+import { ClientRole, DevicePlatform } from '@debug-server-next/@types/enum';
 import { config } from '@debug-server-next/config';
 
 export type AppWsUrlParams = {
@@ -56,7 +56,16 @@ export type JSRuntimeWsUrlParams = {
   contextName: string;
 };
 
-export type WsUrlParams = AppWsUrlParams | DevtoolsWsUrlParams | HMRWsParams;
+export type VanillaJSRuntimeWsUrlParams = JSRuntimeWsUrlParams & {
+  platform: DevicePlatform;
+};
+
+export type WsUrlParams =
+  | AppWsUrlParams
+  | DevtoolsWsUrlParams
+  | HMRWsParams
+  | JSRuntimeWsUrlParams
+  | VanillaJSRuntimeWsUrlParams;
 
 /**
  * parse debug WebSocket url params
@@ -69,6 +78,8 @@ export const parseWsUrl = (reqUrl: string): WsUrlParams => {
   const deviceName = url.searchParams.get('deviceName');
   const extensionName = url.searchParams.get('extensionName') || '';
   const hash = url.searchParams.get('hash') || '';
+  const platform = (url.searchParams.get('platform') || DevicePlatform.Unknown) as DevicePlatform;
+
   return {
     clientId,
     clientRole,
@@ -77,6 +88,7 @@ export const parseWsUrl = (reqUrl: string): WsUrlParams => {
     deviceName,
     extensionName,
     hash,
+    platform,
   };
 };
 

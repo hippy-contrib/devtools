@@ -27,7 +27,7 @@ import {
   DevicePlatform,
   AppClientType,
 } from '@debug-server-next/@types/enum';
-import { JSRuntimeWsUrlParams, DevtoolsWsUrlParams } from '@debug-server-next/utils/url';
+import { VanillaJSRuntimeWsUrlParams } from '@debug-server-next/utils/url';
 import { Logger } from '@debug-server-next/utils/log';
 import {
   createUpwardChannel,
@@ -60,12 +60,9 @@ const ENABLE_PROTOCOLS = ['Network.enable', 'DOMStorage.enable'];
 /**
  * Pub/Sub vanilla js devtools msg
  */
-export const onVanillaJSClientConnection = async (
-  ws: WebSocket,
-  wsUrlParams: JSRuntimeWsUrlParams | DevtoolsWsUrlParams,
-) => {
+export const onVanillaJSClientConnection = async (ws: WebSocket, wsUrlParams: VanillaJSRuntimeWsUrlParams) => {
   const protocolId = new GlobalId(-20000, -1);
-  const { contextName, clientRole, clientId } = wsUrlParams;
+  const { contextName, clientRole, clientId, platform } = wsUrlParams;
   log.info('%s connected', clientRole);
   const { Subscriber, Publisher } = getDBOperator();
   aegis.reportEvent({
@@ -80,8 +77,7 @@ export const onVanillaJSClientConnection = async (
     if (msg === InternalChannelEvent.DevtoolsConnected) {
       // pub enable after devtools connected
       triggerEnableLogForIOS(ws, protocolId, clientId);
-
-      broadcastHistoryLog(clientId, downPublisher, debugTarget);
+      broadcastHistoryLog(clientId, downPublisher, platform);
     }
   });
   // pub enable immediately, support for reload scene
@@ -170,9 +166,6 @@ async function triggerEnableLogForIOS(ws, protocolId, clientId) {
   }
 }
 
-/**
- *
- */
 async function triggerEnableNetworkAndStorage(ws, protocolId) {
   // enable sample data when connected
   ENABLE_PROTOCOLS.forEach((protocol) => {
@@ -186,7 +179,7 @@ async function triggerEnableNetworkAndStorage(ws, protocolId) {
   });
 }
 
-const broadcastHistoryLog = async (clientId, downPublisher, debugTarget: DebugTarget) => {
+const broadcastHistoryLog = async (clientId, downPublisher, platform: DevicePlatform) => {
   const list = await getHistoryProtocol(clientId);
   if (!list.length) return;
 
@@ -197,7 +190,7 @@ const broadcastHistoryLog = async (clientId, downPublisher, debugTarget: DebugTa
     /**
      * mock a clear protocol to clear existed history logs in console panel
      */
-    if (debugTarget?.platform === DevicePlatform.IOS)
+    if (platform === DevicePlatform.IOS)
       await downPublisher.publish({
         method: 'Log.cleared',
         params: {},

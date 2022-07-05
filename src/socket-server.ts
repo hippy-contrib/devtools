@@ -35,6 +35,7 @@ import {
   DevtoolsWsUrlParams,
   HMRWsParams,
   JSRuntimeWsUrlParams,
+  VanillaJSRuntimeWsUrlParams,
 } from '@debug-server-next/utils/url';
 import { config } from '@debug-server-next/config';
 import { onHMRClientConnection, onHMRServerConnection } from '@debug-server-next/controller/hmr';
@@ -141,7 +142,7 @@ export class SocketServer {
       return onVueClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
     }
     if ([ClientRole.VanillaJSRuntime].includes(clientRole)) {
-      return onVanillaJSClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
+      return onVanillaJSClientConnection(ws, wsUrlParams as VanillaJSRuntimeWsUrlParams);
     }
     if ([ClientRole.ReactJSRuntime, ClientRole.ReactDevtools].includes(clientRole)) {
       return onReactClientConnection(ws, wsUrlParams as JSRuntimeWsUrlParams | DevtoolsWsUrlParams);
