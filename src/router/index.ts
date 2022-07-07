@@ -56,11 +56,26 @@ export const routeApp = (app: Koa) => {
     preload: false,
   };
 
-  // chrome devtools
+  // chrome devtools html files no cache
+  const htmlList = [
+    'devtools_app.html',
+    'hippy_tdf.html',
+    'hippy.html',
+    'inspector.html',
+    'js_app.html',
+    'ndb_app.html',
+    'node_app.html',
+    'tdf_core.html',
+  ];
+  htmlList.forEach((file) => {
+    app.use(serve(getModuleFolder('@hippy/chrome-devtools', `out/Version/gen/front_end/${file}`)));
+  });
+
+  // chrome devtools resources with versionId(commit id),
   app.use(
-    staticCache(getModuleFolder('@hippy/chrome-devtools', 'out/Release/gen'), {
+    staticCache(getModuleFolder('@hippy/chrome-devtools', 'out/Version/gen'), {
       ...defaultStaticOption,
-      maxAge: 60 * 60,
+      maxAge: 60 * 60 * 24 * 365,
     }),
   );
 
