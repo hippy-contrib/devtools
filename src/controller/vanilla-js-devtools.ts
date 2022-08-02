@@ -121,11 +121,11 @@ export const onVanillaJSClientConnection = async (ws: WebSocket, wsUrlParams: Va
         await sleep(800);
         debugTarget = await DebugTargetManager.findDebugTarget(clientId, undefined, true);
       }
-      if (cmd.method && isHistoryProtocol(cmd.method, debugTarget.platform)) {
+      if (cmd.method && debugTarget && isHistoryProtocol(cmd.method, debugTarget.platform)) {
         saveHistoryProtocol(clientId, msgStr);
       }
     } catch (e) {
-      log.error('parse json error');
+      log.error('parse json error: %s', (e as Error)?.stack || e);
     }
   });
 
