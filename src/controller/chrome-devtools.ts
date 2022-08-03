@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import { aegis } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 import {
   AppClientType,
   ClientRole,
@@ -69,7 +69,7 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
       const msgObj = JSON.parse(msgStr as string);
       const { ts: start } = msgObj;
       if (start) {
-        aegis.reportTime({
+        report.event({
           name: ReportEvent.PubSub,
           duration: Date.now() - start,
           ext1: `${Math.ceil(msgStr.length / 1024)}KB`,

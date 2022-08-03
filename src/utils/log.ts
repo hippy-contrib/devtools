@@ -25,7 +25,7 @@ import { Logger as WinstonLogger, transports, format, createLogger } from 'winst
 import { lowerFirst, uniq, random } from 'lodash';
 import { WinstonColor, LogLevel } from '@debug-server-next/@types/enum';
 import { config } from '@debug-server-next/config';
-import { aegis } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 import 'winston-daily-rotate-file';
 
 export class Logger {
@@ -72,9 +72,9 @@ export class Logger {
     this.loggerInstance.log(level, msg);
     try {
       if (level === LogLevel.Error) {
-        aegis.report(new Error(msg));
+        report.error(new Error(msg));
       } else if ([LogLevel.Warn].includes(level)) {
-        aegis.infoAll(msg);
+        report.log(msg);
       }
     } catch (e) {}
   }

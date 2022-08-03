@@ -23,7 +23,7 @@ import COS from 'cos-nodejs-sdk-v5';
 import { Logger } from '@debug-server-next/utils/log';
 import { config } from '@debug-server-next/config';
 import { ReportEvent } from '@debug-server-next/@types/enum';
-import { timeStart } from '@debug-server-next/utils/aegis';
+import { timeStart } from '@debug-server-next/utils/report';
 
 const log = new Logger('cos-util');
 const baseCosOption = {

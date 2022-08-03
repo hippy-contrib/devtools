@@ -22,7 +22,7 @@ import { createClient } from 'redis';
 import { config } from '@debug-server-next/config';
 import { Logger } from '@debug-server-next/utils/log';
 import { WinstonColor, ReportEvent } from '@debug-server-next/@types/enum';
-import { timeStart } from '@debug-server-next/utils/aegis';
+import { timeStart } from '@debug-server-next/utils/report';
 import { BaseDB } from '../base-db';
 
 const log = new Logger('redis-model', WinstonColor.BrightCyan);

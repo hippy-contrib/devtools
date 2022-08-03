@@ -35,7 +35,7 @@ import {
   createInternalChannel,
 } from '@debug-server-next/utils/pub-sub-channel';
 import { getDBOperator } from '@debug-server-next/db';
-import { aegis } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 import { DebugTargetManager } from '@debug-server-next/controller/debug-targets';
 import { GlobalId } from '@debug-server-next/utils/global-id';
 import { sleep } from '@debug-server-next/utils/timer';
@@ -65,7 +65,7 @@ export const onVanillaJSClientConnection = async (ws: WebSocket, wsUrlParams: Va
   const { contextName, clientRole, clientId, platform } = wsUrlParams;
   log.info('%s connected', clientRole);
   const { Subscriber, Publisher } = getDBOperator();
-  aegis.reportEvent({
+  report.event({
     name: ReportEvent.VanillaJSRuntime,
     ext1: clientId,
     ext2: contextName,

@@ -22,7 +22,36 @@ import Aegis from '@debug-server-next/patch/aegis';
 import { config } from '@debug-server-next/config';
 import { version } from '../../package.json';
 
-export const aegis: any = new Aegis({
+class Report {
+  public event = (event: Event) => {
+    if (event.duration) {
+      aegis.reportTime(event);
+      return;
+    }
+    aegis.reportEvent(event);
+    console.log(`report event:${JSON.stringify(event)}`);
+  };
+
+  public error = (e: Error) => {
+    aegis.reportError(e);
+  };
+
+  public log = (msg: string) => {
+    aegis.infoAll(msg);
+  };
+}
+
+export const report = new Report();
+
+interface Event {
+  name: string;
+  duration?: number;
+  ext1?: string;
+  ext2?: string;
+  ext3?: string;
+}
+
+const aegis = new Aegis({
   id: config.aegisId,
   selector: {
     type: 'host',

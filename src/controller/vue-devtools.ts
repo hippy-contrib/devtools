@@ -25,7 +25,7 @@ import { JSRuntimeWsUrlParams, DevtoolsWsUrlParams } from '@debug-server-next/ut
 import { Logger } from '@debug-server-next/utils/log';
 import { createVueDevtoolsChannel, createInternalChannel } from '@debug-server-next/utils/pub-sub-channel';
 import { getDBOperator } from '@debug-server-next/db';
-import { aegis } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 import { publishRes } from '@debug-server-next/utils/reload-adapter';
 import { DebugTargetManager } from '@debug-server-next/controller/debug-targets';
 
@@ -38,7 +38,7 @@ export const onVueClientConnection = async (ws: WebSocket, wsUrlParams: JSRuntim
   const { contextName, clientRole, clientId } = wsUrlParams;
   log.info('%s connected', clientRole);
   const { Subscriber, Publisher } = getDBOperator();
-  aegis.reportEvent({
+  report.event({
     name: ReportEvent.VueDevtools,
     ext1: clientId,
     ext2: contextName,

@@ -24,7 +24,7 @@ import { JSRuntimeWsUrlParams, DevtoolsWsUrlParams } from '@debug-server-next/ut
 import { Logger } from '@debug-server-next/utils/log';
 import { createReactDevtoolsChannel } from '@debug-server-next/utils/pub-sub-channel';
 import { getDBOperator } from '@debug-server-next/db';
-import { aegis } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 
 const log = new Logger('react-devtools', WinstonColor.Yellow);
 
@@ -38,7 +38,7 @@ export const onReactClientConnection = async (
   const { contextName, clientRole, clientId } = wsUrlParams;
   log.info('%s connected', clientRole);
   const { Subscriber, Publisher } = getDBOperator();
-  aegis.reportEvent({
+  report.event({
     name: ReportEvent.ReactDevtools,
     ext1: clientId,
     ext2: contextName,

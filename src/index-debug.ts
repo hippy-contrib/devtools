@@ -86,7 +86,7 @@ if (debugAppArgv.version) yargs.version().exit(0, null);
 /**
  * import after global.debugAppArgv is set
  */
-import '@debug-server-next/utils/aegis';
+import '@debug-server-next/utils/report';
 import { Logger } from '@debug-server-next/utils/log';
 import { startDebugServer } from '@debug-server-next/app-debug';
 import { version } from '../package.json';
