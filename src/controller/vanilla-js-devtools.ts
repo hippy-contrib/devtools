@@ -65,11 +65,6 @@ export const onVanillaJSClientConnection = async (ws: WebSocket, wsUrlParams: Va
   const { contextName, clientRole, clientId, platform } = wsUrlParams;
   log.info('%s connected', clientRole);
   const { Subscriber, Publisher } = getDBOperator();
-  report.event({
-    name: ReportEvent.VanillaJSRuntime,
-    ext1: clientId,
-    ext2: contextName,
-  });
 
   const internalChannelId = createInternalChannel(clientId, '');
   const internalSubscriber = new Subscriber(internalChannelId);
@@ -96,11 +91,21 @@ export const onVanillaJSClientConnection = async (ws: WebSocket, wsUrlParams: Va
       if (LOG_PROTOCOLS.includes(msgObj.method)) {
         if (!(ws as any).enableLogForIOS) return;
         upwardLog.verbose('sendToApp %j', msgObj);
+        report.event({
+          name: ReportEvent.VanillaIOSJSRuntime,
+          ext1: contextName,
+          ext2: msgObj.method,
+        });
         return ws.send(msgStr);
       }
       if (VANILLA_JS_METHODS.includes(msgObj.method)) {
         upwardLog.verbose('sendToApp %j', msgObj);
         ws.send(msgStr);
+        report.event({
+          name: ReportEvent.VanillaJSRuntime,
+          ext1: contextName,
+          ext2: msgObj.method,
+        });
       }
     } catch (e) {}
   });

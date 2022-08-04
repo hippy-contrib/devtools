@@ -213,11 +213,13 @@ export enum ReportEvent {
   StartDev = 'start-dev', // event for npm run hippy:dev
   RemoteDebug = 'remote-debug', // event for device connection
   ConnectFrontend = 'connect-frontend', // event for connect frontend and debug
+  HMR = 'hmr', // event for use hmr
   COSUpload = 'cos-upload',
   RemoteHMR = 'remote-hmr',
   VueDevtools = 'vue-devtools',
   ReactDevtools = 'react-devtools',
-  VanillaJSRuntime = 'vanilla_js_runtime',
+  VanillaJSRuntime = 'vanilla_js_runtime', // event for use vanilla like cookie, storage...
+  VanillaIOSJSRuntime = 'vanilla_ios_js_runtime', // event for use vanilla like ios console
   DevtoolsToDebugServer = 'devtools-to-debug-server',
   DebugServerToDevtools = 'debug-server-to-devtools',
   PubSub = 'pub-sub',
