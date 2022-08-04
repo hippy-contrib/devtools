@@ -54,6 +54,10 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
   const downwardChannelId = createDownwardChannel(clientId, extensionName);
   const upwardChannelId = createUpwardChannel(clientId, extensionName);
   const internalChannelId = createInternalChannel(clientId, '');
+  report.event({
+    name: ReportEvent.ConnectFrontend,
+    ext1: clientId,
+  });
   log.info('devtools connected');
   log.verbose('subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
 
@@ -69,9 +73,8 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
       const msgObj = JSON.parse(msgStr as string);
       const { ts: start } = msgObj;
       if (start) {
-        report.event({
+        report.time(Date.now() - start, {
           name: ReportEvent.PubSub,
-          duration: Date.now() - start,
           ext1: `${Math.ceil(msgStr.length / 1024)}KB`,
           ext2: msgObj.method,
         });

@@ -210,8 +210,10 @@ export enum StaticFileStorage {
 }
 
 export enum ReportEvent {
+  StartDev = 'start-dev', // event for npm run hippy:dev
+  RemoteDebug = 'remote-debug', // event for device connection
+  ConnectFrontend = 'connect-frontend', // event for connect frontend and debug
   COSUpload = 'cos-upload',
-  RemoteDebug = 'remote-debug',
   RemoteHMR = 'remote-hmr',
   VueDevtools = 'vue-devtools',
   ReactDevtools = 'react-devtools',

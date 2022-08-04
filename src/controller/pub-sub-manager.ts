@@ -91,7 +91,7 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
   report.event({
     name: ReportEvent.RemoteDebug,
     ext1: title,
-    ext2: DevicePlatform[platform],
+    ext2: platform,
   });
 
   const { appClientList, upwardSubHandlerMap, upwardSubscriber, internalSubscriber } = channelMap.get(clientId);
