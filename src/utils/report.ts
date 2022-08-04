@@ -55,12 +55,6 @@ class Report {
       });
     };
   };
-
-  public config = (uin: string) => {
-    if (uin) {
-      aegis.setConfig({ uin });
-    }
-  };
 }
 
 export const report = new Report();
