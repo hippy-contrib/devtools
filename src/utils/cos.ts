@@ -23,7 +23,7 @@ import COS from 'cos-nodejs-sdk-v5';
 import { Logger } from '@debug-server-next/utils/log';
 import { config } from '@debug-server-next/config';
 import { ReportEvent } from '@debug-server-next/@types/enum';
-import { timeStart } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 
 const log = new Logger('cos-util');
 const baseCosOption = {
@@ -55,7 +55,7 @@ export const cosUpload = (key: string, buffer: Buffer) =>
 
 export const cosUploadByBuffer = function (options: COSUploadByBufferOptions) {
   const { SecretId, SecretKey, Bucket, Region, Key, buffer, StorageClass = 'STANDARD', onProgress } = options;
-  const timeEnd = timeStart(ReportEvent.COSUpload);
+  const timeEnd = report.timeStart(ReportEvent.COSUpload);
   return new Promise((resolve, reject) => {
     const client = new COS({
       ...baseCosOption,

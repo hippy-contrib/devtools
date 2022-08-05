@@ -47,7 +47,7 @@ import {
 import { Logger } from '@debug-server-next/utils/log';
 import { IPublisher, ISubscriber, PSubCallback, SubCallback } from '@debug-server-next/db/pub-sub';
 import { decreaseRefAndSave, removeDebugTarget } from '@debug-server-next/utils/debug-target';
-import { aegis } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 import {
   saveHistoryProtocol,
   isHistoryProtocol,
@@ -88,10 +88,10 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
   if (!channelMap.has(clientId)) addChannelItem(debugTarget);
   else if (isIWDPPage(clientId)) return;
 
-  aegis.reportEvent({
+  report.event({
     name: ReportEvent.RemoteDebug,
     ext1: title,
-    ext2: DevicePlatform[platform],
+    ext2: platform,
   });
 
   const { appClientList, upwardSubHandlerMap, upwardSubscriber, internalSubscriber } = channelMap.get(clientId);

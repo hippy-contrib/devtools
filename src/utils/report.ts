@@ -20,36 +20,62 @@
 
 import Aegis from '@debug-server-next/patch/aegis';
 import { config } from '@debug-server-next/config';
+import { getBundleVersionId } from '@debug-server-next/utils/bundle-version';
 import { version } from '../../package.json';
 
-export const aegis: any = new Aegis({
+class Report {
+  public event = (event: Event) => {
+    aegis.reportEvent(event);
+  };
+
+  public error = (e: Error) => {
+    aegis.reportError(e);
+  };
+
+  public log = (msg: string) => {
+    aegis.infoAll(msg);
+  };
+
+  public time = (duration: number, event: Event) => {
+    aegis.reportTime({
+      duration,
+      ...event,
+    });
+  };
+
+  public timeStart = (name: string) => {
+    const start = Date.now();
+    return (event: Event = {}) => {
+      const end = Date.now();
+      const duration = end - start;
+      aegis.reportTime({
+        duration,
+        ...event,
+        name,
+      });
+    };
+  };
+}
+
+export const report = new Report();
+
+interface Event {
+  name?: string;
+  ext1?: string;
+  ext2?: string;
+  ext3?: string;
+}
+
+const aegis = new Aegis({
   id: config.aegisId,
   selector: {
     type: 'host',
   },
+  uin: getBundleVersionId(),
   version,
   ext3: config.isCluster ? 'remote' : 'local',
   // protocol: 'http',
 });
-
-export const timeStart = (name: string) => {
-  const start = Date.now();
-  return (ext: ExtOption = {}) => {
-    const end = Date.now();
-    const duration = end - start;
-    aegis.reportTime({
-      name,
-      duration,
-      ...ext,
-    });
-  };
-};
-
-type ExtOption = {
-  ext1?: string;
-  ext2?: string;
-  ext3?: string;
-};
 
 export const createCDPPerformance = (perf?: Partial<Adapter.Performance>): Adapter.Performance => ({
   devtoolsToDebugServer: 0,

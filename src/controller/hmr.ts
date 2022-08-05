@@ -37,7 +37,7 @@ import { getDBOperator } from '@debug-server-next/db';
 import { config } from '@debug-server-next/config';
 import { decodeHMRData } from '@debug-server-next/utils/buffer';
 import { cosUpload, deleteObjects } from '@debug-server-next/utils/cos';
-import { aegis } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 
 const log = new Logger('hmr-controller', WinstonColor.Blue);
 const hmrCloseEvent = 'HMR_SERVER_CLOSED';
@@ -55,7 +55,7 @@ export const onHMRClientConnection = async (ws: WebSocket, wsUrlParams: HMRWsPar
     ws.close(WSCode.InvalidRequestParams, reason);
     return log.warn(reason);
   }
-  aegis.reportEvent({
+  report.event({
     name: ReportEvent.RemoteHMR,
     ext2: HMRReportExt2.Client,
   });
@@ -95,7 +95,7 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
   const model = new DB(config.redis.bundleTable);
   model.upsert(hash, { hash });
   const publisher = new Publisher(createHMRChannel(hash));
-  aegis.reportEvent({
+  report.event({
     name: ReportEvent.RemoteHMR,
     ext2: HMRReportExt2.Server,
   });
@@ -112,13 +112,13 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
         const hmrSize = `${Math.ceil(msg.length / 1024)}KB`;
         const reportData = {
           name: ReportEvent.HMRPCToServer,
-          duration: serverReceive - pcToServer,
           ext1: hmrSize,
           ext2: '',
         };
         if ('hadSyncBundleResource' in emitJSON)
           reportData.ext2 = hadSyncBundleResource ? HMRSyncType.Patch : HMRSyncType.FirstTime;
-        aegis.reportTime(reportData);
+        report.time(serverReceive - pcToServer, reportData);
+        report.event({ name: ReportEvent.HMR, ext1: hmrSize, ext2: reportData.ext2 });
       }
 
       const folder = getBaseFolderOfPublicPath(publicPath);

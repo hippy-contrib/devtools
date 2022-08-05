@@ -22,7 +22,7 @@ import { ChromeCommand, ChromeEvent, TdfCommand } from '@hippy/devtools-protocol
 import { getDBOperator } from '@debug-server-next/db';
 import { createUpwardChannel, createDownwardChannel } from '@debug-server-next/utils/pub-sub-channel';
 import { DebugTarget } from '@debug-server-next/@types/debug-target';
-import { createCDPPerformance } from '@debug-server-next/utils/aegis';
+import { createCDPPerformance } from '@debug-server-next/utils/report';
 import { GlobalId } from './global-id';
 
 const reloadCommandId = new GlobalId(-10000, -1);

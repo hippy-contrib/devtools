@@ -29,10 +29,11 @@ import { Logger } from '@debug-server-next/utils/log';
 import { initDbModel } from '@debug-server-next/db';
 import { routeApp } from '@debug-server-next/router';
 import { config } from '@debug-server-next/config';
-import { WinstonColor, DevtoolsEnv, DebugTunnel } from '@debug-server-next/@types/enum';
+import { WinstonColor, DevtoolsEnv, DebugTunnel, ReportEvent } from '@debug-server-next/@types/enum';
 import { getHomeUrl } from '@debug-server-next/utils/url';
 import { checkPort } from '@debug-server-next/utils/port';
 import { rmFolder } from '@debug-server-next/utils/file';
+import { report } from '@debug-server-next/utils/report';
 
 const log = new Logger('debug-server', WinstonColor.Yellow);
 let server: HTTPServer;
@@ -67,6 +68,10 @@ export const startDebugServer = async () => {
 
   server.on('error', (e) => {
     log.error('launch debug server failed: %j', e);
+  });
+  report.event({
+    name: ReportEvent.StartDev,
+    ext1: env,
   });
 };
 

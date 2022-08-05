@@ -35,7 +35,7 @@ import {
   createInternalChannel,
 } from '@debug-server-next/utils/pub-sub-channel';
 import { getDBOperator } from '@debug-server-next/db';
-import { aegis } from '@debug-server-next/utils/aegis';
+import { report } from '@debug-server-next/utils/report';
 import { DebugTargetManager } from '@debug-server-next/controller/debug-targets';
 import { GlobalId } from '@debug-server-next/utils/global-id';
 import { sleep } from '@debug-server-next/utils/timer';
@@ -65,11 +65,6 @@ export const onVanillaJSClientConnection = async (ws: WebSocket, wsUrlParams: Va
   const { contextName, clientRole, clientId, platform } = wsUrlParams;
   log.info('%s connected', clientRole);
   const { Subscriber, Publisher } = getDBOperator();
-  aegis.reportEvent({
-    name: ReportEvent.VanillaJSRuntime,
-    ext1: clientId,
-    ext2: contextName,
-  });
 
   const internalChannelId = createInternalChannel(clientId, '');
   const internalSubscriber = new Subscriber(internalChannelId);
@@ -96,11 +91,21 @@ export const onVanillaJSClientConnection = async (ws: WebSocket, wsUrlParams: Va
       if (LOG_PROTOCOLS.includes(msgObj.method)) {
         if (!(ws as any).enableLogForIOS) return;
         upwardLog.verbose('sendToApp %j', msgObj);
+        report.event({
+          name: ReportEvent.VanillaIOSJSRuntime,
+          ext1: contextName,
+          ext2: msgObj.method,
+        });
         return ws.send(msgStr);
       }
       if (VANILLA_JS_METHODS.includes(msgObj.method)) {
         upwardLog.verbose('sendToApp %j', msgObj);
         ws.send(msgStr);
+        report.event({
+          name: ReportEvent.VanillaJSRuntime,
+          ext1: contextName,
+          ext2: msgObj.method,
+        });
       }
     } catch (e) {}
   });
@@ -121,11 +126,11 @@ export const onVanillaJSClientConnection = async (ws: WebSocket, wsUrlParams: Va
         await sleep(800);
         debugTarget = await DebugTargetManager.findDebugTarget(clientId, undefined, true);
       }
-      if (cmd.method && isHistoryProtocol(cmd.method, debugTarget.platform)) {
+      if (cmd.method && debugTarget && isHistoryProtocol(cmd.method, debugTarget.platform)) {
         saveHistoryProtocol(clientId, msgStr);
       }
     } catch (e) {
-      log.error('parse json error');
+      log.error('parse json error: %s', (e as Error)?.stack || e);
     }
   });
 

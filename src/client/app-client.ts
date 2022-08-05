@@ -42,7 +42,7 @@ import {
 import { CDP_DOMAIN_LIST, getDomain } from '@debug-server-next/utils/cdp';
 import { Logger } from '@debug-server-next/utils/log';
 import { composeMiddlewares } from '@debug-server-next/utils/middleware';
-import { createCDPPerformance } from '@debug-server-next/utils/aegis';
+import { createCDPPerformance } from '@debug-server-next/utils/report';
 import { config } from '@debug-server-next/config';
 
 // ignore log the following method, because of high frequency
