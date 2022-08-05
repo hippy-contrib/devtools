@@ -29,7 +29,7 @@ class Report {
   };
 
   public error = (e: Error) => {
-    aegis.reportError(e);
+    aegis.report(e);
   };
 
   public log = (msg: string) => {
