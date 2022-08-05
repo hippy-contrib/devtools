@@ -19,13 +19,14 @@
  */
 
 import { DeviceInfo } from '@debug-server-next/@types/device';
-import { ChromePageType, DevicePlatform, ClientRole, AppClientType } from '@debug-server-next/@types/enum';
+import { ChromePageType, DevicePlatform, ClientRole, AppClientType, ReportEvent } from '@debug-server-next/@types/enum';
 import { makeUrl, AppWsUrlParams } from '@debug-server-next/utils/url';
 import { config } from '@debug-server-next/config';
 import { DebugTarget } from '@debug-server-next/@types/debug-target';
 import { getIWDPPages, patchIOSTarget } from '@debug-server-next/utils/iwdp';
 import { getDBOperator } from '@debug-server-next/db';
 import { Logger } from '@debug-server-next/utils/log';
+import { report } from '@debug-server-next/utils/report';
 
 const log = new Logger('debug-target-util');
 
@@ -194,6 +195,12 @@ export const updateDebugTarget = async (clientId: string, partialDebugTarget: Pa
     ...oldDebugTarget,
     ...partialDebugTarget,
   };
+  const { title, platform } = updated;
+  report.event({
+    name: ReportEvent.UpdateContext,
+    ext1: title,
+    ext2: platform,
+  });
   await db.upsert(clientId, updated);
   return updated;
 };
