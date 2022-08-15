@@ -58,6 +58,7 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
     name: ReportEvent.ConnectFrontend,
     ext1: clientId,
   });
+  const connectTime = Date.now();
   log.info('devtools connected');
   log.verbose('subscribe channel: %s, publish channel: %s', downwardChannelId, upwardChannelId);
 
@@ -112,6 +113,11 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
     downwardSubscriber.disconnect();
     internalSubscriber.disconnect();
     internalPublisher.disconnect();
+    report.event({
+      name: ReportEvent.DisConnectFrontend,
+      ext1: String(code),
+      ext2: String(Date.now() - connectTime),
+    });
   });
   ws.on('error', (e) => log.error('devtools ws client error: %j', e));
 };

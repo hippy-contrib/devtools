@@ -8,3 +8,4 @@ cache
 public
 src/webpack-dev-server
 src/patch/aegis.js
+src/patch/beacon.js

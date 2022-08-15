@@ -213,6 +213,7 @@ export enum ReportEvent {
   StartDev = 'start-dev', // event for npm run hippy:dev
   RemoteDebug = 'remote-debug', // event for device connection
   ConnectFrontend = 'connect-frontend', // event for connect frontend and debug
+  DisConnectFrontend = 'disconnect-frontend', // event for disconnect frontend and debug
   UpdateContext = 'update-context', // event for context name update
   HMR = 'hmr', // event for use hmr
   COSUpload = 'cos-upload',
