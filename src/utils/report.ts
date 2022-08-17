@@ -18,14 +18,18 @@
  * limitations under the License.
  */
 
+import os from 'os';
 import Aegis from '@debug-server-next/patch/aegis';
+import BeaconAction from '@debug-server-next/patch/beacon';
 import { config } from '@debug-server-next/config';
 import { getBundleVersionId } from '@debug-server-next/utils/bundle-version';
+import { OSType } from '@debug-server-next/@types/enum';
 import { version } from '../../package.json';
 
 class Report {
   public event = (event: Event) => {
     aegis.reportEvent(event);
+    beacon.onUserAction(event.name, event);
   };
 
   public error = (e: Error) => {
@@ -55,6 +59,15 @@ class Report {
       });
     };
   };
+
+  public addCommonParams = (params?: { [name: string]: any }) => {
+    beacon.addAdditionalParams({
+      ...params,
+      userApp: global.debugAppArgv.env, // hippy or HippyTDF or TDFCore
+      devtoolsPlatform: devtoolsPlatform(), // Darwin_x86 or Darwin_arm64 or Windows
+      devtoolsEnv: config.isCluster ? 'remote' : 'local',
+    });
+  };
 }
 
 export const report = new Report();
@@ -76,6 +89,24 @@ const aegis = new Aegis({
   ext3: config.isCluster ? 'remote' : 'local',
   // protocol: 'http',
 });
+
+const beacon = new BeaconAction({
+  appkey: '0WEB0A25405J1LFO',
+  versionCode: version,
+  openid: getBundleVersionId(),
+  unionid: getBundleVersionId(),
+});
+
+const devtoolsPlatform = () => {
+  const osType = os.type();
+  if (osType === OSType.Darwin) {
+    if (process.arch === 'arm64') {
+      return `${osType}_arm64`;
+    }
+    return `${osType}_x86`;
+  }
+  return osType;
+};
 
 export const createCDPPerformance = (perf?: Partial<Adapter.Performance>): Adapter.Performance => ({
   devtoolsToDebugServer: 0,
