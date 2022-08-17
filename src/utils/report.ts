@@ -59,6 +59,15 @@ class Report {
       });
     };
   };
+
+  public addCommonParams = (params?: { [name: string]: any }) => {
+    beacon.addAdditionalParams({
+      ...params,
+      userApp: global.debugAppArgv.env, // hippy or HippyTDF or TDFCore
+      devtoolsPlatform: devtoolsPlatform(), // Darwin_x86 or Darwin_arm64 or Windows
+      devtoolsEnv: config.isCluster ? 'remote' : 'local',
+    });
+  };
 }
 
 export const report = new Report();
@@ -98,12 +107,6 @@ const devtoolsPlatform = () => {
   }
   return osType;
 };
-
-beacon.addAdditionalParams({
-  userApp: global.debugAppArgv.env, // hippy or HippyTDF or TDFCore
-  devtoolsPlatform: devtoolsPlatform(), // Darwin_x86 or Darwin_arm64 or Windows
-  devtoolsEnv: config.isCluster ? 'remote' : 'local',
-});
 
 export const createCDPPerformance = (perf?: Partial<Adapter.Performance>): Adapter.Performance => ({
   devtoolsToDebugServer: 0,

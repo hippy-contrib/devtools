@@ -69,6 +69,7 @@ export const startDebugServer = async () => {
   server.on('error', (e) => {
     log.error('launch debug server failed: %j', e);
   });
+  report.addCommonParams();
   report.event({
     name: ReportEvent.StartDev,
     ext1: env,
