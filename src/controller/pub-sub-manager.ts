@@ -88,12 +88,6 @@ export const subscribeCommand = async (debugTarget: DebugTarget, ws?: WebSocket)
   if (!channelMap.has(clientId)) addChannelItem(debugTarget);
   else if (isIWDPPage(clientId)) return;
 
-  report.event({
-    name: ReportEvent.RemoteDebug,
-    ext1: title,
-    ext2: platform,
-  });
-
   const { appClientList, upwardSubHandlerMap, upwardSubscriber, internalSubscriber } = channelMap.get(clientId);
 
   createAppClientList(debugTarget, ws);

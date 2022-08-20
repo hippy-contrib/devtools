@@ -115,10 +115,11 @@ export const onHMRServerConnection = (ws: WebSocket, wsUrlParams: HMRWsParams) =
           ext1: hmrSize,
           ext2: '',
         };
-        if ('hadSyncBundleResource' in emitJSON)
+        if ('hadSyncBundleResource' in emitJSON) {
           reportData.ext2 = hadSyncBundleResource ? HMRSyncType.Patch : HMRSyncType.FirstTime;
+          report.event({ name: ReportEvent.HMR, ext1: hmrSize, ext2: reportData.ext2 });
+        }
         report.time(serverReceive - pcToServer, reportData);
-        report.event({ name: ReportEvent.HMR, ext1: hmrSize, ext2: reportData.ext2 });
       }
 
       const folder = getBaseFolderOfPublicPath(publicPath);
