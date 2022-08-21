@@ -29,7 +29,7 @@ import { version } from '../../package.json';
 class Report {
   public event = (event: Event) => {
     aegis.reportEvent(event);
-    beacon.onUserAction(event.name, event);
+    beacon.onDirectUserAction(event.name, event);
   };
 
   public error = (e: Error) => {
