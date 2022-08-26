@@ -134,15 +134,26 @@ export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlPara
 
   subscribeCommand(debugTarget, ws);
 
+  report.event({
+    name: ReportEvent.RemoteDebug,
+    ext1: contextName,
+    ext2: platform,
+  });
+
   // when reload, iOS will create a new JSContext, so the debug protocol should resend
   if (debugTarget.platform === DevicePlatform.IOS) publishReloadCommand(debugTarget);
-
+  const connectTime = Date.now();
   ws.on('close', (code: number, reason: string) => {
     log.info('app closed. code: %j, reason: %s, contextName: %s', code, reason, contextName);
     clearHistoryProtocol(clientId);
     // when reload page, keep frontend open to debug lifecycle of created
     const closeDevtools = code === WSCode.ClosePage;
     cleanDebugTarget(clientId, closeDevtools);
+    report.event({
+      name: ReportEvent.DisRemoteDebug,
+      ext1: String(code),
+      ext2: String(Date.now() - connectTime),
+    });
   });
   ws.on('error', (e) => log.error('WSAppClient error %j', e));
 };

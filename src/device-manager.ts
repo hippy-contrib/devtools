@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import { AppClientType, DeviceStatus } from '@debug-server-next/@types/enum';
+import { AppClientType, DeviceStatus, ReportEvent } from '@debug-server-next/@types/enum';
 import { DeviceInfo } from '@debug-server-next/@types/device';
 import { TunnelLogger } from '@debug-server-next/utils/log';
 import { getDBOperator } from '@debug-server-next/db';
@@ -26,6 +26,7 @@ import { createTargetByDeviceInfo, patchDebugTarget } from '@debug-server-next/u
 import { config } from '@debug-server-next/config';
 import { appClientManager } from '@debug-server-next/client/app-client-manager';
 import { cleanDebugTarget, subscribeCommand } from '@debug-server-next/controller/pub-sub-manager';
+import { report } from '@debug-server-next/utils/report';
 
 const log = new TunnelLogger('device-manager');
 
@@ -60,6 +61,11 @@ class DeviceManager {
         log.verbose('before upsert db %j', debugTarget);
         new DB(config.redis.debugTargetTable).upsert(debugTarget.clientId, debugTarget);
         subscribeCommand(debugTarget);
+        report.event({
+          name: ReportEvent.RemoteDebug,
+          ext1: debugTarget.title,
+          ext2: debugTarget.platform,
+        });
       } catch (e) {
         log.error('app connect e, %j, %j', (e as any)?.stack, e);
       }
