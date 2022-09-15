@@ -53,6 +53,23 @@ export function normalizeWebpackConfig(versionId, config) {
 }
 
 function normalizeRemoteDebug(versionId, config) {
+  config.devServer = {
+    // 默认为 false，设为 true 调试服务支持多个工程同时调试，彼此之间不会干扰
+    multiple: false,
+    // 默认为 false，hippy vue 项目可以手动开启
+    vueDevtools: false,
+    // 默认 hot, liveReload 都为 true，如果只想使用 live-reload 功能，请将 hot 设为 false，liveReload 设为 true
+    hot: true,
+    liveReload: true,
+    client: {
+      overlay: false,
+    },
+    autoLaunchHippyDebug: true,
+    injectJSDevtools: {
+      domains: []
+    },
+    ...(config.devServer || {}),
+  }
   config.devServer.remote = {
     protocol: 'http',
     host: '127.0.0.1',
@@ -62,10 +79,6 @@ function normalizeRemoteDebug(versionId, config) {
     ...(config.devServer.remote || {}),
   };
   config.devServer.remote.port = Number(config.devServer.remote.port);
-  config.devServer.autoLaunchHippyDebug ??= true;
-  config.devServer.injectJSDevtools ??= {
-    domains: [],
-  };
 
   if (config.devServer.autoLaunchHippyDebug) {
     autoLaunchHippyDebug(config.devServer.remote);
@@ -125,7 +138,7 @@ function appendHMRPlugin(versionId: string, config) {
  * remote debug is enabled by default if enable webpack-dev-server
  */
 function isRemoteDebugEnabled(webpackConfig) {
-  return webpackConfig.devServer;
+  return webpackConfig.mode === 'development' || webpackConfig.devServer;
 }
 
 /**
