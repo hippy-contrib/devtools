@@ -29,7 +29,7 @@ import { version } from '../../package.json';
 class Report {
   public event = (event: Event) => {
     aegis.reportEvent(event);
-    beacon.onDirectUserAction(event.name, event);
+    getBeacon().onDirectUserAction(event.name, event);
   };
 
   public error = (e: Error) => {
@@ -61,7 +61,7 @@ class Report {
   };
 
   public addCommonParams = (params?: { [name: string]: any }) => {
-    beacon.addAdditionalParams({
+    getBeacon().addAdditionalParams({
       ...params,
       userApp: global.debugAppArgv.env, // hippy or HippyTDF or TDFCore
       devtoolsPlatform: devtoolsPlatform(), // Darwin_x86 or Darwin_arm64 or Windows
@@ -90,12 +90,18 @@ const aegis = new Aegis({
   // protocol: 'http',
 });
 
-const beacon = new BeaconAction({
-  appkey: '0WEB0A25405J1LFO',
-  versionCode: version,
-  openid: getBundleVersionId(),
-  unionid: getBundleVersionId(),
-});
+let beacon: BeaconAction;
+const getBeacon = () => {
+  if (!beacon) {
+    beacon = new BeaconAction({
+      appkey: '0WEB0A25405J1LFO',
+      versionCode: version,
+      openid: getBundleVersionId(),
+      unionid: getBundleVersionId(),
+    });
+  }
+  return beacon;
+};
 
 const devtoolsPlatform = () => {
   const osType = os.type();
