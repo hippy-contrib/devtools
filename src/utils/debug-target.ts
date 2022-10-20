@@ -200,9 +200,9 @@ export const updateDebugTarget = async (clientId: string, partialDebugTarget: Pa
     name: ReportEvent.UpdateContext,
     ext1: title,
     ext2: platform,
-    bundleId,
-    hostVersion,
-    sdkVersion,
+    bundleId: bundleId || '',
+    hostVersion: hostVersion || '',
+    sdkVersion: sdkVersion || '',
   });
   await db.upsert(clientId, updated);
   return updated;

@@ -41,7 +41,7 @@
 	"dependencies": {
 		"@hippy/chrome-devtools": "^0.1.2",
 		"@hippy/chrome-devtools-extensions": "^0.0.1",
-		"@hippy/devtools-protocol": "^0.0.1",
+		"@hippy/devtools-protocol": "^0.0.2",
 		"@hippy/hippy-hmr-plugin": "^0.1.0",
 		"@hippy/hippy-react-devtools-plugin": "^0.1.0",
 		"@hippy/hippy-vue-devtools-plugin": "^0.0.5",
