@@ -77,6 +77,7 @@ interface Event {
   ext1?: string;
   ext2?: string;
   ext3?: string;
+  [key: string]: string;
 }
 
 const aegis = new Aegis({
