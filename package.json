@@ -13,9 +13,11 @@
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.2",
-    "eslint": "^7.30.0"
+    "eslint": "^7.30.0",
+    "eslint-config-tencent": "^1.0.4"
   },
   "devDependencies": {
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.2.1"
   }
 }

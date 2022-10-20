@@ -1,11 +1,6 @@
-.git
-.vscode
-dist
 node_modules
-.vscode
-log
-cache
-public
-src/webpack-dev-server
-src/patch/aegis.js
-src/patch/beacon.js
+dist
+build
+.eslintrc.js
+packages/vue-devtools
+packages/chrome-devtools-extensions
