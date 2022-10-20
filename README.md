@@ -1,32 +1,19 @@
-# Hippy Debug Server
+# Hippy DevTools
 
-![Hippy Group](https://img.shields.io/badge/group-Hippy-blue.svg)
+## What is this?
 
-The package provide the debug server communicated with native(Android apk or iOS Simulator) and the local web development.
+Hippy DevTools is a suite of debugging tools for Hippy.
 
-## Usage
+## Getting started
 
-`@hippy/debug-server-next` can be installed globally, but install to local in most case.
+For documentation on installing and trying out DevTools, please see our [docs](https://hippyjs.org/#/guide/debug).
 
-```
-npm install -g @hippy/debug-server-next # Install
-cd hippy-react-demo               # Change to a hippy-react project folder.
-hippy-debug                       # Start the debug server
-```
+## Contributing and development
 
-If you use custom cli, you could customize like this:
+Developers are welcome to contribute to Tencent's open source, and we will also give them incentives to acknowledge and thank them. Here we provide an official description of Tencent's open source contribution. Specific contribution rules for each project are formulated by the project team. Developers can choose the appropriate project and participate according to the corresponding rules. The Tencent Project Management Committee will report regularly to qualified contributors and awards will be issued by the official contact. Before making a pull request or issue to Hippy, please make sure to read [Contributing Guide](https://github.com/Tencent/Hippy/blob/master/.github/CONTRIBUTING.md).
 
-```javascript
-const { webpack, startDebugServer } = require('@hippy/debug-server-next');
+All the people who already contributed to Hippy can be seen in [Contributors](https://github.com/hippy-contrib/devtools/graphs/contributors).
 
-// start hippy dev with HMR supported
-webpack(webpackConfig, (err, stats) => {
-  // add you custom callback here...
-});
+## Terms and Privacy
 
-// start hippy debug
-startDebugServer();
-```
-
-## Private Deployment
-If you want to use **remote debug**, you could follow [this doc](./doc/deploy.md) to deploy your debug server.
+By using Hippy DevTools, you agree to the service that we collect datas for the usage of devtools function.
