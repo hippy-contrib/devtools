@@ -1,6 +1,6 @@
 {
 	"name": "@hippy/debug-server-next",
-	"version": "0.4.12",
+	"version": "0.4.13",
 	"description": "Debug server for hippy.",
 	"repository": "https://github.com/hippy-contrib/debug-server-next",
 	"homepage": "http://hippyjs.org",
@@ -44,7 +44,7 @@
 		"@hippy/devtools-protocol": "^0.0.3",
 		"@hippy/hippy-hmr-plugin": "^0.1.0",
 		"@hippy/hippy-react-devtools-plugin": "^0.1.0",
-		"@hippy/hippy-vue-devtools-plugin": "^0.0.5",
+		"@hippy/hippy-vue-devtools-plugin": "^0.1.0",
 		"@hippy/react-devtools": "^0.1.0",
 		"@hippy/vanilla-js-devtools": "^0.1.7",
 		"@hippy/vue-devtools": "^0.0.1",
