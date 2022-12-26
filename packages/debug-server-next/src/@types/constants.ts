@@ -59,6 +59,7 @@ export const VANILLA_JS_METHODS = [
   // 'Log.enable',
   // 'Log.clear',
   // 'Log.startViolationsReport',
+  'Page.getResourceTree',
   'Network.deleteCookies',
   'Network.setCookie',
   'Network.enable',
