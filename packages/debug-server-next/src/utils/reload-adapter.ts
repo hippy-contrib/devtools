@@ -23,6 +23,7 @@ import { getDBOperator } from '@debug-server-next/db';
 import { createUpwardChannel, createDownwardChannel } from '@debug-server-next/utils/pub-sub-channel';
 import { DebugTarget } from '@debug-server-next/@types/debug-target';
 import { createCDPPerformance } from '@debug-server-next/utils/report';
+import { Logger } from '@debug-server-next/utils/log';
 import { GlobalId } from './global-id';
 
 const reloadCommandId = new GlobalId(-10000, -1);
@@ -231,6 +232,22 @@ export const publishReloadCommand = (debugTarget: DebugTarget) => {
     publisher.disconnect();
     downPublisher.disconnect();
   }, 2000);
+};
+
+export const runtimeEvaluateCommandId = 20200101; // 随机定义的ID
+export const publishEvaluateCommand = (clientId: string, expression: string) => {
+  const upwardChannelId = createUpwardChannel(clientId);
+  const { Publisher } = getDBOperator();
+  const publisher = new Publisher(upwardChannelId);
+  publisher.publish(
+    JSON.stringify({
+      id: runtimeEvaluateCommandId,
+      method: 'Runtime.evaluate',
+      params: {
+        expression,
+      },
+    }),
+  );
 };
 
 export const publishRes = (clientId: string, res: Adapter.CDP.Res) => {

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import { DevicePlatform, AppClientType } from './enum';
+import {DevicePlatform, AppClientType, AppDriverType} from './enum';
 
 export interface DebugTarget {
   // bundle version hash id, only relate to compile machine id and process.cwd()
@@ -43,6 +43,10 @@ export interface DebugTarget {
   bundleId?: string; // app bundle id or packageName
   hostVersion?: string; // app version
   sdkVersion?: string; // sdk version
+  rendererType?: string; // renderer type: 'Native' | 'TDF' | 'Voltron' | 'Other'
+  driverType?: AppDriverType; // driver type, react/vue/other
+  viewCount?: number; // view component count
+  moduleCount?: number; // module count
   // DebugTarget reference num, every time create with same clientId will increase
   // every time clean will decrease, and will remove this record when ref === 0
   // To be compatible with iOS reload scene, the new ws will firstly connect, then the old will close

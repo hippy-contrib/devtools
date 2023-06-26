@@ -195,7 +195,7 @@ export const updateDebugTarget = async (clientId: string, partialDebugTarget: Pa
     ...oldDebugTarget,
     ...partialDebugTarget,
   };
-  const { title, platform, bundleId, hostVersion, sdkVersion } = updated;
+  const { title, platform, bundleId, hostVersion, sdkVersion, rendererType, driverType, viewCount, moduleCount } = updated;
   report.event({
     name: ReportEvent.UpdateContext,
     ext1: title,
@@ -203,6 +203,10 @@ export const updateDebugTarget = async (clientId: string, partialDebugTarget: Pa
     bundleId: bundleId || '',
     hostVersion: hostVersion || '',
     sdkVersion: sdkVersion || '',
+    rendererType: rendererType || '', // renderer type need app support, add from sdk 2.16.5
+    driverType: driverType || '', // driver type need app support, add from sdk 2.16.5 (iOS only)
+    viewCount: `${viewCount}`, // view count need app support, add from sdk 2.16.5
+    moduleCount: `${moduleCount}`, // module count need app support, add from sdk 2.16.5
   });
   await db.upsert(clientId, updated);
   return updated;

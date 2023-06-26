@@ -21,27 +21,35 @@
 import { report } from '@debug-server-next/utils/report';
 import {
   AppClientType,
+  AppDriverType,
   ClientRole,
   DevicePlatform,
   InternalChannelEvent,
+  ReportEvent,
   WinstonColor,
   WSCode,
-  ReportEvent,
 } from '@debug-server-next/@types/enum';
 import { getDBOperator } from '@debug-server-next/db';
 import { appClientManager } from '@debug-server-next/client';
-import { subscribeCommand, cleanDebugTarget } from '@debug-server-next/controller/pub-sub-manager';
+import { cleanDebugTarget, subscribeCommand } from '@debug-server-next/controller/pub-sub-manager';
 import { Logger } from '@debug-server-next/utils/log';
 import { DebugTarget } from '@debug-server-next/@types/debug-target';
 import {
   createDownwardChannel,
-  createUpwardChannel,
   createInternalChannel,
+  createUpwardChannel,
 } from '@debug-server-next/utils/pub-sub-channel';
 import { AppWsUrlParams, DevtoolsWsUrlParams } from '@debug-server-next/utils/url';
 import { MyWebSocket } from '@debug-server-next/@types/socker-server';
-import { publishReloadCommand, resumeCommands } from '@debug-server-next/utils/reload-adapter';
+import {
+  publishEvaluateCommand,
+  publishReloadCommand,
+  resumeCommands,
+  runtimeEvaluateCommandId,
+} from '@debug-server-next/utils/reload-adapter';
 import { clearHistoryProtocol } from '@debug-server-next/utils/history-event-protocol';
+import { DebugTargetManager } from '@debug-server-next/controller/debug-targets';
+import { updateDebugTarget } from '@debug-server-next/utils/debug-target';
 
 const log = new Logger('chrome-devtools', WinstonColor.Cyan);
 
@@ -50,7 +58,7 @@ const log = new Logger('chrome-devtools', WinstonColor.Cyan);
  */
 export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrlParams) => {
   const { Subscriber, Publisher } = getDBOperator();
-  const { extensionName, clientId } = wsUrlParams;
+  const { extensionName, clientId, hash } = wsUrlParams;
   const downwardChannelId = createDownwardChannel(clientId, extensionName);
   const upwardChannelId = createUpwardChannel(clientId, extensionName);
   const internalChannelId = createInternalChannel(clientId, '');
@@ -79,6 +87,34 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
           ext1: `${Math.ceil(msgStr.length / 1024)}KB`,
           ext2: msgObj.method,
         });
+      }
+      // evaluate response
+      if (msgObj.id === runtimeEvaluateCommandId) {
+        try {
+          const { result } = msgObj.result;
+          const isVue = result.value.split('+')[0] !== 'undefined';
+          const isReact = result.value.split('+')[1] !== 'undefined';
+          log.info('receive evaluate response, welcome to use Hippy-%s', isVue ? 'Vue' : isReact ? 'React' : 'Other');
+          // get debug target
+          const { clientId } = wsUrlParams;
+          try {
+            updateDebugTarget(clientId, {
+              driverType: isVue ? AppDriverType.Vue : isReact ? AppDriverType.React : AppDriverType.Other,
+            }).then((debugTarget) => {
+              log.info('debug target updated for %s', debugTarget.title);
+              // 数据上报
+              report.event({
+                name: ReportEvent.ConnectFrontend2,
+                ext1: debugTarget.title,
+                ext2: debugTarget.driverType,
+              });
+            });
+          } catch (e) {
+            log.error('update DebugTarget contextName fail', (e as any).stack);
+          }
+        } catch (e) {
+          log.error('evaluate response parse fail', (e as any).stack);
+        }
       }
     } catch (e) {
       log.error('%s channel message are invalid JSON, %s', downwardChannelId, msg);
@@ -120,6 +156,18 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
     });
   });
   ws.on('error', (e) => log.error('devtools ws client error: %j', e));
+
+  // send evaluate command to get driver type
+  DebugTargetManager.findDebugTarget(clientId, hash).then((debugTarget: DebugTarget) => {
+    if (debugTarget.driverType === undefined) {
+      setTimeout(() => {
+        log.info('send evaluate command to get driver type...');
+        publishEvaluateCommand(clientId, "typeof __VUE_ROOT_INSTANCES__ + '+' + typeof __REACT_DEVTOOLS_GLOBAL_HOOK__");
+      }, 2000);
+    } else {
+      log.info('reopen frontend, debugTarget.driverType is %s', debugTarget.driverType);
+    }
+  });
 };
 
 export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlParams, debugTarget: DebugTarget) => {
@@ -156,4 +204,5 @@ export const onAppConnection = async (ws: MyWebSocket, wsUrlParams: AppWsUrlPara
     });
   });
   ws.on('error', (e) => log.error('WSAppClient error %j', e));
+  // log.info(`debug target is: ${JSON.stringify(debugTarget)}`);
 };
