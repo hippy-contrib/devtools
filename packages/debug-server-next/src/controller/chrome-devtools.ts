@@ -107,6 +107,10 @@ export const onDevtoolsConnection = (ws: MyWebSocket, wsUrlParams: DevtoolsWsUrl
                 name: ReportEvent.ConnectFrontend2,
                 ext1: debugTarget.title,
                 ext2: debugTarget.driverType,
+                ext3: debugTarget.platform,
+                bundleId: debugTarget.bundleId,
+                hostVersion: debugTarget.hostVersion,
+                sdkVersion: debugTarget.sdkVersion,
               });
             });
           } catch (e) {

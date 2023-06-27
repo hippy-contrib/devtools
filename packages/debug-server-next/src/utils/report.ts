@@ -66,6 +66,7 @@ class Report {
       userApp: global.debugAppArgv.env, // hippy or HippyTDF or TDFCore
       devtoolsPlatform: devtoolsPlatform(), // Darwin_x86 or Darwin_arm64 or Windows
       devtoolsEnv: config.isCluster ? 'remote' : 'local',
+      hostname: os.hostname(),
     });
   };
 }
