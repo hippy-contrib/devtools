@@ -214,6 +214,7 @@ export enum ReportEvent {
   RemoteDebug = 'remote-debug', // event for device connection
   DisRemoteDebug = 'dis-remote-debug', // event for device disconnection
   ConnectFrontend = 'connect-frontend', // event for connect frontend and debug
+  ConnectFrontend2 = 'connect-frontend2', // event for frontend connection after evaluate isVue command
   DisConnectFrontend = 'disconnect-frontend', // event for disconnect frontend and debug
   UpdateContext = 'update-context', // event for context name update
   HMR = 'hmr', // event for use hmr
@@ -262,4 +263,10 @@ export enum LogLevel {
 export enum GatewayFamily {
   V4 = 'v4',
   V6 = 'v6',
+}
+
+export enum AppDriverType {
+  React = 'React',
+  Vue = 'Vue',
+  Other = 'Other',
 }

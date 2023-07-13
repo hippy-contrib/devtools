@@ -29,9 +29,17 @@ export const tdfRuntimeMiddleWareManager: MiddleWareManager = {
   downwardMiddleWareListMap: {
     [TdfEvent.TDFRuntimeUpdateContextInfo]: async ({ clientId, msg }) => {
       const eventRes = msg as Adapter.CDP.EventRes<ProtocolTdf.TDFRuntime.UpdateContextInfoEvent>;
-      const { contextName, bundleId, hostVersion, sdkVersion } = eventRes.params;
+      const { contextName, bundleId, hostVersion, sdkVersion, rendererType, viewCount, moduleCount } = eventRes.params;
       try {
-        await updateDebugTarget(clientId, { title: contextName, bundleId, hostVersion, sdkVersion });
+        await updateDebugTarget(clientId, {
+          title: contextName,
+          bundleId,
+          hostVersion,
+          sdkVersion,
+          rendererType,
+          viewCount,
+          moduleCount,
+        });
       } catch (e) {
         log.error('update DebugTarget contextName fail', (e as any).stack);
       }

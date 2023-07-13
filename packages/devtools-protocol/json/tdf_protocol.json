@@ -638,6 +638,18 @@
             {
               "name": "sdkVersion",
               "type": "string"
+            },
+            {
+              "name": "rendererType",
+              "type": "string"
+            },
+            {
+              "name": "viewCount",
+              "type": "number"
+            },
+            {
+              "name": "moduleCount",
+              "type": "number"
             }
           ]
         }
