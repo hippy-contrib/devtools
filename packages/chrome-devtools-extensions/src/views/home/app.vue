@@ -39,6 +39,13 @@ import '@chrome-devtools-extensions/views/index.scss';
 import AndroidIcon from '@chrome-devtools-extensions/assets/img/android.png';
 import IOSIcon from '@chrome-devtools-extensions/assets/img/iOS.png';
 import { AppClientType, DevicePlatform } from '@chrome-devtools-extensions/@types/enum';
+import  {
+  ConfigSDK,
+  Env,
+  PullType,
+  SystemType,
+  Target,
+} from '@tencent/shiply-js-sdk';
 
 const fetchInterval = 1500;
 let fetchTimer;
@@ -60,6 +67,7 @@ export default defineComponent({
     this.modifyTitle();
     this.getDebugTargets();
     fetchTimer = setInterval(this.getDebugTargets, fetchInterval);
+    this.showUpgradeTitle();
   },
   beforeDestroy() {
     clearInterval(fetchTimer);
@@ -104,6 +112,30 @@ export default defineComponent({
       link.href = `favicon-${iconName}.png`;
       document.getElementsByTagName('head')[0].appendChild(link);
     },
+    showUpgradeTitle() {
+      const configSDK = new ConfigSDK({
+        systemType: SystemType.CONFIG,
+        appID: '9acf86e7a7', 
+        appToken: '998dab45-f50e-4a03-b26d-267e7ccb9822',
+        env: Env.PROD,
+        pullType: PullType.SINGLE,
+        target: Target.PROJECT,
+        usePolaris: false,
+      });
+      const res = await configSDK.pull({
+        key: 'hippy-devtool',
+        properties: {
+          appVersion: '0.0.1',
+        },
+      });
+      try {
+        const config = JSON.parse(res?.configs?.value);
+        const configValue = JSON.parse(config?.config_value);
+        console.log(configValue);
+      } catch (e) {
+        console.error('pull config error: ' + e);
+      }
+    }
   },
 });
 </script>
