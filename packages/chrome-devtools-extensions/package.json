@@ -1,6 +1,6 @@
 {
     "name": "@hippy/chrome-devtools-extensions",
-    "version": "0.0.1",
+    "version": "0.5.0",
     "files": [
         "dist"
     ],

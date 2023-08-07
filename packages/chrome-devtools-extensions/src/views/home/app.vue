@@ -46,6 +46,8 @@ import  {
   SystemType,
   Target,
 } from '@tencent/shiply-js-sdk';
+import { TipsType, showToast, compareVersionLatest, VersionResult } from '@chrome-devtools-extensions/utils';
+import packageConfig from '../../../package.json';
 
 const fetchInterval = 1500;
 let fetchTimer;
@@ -112,7 +114,7 @@ export default defineComponent({
       link.href = `favicon-${iconName}.png`;
       document.getElementsByTagName('head')[0].appendChild(link);
     },
-    showUpgradeTitle() {
+    async showUpgradeTitle() {
       const configSDK = new ConfigSDK({
         systemType: SystemType.CONFIG,
         appID: '9acf86e7a7', 
@@ -129,11 +131,15 @@ export default defineComponent({
         },
       });
       try {
-        const config = JSON.parse(res?.configs?.value);
+        const config = JSON.parse(res?.configs[0]?.value);
         const configValue = JSON.parse(config?.config_value);
-        console.log(configValue);
+        if (configValue?.isShowTips && configValue?.showTipsText && configValue?.maxVersionShowTips) {
+          if (compareVersionLatest(packageConfig.version, configValue?.maxVersionShowTips) === VersionResult.LessThan) {
+            showToast(configValue?.showTipsText, TipsType.Error, 0);
+          }
+        }
       } catch (e) {
-        console.error('pull config error: ' + e);
+        console.error(e);
       }
     }
   },
