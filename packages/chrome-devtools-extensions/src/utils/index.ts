@@ -27,3 +27,4 @@ export * from './toast';
 export * from './array';
 export * from './url';
 export * from './number';
+export * from './version';

@@ -1,6 +1,6 @@
 {
   "name": "@hippy/debug-server-next",
-  "version": "0.4.16",
+  "version": "0.5.0",
   "description": "Debug server for hippy.",
   "repository": "https://github.com/hippy-contrib/debug-server-next",
   "homepage": "http://hippyjs.org",
@@ -40,7 +40,7 @@
   "types": "dist/@types/index.d.ts",
   "dependencies": {
     "@hippy/chrome-devtools": "^0.1.2",
-    "@hippy/chrome-devtools-extensions": "^0.0.1",
+    "@hippy/chrome-devtools-extensions": "0.5.0",
     "@hippy/devtools-protocol": "^0.0.4",
     "@hippy/hippy-hmr-plugin": "^0.1.0",
     "@hippy/hippy-react-devtools-plugin": "^0.1.0",

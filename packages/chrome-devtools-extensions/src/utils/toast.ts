@@ -28,9 +28,10 @@ export const enum TipsType {
 }
 
 // dialog duration
-const showDuration = 1000;
+const defaultDuration = 1000;
 
-export function showToast(message: string, type: TipsType = TipsType.Info): void {
+export function showToast(message: string, type: TipsType = TipsType.Info, duration?: number): void {
+  const showDuration = duration !== undefined ? duration : defaultDuration;
   switch (type) {
     case TipsType.Success:
       ElMessage.success({
