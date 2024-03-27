@@ -43,8 +43,8 @@ export const startAdbProxy = async () => {
     [OSType.Darwin]: '../build/mac/adb',
     [OSType.Windows]: '../build/win/adb.exe',
   }[os.type()];
-  const adbPath = path.join(__dirname, adbRelatePath);
   try {
+    const adbPath = path.join(__dirname, adbRelatePath);
     if (port) await exec(adbPath, ['reverse', `tcp:${port}`, `tcp:${port}`]);
     if (hmrPort) await exec(adbPath, ['reverse', `tcp:${hmrPort}`, `tcp:${hmrPort}`]);
   } catch (e) {
