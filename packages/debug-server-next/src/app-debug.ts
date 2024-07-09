@@ -56,6 +56,9 @@ export const startDebugServer = async () => {
 
       const { startAdbProxy } = await import('./child-process/adb');
       startAdbProxy();
+
+      const { startHdcProxy } = await import('./child-process/hdc');
+      startHdcProxy();
     }
 
     socketServer = new SocketServer(server);
