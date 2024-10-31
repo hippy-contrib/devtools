@@ -47,7 +47,7 @@ export const logMiddleWareManager: MiddleWareManager = {
       if (message.source === 'console-api') {
         const logEntry: ProtocolChrome.Runtime.ConsoleAPICalledEvent = {
           type: type as any,
-          stackTrace: message.stackTrace,
+          stackTrace: transformStacktrace(message.stackTrace),
           timestamp: Math.floor(new Date().getTime()),
           executionContextId: 1,
           args: (message.parameters || []) as any,
@@ -67,9 +67,7 @@ export const logMiddleWareManager: MiddleWareManager = {
         timestamp: new Date().getTime(),
         url: message.url,
         args: message.parameters as unknown as ProtocolChrome.Runtime.RemoteObject[],
-        stackTrace: message.stackTrace
-          ? message.stackTrace
-          : undefined,
+        stackTrace: transformStacktrace(message.stackTrace),
         networkRequestId: message.networkRequestId,
       };
 
@@ -109,13 +107,15 @@ export const logMiddleWareManager: MiddleWareManager = {
   },
 };
 
-function transformStacktrace(callFrames): ProtocolChrome.Runtime.StackTrace {
-  if (!callFrames) {
-    return;
+function transformStacktrace(stackTrace): ProtocolChrome.Runtime.StackTrace {
+  if (!stackTrace) {
+    return undefined;
   }
 
   return {
-    callFrames,
+    callFrames: 'callFrames' in stackTrace
+      ? stackTrace.callFrames
+      : stackTrace
     // Optional
     // description?: string;
     // parent?: StackTrace;
