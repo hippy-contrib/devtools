@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "commonjs",
+    "strictPropertyInitialization": false,
+    "removeComments": true,
+    "noUnusedLocals": true,
+    "target": "ES2015",
+    "sourceMap": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "lib": ["DOM", "ES2015"]
+  },
+  "include": ["src/**/*"]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "@hippy/vanilla-js-devtools",
+  "version": "0.1.11",
+  "description": "Chrome devtools protocol JavaScript implementation",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "ci": "npm run lint && npm test && npm run build",
+    "dev": "cross-env NODE_ENV=development rimraf dist && webpack --mode=development -w",
+    "build": "cross-env NODE_ENV=production rimraf dist && webpack --mode=production",
+    "stat": "cross-env NODE_ENV=stat rimraf dist && webpack --mode=production",
+    "lint": "tslint src/**/*.ts",
+    "test": "karma start",
+    "format": "lsla prettier src/**/*.ts *.{js,json} test/*.js script/*.js --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hippy-contrib/js-devtools.git"
+  },
+  "keywords": [
+    "hippy",
+    "devtools"
+  ],
+  "author": "chestershen@tencent.com",
+  "license": "MIT",
+  "homepage": "http://hippyjs.org",
+  "devDependencies": {
+    "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
+    "@types/node": "^14.0.13",
+    "cross-env": "^7.0.3",
+    "karma": "^5.1.0",
+    "karma-chai-plugins": "^0.9.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-coverage-istanbul-reporter": "^3.0.3",
+    "karma-mocha": "^2.0.1",
+    "karma-webpack": "^4.0.2",
+    "licia": "^1.26.0",
+    "mocha": "^8.0.1",
+    "rimraf": "^3.0.2",
+    "ts-loader": "^7.0.5",
+    "tslint": "^6.1.2",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.9.5",
+    "webpack": "^4.43.0",
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-cli": "^3.3.11"
+  }
+}
