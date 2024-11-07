@@ -1,0 +1,24 @@
+{
+  "name": "@hippy/hippy-hmr-plugin",
+  "version": "0.1.1",
+  "description": "hot module replacement plugin",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hippy",
+    "hmr"
+  ],
+  "files": [
+    "lib"
+  ],
+  "peerDependencies": {
+    "webpack": "^4.37.0 || ^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "chestershen <chestershen@tencent.com>",
+  "license": "Apache-2.0"
+}
