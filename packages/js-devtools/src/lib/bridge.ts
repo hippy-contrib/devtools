@@ -2,7 +2,7 @@ import { parseURL, getWSProtocolByHttpProtocol, makeUrl } from './url';
 import { socketWithRetry, SocketHandlers } from './ws';
 import { log } from './log'
 
-export const createBridge = (handlers: SocketHandlers) => {
+export const createBridge = (handlers: SocketHandlers, retryCallback) => {
   // __resourceQuery is entry query string, webpack will inject this variable
   const parsedResourceQuery: any = parseURL(__resourceQuery)
   const protocol = getWSProtocolByHttpProtocol(parsedResourceQuery.protocol || 'http')
@@ -24,7 +24,7 @@ export const createBridge = (handlers: SocketHandlers) => {
     platform: global?.Hippy?.device?.platform?.OS === 'ios' ? DevicePlatform.IOS : DevicePlatform.Android,
   })
 
-  const socket = socketWithRetry(url, handlers)
+  const socket = socketWithRetry(url, handlers, retryCallback)
   return socket;
 }
 

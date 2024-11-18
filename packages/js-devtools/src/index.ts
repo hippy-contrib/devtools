@@ -11,6 +11,7 @@ import { hookLocalStorage } from './domains/DOMStorage';
 import { parseURL } from './lib/url';
 import { setDomains } from './lib/domain';
 import { log } from './lib/log';
+import { SocketHandlers } from './lib/ws';
 // @ts-ignore
 // import { Vue, NetworkModule } from './lib/external';
 
@@ -115,12 +116,17 @@ try {
 }
 setDomains(domains);
 
+let ws: WebSocket;
+const retryCallback = (handler: SocketHandlers) => {
+  ws = createBridge(handler, retryCallback);
+}
+
 const startVanillaJSDebug = () => {
   log.info('enable inspect Network, Cookie, Storage');
 
   let isInit = false;
   const chobitsu = new Chobitsu();
-  const ws = createBridge({
+  ws = createBridge({
     onOpen: () => {
       isInit = true;
     },
@@ -129,8 +135,8 @@ const startVanillaJSDebug = () => {
     },
     onMessage: (event) => {
       chobitsu.sendRawMessage(event.data);
-    }
-  });
+    },
+  }, retryCallback);
   chobitsu.setOnMessage((message: string) => {
     if(!isInit) return;
     ws.send(message);

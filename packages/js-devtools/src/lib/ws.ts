@@ -5,7 +5,7 @@ const maxRetries = 10
 const noop = () => {}
 const prefix = '[vanilla js devtools]'
 
-export const socketWithRetry = (url: string, handlers: SocketHandlers) => {
+export const socketWithRetry = (url: string, handlers: SocketHandlers, retryCallback) => {
   const {
     onOpen = noop,
     onClose = noop,
@@ -25,7 +25,7 @@ export const socketWithRetry = (url: string, handlers: SocketHandlers) => {
       retries += 1
       log.warn(prefix, 'Trying to reconnect...')
       setTimeout(() => {
-        client = socketWithRetry(url, handlers)
+        client = retryCallback(handlers)
       }, retryInMs)
     }
   }
