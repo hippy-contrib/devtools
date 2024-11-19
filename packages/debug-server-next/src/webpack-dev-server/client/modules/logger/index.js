@@ -98,7 +98,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ "../../node_modules/process/browser.js":
 /*!******************************************************************************************************!*\
-  !*** /Users/ray/Documents/repo2/devtools/packages/debug-server-next/node_modules/process/browser.js ***!
+  !*** /Users/sherryfancy/code/rn/devtools/packages/debug-server-next/node_modules/process/browser.js ***!
   \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
