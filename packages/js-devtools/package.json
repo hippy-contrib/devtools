@@ -1,6 +1,6 @@
 {
   "name": "@hippy/vanilla-js-devtools",
-  "version": "0.1.11",
+  "version": "0.1.13",
   "description": "Chrome devtools protocol JavaScript implementation",
   "main": "dist/index.js",
   "files": [
