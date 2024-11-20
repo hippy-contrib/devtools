@@ -44,7 +44,7 @@ import { onVueClientConnection } from '@debug-server-next/controller/vue-devtool
 import { onReactClientConnection } from '@debug-server-next/controller/react-devtools';
 import { onVanillaJSClientConnection } from '@debug-server-next/controller/vanilla-js-devtools';
 
-const heartbeatInterval = 30000;
+const heartbeatInterval = 300000;
 
 const log = new Logger('socket-server', WinstonColor.Cyan);
 
