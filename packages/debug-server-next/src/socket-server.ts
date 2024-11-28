@@ -107,7 +107,6 @@ export class SocketServer {
     }
 
     const { clientRole } = wsUrlParams;
-    let debugTarget: DebugTarget;
 
     if (clientRole === ClientRole.Devtools) {
       const params = wsUrlParams as DevtoolsWsUrlParams;
@@ -117,12 +116,14 @@ export class SocketServer {
         log.warn(reason);
         return socket.destroy();
       }
-    } else if ([ClientRole.IOS, ClientRole.Android].includes(clientRole)) {
-      debugTarget = createTargetByWsUrlParams(wsUrlParams as AppWsUrlParams, host);
-      await patchRefAndSave(debugTarget);
-    }
+    } 
 
-    this.wss.handleUpgrade(req, socket, head, (ws) => {
+    this.wss.handleUpgrade(req, socket, head, async (ws) => {
+      let debugTarget: DebugTarget;
+      if ([ClientRole.IOS, ClientRole.Android].includes(clientRole)) {
+        debugTarget = createTargetByWsUrlParams(wsUrlParams as AppWsUrlParams, host);
+        await patchRefAndSave(debugTarget);
+      }
       this.wss.emit('connection', ws, req, debugTarget);
     });
   }
