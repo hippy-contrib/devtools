@@ -27,7 +27,7 @@ import { cleanAllDebugTargets } from '@debug-server-next/controller/pub-sub-mana
 import { onDevtoolsConnection, onAppConnection } from '@debug-server-next/controller/chrome-devtools';
 import { Logger } from '@debug-server-next/utils/log';
 import { DebugTarget } from '@debug-server-next/@types/debug-target';
-import { createTargetByWsUrlParams, patchRefAndSave } from '@debug-server-next/utils/debug-target';
+import { createTargetByWsUrlParams, patchRefAndSave, decreaseRefAndSave } from '@debug-server-next/utils/debug-target';
 import {
   parseWsUrl,
   getWsInvalidReason,
@@ -107,6 +107,7 @@ export class SocketServer {
     }
 
     const { clientRole } = wsUrlParams;
+    let debugTarget: DebugTarget;
 
     if (clientRole === ClientRole.Devtools) {
       const params = wsUrlParams as DevtoolsWsUrlParams;
@@ -116,16 +117,19 @@ export class SocketServer {
         log.warn(reason);
         return socket.destroy();
       }
-    } 
+    } else if ([ClientRole.IOS, ClientRole.Android].includes(clientRole)) {
+      debugTarget = createTargetByWsUrlParams(wsUrlParams as AppWsUrlParams, host);
+      await patchRefAndSave(debugTarget);
+    }
 
+    let upgradeSuccess = false;
     this.wss.handleUpgrade(req, socket, head, async (ws) => {
-      let debugTarget: DebugTarget;
-      if ([ClientRole.IOS, ClientRole.Android].includes(clientRole)) {
-        debugTarget = createTargetByWsUrlParams(wsUrlParams as AppWsUrlParams, host);
-        await patchRefAndSave(debugTarget);
-      }
+      upgradeSuccess = true;
       this.wss.emit('connection', ws, req, debugTarget);
     });
+    if (!upgradeSuccess) {
+      await decreaseRefAndSave(debugTarget.clientId);
+    }
   }
 
   /**
