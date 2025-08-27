@@ -135,6 +135,7 @@ function getTunnelOption(): StartTunnelOption {
   if (os.type() === OSType.Darwin) {
     tunnelOption = {
       adb_path: path.join(__dirname, '../build/mac/adb'),
+      hdc_path: path.join(__dirname, '../build/mac/hdc'),
       iwdp: {
         iwdp_params: iWDPParams,
         iwdp_listen_port: iWDPPort,
@@ -145,6 +146,7 @@ function getTunnelOption(): StartTunnelOption {
   if (os.type() === OSType.Windows) {
     tunnelOption = {
       adb_path: path.join(__dirname, '../build/win/adb.exe'),
+      hdc_path: path.join(__dirname, '../build/win/hdc.exe'),
       iwdp: {
         iwdp_params: iWDPParams,
         iwdp_listen_port: iWDPPort,
