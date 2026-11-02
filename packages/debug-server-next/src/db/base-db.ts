@@ -37,8 +37,10 @@ export abstract class BaseDB<T = unknown> {
 
   /**
    * redis list operate
+   *
+   * @param ttlSeconds refresh the expire time of whole list after push, never expire if not set
    */
-  public abstract rPush(value: string | Object);
+  public abstract rPush(value: string | Object, ttlSeconds?: number);
   public abstract getList(): Promise<T[]>;
   public abstract clearList();
 }
