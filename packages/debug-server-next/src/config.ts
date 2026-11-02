@@ -36,6 +36,7 @@ export const config: Config = {
     debugTargetTable: 'tdf:debugtargets',
     bundleTable: 'tdf:bundles',
     logTablePrefix: 'tdf:logs:',
+    logTTLSeconds: getRedisLogTTLSeconds(),
   },
   isCluster: process.env.IS_CLUSTER === 'true',
   cos: {
@@ -66,6 +67,7 @@ interface Config {
     debugTargetTable: string;
     bundleTable: string;
     logTablePrefix: string;
+    logTTLSeconds: number;
   };
   isCluster: boolean;
   cos: {
@@ -78,6 +80,16 @@ interface Config {
   staticFileStorage: StaticFileStorage;
   aegisId: string;
   showPerformance: boolean;
+}
+
+/**
+ * REDIS_LOG_TTL is in hours, fallback to 6 hours if it's empty or invalid
+ */
+function getRedisLogTTLSeconds() {
+  const defaultHours = 6;
+  const hours = Number(process.env.REDIS_LOG_TTL);
+  const validHours = Number.isFinite(hours) && hours > 0 ? hours : defaultHours;
+  return Math.ceil(validHours * 3600);
 }
 
 function getPublicDomain() {

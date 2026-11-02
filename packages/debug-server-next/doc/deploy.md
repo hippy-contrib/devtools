@@ -18,6 +18,7 @@ Debug server use Redis Pub/Sub to do load-balancing between multiple server, and
       REDIS_PWD=<your_redis_pwd>
       REDIS_HOST=<your_redis_host>
       REDIS_PORT=<your_redis_port>
+      REDIS_LOG_TTL=<ttl_of_history_log_in_hours> # optional, default is 6
       # cos config
       SecretId=<your_COS_secret_id>
       SecretKey=<your_COS_secret_key>

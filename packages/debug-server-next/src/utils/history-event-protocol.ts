@@ -51,7 +51,7 @@ export const isHistoryProtocol = (method: string, platform: DevicePlatform) => {
 export const saveHistoryProtocol = async (clientId: string, msg: string) => {
   const { DB } = getDBOperator();
   const db = new DB<string>(getHistoryKey(clientId));
-  await db.rPush(msg);
+  await db.rPush(msg, config.redis.logTTLSeconds);
 };
 
 export const clearHistoryProtocol = async (clientId: string) => {

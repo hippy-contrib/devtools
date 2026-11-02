@@ -124,12 +124,13 @@ export class RedisDB<T> extends BaseDB<T> {
     });
   }
 
-  public async rPush(value) {
+  public async rPush(value, ttlSeconds?: number) {
     return this.queueWrap(async (resolve, reject) => {
       try {
         let strValue = value;
         if (typeof value !== 'string') strValue = JSON.stringify(value);
         await RedisDB.client.rPush(this.key, strValue);
+        if (ttlSeconds) await RedisDB.client.expire(this.key, ttlSeconds);
         resolve(null);
       } catch (e) {
         reject(e);
